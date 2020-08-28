@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Hello Y
-          uses: actions/hello-world-javascript-action@v1
-          with:
-            who-to-greet: 'Y'
-          id: hello
+        uses: actions/hello-world-javascript-action@v1
+        with:
+          who-to-greet: 'Y'
+        id: hello
 
       - name: Echo the greeting's time
-          run: echo 'The time was ${{ steps.hello.outputs.time }}.'
+        run: echo 'The time was ${{ steps.hello.outputs.time }}.'
