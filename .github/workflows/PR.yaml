@@ -13,11 +13,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Hello Y
-        uses: actions/hello-world-javascript-action@v1
-        with:
-          who-to-greet: 'Y'
-        id: hello
+      - name: Checkout the repo
+        uses: actions/checkout@v2
 
-      - name: Echo the greeting's time
-        run: echo 'The time was ${{ steps.hello.outputs.time }}.'
+      - name: Run unit tests
+        run: ./gradlew test --stacktrace
+
+      - name: Run ktlint
+          run: ./gradlew ktlintCheck
+
+      - name: Generate Jacoco coverage
+          run: ./gradlew jacocoRootReport
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+          with:
+            token: ${{ secrets.CODECOV_TOKEN }}
+            file: ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+            name: codecov-y
+            fail_ci_if_error: true
+
+      - name: Bundle the build report
+        if: failure()
+        run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
+
+      - name: Upload the build report
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: error-report
+          path: build-reports.zip
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
