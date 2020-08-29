@@ -33,11 +33,11 @@ jobs:
           name: codecov-y
           fail_ci_if_error: true
 
-      - name: Bundle the build report
+      - name: Bundle the build report (when failure)
         if: failure()
         run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
 
-      - name: Upload the build report
+      - name: Upload the build report (when failure)
         if: failure()
         uses: actions/upload-artifact@master
         with:
