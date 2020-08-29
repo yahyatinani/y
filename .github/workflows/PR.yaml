@@ -19,8 +19,11 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test --stacktrace
 
+      - name: Run ktlint
+        run: ./gradlew ktlintCheck
+
       - name: Generate Jacoco coverage
-          run: ./gradlew jacocoRootReport
+        run: ./gradlew jacocoRootReport
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
