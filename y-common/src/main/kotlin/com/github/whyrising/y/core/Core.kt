@@ -17,3 +17,17 @@ fun inc(x: BigInteger): BigInteger = x.inc()
 fun inc(x: Float): Float = x.inc()
 
 fun inc(x: Double): Double = x.inc()
+
+fun dec(x: Byte): Byte = x.dec()
+
+fun dec(x: Short): Short = x.dec()
+
+fun dec(x: Int): Int = x.dec()
+
+fun dec(x: Long): Long = x.dec()
+
+fun dec(x: BigInteger): BigInteger = x.dec()
+
+fun dec(x: Float): Float = x.dec()
+
+fun dec(x: Double): Double = x.dec()

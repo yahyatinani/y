@@ -135,4 +135,62 @@ class CoreTest : FunSpec({
             }
         }
     }
+
+    context("dec") {
+        test("Decrement Bytes") {
+            forAll(Arb.byte()) { n: Byte ->
+                val r: Byte = dec(n)
+
+                r == n.dec()
+            }
+        }
+
+        test("Decrement Shorts") {
+            forAll(Arb.short()) { n: Short ->
+                val r: Short = dec(n)
+
+                r == n.dec()
+            }
+        }
+
+        test("Decrement Integers") {
+            forAll(Arb.int()) { n: Int ->
+                val r: Int = dec(n)
+
+                r == n.dec()
+            }
+        }
+
+        test("Decrement Longs") {
+            forAll(Arb.long()) { n: Long ->
+                val r: Long = dec(n)
+
+                r == n.dec()
+            }
+        }
+
+        test("Decrement BigIntegers") {
+            forAll(Arb.bigInt(45)) { n: BigInteger ->
+                val r: BigInteger = dec(n)
+
+                r == n.dec()
+            }
+        }
+
+        test("Decrement Floats") {
+            forAll(Arb.float()) { n: Float ->
+                val r: Float = dec(n)
+
+                r.equals(n.dec())
+            }
+        }
+
+        test("Decrement Doubles") {
+            forAll(Arb.double()) { n: Double ->
+                val r: Double = dec(n)
+
+                r.equals(n.dec())
+            }
+        }
+    }
 })
