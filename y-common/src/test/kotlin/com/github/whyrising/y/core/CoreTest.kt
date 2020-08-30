@@ -3,13 +3,19 @@ package com.github.whyrising.y.core
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bigInt
 import io.kotest.property.arbitrary.bool
+import io.kotest.property.arbitrary.byte
 import io.kotest.property.arbitrary.char
 import io.kotest.property.arbitrary.double
+import io.kotest.property.arbitrary.float
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.long
+import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.string
 import io.kotest.property.forAll
+import java.math.BigInteger
 
 class CoreTest : FunSpec({
     context("identity") {
@@ -68,6 +74,65 @@ class CoreTest : FunSpec({
             val r = identity(f)
 
             r shouldBe f
+        }
+    }
+
+    context("inc") {
+
+        test("Increment Bytes") {
+            forAll(Arb.byte()) { n: Byte ->
+                val r: Byte = inc(n)
+
+                r == n.inc()
+            }
+        }
+
+        test("Increment Shorts") {
+            forAll(Arb.short()) { n: Short ->
+                val r: Short = inc(n)
+
+                r == n.inc()
+            }
+        }
+
+        test("Increment Integers") {
+            forAll(Arb.int()) { n: Int ->
+                val r: Int = inc(n)
+
+                r == n.inc()
+            }
+        }
+
+        test("Increment Longs") {
+            forAll(Arb.long()) { n: Long ->
+                val r: Long = inc(n)
+
+                r == n.inc()
+            }
+        }
+
+        test("Increment BigIntegers") {
+            forAll(Arb.bigInt(45)) { n: BigInteger ->
+                val r: BigInteger = inc(n)
+
+                r == n.inc()
+            }
+        }
+
+        test("Increment Floats") {
+            forAll(Arb.float()) { n: Float ->
+                val r: Float = inc(n)
+
+                r.equals(n.inc())
+            }
+        }
+
+        test("Increment Doubles") {
+            forAll(Arb.double()) { n: Double ->
+                val r: Double = inc(n)
+
+                r.equals(n.inc())
+            }
         }
     }
 })
