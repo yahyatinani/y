@@ -32,6 +32,8 @@ fun dec(x: Float): Float = x.dec()
 
 fun dec(x: Double): Double = x.dec()
 
+fun str(): String = ""
+
 fun <T> str(x: T): String = x?.toString() ?: ""
 
 fun <T> str(x: T, vararg ys: T): String =

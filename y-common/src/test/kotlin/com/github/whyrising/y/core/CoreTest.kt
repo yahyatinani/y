@@ -197,6 +197,12 @@ class CoreTest : FreeSpec({
     }
 
     "str" - {
+        "When passing no arguments, It should return the empty string." {
+            val r = str()
+
+            r shouldBe ""
+        }
+
         "When passing one argument." - {
             "When passing `null` It should return the empty string." {
                 forAll(Arb.string().map { null }) { nil ->
