@@ -13,7 +13,6 @@ import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.long
 import io.kotest.property.arbitrary.map
-import io.kotest.property.arbitrary.pair
 import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
@@ -216,6 +215,32 @@ class CoreTest : FreeSpec({
 
                 forAll(Arb.int()) { i: Int ->
                     str(i) == i.toString()
+                }
+            }
+        }
+
+        "When passing multiple arguments" - {
+            "It returns the concatenation of two strings" {
+                checkAll { a: String, b: String ->
+                    val r = str(a, b)
+
+                    r shouldBe "$a$b"
+                }
+            }
+
+            "It returns the concatenation of three strings" {
+                checkAll { a: String, b: String, c: String ->
+                    val r = str(a, b, c)
+
+                    r shouldBe "$a$b$c"
+                }
+            }
+
+            "It returns the concatenation of four strings" {
+                checkAll { a: String, b: String, c: String, d: String ->
+                    val r = str(a, b, c, d)
+
+                    r shouldBe "$a$b$c$d"
                 }
             }
         }
