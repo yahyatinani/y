@@ -16,6 +16,7 @@ import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.pair
 import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
 import io.kotest.property.forAll
 import java.math.BigInteger
 
@@ -197,23 +198,25 @@ class CoreTest : FreeSpec({
     }
 
     "str" - {
-        "When passing `null` It returns the empty string." {
-            forAll(Arb.string().map { null }) { nil ->
-                val r = str(nil)
+        "When passing one argument." - {
+            "When passing `null` It should return the empty string." {
+                forAll(Arb.string().map { null }) { nil ->
+                    val r = str(nil)
 
-                r == ""
-            }
-        }
-
-        "When passing one arg, It should return arg.toString()." {
-            forAll(Arb.string()) { s: String ->
-                val r = str(s)
-
-                r == s
+                    r == ""
+                }
             }
 
-            forAll(Arb.int()) { i: Int ->
-                str(i) == i.toString()
+            "When passing `arg` It should return arg.toString()." {
+                forAll(Arb.string()) { s: String ->
+                    val r = str(s)
+
+                    r == s
+                }
+
+                forAll(Arb.int()) { i: Int ->
+                    str(i) == i.toString()
+                }
             }
         }
     }
