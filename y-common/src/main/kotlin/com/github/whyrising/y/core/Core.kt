@@ -31,3 +31,5 @@ fun dec(x: BigInteger): BigInteger = x.dec()
 fun dec(x: Float): Float = x.dec()
 
 fun dec(x: Double): Double = x.dec()
+
+fun <T> str(x: T): String = x?.toString() ?: ""

@@ -12,6 +12,7 @@ import io.kotest.property.arbitrary.float
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.long
+import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.string
 import io.kotest.property.forAll
@@ -190,6 +191,28 @@ class CoreTest : FunSpec({
                 val r: Double = dec(n)
 
                 r.equals(n.dec())
+            }
+        }
+    }
+
+    context("str") {
+        test("Whn passing `null` It returns the empty string.") {
+            forAll(Arb.string().map { null }) { nil ->
+                val r = str(nil)
+
+                r == ""
+            }
+        }
+
+        test("When passing one arg, It should return arg.toString().") {
+            forAll(Arb.string()) { s: String ->
+                val r = str(s)
+
+                r == s
+            }
+
+            forAll(Arb.int()) { i: Int ->
+                str(i) == i.toString()
             }
         }
     }
