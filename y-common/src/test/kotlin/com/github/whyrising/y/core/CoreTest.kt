@@ -1,6 +1,6 @@
 package com.github.whyrising.y.core
 
-import io.kotest.core.spec.style.FunSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.bigInt
@@ -13,15 +13,16 @@ import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.long
 import io.kotest.property.arbitrary.map
+import io.kotest.property.arbitrary.pair
 import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.string
 import io.kotest.property.forAll
 import java.math.BigInteger
 
-class CoreTest : FunSpec({
-    context("identity") {
+class CoreTest : FreeSpec({
+    "identity" - {
 
-        test("for Int") {
+        "for Int" {
             forAll(Arb.int()) { n: Int ->
                 val r = identity(n)
 
@@ -29,7 +30,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("for Double") {
+        "for Double" {
             forAll(Arb.double()) { d: Double ->
                 val r = identity(d)
 
@@ -37,7 +38,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("for String") {
+        "for String" {
             forAll(Arb.string()) { s: String ->
                 val r = identity(s)
 
@@ -45,7 +46,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("for Boolean") {
+        "for Boolean" {
             forAll(Arb.bool()) { b: Boolean ->
                 val r = identity(b)
 
@@ -53,7 +54,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("for Char") {
+        "for Char" {
             forAll(Arb.char()) { c: Char ->
                 val r = identity(c)
 
@@ -61,7 +62,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("for List") {
+        "for List" {
             forAll(Arb.list(Arb.double())) { list: List<Double> ->
                 val r = identity(list)
 
@@ -69,7 +70,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("for value function") {
+        "for value function" {
             val f = {}
 
             val r = identity(f)
@@ -78,9 +79,9 @@ class CoreTest : FunSpec({
         }
     }
 
-    context("inc") {
+    "inc" - {
 
-        test("Increment Bytes") {
+        "Increment Bytes" {
             forAll(Arb.byte()) { n: Byte ->
                 val r: Byte = inc(n)
 
@@ -88,7 +89,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Increment Shorts") {
+        "Increment Shorts" {
             forAll(Arb.short()) { n: Short ->
                 val r: Short = inc(n)
 
@@ -96,7 +97,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Increment Integers") {
+        "Increment Integers" {
             forAll(Arb.int()) { n: Int ->
                 val r: Int = inc(n)
 
@@ -104,7 +105,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Increment Longs") {
+        "Increment Longs" {
             forAll(Arb.long()) { n: Long ->
                 val r: Long = inc(n)
 
@@ -112,7 +113,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Increment BigIntegers") {
+        "Increment BigIntegers" {
             forAll(Arb.bigInt(45)) { n: BigInteger ->
                 val r: BigInteger = inc(n)
 
@@ -120,7 +121,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Increment Floats") {
+        "Increment Floats" {
             forAll(Arb.float()) { n: Float ->
                 val r: Float = inc(n)
 
@@ -128,7 +129,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Increment Doubles") {
+        "Increment Doubles" {
             forAll(Arb.double()) { n: Double ->
                 val r: Double = inc(n)
 
@@ -137,8 +138,8 @@ class CoreTest : FunSpec({
         }
     }
 
-    context("dec") {
-        test("Decrement Bytes") {
+    "dec" - {
+        "Decrement Bytes" {
             forAll(Arb.byte()) { n: Byte ->
                 val r: Byte = dec(n)
 
@@ -146,7 +147,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Decrement Shorts") {
+        "Decrement Shorts" {
             forAll(Arb.short()) { n: Short ->
                 val r: Short = dec(n)
 
@@ -154,7 +155,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Decrement Integers") {
+        "Decrement Integers" {
             forAll(Arb.int()) { n: Int ->
                 val r: Int = dec(n)
 
@@ -162,7 +163,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Decrement Longs") {
+        "Decrement Longs" {
             forAll(Arb.long()) { n: Long ->
                 val r: Long = dec(n)
 
@@ -170,7 +171,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Decrement BigIntegers") {
+        "Decrement BigIntegers" {
             forAll(Arb.bigInt(45)) { n: BigInteger ->
                 val r: BigInteger = dec(n)
 
@@ -178,7 +179,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Decrement Floats") {
+        "Decrement Floats" {
             forAll(Arb.float()) { n: Float ->
                 val r: Float = dec(n)
 
@@ -186,7 +187,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("Decrement Doubles") {
+        "Decrement Doubles" {
             forAll(Arb.double()) { n: Double ->
                 val r: Double = dec(n)
 
@@ -195,8 +196,8 @@ class CoreTest : FunSpec({
         }
     }
 
-    context("str") {
-        test("Whn passing `null` It returns the empty string.") {
+    "str" - {
+        "When passing `null` It returns the empty string." {
             forAll(Arb.string().map { null }) { nil ->
                 val r = str(nil)
 
@@ -204,7 +205,7 @@ class CoreTest : FunSpec({
             }
         }
 
-        test("When passing one arg, It should return arg.toString().") {
+        "When passing one arg, It should return arg.toString()." {
             forAll(Arb.string()) { s: String ->
                 val r = str(s)
 
