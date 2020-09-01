@@ -40,4 +40,14 @@ fun <T> str(x: T): String = when (x) {
 }
 
 fun <T> str(x: T, vararg ys: T): String =
-    ys.fold("") { acc, y -> "$acc$y" }.let { "$x$it" }
+    ys.fold("") { acc, y ->
+        when (y) {
+            null -> acc
+            else -> "$acc$y"
+        }
+    }.let {
+        when (x) {
+            null -> it
+            else -> "$x$it"
+        }
+    }
