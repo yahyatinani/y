@@ -2,7 +2,6 @@ package com.github.whyrising.y
 
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.Codepoint
 import io.kotest.property.arbitrary.arb
@@ -23,9 +22,9 @@ fun Arb.Companion.`string?`(
 
 class TestUtilsTest : FreeSpec({
     "Arb nil generator should return null" {
-        Arb.nil<Int>().edgecases() shouldHaveSize 1
-        Arb.nil<String>().edgecases() shouldHaveSize 1
-        Arb.nil<Boolean>().edgecases() shouldHaveSize 1
+        Arb.nil<Int>().edgecases() shouldContain null
+        Arb.nil<String>().edgecases() shouldContain null
+        Arb.nil<Boolean>().edgecases() shouldContain null
     }
 
     "Arb string? generator should generate at least 1 null" {
