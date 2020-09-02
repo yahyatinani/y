@@ -3,15 +3,20 @@ package com.github.whyrising.y
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.property.Arb
+import io.kotest.property.Shrinker
 import io.kotest.property.arbitrary.Codepoint
+import io.kotest.property.arbitrary.IntShrinker
+import io.kotest.property.arbitrary.StringShrinker
 import io.kotest.property.arbitrary.arb
 import io.kotest.property.arbitrary.ascii
+import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.merge
 import io.kotest.property.arbitrary.string
+import kotlin.random.nextInt
 
-fun <A> Arb.Companion.nil(): Arb<A?> = arb(listOf<A?>(null)) {
-    generateSequence { null }
-}
+fun <A> Arb.Companion.nil(): Arb<A?> = arb(object : Shrinker<A?> {
+    override fun shrink(value: A?): List<A?> = listOf(null)
+}, listOf(null)) { null }
 
 fun Arb.Companion.`string?`(
     minSize: Int = 0,
