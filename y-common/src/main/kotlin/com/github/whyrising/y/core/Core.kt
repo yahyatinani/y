@@ -34,11 +34,6 @@ fun dec(x: Double): Double = x.dec()
 
 fun str(): String = ""
 
-fun <T> str(x: T): String = when (x) {
-    null -> ""
-    else -> x.toString()
-}
-
 fun <T> str(x: T, vararg ys: T): String =
     ys.fold("") { acc, y ->
         when (y) {

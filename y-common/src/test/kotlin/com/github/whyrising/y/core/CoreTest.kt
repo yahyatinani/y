@@ -251,8 +251,7 @@ class CoreTest : FreeSpec({
                 }
             }
 
-            "When one of the args is null, it's replaced with empty string" +
-                "and it returns the concatenation of the rest" {
+            "it should replace null with empty string and concat the rest" {
                     checkAll(Arb.`string?`(), Arb.`string?`(), Arb.`string?`())
                     { a: String?, b: String?, c: String? ->
                         val expected = "${str(a)}${str(b)}${str(c)}"
@@ -262,8 +261,6 @@ class CoreTest : FreeSpec({
                         r shouldBe expected
                     }
                 }
-
-            // TODO : val r2 = str(listOf(1, 2, 3).toIntArray())
         }
     }
 })
