@@ -1,5 +1,6 @@
 package com.github.whyrising.y.core
 
+import com.github.whyrising.y.`string?`
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
@@ -247,6 +248,30 @@ class CoreTest : FreeSpec({
                     val r = str(a, b, c, d)
 
                     r shouldBe "$a$b$c$d"
+                }
+            }
+
+            "It should return the string concatenation of all args" {
+                checkAll(Arb.list(Arb.int())) { list: List<Int> ->
+                    val expected = list.fold("") { acc, i -> "$acc$i" }
+
+                    val r = str(*list.toTypedArray())
+
+                    r shouldBe expected
+                }
+            }
+
+            "it should replace null with empty string and concat the rest" {
+                checkAll(
+                    Arb.`string?`(),
+                    Arb.`string?`(),
+                    Arb.`string?`()
+                ) { a: String?, b: String?, c: String? ->
+                    val expected = "${str(a)}${str(b)}${str(c)}"
+
+                    val r = str(a, b, c)
+
+                    r shouldBe expected
                 }
             }
         }
