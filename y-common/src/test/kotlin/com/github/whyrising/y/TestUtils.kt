@@ -10,9 +10,12 @@ import io.kotest.property.arbitrary.ascii
 import io.kotest.property.arbitrary.merge
 import io.kotest.property.arbitrary.string
 
-fun <A> Arb.Companion.nil(): Arb<A?> = arb(object : Shrinker<A?> {
-    override fun shrink(value: A?): List<A?> = listOf(null)
-}, listOf(null)) { null }
+fun <A> Arb.Companion.nil(): Arb<A?> = arb(
+    object : Shrinker<A?> {
+        override fun shrink(value: A?): List<A?> = listOf(null)
+    },
+    listOf(null)
+) { null }
 
 fun Arb.Companion.`string?`(
     minSize: Int = 0,
