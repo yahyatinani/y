@@ -262,8 +262,11 @@ class CoreTest : FreeSpec({
             }
 
             "it should replace null with empty string and concat the rest" {
-                checkAll(Arb.`string?`(), Arb.`string?`(), Arb.`string?`())
-                { a: String?, b: String?, c: String? ->
+                checkAll(
+                    Arb.`string?`(),
+                    Arb.`string?`(),
+                    Arb.`string?`()
+                ) { a: String?, b: String?, c: String? ->
                     val expected = "${str(a)}${str(b)}${str(c)}"
 
                     val r = str(a, b, c)
