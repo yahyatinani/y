@@ -34,13 +34,19 @@ fun dec(x: Double): Double = x.dec()
 
 fun str(): String = ""
 
-// TODO: Overload str
-fun <T> str(vararg xs: T): String = xs.fold("") { acc, x ->
-    when (x) {
-        null -> acc
-        else -> "$acc$x"
-    }
+fun <T> str(x: T): String = when (x) {
+    null -> ""
+    else -> x.toString()
 }
+
+fun <T1, T2> str(x: T1, y: T2): String = "${str(x)}${str(y)}"
+
+fun <T1, T2, T3> str(x: T1, y: T2, z: T3): String = "${str(x, y)}${str(z)}"
+
+fun <T1, T2, T3, T> str(x: T1, y: T2, z: T3, vararg args: T): String =
+    args.fold("") { acc, arg ->
+        "$acc${str(arg)}"
+    }.let { "${str(x, y, z)}$it" }
 
 fun <T1, T2, R> curry(f: (T1, T2) -> R): (T1) -> (T2) -> R = { t1: T1 ->
     { t2: T2 ->

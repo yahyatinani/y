@@ -204,81 +204,103 @@ class CoreTest : FreeSpec({
     }
 
     "str" - {
-        "When passing no arguments, It should return the empty string." {
+        "when passing no arguments, It should return the empty string." {
             val r = str()
 
             r shouldBe ""
         }
 
-        "When passing one argument." - {
-            "When passing `null` It should return the empty string." {
-                forAll(Arb.string().map { null }) { nil ->
-                    val r = str(nil)
-
-                    r == ""
-                }
-            }
-
-            "When passing `arg` It should return arg.toString()." {
-                forAll(Arb.string()) { s: String ->
-                    val r = str(s)
-
-                    r == s
+        "when passing 1 arg, it returns the string value of the arg" {
+            checkAll(Arb.`string?`()) { a: String? ->
+                val expected: String = when (a) {
+                    null -> ""
+                    else -> a.toString()
                 }
 
-                forAll(Arb.int()) { i: Int ->
-                    str(i) == i.toString()
-                }
+                val r = str(a)
+
+                r shouldBe expected
             }
         }
 
-        "When passing multiple arguments" - {
-            "It returns the concatenation of two strings" {
-                checkAll { a: String, b: String ->
-                    val r = str(a, b)
-
-                    r shouldBe "$a$b"
+        "when passing 2 args, it returns the string concatenation of the two" {
+            checkAll(Arb.`string?`(), Arb.`string?`()) { a: String?,
+                                                         b: String? ->
+                val expected: String = when (a) {
+                    null -> ""
+                    else -> a.toString()
+                }.let {
+                    when (b) {
+                        null -> it
+                        else -> "$it$b"
+                    }
                 }
+
+                val r = str(a, b)
+
+                r shouldBe expected
             }
+        }
 
-            "It returns the concatenation of three strings" {
-                checkAll { a: String, b: String, c: String ->
-                    val r = str(a, b, c)
-
-                    r shouldBe "$a$b$c"
+        "when passing 3 args, it returns the string concatenation of the args" {
+            checkAll(
+                Arb.`string?`(),
+                Arb.`string?`(),
+                Arb.`string?`()
+            ) { a: String?, b: String?, c: String? ->
+                val expected: String = when (a) {
+                    null -> ""
+                    else -> a.toString()
+                }.let {
+                    when (b) {
+                        null -> it
+                        else -> "$it$b"
+                    }
+                }.let {
+                    when (c) {
+                        null -> it
+                        else -> "$it$c"
+                    }
                 }
+
+                val r = str(a, b, c)
+
+                r shouldBe expected
             }
+        }
 
-            "It returns the concatenation of four strings" {
-                checkAll { a: String, b: String, c: String, d: String ->
-                    val r = str(a, b, c, d)
-
-                    r shouldBe "$a$b$c$d"
+        "when passing vararg it returns the string concatenation of all args" {
+            checkAll(
+                Arb.`string?`(),
+                Arb.`string?`(),
+                Arb.`string?`(),
+                Arb.list(Arb.`string?`())
+            ) { a: String?, b: String?, c: String?, list: List<String?> ->
+                val expected: String = when (a) {
+                    null -> ""
+                    else -> a.toString()
+                }.let {
+                    when (b) {
+                        null -> it
+                        else -> "$it$b"
+                    }
+                }.let {
+                    when (c) {
+                        null -> it
+                        else -> "$it$c"
+                    }
+                }.let {
+                    list.fold(it) { acc, s ->
+                        when (s) {
+                            null -> acc
+                            else -> "$acc$s"
+                        }
+                    }
                 }
-            }
 
-            "It should return the string concatenation of all args" {
-                checkAll(Arb.list(Arb.int())) { list: List<Int> ->
-                    val expected = list.fold("") { acc, i -> "$acc$i" }
+                val r = str(a, b, c, *list.toTypedArray())
 
-                    val r = str(*list.toTypedArray())
-
-                    r shouldBe expected
-                }
-            }
-
-            "it should replace null with empty string and concat the rest" {
-                checkAll(
-                    Arb.`string?`(),
-                    Arb.`string?`(),
-                    Arb.`string?`()
-                ) { a: String?, b: String?, c: String? ->
-                    val expected = "${str(a)}${str(b)}${str(c)}"
-
-                    val r = str(a, b, c)
-
-                    r shouldBe expected
-                }
+                r shouldBe expected
             }
         }
     }
