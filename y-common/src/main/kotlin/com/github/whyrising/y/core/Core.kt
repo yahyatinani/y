@@ -96,3 +96,33 @@ fun <T1, T2, T3, T4, T5, T6, R> curry(
             }
         }
     }
+
+fun complement(f: () -> Boolean): () -> Boolean = { !f() }
+
+fun <T> complement(f: (T) -> Boolean): (T) -> Boolean = { t: T ->
+    !f(t)
+}
+
+@JvmName("complementY")
+fun <T1, T2> complement(f: (T1) -> (T2) -> Boolean):
+    (T1) -> (T2) -> Boolean = { t1: T1 -> { t2: T2 -> !f(t1)(t2) } }
+
+@JvmName("complementY1")
+fun <T1, T2, T3> complement(f: (T1) -> (T2) -> (T3) -> Boolean):
+    (T1) -> (T2) -> (T3) -> Boolean = { t1: T1 ->
+    { t2: T2 ->
+        { t3: T3 ->
+            !f(t1)(t2)(t3)
+        }
+    }
+}
+
+@JvmName("complementY2")
+fun <T1, T2, T3, T4> complement(f: (T1) -> (T2) -> (T3) -> (T4) -> Boolean):
+    (T1) -> (T2) -> (T3) -> (T4) -> Boolean = { t1: T1 ->
+    { t2: T2 ->
+        { t3: T3 ->
+            { t4: T4 -> !f(t1)(t2)(t3)(t4) }
+        }
+    }
+}

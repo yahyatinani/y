@@ -334,4 +334,78 @@ class CoreTest : FreeSpec({
                 foo5(arg1, arg2, arg3, arg4, arg5, arg6)
         }
     }
+
+    "complement" - {
+        "of a function of no arguments" {
+            checkAll() { b: Boolean ->
+                val f = { b }
+
+                val complementF: () -> Boolean = complement(f)
+                val r = complementF()
+
+                r shouldBe !b
+            }
+        }
+
+        "of a function of 1 argument" {
+            checkAll() { b: Boolean ->
+                val f = { _: Int -> b }
+
+                val complementF: (Int) -> Boolean = complement(f)
+                val r = complementF(0)
+
+                r shouldBe !b
+            }
+        }
+
+        "of a function of 2 arguments" {
+            checkAll() { b: Boolean ->
+                val f = { _: Int -> { _: Long -> b } }
+
+                val complementF: (Int) -> (Long) -> Boolean = complement(f)
+                val r = complementF(0)(0L)
+
+                r shouldBe !b
+            }
+        }
+
+        "of a function of 3 arguments" {
+            checkAll() { b: Boolean ->
+                val f = { _: Int -> { _: Long -> { _: String -> b } } }
+
+                val complementF: (Int) ->
+                (Long) ->
+                (String) ->
+                Boolean = complement(f)
+
+                val r = complementF(0)(0L)("")
+
+                r shouldBe !b
+            }
+        }
+
+        "of a function of 4 arguments" {
+            checkAll() { b: Boolean ->
+                val f = { _: Int ->
+                    { _: Long ->
+                        { _: String ->
+                            { _: Float ->
+                                b
+                            }
+                        }
+                    }
+                }
+
+                val complementF: (Int) ->
+                (Long) ->
+                (String) ->
+                (Float) ->
+                Boolean = complement(f)
+
+                val r = complementF(0)(0L)("")(1.2F)
+
+                r shouldBe !b
+            }
+        }
+    }
 })
