@@ -337,7 +337,7 @@ class CoreTest : FreeSpec({
 
     "complement" - {
         "of a function of no arguments" {
-            checkAll() { b: Boolean ->
+            checkAll { b: Boolean ->
                 val f = { b }
 
                 val complementF: () -> Boolean = complement(f)
@@ -348,7 +348,7 @@ class CoreTest : FreeSpec({
         }
 
         "of a function of 1 argument" {
-            checkAll() { b: Boolean ->
+            checkAll { b: Boolean ->
                 val f = { _: Int -> b }
 
                 val complementF: (Int) -> Boolean = complement(f)
@@ -359,7 +359,7 @@ class CoreTest : FreeSpec({
         }
 
         "of a function of 2 arguments" {
-            checkAll() { b: Boolean ->
+            checkAll { b: Boolean ->
                 val f = { _: Int -> { _: Long -> b } }
 
                 val complementF: (Int) -> (Long) -> Boolean = complement(f)
@@ -370,7 +370,7 @@ class CoreTest : FreeSpec({
         }
 
         "of a function of 3 arguments" {
-            checkAll() { b: Boolean ->
+            checkAll { b: Boolean ->
                 val f = { _: Int -> { _: Long -> { _: String -> b } } }
 
                 val complementF: (Int) ->
@@ -385,7 +385,7 @@ class CoreTest : FreeSpec({
         }
 
         "of a function of 4 arguments" {
-            checkAll() { b: Boolean ->
+            checkAll { b: Boolean ->
                 val f = { _: Int ->
                     { _: Long ->
                         { _: String ->
