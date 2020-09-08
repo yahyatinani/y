@@ -34,6 +34,7 @@ fun dec(x: Double): Double = x.dec()
 
 fun str(): String = ""
 
+// TODO: Overload str
 fun <T> str(vararg xs: T): String = xs.fold("") { acc, x ->
     when (x) {
         null -> acc
@@ -123,6 +124,33 @@ fun <T1, T2, T3, T4> complement(f: (T1) -> (T2) -> (T3) -> (T4) -> Boolean):
     { t2: T2 ->
         { t3: T3 ->
             { t4: T4 -> !f(t1)(t2)(t3)(t4) }
+        }
+    }
+}
+
+fun <T> compose(): (T) -> T = ::identity
+
+fun <T> compose(f: T): T = f
+
+fun <R2, R> compose(f: (R2) -> R, g: () -> R2): () -> R = { f(g()) }
+
+fun <T1, R2, R> compose(f: (R2) -> R, g: (T1) -> R2): (T1) -> R =
+    { t1: T1 -> f(g(t1)) }
+
+@JvmName("composeY1")
+fun <T1, T2, R2, R> compose(
+    f: (R2) -> R,
+    g: (T1) -> (T2) -> R2
+): (T1) -> (T2) -> R = { t1: T1 -> { t2: T2 -> f(g(t1)(t2)) } }
+
+@JvmName("composeY2")
+fun <T1, T2, T3, R2, R> compose(
+    f: (R2) -> R,
+    g: (T1) -> (T2) -> (T3) -> R2
+): (T1) -> (T2) -> (T3) -> R = { t1: T1 ->
+    { t2: T2 ->
+        { t3: T3 ->
+            f(g(t1)(t2)(t3))
         }
     }
 }

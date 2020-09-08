@@ -408,4 +408,75 @@ class CoreTest : FreeSpec({
             }
         }
     }
+
+    "compose" - {
+        "with no arguments passed, should return the identity function" {
+            checkAll { i: Int ->
+                val comp = compose<Int>()
+
+                val r = comp(i)
+
+                r shouldBeExactly i
+            }
+        }
+
+        "one function, should return the same function" {
+            val f1: (Int) -> Int = ::inc
+            val g1: (Float) -> Float = ::inc
+
+            val f2: (Int) -> Int = compose(f1)
+            val g2: (Float) -> Float = compose(g1)
+
+            f2 shouldBe f1
+            g2 shouldBe g1
+        }
+
+        "two functions `f` and `g`" - {
+            "when g has no args, should return the composition with no args " {
+                checkAll { n: Int ->
+                    val f: (Int) -> String = { i: Int -> str(i) }
+                    val g: () -> Int = { n }
+
+                    val fog: () -> String = compose(f, g)
+
+                    fog() shouldBe f(g())
+                }
+            }
+
+            "when g has 1 arg, should return the composition with 1 arg" {
+                checkAll { n: Int, x: Float ->
+                    val f: (Int) -> String = { i: Int -> str(i) }
+                    val g: (Float) -> Int = { n }
+
+                    val fog: (Float) -> String = compose(f, g)
+
+                    fog(x) shouldBe f(g(x))
+                }
+            }
+
+            "when g has 2 args, should return the composition with 2 args" {
+                checkAll { n: Int, x: Float, y: Double ->
+                    val f: (Int) -> String = { i: Int -> str(i) }
+                    val g: (Float) -> (Double) -> Int = { { n } }
+
+                    val fog: (Float) -> (Double) -> String = compose(f, g)
+
+                    fog(x)(y) shouldBe f(g(x)(y))
+                }
+            }
+
+            "when g has 3 args, should return the composition with 3 args" {
+                checkAll { n: Int, x: Float, y: Double, z: Boolean ->
+                    val f: (Int) -> String = { i: Int -> str(i) }
+                    val g: (Float) -> (Double) -> (Boolean) -> Int =
+                        { { { n } } }
+
+                    val fog: (Float) -> (Double) -> (Boolean) -> String =
+                        compose(f, g)
+
+                    fog(x)(y)(z) shouldBe f(g(x)(y)(z))
+                }
+            }
+        }
+    }
 })
