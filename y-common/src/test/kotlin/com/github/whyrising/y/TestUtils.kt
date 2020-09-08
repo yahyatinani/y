@@ -35,3 +35,13 @@ class TestUtilsTest : FreeSpec({
         Arb.`string?`().edgecases() shouldContain null
     }
 })
+
+val foo1 = { _: Int, _: Double -> 1 }
+
+val foo2 = { _: Int, _: Double, _: Float -> 1 }
+
+val foo3 = { _: Int, _: Double, _: Float, _: String -> 1 }
+
+val foo4 = { _: Int, _: Double, _: Float, _: String, _: Boolean -> 1 }
+
+val foo5 = { _: Int, _: Double, _: Float, _: String, _: Boolean, _: Long -> 1 }

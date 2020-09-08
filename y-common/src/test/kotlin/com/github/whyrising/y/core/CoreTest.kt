@@ -1,7 +1,13 @@
 package com.github.whyrising.y.core
 
 import com.github.whyrising.y.`string?`
+import com.github.whyrising.y.foo1
+import com.github.whyrising.y.foo2
+import com.github.whyrising.y.foo3
+import com.github.whyrising.y.foo4
+import com.github.whyrising.y.foo5
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.bigInt
@@ -274,6 +280,58 @@ class CoreTest : FreeSpec({
                     r shouldBe expected
                 }
             }
+        }
+    }
+
+    "curry" - {
+        val arg1 = 1
+        val arg2 = 1.0
+        val arg3 = 1.0F
+        val arg4 = ""
+        val arg5 = true
+        val arg6 = 1L
+
+        "a function of 2 arguments" {
+            val curried: (Int) -> (Double) -> Int = curry(foo1)
+
+            curried(arg1)(arg2) shouldBeExactly foo1(arg1, arg2)
+        }
+
+        "a function of 3 arguments" {
+            val curried: (Int) -> (Double) -> (Float) -> Int = curry(foo2)
+
+            curried(arg1)(arg2)(arg3) shouldBeExactly foo2(arg1, arg2, arg3)
+        }
+
+        "a function of 4 arguments" {
+            val curried: (Int) -> (Double) -> (Float) -> (String) -> Int =
+                curry(foo3)
+
+            curried(arg1)(arg2)(arg3)(arg4) shouldBeExactly
+                foo3(arg1, arg2, arg3, arg4)
+        }
+
+        "a function of 5 arguments" {
+            val curried: (Int) ->
+            (Double) ->
+            (Float) ->
+            (String) ->
+            (Boolean) -> Int = curry(foo4)
+
+            curried(arg1)(arg2)(arg3)(arg4)(arg5) shouldBeExactly
+                foo4(arg1, arg2, arg3, arg4, arg5)
+        }
+
+        "a function of 6 arguments" {
+            val curried: (Int) ->
+            (Double) ->
+            (Float) ->
+            (String) ->
+            (Boolean) ->
+            (Long) -> Int = curry(foo5)
+
+            curried(arg1)(arg2)(arg3)(arg4)(arg5)(arg6) shouldBeExactly
+                foo5(arg1, arg2, arg3, arg4, arg5, arg6)
         }
     }
 })
