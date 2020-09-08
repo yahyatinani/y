@@ -19,7 +19,6 @@ import io.kotest.property.arbitrary.float
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.long
-import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
@@ -204,81 +203,103 @@ class CoreTest : FreeSpec({
     }
 
     "str" - {
-        "When passing no arguments, It should return the empty string." {
+        "when passing no arguments, It should return the empty string." {
             val r = str()
 
             r shouldBe ""
         }
 
-        "When passing one argument." - {
-            "When passing `null` It should return the empty string." {
-                forAll(Arb.string().map { null }) { nil ->
-                    val r = str(nil)
-
-                    r == ""
-                }
-            }
-
-            "When passing `arg` It should return arg.toString()." {
-                forAll(Arb.string()) { s: String ->
-                    val r = str(s)
-
-                    r == s
+        "when passing 1 arg, it returns the string value of the arg" {
+            checkAll(Arb.`string?`()) { a: String? ->
+                val expected: String = when (a) {
+                    null -> ""
+                    else -> a.toString()
                 }
 
-                forAll(Arb.int()) { i: Int ->
-                    str(i) == i.toString()
-                }
+                val r = str(a)
+
+                r shouldBe expected
             }
         }
 
-        "When passing multiple arguments" - {
-            "It returns the concatenation of two strings" {
-                checkAll { a: String, b: String ->
-                    val r = str(a, b)
-
-                    r shouldBe "$a$b"
+        "when passing 2 args, it returns the string concatenation of the two" {
+            checkAll(Arb.`string?`(), Arb.`string?`())
+            { a: String?, b: String? ->
+                val expected: String = when (a) {
+                    null -> ""
+                    else -> a.toString()
+                }.let {
+                    when (b) {
+                        null -> it
+                        else -> "$it$b"
+                    }
                 }
+
+                val r = str(a, b)
+
+                r shouldBe expected
             }
+        }
 
-            "It returns the concatenation of three strings" {
-                checkAll { a: String, b: String, c: String ->
-                    val r = str(a, b, c)
-
-                    r shouldBe "$a$b$c"
+        "when passing 3 args, it returns the string concatenation of the args" {
+            checkAll(
+                Arb.`string?`(),
+                Arb.`string?`(),
+                Arb.`string?`()
+            ) { a: String?, b: String?, c: String? ->
+                val expected: String = when (a) {
+                    null -> ""
+                    else -> a.toString()
+                }.let {
+                    when (b) {
+                        null -> it
+                        else -> "$it$b"
+                    }
+                }.let {
+                    when (c) {
+                        null -> it
+                        else -> "$it$c"
+                    }
                 }
+
+                val r = str(a, b, c)
+
+                r shouldBe expected
             }
+        }
 
-            "It returns the concatenation of four strings" {
-                checkAll { a: String, b: String, c: String, d: String ->
-                    val r = str(a, b, c, d)
-
-                    r shouldBe "$a$b$c$d"
+        "when passing vararg it returns the string concatenation of all args" {
+            checkAll(
+                Arb.`string?`(),
+                Arb.`string?`(),
+                Arb.`string?`(),
+                Arb.list(Arb.`string?`())
+            ) { a: String?, b: String?, c: String?, list: List<String?> ->
+                val expected: String = when (a) {
+                    null -> ""
+                    else -> a.toString()
+                }.let {
+                    when (b) {
+                        null -> it
+                        else -> "$it$b"
+                    }
+                }.let {
+                    when (c) {
+                        null -> it
+                        else -> "$it$c"
+                    }
+                }.let {
+                    list.fold(it) { acc, s ->
+                        when (s) {
+                            null -> acc
+                            else -> "$acc$s"
+                        }
+                    }
                 }
-            }
 
-            "It should return the string concatenation of all args" {
-                checkAll(Arb.list(Arb.int())) { list: List<Int> ->
-                    val expected = list.fold("") { acc, i -> "$acc$i" }
+                val r = str(a, b, c, *list.toTypedArray())
 
-                    val r = str(*list.toTypedArray())
-
-                    r shouldBe expected
-                }
-            }
-
-            "it should replace null with empty string and concat the rest" {
-                checkAll(
-                    Arb.`string?`(),
-                    Arb.`string?`(),
-                    Arb.`string?`()
-                ) { a: String?, b: String?, c: String? ->
-                    val expected = "${str(a)}${str(b)}${str(c)}"
-
-                    val r = str(a, b, c)
-
-                    r shouldBe expected
-                }
+                r shouldBe expected
             }
         }
     }
@@ -332,6 +353,151 @@ class CoreTest : FreeSpec({
 
             curried(arg1)(arg2)(arg3)(arg4)(arg5)(arg6) shouldBeExactly
                 foo5(arg1, arg2, arg3, arg4, arg5, arg6)
+        }
+    }
+
+    "complement" - {
+        "of a function of no arguments" {
+            checkAll { b: Boolean ->
+                val f = { b }
+
+                val complementF: () -> Boolean = complement(f)
+                val r = complementF()
+
+                r shouldBe !b
+            }
+        }
+
+        "of a function of 1 argument" {
+            checkAll { b: Boolean ->
+                val f = { _: Int -> b }
+
+                val complementF: (Int) -> Boolean = complement(f)
+                val r = complementF(0)
+
+                r shouldBe !b
+            }
+        }
+
+        "of a function of 2 arguments" {
+            checkAll { b: Boolean ->
+                val f = { _: Int -> { _: Long -> b } }
+
+                val complementF: (Int) -> (Long) -> Boolean = complement(f)
+                val r = complementF(0)(0L)
+
+                r shouldBe !b
+            }
+        }
+
+        "of a function of 3 arguments" {
+            checkAll { b: Boolean ->
+                val f = { _: Int -> { _: Long -> { _: String -> b } } }
+
+                val complementF: (Int) ->
+                (Long) ->
+                (String) ->
+                Boolean = complement(f)
+
+                val r = complementF(0)(0L)("")
+
+                r shouldBe !b
+            }
+        }
+
+        "of a function of 4 arguments" {
+            checkAll { b: Boolean ->
+                val f = { _: Int ->
+                    { _: Long ->
+                        { _: String ->
+                            { _: Float ->
+                                b
+                            }
+                        }
+                    }
+                }
+
+                val complementF: (Int) ->
+                (Long) ->
+                (String) ->
+                (Float) ->
+                Boolean = complement(f)
+
+                val r = complementF(0)(0L)("")(1.2F)
+
+                r shouldBe !b
+            }
+        }
+    }
+
+    "compose" - {
+        "with no arguments passed, should return the identity function" {
+            checkAll { i: Int ->
+                val comp = compose<Int>()
+
+                val r = comp(i)
+
+                r shouldBeExactly i
+            }
+        }
+
+        "one function, should return the same function" {
+            val f1: (Int) -> Int = ::inc
+            val g1: (Float) -> Float = ::inc
+
+            val f2: (Int) -> Int = compose(f1)
+            val g2: (Float) -> Float = compose(g1)
+
+            f2 shouldBe f1
+            g2 shouldBe g1
+        }
+
+        "two functions `f` and `g`" - {
+            "when g has no args, should return the composition with no args " {
+                checkAll { n: Int ->
+                    val f: (Int) -> String = { i: Int -> str(i) }
+                    val g: () -> Int = { n }
+
+                    val fog: () -> String = compose(f, g)
+
+                    fog() shouldBe f(g())
+                }
+            }
+
+            "when g has 1 arg, should return the composition with 1 arg" {
+                checkAll { n: Int, x: Float ->
+                    val f: (Int) -> String = { i: Int -> str(i) }
+                    val g: (Float) -> Int = { n }
+
+                    val fog: (Float) -> String = compose(f, g)
+
+                    fog(x) shouldBe f(g(x))
+                }
+            }
+
+            "when g has 2 args, should return the composition with 2 args" {
+                checkAll { n: Int, x: Float, y: Double ->
+                    val f: (Int) -> String = { i: Int -> str(i) }
+                    val g: (Float) -> (Double) -> Int = { { n } }
+
+                    val fog: (Float) -> (Double) -> String = compose(f, g)
+
+                    fog(x)(y) shouldBe f(g(x)(y))
+                }
+            }
+
+            "when g has 3 args, should return the composition with 3 args" {
+                checkAll { n: Int, x: Float, y: Double, z: Boolean ->
+                    val f: (Int) -> String = { i: Int -> str(i) }
+                    val g: (Float) -> (Double) -> (Boolean) -> Int =
+                        { { { n } } }
+
+                    val fog: (Float) -> (Double) -> (Boolean) -> String =
+                        compose(f, g)
+
+                    fog(x)(y)(z) shouldBe f(g(x)(y)(z))
+                }
+            }
         }
     }
 })
