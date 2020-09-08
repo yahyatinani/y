@@ -19,7 +19,6 @@ import io.kotest.property.arbitrary.float
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.long
-import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
@@ -224,8 +223,8 @@ class CoreTest : FreeSpec({
         }
 
         "when passing 2 args, it returns the string concatenation of the two" {
-            checkAll(Arb.`string?`(), Arb.`string?`()) { a: String?,
-                                                         b: String? ->
+            checkAll(Arb.`string?`(), Arb.`string?`())
+            { a: String?, b: String? ->
                 val expected: String = when (a) {
                     null -> ""
                     else -> a.toString()
