@@ -5,6 +5,8 @@ sealed class Option<out T> {
 
     abstract fun <U> map(f: (T) -> U): Option<U>
 
+    abstract fun <U> flatMap(f: (T) -> Option<U>): Option<U>
+
     fun getOrElse(default: () -> @UnsafeVariance T): T = when (this) {
         is Some -> value
         None -> default()
@@ -15,6 +17,8 @@ sealed class Option<out T> {
 
         override fun <U> map(f: (Nothing) -> U): Option<U> = None
 
+        override fun <U> flatMap(f: (Nothing) -> Option<U>): Option<U> = None
+
         override fun toString(): String = "None"
 
         override fun hashCode(): Int = 0
@@ -24,6 +28,9 @@ sealed class Option<out T> {
         override fun isEmpty(): Boolean = false
 
         override fun <U> map(f: (T) -> U): Option<U> = Some(f(value))
+
+        override fun <U> flatMap(f: (T) -> Option<U>): Option<U> =
+            map(f).getOrElse { None }
     }
 
     companion object {
