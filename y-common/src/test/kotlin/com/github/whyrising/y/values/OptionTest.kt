@@ -179,4 +179,18 @@ class OptionTest : FreeSpec({
             r shouldBe option
         }
     }
+
+    "filter" {
+        checkAll { i: Int ->
+            val p: (Int) -> Boolean = { it % 2 == 0 }
+            val option: Option<Int> = Option(i)
+
+            val even = option.filter(p)
+
+            when (p(i)) {
+                true -> even shouldBe option
+                else -> even shouldBe None
+            }
+        }
+    }
 })
