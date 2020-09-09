@@ -3,6 +3,11 @@ package com.github.whyrising.y.values
 sealed class Option<out T> {
     abstract fun isEmpty(): Boolean
 
+    fun getOrElse(default: () -> @UnsafeVariance T): T = when (this) {
+        is Some -> value
+        None -> default()
+    }
+
     internal object None : Option<Nothing>() {
         override fun isEmpty(): Boolean = true
 
