@@ -159,4 +159,24 @@ class OptionTest : FreeSpec({
             }
         }
     }
+
+    "orElse" - {
+        "should return the default Option" {
+            val option: Option<Int> = Option()
+            val default: () -> Option<Int> = { Option(0) }
+
+            val r: Option<Int> = option.orElse(default)
+
+            r shouldBe default()
+        }
+
+        "should return the value Option" {
+            val option: Option<Int> = Option(2)
+            val default: () -> Option<Int> = { Option(0) }
+
+            val r: Option<Int> = option.orElse(default)
+
+            r shouldBe option
+        }
+    }
 })
