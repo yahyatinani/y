@@ -52,4 +52,30 @@ class EitherTest : FreeSpec({
     "right() function should return Right type as Either type" {
         Either.right<Int, Double>(1.0).shouldBeTypeOf<Right<Int, Double>>()
     }
+
+    "Right map" - {
+        "when applied on Right, it should apply the transformation" {
+            checkAll { i: Int ->
+                val right: Either<String, Int> = Either.right(i)
+
+                val result: Either<String, Double> = right.map { i: Int ->
+                    i.toDouble()
+                }
+
+                result shouldBe Either.right(i.toDouble())
+            }
+        }
+
+        "when applied on Left, it should return the original Left value" {
+            checkAll { str: String ->
+                val left: Either<String, Int> = Either.left(str)
+
+                val result: Either<String, Double> = left.map { i: Int ->
+                    i.toDouble()
+                }
+
+                result shouldBe left
+            }
+        }
+    }
 })
