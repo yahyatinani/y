@@ -49,3 +49,16 @@ sealed class Option<out T> {
 }
 
 fun <T, R> lift(f: (T) -> R): (Option<T>) -> Option<R> = { it.map(f) }
+
+@JvmName("lift1")
+fun <T1, T2, R> lift(
+    f: (T1) -> (T2) -> R
+): (Option<T1>) -> (Option<T2>) -> Option<R> = { option1: Option<T1> ->
+    { option2: Option<T2> ->
+        option1.flatMap { t1 ->
+            option2.map { t2: T2 ->
+                f(t1)(t2)
+            }
+        }
+    }
+}

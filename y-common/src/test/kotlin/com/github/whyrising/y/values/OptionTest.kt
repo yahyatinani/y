@@ -207,5 +207,23 @@ class OptionTest : FreeSpec({
                 g2(Option(l)) shouldBe Option(f2(l))
             }
         }
+
+        "should convert f: A,B -> C, to g: Option(A),Option(B) -> Option(C)" {
+            checkAll { n: Int, l: Long, f: Float ->
+                val f1: (Int) -> (Float) -> String = { { f -> str(it, f) } }
+                val f2: (Long) -> (Float) -> String = { { f -> str(it, f) } }
+
+                val g1: (Option<Int>) ->
+                (Option<Float>) ->
+                Option<String> = lift(f1)
+
+                val g2: (Option<Long>) ->
+                (Option<Float>) ->
+                Option<String> = lift(f2)
+
+                g1(Option(n))(Option(f)) shouldBe Option(f1(n)(f))
+                g2(Option(l))(Option(f)) shouldBe Option(f2(l)(f))
+            }
+        }
     }
 })
