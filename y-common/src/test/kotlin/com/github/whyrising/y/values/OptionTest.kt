@@ -208,7 +208,7 @@ class OptionTest : FreeSpec({
             }
         }
 
-        "should convert f: A,B -> C, to g: Option(A),Option(B) -> Option(C)" {
+        "should convert f: A->B->C, to g: Option(A)->Option(B)->Option(C)" {
             checkAll { n: Int, l: Long, f: Float ->
                 val f1: (Int) -> (Float) -> String = { { f -> str(it, f) } }
                 val f2: (Long) -> (Float) -> String = { { f -> str(it, f) } }

@@ -112,7 +112,7 @@ fun <T1, T2, R> map(
     op1: Option<T1>,
     op2: Option<T2>,
     f: (T1) -> (T2) -> R
-): Option<R> = op1.flatMap { i -> op2.map { l -> f(i)(l) } }
+): Option<R> = op1.flatMap { t1 -> op2.map { t2 -> f(t1)(t2) } }
 
 fun <T1, T2, T3, R> map(
     op1: Option<T1>,
