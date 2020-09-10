@@ -63,7 +63,6 @@ fun <T1, T2, R> lift(
     }
 }
 
-
 @JvmName("lift2")
 fun <T1, T2, T3, R> lift(
     f: (T1) -> (T2) -> (T3) -> R
