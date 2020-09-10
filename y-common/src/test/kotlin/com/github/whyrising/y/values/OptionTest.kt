@@ -298,22 +298,21 @@ class OptionTest : FreeSpec({
             }
         }
 
-        "Option(A), Option(B), Option(C) and f:(A)->(B)->(C)->D, " +
-            "to Option(D)" {
-                checkAll { n: Int, l: Long, d: Double ->
-                    val option1 = Option(n)
-                    val option2 = Option(l)
-                    val option3 = Option(d)
-                    val f: (Int) ->
-                    (Long) ->
-                    (Double) ->
-                    String = { { m -> { k -> str(it, m, k) } } }
+        "Option(A), Option(B), Option(C) and f:(A)->(B)->(C)->D to Option(D)" {
+            checkAll { n: Int, l: Long, d: Double ->
+                val option1 = Option(n)
+                val option2 = Option(l)
+                val option3 = Option(d)
+                val f: (Int) ->
+                (Long) ->
+                (Double) ->
+                String = { { m -> { k -> str(it, m, k) } } }
 
-                    val r: Option<String> = map(option1, option2, option3, f)
+                val r: Option<String> = map(option1, option2, option3, f)
 
-                    r shouldBe Option(f(n)(l)(d))
-                }
+                r shouldBe Option(f(n)(l)(d))
             }
+        }
     }
 })
 
