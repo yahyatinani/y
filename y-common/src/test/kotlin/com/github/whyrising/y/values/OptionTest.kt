@@ -314,5 +314,25 @@ class OptionTest : FreeSpec({
             }
         }
     }
-})
 
+    "traverse" {
+        checkAll { list1: List<Int>, list2: List<Double> ->
+            val f: (Int) -> Option<String> = { Option(str(it)) }
+            val g: (Double) -> Option<String> = { Option(str(it)) }
+            val expected1 =
+                list1.fold<Int, List<String>>(emptyList()) { acc, i ->
+                    acc + str(i)
+                }
+            val expected2 =
+                list2.fold<Double, List<String>>(emptyList()) { acc, i ->
+                    acc + str(i)
+                }
+
+            val r1: Option<List<String>> = traverse(list1, f)
+            val r2: Option<List<String>> = traverse(list2, g)
+
+            r1.map { coll: List<String> -> coll shouldBe expected1 }
+            r2.map { coll: List<String> -> coll shouldBe expected2 }
+        }
+    }
+})

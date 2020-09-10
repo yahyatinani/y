@@ -124,3 +124,15 @@ fun <T1, T2, T3, R> map(
         op3.map { t3 -> f(t1)(t2)(t3) }
     }
 }
+
+fun <T, R> traverse(
+    coll: List<T>,
+    f: (T) -> Option<R>
+): Option<List<R>> =
+    coll.fold(Option(emptyList())) { acc, i ->
+        map(f(i), acc) { s: R ->
+            { list: List<R> ->
+                list.plus(s)
+            }
+        }
+    }
