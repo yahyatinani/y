@@ -33,10 +33,11 @@ sealed class Option<out T> {
     internal data class Some<out T>(internal val value: T) : Option<T>() {
         override fun isEmpty(): Boolean = false
 
-        override fun <U> map(f: (T) -> U): Option<U> = Some(f(value))
+        private fun <U> some(f: (T) -> U) = Some(f(value))
 
-        override fun <U> flatMap(f: (T) -> Option<U>): Option<U> =
-            map(f).getOrElse { None }
+        override fun <U> map(f: (T) -> U): Option<U> = some(f)
+
+        override fun <U> flatMap(f: (T) -> Option<U>): Option<U> = some(f).value
     }
 
     companion object {

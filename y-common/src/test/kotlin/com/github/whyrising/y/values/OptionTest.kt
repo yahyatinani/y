@@ -138,19 +138,18 @@ class OptionTest : FreeSpec({
     }
 
     "flatMap" - {
+        val f: (Int) -> Option<String> = { i: Int -> Option("$i") }
+
         "when `this` is None, should return None" {
             val option: Option<Int> = Option()
 
-            val mapped: Option<String> = option.flatMap { i: Int ->
-                Option("$i")
-            }
+            val mapped: Option<String> = option.flatMap(f)
 
             mapped shouldBeSameInstanceAs None
         }
 
         "when `this` is Some, should return the mapped value" {
             checkAll { i: Int ->
-                val f: (Int) -> Option<String> = { n: Int -> Option("$n") }
                 val option: Option<Int> = Option(i)
 
                 val mapped: Option<String> = option.flatMap(f)
