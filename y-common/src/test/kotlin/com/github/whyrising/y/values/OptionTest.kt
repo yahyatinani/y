@@ -1,5 +1,6 @@
 package com.github.whyrising.y.values
 
+import com.github.whyrising.y.core.str
 import com.github.whyrising.y.values.Option.None
 import com.github.whyrising.y.values.Option.Some
 import io.kotest.core.spec.style.FreeSpec
@@ -189,6 +190,21 @@ class OptionTest : FreeSpec({
             when (p(i)) {
                 true -> even shouldBe option
                 else -> even shouldBe None
+            }
+        }
+    }
+
+    "lift" - {
+        "should convert f: A -> B, to g: Option(A) -> Option(B)" {
+            checkAll { n: Int, l: Long ->
+                val f1: (Int) -> String = { i: Int -> str(i) }
+                val f2: (Long) -> String = { i: Long -> str(i) }
+
+                val g1: (Option<Int>) -> Option<String> = lift(f1)
+                val g2: (Option<Long>) -> Option<String> = lift(f2)
+
+                g1(Option(n)) shouldBe Option(f1(n))
+                g2(Option(l)) shouldBe Option(f2(l))
             }
         }
     }

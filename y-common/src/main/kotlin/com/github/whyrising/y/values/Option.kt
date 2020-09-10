@@ -47,3 +47,5 @@ sealed class Option<out T> {
         }
     }
 }
+
+fun <T, R> lift(f: (T) -> R): (Option<T>) -> Option<R> = { it.map(f) }
