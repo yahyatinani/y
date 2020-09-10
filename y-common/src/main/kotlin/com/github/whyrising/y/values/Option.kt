@@ -136,3 +136,5 @@ fun <T, R> traverse(
             }
         }
     }
+
+fun <T> sequence(coll: List<Option<T>>): Option<List<T>> = traverse(coll) { it }

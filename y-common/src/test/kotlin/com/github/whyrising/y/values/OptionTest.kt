@@ -13,6 +13,7 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldBeTypeOf
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 
@@ -333,6 +334,15 @@ class OptionTest : FreeSpec({
 
             r1.map { coll: List<String> -> coll shouldBe expected1 }
             r2.map { coll: List<String> -> coll shouldBe expected2 }
+        }
+    }
+
+    "sequence" {
+        checkAll { list: List<Int> ->
+            val l = list.map { n: Int -> Option(n) }
+
+            val r1: Option<List<Int>> = sequence(l)
+            r1.map { coll: List<Int> -> coll shouldBe list }
         }
     }
 })
