@@ -107,3 +107,9 @@ fun <T1, T2, T3, R> hLift(
         }
     }
 }
+
+fun <T1, T2, R> map(
+    op1: Option<T1>,
+    op2: Option<T2>,
+    f: (T1) -> (T2) -> R
+): Option<R> = op1.flatMap { i -> op2.map { l -> f(i)(l) } }

@@ -280,4 +280,23 @@ class OptionTest : FreeSpec({
             }
         }
     }
+
+    "map package level" - {
+        "Option(A), Option(B) and f:(A)->(B)->C, to Option(C)" {
+            checkAll { n: Int, l: Long, d: Double ->
+                val option1 = Option(n)
+                val option2 = Option(l)
+                val option3 = Option(d)
+                val f1: (Int) -> (Long) -> String = { { m -> str(it, m) } }
+                val f2: (Int) -> (Double) -> String = { { m -> str(it, m) } }
+
+                val r1: Option<String> = map(option1, option2, f1)
+                val r2: Option<String> = map(option1, option3, f2)
+
+                r1 shouldBe Option(f1(n)(l))
+                r2 shouldBe Option(f2(n)(d))
+            }
+        }
+    }
 })
+
