@@ -268,5 +268,16 @@ class OptionTest : FreeSpec({
                 g(n)(l) shouldBe Option(f(n)(l))
             }
         }
+
+        "should convert f: A -> B -> C -> D to g: A -> B -> C -> Option(D)" - {
+            checkAll { n: Int, l: Long, d: Double ->
+                val f: (Int) -> (Long) -> (Double) -> String =
+                    { { m -> { d -> str(it, m, d) } } }
+
+                val g: (Int) -> (Long) -> (Double) -> Option<String> = hLift(f)
+
+                g(n)(l)(d) shouldBe Option(f(n)(l)(d))
+            }
+        }
     }
 })
