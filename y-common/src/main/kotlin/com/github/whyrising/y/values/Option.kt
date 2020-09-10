@@ -62,3 +62,21 @@ fun <T1, T2, R> lift(
         }
     }
 }
+
+
+@JvmName("lift2")
+fun <T1, T2, T3, R> lift(
+    f: (T1) -> (T2) -> (T3) -> R
+): (Option<T1>) -> (Option<T2>) -> (Option<T3>) -> Option<R> = { option1 ->
+    { option2 ->
+        { option3 ->
+            option1.flatMap { t1 ->
+                option2.flatMap { t2 ->
+                    option3.map { t3 ->
+                        f(t1)(t2)(t3)
+                    }
+                }
+            }
+        }
+    }
+}
