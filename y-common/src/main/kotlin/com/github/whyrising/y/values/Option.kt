@@ -82,3 +82,13 @@ fun <T1, T2, T3, R> lift(
 }
 
 fun <T, R> hLift(f: (T) -> R): (T) -> Option<R> = { Option(it).map(f) }
+
+@JvmName("hLift1")
+fun <T1, T2, R> hLift(f: (T1) -> (T2) -> R): (T1) -> (T2) -> Option<R> =
+    { t1 ->
+        { t2 ->
+            Option(f(t1)).flatMap { f1 ->
+                Option(t2).map(f1)
+            }
+        }
+    }
