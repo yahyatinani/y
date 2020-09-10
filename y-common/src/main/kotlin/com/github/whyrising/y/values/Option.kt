@@ -80,3 +80,5 @@ fun <T1, T2, T3, R> lift(
         }
     }
 }
+
+fun <T, R> hLift(f: (T) -> R): (T) -> Option<R> = { Option(it).map(f) }
