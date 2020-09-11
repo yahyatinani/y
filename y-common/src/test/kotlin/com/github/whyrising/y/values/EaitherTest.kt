@@ -5,6 +5,7 @@ import com.github.whyrising.y.values.Either.Right
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
@@ -200,6 +201,54 @@ class EitherTest : FreeSpec({
                 val either: Either<Int, String> = Either.left(i)
 
                 either.getOrElse(defaultValue) shouldBe i
+            }
+        }
+    }
+
+    "orElse, Right" - {
+        "should return the default value when called on a Left" {
+            checkAll { value: String ->
+                val default: Either<String, Int> = Either.right(-1)
+                val defaultValue = { default }
+                val either: Either<String, Int> = Either.left(value)
+
+                either.orElseR(defaultValue) shouldBe default
+                either.orElseR(defaultValue) shouldNotBe either
+            }
+        }
+
+        "should return the value when called on a Right" {
+            checkAll(Arb.int().filter { it != -1 }) { value: Int ->
+                val default: Either<String, Int> = Either.right(-1)
+                val defaultValue = { default }
+                val either: Either<String, Int> = Either.right(value)
+
+                either.orElseR(defaultValue) shouldBe either
+                either.orElseR(defaultValue) shouldNotBe default
+            }
+        }
+    }
+
+    "orElse, Left" - {
+        "should return the default value when called on a Right" {
+            checkAll { value: String ->
+                val default: Either<Int, String> = Either.left(-1)
+                val defaultValue = { default }
+                val either: Either<Int, String> = Either.right(value)
+
+                either.orElseL(defaultValue) shouldBe default
+                either.orElseL(defaultValue) shouldNotBe either
+            }
+        }
+
+        "should return the value when called on a Left" {
+            checkAll(Arb.int().filter { it != -1 }) { value: Int ->
+                val default: Either<Int, String> = Either.left(-1)
+                val defaultValue = { default }
+                val either: Either<Int, String> = Either.left(value)
+
+                either.orElseL(defaultValue) shouldBe either
+                either.orElseL(defaultValue) shouldNotBe default
             }
         }
     }
