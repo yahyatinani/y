@@ -104,4 +104,56 @@ class EitherTest : FreeSpec({
             }
         }
     }
+
+    "Right flatMap" - {
+        "when applied on Right, it should apply the transformation" {
+            checkAll { i: Int ->
+                val right: Either<String, Int> = Either.right(i)
+
+                val result: Either<String, Double> = right.flatMap { n: Int ->
+                    Either.right(n.toDouble())
+                }
+
+                result shouldBe Either.right(i.toDouble())
+            }
+        }
+
+        "when applied on Left, it should return the original Left value" {
+            checkAll { str: String ->
+                val left: Either<String, Int> = Either.left(str)
+
+                val result: Either<String, Double> = left.flatMap { n: Int ->
+                    Either.right(n.toDouble())
+                }
+
+                result shouldBe left
+            }
+        }
+    }
+
+    "Left flatMap" - {
+        "when applied on Left, it should apply the transformation" {
+            checkAll { i: Int ->
+                val left: Either<Int, String> = Either.left(i)
+
+                val result: Either<Double, String> = left.flatMap { n: Int ->
+                    Either.left(n.toDouble())
+                }
+
+                result shouldBe Either.left(i.toDouble())
+            }
+        }
+
+        "when applied on Right, it should return the original Right value" {
+            checkAll { str: String ->
+                val right: Either<Int, String> = Either.right(str)
+
+                val result: Either<Double, String> = right.flatMap { n: Int ->
+                    Either.left(n.toDouble())
+                }
+
+                result shouldBe right
+            }
+        }
+    }
 })
