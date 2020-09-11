@@ -6,6 +6,10 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.filter
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 
 class EitherTest : FreeSpec({
@@ -153,6 +157,26 @@ class EitherTest : FreeSpec({
                 }
 
                 result shouldBe right
+            }
+        }
+    }
+
+    "getOrElse, Right" - {
+        "should return the default value when called on a Left" {
+            checkAll { str: String ->
+                val default = -1
+                val either: Either<String, Int> = Either.left(str)
+
+                either.getOrElse { default } shouldBe default
+            }
+        }
+
+        "should return the value when called on a Right" {
+            checkAll(Arb.int().filter { it != 0 }) { i: Int ->
+                val default = 0
+                val either: Either<String, Int> = Either.right(i)
+
+                either.getOrElse { default } shouldBe i
             }
         }
     }
