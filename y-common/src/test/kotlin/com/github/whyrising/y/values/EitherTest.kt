@@ -65,7 +65,7 @@ class EitherTest : FreeSpec({
                 checkAll { i: Int ->
                     val left: Either<Int, String> = Either.left(i)
 
-                    val result: Either<Double, String> = left.flatMap { n: Int ->
+                    val result = left.flatMap { n: Int ->
                         Either.left(n.toDouble())
                     }
 
@@ -77,7 +77,7 @@ class EitherTest : FreeSpec({
                 checkAll { str: String ->
                     val right: Either<Int, String> = Either.right(str)
 
-                    val result: Either<Double, String> = right.flatMap { n: Int ->
+                    val result = right.flatMap { n: Int ->
                         Either.left(n.toDouble())
                     }
 
@@ -185,7 +185,7 @@ class EitherTest : FreeSpec({
                 checkAll { i: Int ->
                     val right: Either<String, Int> = Either.right(i)
 
-                    val result: Either<String, Double> = right.flatMap { n: Int ->
+                    val result = right.flatMap { n: Int ->
                         Either.right(n.toDouble())
                     }
 
@@ -197,7 +197,7 @@ class EitherTest : FreeSpec({
                 checkAll { str: String ->
                     val left: Either<String, Int> = Either.left(str)
 
-                    val result: Either<String, Double> = left.flatMap { n: Int ->
+                    val result = left.flatMap { n: Int ->
                         Either.right(n.toDouble())
                     }
 
