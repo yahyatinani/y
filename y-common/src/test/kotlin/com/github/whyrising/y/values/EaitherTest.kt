@@ -53,7 +53,7 @@ class EitherTest : FreeSpec({
         Either.right<Int, Double>(1.0).shouldBeTypeOf<Right<Int, Double>>()
     }
 
-    "Right map" - {
+    "map, Right" - {
         "when applied on Right, it should apply the transformation" {
             checkAll { i: Int ->
                 val right: Either<String, Int> = Either.right(i)
@@ -79,7 +79,7 @@ class EitherTest : FreeSpec({
         }
     }
 
-    "Left map" - {
+    "map, Left" - {
         "when applied on Left, it should apply the transformation" {
             checkAll { i: Int ->
                 val left: Either<Int, String> = Either.left(i)
@@ -105,7 +105,7 @@ class EitherTest : FreeSpec({
         }
     }
 
-    "Right flatMap" - {
+    "flatMap, Right" - {
         "when applied on Right, it should apply the transformation" {
             checkAll { i: Int ->
                 val right: Either<String, Int> = Either.right(i)
@@ -131,7 +131,7 @@ class EitherTest : FreeSpec({
         }
     }
 
-    "Left flatMap" - {
+    "flatMap, Left" - {
         "when applied on Left, it should apply the transformation" {
             checkAll { i: Int ->
                 val left: Either<Int, String> = Either.left(i)
