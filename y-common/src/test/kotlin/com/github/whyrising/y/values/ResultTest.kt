@@ -2,7 +2,9 @@ package com.github.whyrising.y.values
 
 import com.github.whyrising.y.values.Result.Failure
 import com.github.whyrising.y.values.Result.Success
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.reflection.shouldBeData
 import io.kotest.matchers.reflection.shouldBeSealed
@@ -10,6 +12,8 @@ import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
 import io.kotest.property.checkAll
 import java.io.Serializable
+
+const val EXCEPTION_MESSAGE = "java.lang.Exception: "
 
 class ResultTest : FreeSpec({
     "Result should be sealed" {
@@ -50,12 +54,12 @@ class ResultTest : FreeSpec({
         }
 
         "should have a property of a generic type T" {
-            checkAll { i: Int, str: String ->
+            checkAll { i: Int, msg: String ->
                 val success1 = Success(i)
-                val success2 = Success(str)
+                val success2 = Success(msg)
 
                 success1.value shouldBe i
-                success2.value shouldBe str
+                success2.value shouldBe msg
             }
         }
 
@@ -96,37 +100,37 @@ class ResultTest : FreeSpec({
 
     "failure() companion function" - {
         "when passed a string message, it should return Failure as Result" {
-            checkAll { str: String ->
-                val result: Result<Int> = Result.failure(str)
+            checkAll { msg: String ->
+                val result: Result<Int> = Result.failure(msg)
                 val failure: Failure<Int> = result as Failure<Int>
 
                 shouldThrow<IllegalStateException> { throw failure.exception }
-                failure.exception.message shouldBe str
+                failure.exception.message shouldBe msg
             }
         }
 
-        "when passed a RuntimeException, it should return the failure of it" {
-            checkAll { str: String ->
-                val result: Result<Int> = Result.failure(RuntimeException(str))
+        "when passed a RuntimeException, it should wrap it in a failure" {
+            checkAll { msg: String ->
+                val result: Result<Int> = Result.failure(RuntimeException(msg))
                 val failure: Failure<Int> = result as Failure
 
-                shouldThrow<RuntimeException> { throw failure.exception }
-                failure.exception.message shouldBe str
+                shouldThrowExactly<RuntimeException> { throw failure.exception }
+                failure.exception.message shouldBe msg
             }
         }
 
         """
             when passed a Exception, it should wrap it in
-            an IllegalStateException and return the failure of it
+            an IllegalStateException and wrap it again in a failure
         """ {
-            checkAll { str: String ->
-                val result: Result<Int> = Result.failure(Exception(str))
+            checkAll { msg: String ->
+                val result: Result<Int> = Result.failure(Exception(msg))
                 val failure: Failure<Int> = result as Failure
 
                 shouldThrow<IllegalStateException> {
                     throw failure.exception
                 }
-                failure.exception.message shouldBe str
+                failure.exception.message shouldBe "$EXCEPTION_MESSAGE$msg"
             }
         }
     }
@@ -143,6 +147,57 @@ class ResultTest : FreeSpec({
         shouldThrow<NullPointerException> {
             @Suppress("UNCHECKED_CAST")
             throw (result as Failure<Int>).exception
+        }
+    }
+
+    "map()" - {
+        val f = { i: Int -> i.toDouble() }
+
+        "when called on Failure, it should return a failure" {
+            val failure = Result.failure<Int>("test")
+
+            val r: Result<Double> = failure.map(f)
+
+            r shouldBe failure
+        }
+
+        "when called on Success" - {
+            "it should return the mapped value in a Success" {
+                checkAll { i: Int ->
+                    val success = Result(i)
+
+                    val r: Result<Double> = success.map(f)
+
+                    r shouldBe Result(f(i))
+                }
+            }
+
+            val success = Result(1)
+
+            "when g throws an exception, map shouldn't throw" {
+                checkAll { msg: String ->
+                    val g: (Int) -> Double = { throw RuntimeException(msg) }
+                    val h: (Int) -> Double = { throw Exception(msg) }
+
+                    shouldNotThrow<RuntimeException> { success.map(g) }
+                    shouldNotThrow<Exception> { success.map(h) }
+                }
+            }
+
+            "when g throws an exception, it should wrap it & return a failure" {
+                checkAll { msg: String ->
+                    val g: (Int) -> Double = { throw RuntimeException(msg) }
+                    val h: (Int) -> Double = { throw Exception(msg) }
+
+                    val r1 = success.map(g) as Failure<Double>
+                    val r2 = success.map(h) as Failure<Double>
+
+                    shouldThrowExactly<RuntimeException> { throw r1.exception }
+                    shouldThrowExactly<RuntimeException> { throw r2.exception }
+                    r1.exception.message shouldBe msg
+                    r2.exception.message shouldBe "$EXCEPTION_MESSAGE$msg"
+                }
+            }
         }
     }
 })

@@ -4,15 +4,27 @@ import java.io.Serializable
 import java.lang.IllegalStateException
 
 sealed class Result<out T> : Serializable {
-    internal
-    data class Failure<out T>(
+
+    abstract fun <R> map(f: (T) -> R): Result<R>
+
+    internal data class Failure<out T>(
         internal val exception: RuntimeException
     ) : Result<T>() {
+
+        override fun <R> map(f: (T) -> R): Result<R> = Failure(exception)
 
         override fun toString(): String = "Failure(${exception.message})"
     }
 
     internal data class Success<out T>(internal val value: T) : Result<T>() {
+
+        override fun <R> map(f: (T) -> R): Result<R> = try {
+            Success(f(value))
+        } catch (e: RuntimeException) {
+            failure(e)
+        } catch (e: Exception) {
+            Failure(RuntimeException(e))
+        }
 
         override fun toString(): String = "Success($value)"
     }
@@ -28,9 +40,9 @@ sealed class Result<out T> : Serializable {
             Failure(IllegalStateException(message))
 
         fun <T> failure(exception: RuntimeException): Result<T> =
-            Failure(RuntimeException(exception.message))
+            Failure(exception)
 
         fun <T> failure(exception: Exception): Result<T> =
-            Failure(IllegalStateException(exception.message))
+            Failure(IllegalStateException(exception))
     }
 }
