@@ -21,6 +21,12 @@ sealed class Either<out L, out R> {
         is Right -> value
     }
 
+    @JvmName("getOrElseLeft")
+    fun getOrElse(defaultValue: () -> @UnsafeVariance L): L = when (this) {
+        is Left -> value
+        is Right -> defaultValue()
+    }
+
     internal
     data class Left<out L, out R>(internal val value: L) : Either<L, R>() {
 

@@ -9,7 +9,6 @@ import io.kotest.matchers.types.shouldBeTypeOf
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
-import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 
 class EitherTest : FreeSpec({
@@ -165,18 +164,42 @@ class EitherTest : FreeSpec({
         "should return the default value when called on a Left" {
             checkAll { str: String ->
                 val default = -1
+                val defaultValue: () -> Int = { default }
                 val either: Either<String, Int> = Either.left(str)
 
-                either.getOrElse { default } shouldBe default
+                either.getOrElse(defaultValue) shouldBe default
             }
         }
 
         "should return the value when called on a Right" {
-            checkAll(Arb.int().filter { it != 0 }) { i: Int ->
-                val default = 0
+            checkAll(Arb.int().filter { it != -1 }) { i: Int ->
+                val default = -1
+                val defaultValue: () -> Int = { default }
                 val either: Either<String, Int> = Either.right(i)
 
-                either.getOrElse { default } shouldBe i
+                either.getOrElse(defaultValue) shouldBe i
+            }
+        }
+    }
+
+    "getOrElse, Left" - {
+        "should return the default value when called on a Right" {
+            checkAll { str: String ->
+                val default = -1
+                val defaultValue: () -> Int = { default }
+                val either: Either<Int, String> = Either.right(str)
+
+                either.getOrElse(defaultValue) shouldBe default
+            }
+        }
+
+        "should return the value when called on a Left" {
+            checkAll(Arb.int().filter { it != -1 }) { i: Int ->
+                val default = -1
+                val defaultValue: () -> Int = { default }
+                val either: Either<Int, String> = Either.left(i)
+
+                either.getOrElse(defaultValue) shouldBe i
             }
         }
     }
