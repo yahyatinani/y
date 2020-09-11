@@ -118,7 +118,7 @@ class OptionTest : FreeSpec({
     }
 
     "map" - {
-        "when called on None, should return None" {
+        "when called on None, it should return None" {
             val option: Option<Int> = Option()
 
             val mapped: Option<String> = option.map { i: Int -> "$i" }
@@ -126,7 +126,7 @@ class OptionTest : FreeSpec({
             mapped shouldBeSameInstanceAs None
         }
 
-        "when called on a Some, should return the mapped value" {
+        "when called on a Some, it should return the mapped value" {
             checkAll { i: Int ->
                 val f: (Int) -> String = { n: Int -> "$n" }
                 val option: Option<Int> = Option(i)
@@ -141,7 +141,7 @@ class OptionTest : FreeSpec({
     "flatMap" - {
         val f: (Int) -> Option<String> = { i: Int -> Option("$i") }
 
-        "when called on None, should return None" {
+        "when called on None, it should return None" {
             val option: Option<Int> = Option()
 
             val mapped: Option<String> = option.flatMap(f)
@@ -149,7 +149,7 @@ class OptionTest : FreeSpec({
             mapped shouldBeSameInstanceAs None
         }
 
-        "when called on Some, should return the mapped value" {
+        "when called on Some, it should return the mapped value" {
             checkAll { i: Int ->
                 val option: Option<Int> = Option(i)
 

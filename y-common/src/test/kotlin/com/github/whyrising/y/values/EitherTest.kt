@@ -14,6 +14,10 @@ import io.kotest.property.checkAll
 
 class EitherTest : FreeSpec({
     "Left" - {
+        "left() function should return Left type as Either type" {
+            Either.left<Int, Double>(1).shouldBeTypeOf<Left<Int, Double>>()
+        }
+
         "should be a subtype of Either" {
             Left::class.shouldBeSubtypeOf<Either<*, *>>()
         }
@@ -29,9 +33,111 @@ class EitherTest : FreeSpec({
                 Left<Int, Double>(i).toString() shouldBe "Left($i)"
             }
         }
+
+        "map" - {
+            "when applied on Left, it should apply the transformation" {
+                checkAll { i: Int ->
+                    val left: Either<Int, String> = Either.left(i)
+
+                    val result: Either<Double, String> = left.map { n: Int ->
+                        n.toDouble()
+                    }
+
+                    result shouldBe Either.left(i.toDouble())
+                }
+            }
+
+            "when applied on Right, it should return the original Right value" {
+                checkAll { str: String ->
+                    val right: Either<Int, String> = Either.right(str)
+
+                    val result: Either<Double, String> = right.map { i: Int ->
+                        i.toDouble()
+                    }
+
+                    result shouldBe right
+                }
+            }
+        }
+
+        "flatMap" - {
+            "when applied on Left, it should apply the transformation" {
+                checkAll { i: Int ->
+                    val left: Either<Int, String> = Either.left(i)
+
+                    val result: Either<Double, String> = left.flatMap { n: Int ->
+                        Either.left(n.toDouble())
+                    }
+
+                    result shouldBe Either.left(i.toDouble())
+                }
+            }
+
+            "when applied on Right, it should return the original Right value" {
+                checkAll { str: String ->
+                    val right: Either<Int, String> = Either.right(str)
+
+                    val result: Either<Double, String> = right.flatMap { n: Int ->
+                        Either.left(n.toDouble())
+                    }
+
+                    result shouldBe right
+                }
+            }
+        }
+
+        "getOrElse" - {
+            "when called on a Right, it should return the default value" {
+                checkAll { value: String ->
+                    val default = -1
+                    val defaultValue: () -> Int = { default }
+                    val either: Either<Int, String> = Either.right(value)
+
+                    either.getOrElse(defaultValue) shouldBe default
+                }
+            }
+
+            "when called on a Left, it should return the value" {
+                checkAll(Arb.int().filter { it != -1 }) { value: Int ->
+                    val default = -1
+                    val defaultValue: () -> Int = { default }
+                    val either: Either<Int, String> = Either.left(value)
+
+                    either.getOrElse(defaultValue) shouldBe value
+                }
+            }
+        }
+
+        "orElse" - {
+            "when called on a Right, it should return the default value " {
+                checkAll { value: String ->
+                    val default: Either<Int, String> = Either.left(-1)
+                    val defaultValue = { default }
+                    val either: Either<Int, String> = Either.right(value)
+
+                    either.orElseL(defaultValue) shouldBe default
+                    either.orElseL(defaultValue) shouldNotBe either
+                }
+            }
+
+            "when called on a Left, it should return itself `this`" {
+                checkAll(Arb.int().filter { it != -1 }) { value: Int ->
+                    val default: Either<Int, String> = Either.left(-1)
+                    val defaultValue = { default }
+                    val either: Either<Int, String> = Either.left(value)
+
+                    either.orElseL(defaultValue) shouldBe either
+                    either.orElseL(defaultValue) shouldNotBe default
+                }
+            }
+        }
     }
 
     "Right" - {
+        "right() function should return Right type as Either type" {
+            Either.right<Int, Double>(1.0).shouldBeTypeOf<Right<Int, Double>>()
+        }
+
         "should be a subtype of Either" {
             Right::class.shouldBeSubtypeOf<Either<*, *>>()
         }
@@ -47,208 +153,102 @@ class EitherTest : FreeSpec({
                 Right<Int, Double>(i).toString() shouldBe "Right($i)"
             }
         }
-    }
 
-    "left() function should return Left type as Either type" {
-        Either.left<Int, Double>(1).shouldBeTypeOf<Left<Int, Double>>()
-    }
+        "map" - {
+            "when applied on Right, it should apply the transformation" {
+                checkAll { i: Int ->
+                    val right: Either<String, Int> = Either.right(i)
 
-    "right() function should return Right type as Either type" {
-        Either.right<Int, Double>(1.0).shouldBeTypeOf<Right<Int, Double>>()
-    }
+                    val result: Either<String, Double> = right.map { n: Int ->
+                        n.toDouble()
+                    }
 
-    "map, Right" - {
-        "when applied on Right, it should apply the transformation" {
-            checkAll { i: Int ->
-                val right: Either<String, Int> = Either.right(i)
-
-                val result: Either<String, Double> = right.map { n: Int ->
-                    n.toDouble()
+                    result shouldBe Either.right(i.toDouble())
                 }
-
-                result shouldBe Either.right(i.toDouble())
             }
-        }
 
-        "when applied on Left, it should return the original Left value" {
-            checkAll { str: String ->
-                val left: Either<String, Int> = Either.left(str)
+            "when applied on Left, it should return the original Left value" {
+                checkAll { str: String ->
+                    val left: Either<String, Int> = Either.left(str)
 
-                val result: Either<String, Double> = left.map { i: Int ->
-                    i.toDouble()
+                    val result: Either<String, Double> = left.map { i: Int ->
+                        i.toDouble()
+                    }
+
+                    result shouldBe left
                 }
-
-                result shouldBe left
             }
         }
-    }
 
-    "map, Left" - {
-        "when applied on Left, it should apply the transformation" {
-            checkAll { i: Int ->
-                val left: Either<Int, String> = Either.left(i)
+        "flatMap" - {
+            "when applied on Right, it should apply the transformation" {
+                checkAll { i: Int ->
+                    val right: Either<String, Int> = Either.right(i)
 
-                val result: Either<Double, String> = left.map { n: Int ->
-                    n.toDouble()
+                    val result: Either<String, Double> = right.flatMap { n: Int ->
+                        Either.right(n.toDouble())
+                    }
+
+                    result shouldBe Either.right(i.toDouble())
                 }
-
-                result shouldBe Either.left(i.toDouble())
             }
-        }
 
-        "when applied on Right, it should return the original Right value" {
-            checkAll { str: String ->
-                val right: Either<Int, String> = Either.right(str)
+            "when applied on Left, it should return the original Left value" {
+                checkAll { str: String ->
+                    val left: Either<String, Int> = Either.left(str)
 
-                val result: Either<Double, String> = right.map { i: Int ->
-                    i.toDouble()
+                    val result: Either<String, Double> = left.flatMap { n: Int ->
+                        Either.right(n.toDouble())
+                    }
+
+                    result shouldBe left
                 }
-
-                result shouldBe right
             }
         }
-    }
 
-    "flatMap, Right" - {
-        "when applied on Right, it should apply the transformation" {
-            checkAll { i: Int ->
-                val right: Either<String, Int> = Either.right(i)
+        "getOrElse" - {
+            "when called on a Left, it should return the default value" {
+                checkAll { value: String ->
+                    val default = -1
+                    val defaultValue: () -> Int = { default }
+                    val either: Either<String, Int> = Either.left(value)
 
-                val result: Either<String, Double> = right.flatMap { n: Int ->
-                    Either.right(n.toDouble())
+                    either.getOrElse(defaultValue) shouldBe default
                 }
-
-                result shouldBe Either.right(i.toDouble())
             }
-        }
 
-        "when applied on Left, it should return the original Left value" {
-            checkAll { str: String ->
-                val left: Either<String, Int> = Either.left(str)
+            "when called on a Right, it should return the value" {
+                checkAll(Arb.int().filter { it != -1 }) { value: Int ->
+                    val default = -1
+                    val defaultValue: () -> Int = { default }
+                    val either: Either<String, Int> = Either.right(value)
 
-                val result: Either<String, Double> = left.flatMap { n: Int ->
-                    Either.right(n.toDouble())
+                    either.getOrElse(defaultValue) shouldBe value
                 }
-
-                result shouldBe left
             }
         }
-    }
 
-    "flatMap, Left" - {
-        "when applied on Left, it should apply the transformation" {
-            checkAll { i: Int ->
-                val left: Either<Int, String> = Either.left(i)
+        "orElse" - {
+            "when called on a Left, it should return the default value" {
+                checkAll { value: String ->
+                    val default: Either<String, Int> = Either.right(-1)
+                    val defaultValue = { default }
+                    val either: Either<String, Int> = Either.left(value)
 
-                val result: Either<Double, String> = left.flatMap { n: Int ->
-                    Either.left(n.toDouble())
+                    either.orElseR(defaultValue) shouldBe default
+                    either.orElseR(defaultValue) shouldNotBe either
                 }
-
-                result shouldBe Either.left(i.toDouble())
             }
-        }
 
-        "when applied on Right, it should return the original Right value" {
-            checkAll { str: String ->
-                val right: Either<Int, String> = Either.right(str)
+            "when called on a Right, it should return itself `this`" {
+                checkAll(Arb.int().filter { it != -1 }) { value: Int ->
+                    val default: Either<String, Int> = Either.right(-1)
+                    val defaultValue = { default }
+                    val either: Either<String, Int> = Either.right(value)
 
-                val result: Either<Double, String> = right.flatMap { n: Int ->
-                    Either.left(n.toDouble())
+                    either.orElseR(defaultValue) shouldBe either
+                    either.orElseR(defaultValue) shouldNotBe default
                 }
-
-                result shouldBe right
-            }
-        }
-    }
-
-    "getOrElse, Right" - {
-        "should return the default value when called on a Left" {
-            checkAll { value: String ->
-                val default = -1
-                val defaultValue: () -> Int = { default }
-                val either: Either<String, Int> = Either.left(value)
-
-                either.getOrElse(defaultValue) shouldBe default
-            }
-        }
-
-        "should return the value when called on a Right" {
-            checkAll(Arb.int().filter { it != -1 }) { value: Int ->
-                val default = -1
-                val defaultValue: () -> Int = { default }
-                val either: Either<String, Int> = Either.right(value)
-
-                either.getOrElse(defaultValue) shouldBe value
-            }
-        }
-    }
-
-    "getOrElse, Left" - {
-        "should return the default value when called on a Right" {
-            checkAll { value: String ->
-                val default = -1
-                val defaultValue: () -> Int = { default }
-                val either: Either<Int, String> = Either.right(value)
-
-                either.getOrElse(defaultValue) shouldBe default
-            }
-        }
-
-        "should return the value when called on a Left" {
-            checkAll(Arb.int().filter { it != -1 }) { value: Int ->
-                val default = -1
-                val defaultValue: () -> Int = { default }
-                val either: Either<Int, String> = Either.left(value)
-
-                either.getOrElse(defaultValue) shouldBe value
-            }
-        }
-    }
-
-    "orElse, Right" - {
-        "should return the default value when called on a Left" {
-            checkAll { value: String ->
-                val default: Either<String, Int> = Either.right(-1)
-                val defaultValue = { default }
-                val either: Either<String, Int> = Either.left(value)
-
-                either.orElseR(defaultValue) shouldBe default
-                either.orElseR(defaultValue) shouldNotBe either
-            }
-        }
-
-        "should return itself `this` when called on a Right" {
-            checkAll(Arb.int().filter { it != -1 }) { value: Int ->
-                val default: Either<String, Int> = Either.right(-1)
-                val defaultValue = { default }
-                val either: Either<String, Int> = Either.right(value)
-
-                either.orElseR(defaultValue) shouldBe either
-                either.orElseR(defaultValue) shouldNotBe default
-            }
-        }
-    }
-
-    "orElse, Left" - {
-        "should return the default value when called on a Right" {
-            checkAll { value: String ->
-                val default: Either<Int, String> = Either.left(-1)
-                val defaultValue = { default }
-                val either: Either<Int, String> = Either.right(value)
-
-                either.orElseL(defaultValue) shouldBe default
-                either.orElseL(defaultValue) shouldNotBe either
-            }
-        }
-
-        "should return itself `this` when called on a Left" {
-            checkAll(Arb.int().filter { it != -1 }) { value: Int ->
-                val default: Either<Int, String> = Either.left(-1)
-                val defaultValue = { default }
-                val either: Either<Int, String> = Either.left(value)
-
-                either.orElseL(defaultValue) shouldBe either
-                either.orElseL(defaultValue) shouldNotBe default
             }
         }
     }
