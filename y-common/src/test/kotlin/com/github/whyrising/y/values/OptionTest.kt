@@ -82,13 +82,13 @@ class OptionTest : FreeSpec({
     }
 
     "isEmpty()" - {
-        "should return true" {
+        "when called on None, it should return true" {
             val option: Option<Int> = Option()
 
             option.isEmpty().shouldBeTrue()
         }
 
-        "should return false" {
+        "when called on a Some, it should return false" {
             val option = Option(1)
 
             option.isEmpty().shouldBeFalse()
@@ -96,17 +96,7 @@ class OptionTest : FreeSpec({
     }
 
     "getOrElse" - {
-        "should return the value" {
-            checkAll(Arb.int(), Arb.string()) { i: Int, str: String ->
-                val option1: Option<Int> = Option(i)
-                val option2: Option<String> = Option(str)
-
-                option1.getOrElse { 0 } shouldBe i
-                option2.getOrElse { "" } shouldBe str
-            }
-        }
-
-        "should return the default value when passed a null" {
+        "when called on None, it should return the default value" {
             val default1 = 0
             val default2 = ""
             val option1: Option<Int> = Option(null)
@@ -115,10 +105,20 @@ class OptionTest : FreeSpec({
             option1.getOrElse { default1 } shouldBe default1
             option2.getOrElse { default2 } shouldBe default2
         }
+
+        "when called on a Some, it should return the value" {
+            checkAll(Arb.int(), Arb.string()) { i: Int, str: String ->
+                val option1: Option<Int> = Option(i)
+                val option2: Option<String> = Option(str)
+
+                option1.getOrElse { 0 } shouldBe i
+                option2.getOrElse { "" } shouldBe str
+            }
+        }
     }
 
     "map" - {
-        "when `this` is None, should return None" {
+        "when called on None, should return None" {
             val option: Option<Int> = Option()
 
             val mapped: Option<String> = option.map { i: Int -> "$i" }
@@ -126,7 +126,7 @@ class OptionTest : FreeSpec({
             mapped shouldBeSameInstanceAs None
         }
 
-        "when `this` is Some, should return the mapped value" {
+        "when called on a Some, should return the mapped value" {
             checkAll { i: Int ->
                 val f: (Int) -> String = { n: Int -> "$n" }
                 val option: Option<Int> = Option(i)
@@ -141,7 +141,7 @@ class OptionTest : FreeSpec({
     "flatMap" - {
         val f: (Int) -> Option<String> = { i: Int -> Option("$i") }
 
-        "when `this` is None, should return None" {
+        "when called on None, should return None" {
             val option: Option<Int> = Option()
 
             val mapped: Option<String> = option.flatMap(f)
@@ -149,7 +149,7 @@ class OptionTest : FreeSpec({
             mapped shouldBeSameInstanceAs None
         }
 
-        "when `this` is Some, should return the mapped value" {
+        "when called on Some, should return the mapped value" {
             checkAll { i: Int ->
                 val option: Option<Int> = Option(i)
 
@@ -161,7 +161,7 @@ class OptionTest : FreeSpec({
     }
 
     "orElse" - {
-        "should return the default Option" {
+        "when called on None, it should return the default Option" {
             val option: Option<Int> = Option()
             val default: () -> Option<Int> = { Option(0) }
 
@@ -170,7 +170,7 @@ class OptionTest : FreeSpec({
             r shouldBe default()
         }
 
-        "should return the value Option" {
+        "when called on a Some, it should return the value Option" {
             val option: Option<Int> = Option(2)
             val default: () -> Option<Int> = { Option(0) }
 

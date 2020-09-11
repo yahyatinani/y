@@ -163,44 +163,44 @@ class EitherTest : FreeSpec({
 
     "getOrElse, Right" - {
         "should return the default value when called on a Left" {
-            checkAll { str: String ->
+            checkAll { value: String ->
                 val default = -1
                 val defaultValue: () -> Int = { default }
-                val either: Either<String, Int> = Either.left(str)
+                val either: Either<String, Int> = Either.left(value)
 
                 either.getOrElse(defaultValue) shouldBe default
             }
         }
 
         "should return the value when called on a Right" {
-            checkAll(Arb.int().filter { it != -1 }) { i: Int ->
+            checkAll(Arb.int().filter { it != -1 }) { value: Int ->
                 val default = -1
                 val defaultValue: () -> Int = { default }
-                val either: Either<String, Int> = Either.right(i)
+                val either: Either<String, Int> = Either.right(value)
 
-                either.getOrElse(defaultValue) shouldBe i
+                either.getOrElse(defaultValue) shouldBe value
             }
         }
     }
 
     "getOrElse, Left" - {
         "should return the default value when called on a Right" {
-            checkAll { str: String ->
+            checkAll { value: String ->
                 val default = -1
                 val defaultValue: () -> Int = { default }
-                val either: Either<Int, String> = Either.right(str)
+                val either: Either<Int, String> = Either.right(value)
 
                 either.getOrElse(defaultValue) shouldBe default
             }
         }
 
         "should return the value when called on a Left" {
-            checkAll(Arb.int().filter { it != -1 }) { i: Int ->
+            checkAll(Arb.int().filter { it != -1 }) { value: Int ->
                 val default = -1
                 val defaultValue: () -> Int = { default }
-                val either: Either<Int, String> = Either.left(i)
+                val either: Either<Int, String> = Either.left(value)
 
-                either.getOrElse(defaultValue) shouldBe i
+                either.getOrElse(defaultValue) shouldBe value
             }
         }
     }
@@ -217,7 +217,7 @@ class EitherTest : FreeSpec({
             }
         }
 
-        "should return the value when called on a Right" {
+        "should return itself `this` when called on a Right" {
             checkAll(Arb.int().filter { it != -1 }) { value: Int ->
                 val default: Either<String, Int> = Either.right(-1)
                 val defaultValue = { default }
@@ -241,7 +241,7 @@ class EitherTest : FreeSpec({
             }
         }
 
-        "should return the value when called on a Left" {
+        "should return itself `this` when called on a Left" {
             checkAll(Arb.int().filter { it != -1 }) { value: Int ->
                 val default: Either<Int, String> = Either.left(-1)
                 val defaultValue = { default }
