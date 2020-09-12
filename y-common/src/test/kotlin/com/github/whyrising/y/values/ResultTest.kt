@@ -16,6 +16,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 import java.io.Serializable
 
@@ -454,7 +455,7 @@ class ResultTest : FreeSpec({
         }
     }
 
-    "filter()" - {
+    "filter(predicate: (T) -> Boolean)" - {
         val isEven = { n: Int -> n % 2 == 0 }
 
         "when the condition holds, it should return Success" {
@@ -476,6 +477,33 @@ class ResultTest : FreeSpec({
                 val e = r.exception
 
                 e.message shouldBe "Condition didn't hold"
+                shouldThrowExactly<IllegalStateException> { throw e }
+            }
+        }
+    }
+
+    "filter(message:String, predicate: (T) -> Boolean)" - {
+        val isEven = { n: Int -> n % 2 == 0 }
+
+        "when the condition holds, it should return Success" {
+            checkAll(Arb.int().filter(isEven), Arb.string()) { i, message ->
+                val evenNumber = Result(i)
+
+                val r: Result<Int> = evenNumber.filter(message, isEven)
+
+                r shouldBe evenNumber
+            }
+        }
+
+        "when the condition fails, it should return a Failure" {
+            checkAll(Arb.int().filter(isEven), Arb.string()) { i, message ->
+                val evenNumber = Result(i)
+                val isOdd = { n: Int -> n % 2 != 0 }
+
+                val r = evenNumber.filter(message, isOdd) as Failure<Int>
+                val e = r.exception
+
+                e.message shouldBe message
                 shouldThrowExactly<IllegalStateException> { throw e }
             }
         }

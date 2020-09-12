@@ -22,6 +22,14 @@ sealed class Result<out T> : Serializable {
         }
     }
 
+    fun filter(message: String, predicate: (T) -> Boolean): Result<T> =
+        flatMap { t: T ->
+            when (predicate(t)) {
+                true -> this
+                else -> failure(message)
+            }
+        }
+
     internal abstract class None<T> : Result<T>() {
         override fun <R> map(f: (T) -> R): Result<R> = Empty
 
