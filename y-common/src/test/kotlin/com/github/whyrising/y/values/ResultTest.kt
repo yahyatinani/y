@@ -1,6 +1,9 @@
 package com.github.whyrising.y.values
 
-import com.github.whyrising.y.values.Result.*
+import com.github.whyrising.y.values.Result.Empty
+import com.github.whyrising.y.values.Result.Failure
+import com.github.whyrising.y.values.Result.None
+import com.github.whyrising.y.values.Result.Success
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
