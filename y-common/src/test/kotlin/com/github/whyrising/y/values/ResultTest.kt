@@ -1,11 +1,11 @@
 package com.github.whyrising.y.values
 
-import com.github.whyrising.y.values.Result.Failure
-import com.github.whyrising.y.values.Result.Success
+import com.github.whyrising.y.values.Result.*
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.reflection.shouldBeCompanion
 import io.kotest.matchers.reflection.shouldBeData
 import io.kotest.matchers.reflection.shouldBeSealed
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
@@ -85,6 +85,24 @@ class ResultTest : FreeSpec({
         }
 
         "should be a data class" { Success::class.shouldBeData() }
+    }
+
+    "Empty" - {
+        "should be a subclass of Result" {
+            None::class.shouldBeSubtypeOf<Result<*>>()
+        }
+
+        "Empty be an object" {
+            Empty
+        }
+
+        "Empty should be a subclass of None<Nothing>" {
+            Empty::class.shouldBeSubtypeOf<None<Nothing>>()
+        }
+
+        "toString() should return `Empty`" {
+            Empty.toString() shouldBe "Empty"
+        }
     }
 
     "invoke()" - {

@@ -13,6 +13,28 @@ sealed class Result<out T> : Serializable {
     abstract
     fun orElse(defaultValue: () -> Result<@UnsafeVariance T>): Result<T>
 
+    internal abstract class None<T> : Result<T>() {
+        override fun <R> map(f: (T) -> R): Result<R> {
+            TODO("Not yet implemented")
+        }
+
+        override fun <R> flatMap(f: (T) -> Result<R>): Result<R> {
+            TODO("Not yet implemented")
+        }
+
+        override fun getOrElse(defaultValue: T): T {
+            TODO("Not yet implemented")
+        }
+
+        override fun orElse(defaultValue: () -> Result<T>): Result<T> {
+            TODO("Not yet implemented")
+        }
+
+        override fun toString(): String = "Empty"
+    }
+
+    internal object Empty : None<Nothing>()
+
     internal data class Failure<out T>(
         internal val exception: RuntimeException
     ) : Result<T>() {
