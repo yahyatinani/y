@@ -29,10 +29,8 @@ sealed class Result<out T> : Serializable {
             defaultValue: () -> Result<@UnsafeVariance T>
         ): Result<T> = try {
             defaultValue()
-        } catch (e: RuntimeException) {
-            Failure(e)
         } catch (e: Exception) {
-            Failure(RuntimeException(e))
+            handle(e)
         }
 
         override fun toString(): String = "Failure(${exception.message})"
@@ -42,20 +40,15 @@ sealed class Result<out T> : Serializable {
 
         override fun <R> map(f: (T) -> R): Result<R> = try {
             Success(f(value))
-        } catch (e: RuntimeException) {
-            failure(e)
         } catch (e: Exception) {
-            Failure(RuntimeException(e))
+            handle(e)
         }
 
-        override fun <R> flatMap(f: (T) -> Result<R>): Result<R> =
-            try {
-                f(value)
-            } catch (e: RuntimeException) {
-                failure(e)
-            } catch (e: Exception) {
-                Failure(RuntimeException(e))
-            }
+        override fun <R> flatMap(f: (T) -> Result<R>): Result<R> = try {
+            f(value)
+        } catch (e: Exception) {
+            handle(e)
+        }
 
         override fun getOrElse(defaultValue: @UnsafeVariance T): T = value
 
@@ -80,5 +73,10 @@ sealed class Result<out T> : Serializable {
 
         fun <T> failure(exception: Exception): Result<T> =
             Failure(IllegalStateException(exception))
+
+        private fun <T> handle(e: Exception): Result<T> = when (e) {
+            is RuntimeException -> Failure(e)
+            else -> Failure(RuntimeException(e))
+        }
     }
 }

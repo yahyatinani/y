@@ -176,8 +176,6 @@ class ResultTest : FreeSpec({
                 }
             }
 
-
-
             "when the mapping function throws an exception" - {
                 val success = Result(1)
 
