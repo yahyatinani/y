@@ -235,14 +235,17 @@ class ResultTest : FreeSpec({
 
             "when the mapping function throws an exception" - {
                 val success = Result(1)
+                val faulty1: (String) -> (Int) -> Result<Double> = { msg ->
+                    { throw RuntimeException(msg) }
+                }
+                val faulty2: (String) -> (Int) -> Result<Double> = { msg ->
+                    { throw Exception(msg) }
+                }
+
                 "flatMap() shouldn't throw" {
                     checkAll { msg: String ->
-                        val g: (Int) -> Result<Double> = {
-                            throw RuntimeException(msg)
-                        }
-                        val h: (Int) -> Result<Double> = {
-                            throw Exception(msg)
-                        }
+                        val g = faulty1(msg)
+                        val h = faulty2(msg)
 
                         shouldNotThrow<RuntimeException> { success.flatMap(g) }
                         shouldNotThrow<Exception> { success.flatMap(h) }
@@ -251,12 +254,8 @@ class ResultTest : FreeSpec({
 
                 "flatMap() should wrap it and return a failure" {
                     checkAll { msg: String ->
-                        val g: (Int) -> Result<Double> = {
-                            throw RuntimeException(msg)
-                        }
-                        val h: (Int) -> Result<Double> = {
-                            throw Exception(msg)
-                        }
+                        val g = faulty1(msg)
+                        val h = faulty2(msg)
 
                         val r1 = success.flatMap(g) as Failure<Double>
                         val r2 = success.flatMap(h) as Failure<Double>

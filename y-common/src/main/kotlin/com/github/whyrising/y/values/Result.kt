@@ -19,11 +19,11 @@ sealed class Result<out T> : Serializable {
 
         override fun <R> map(f: (T) -> R): Result<R> = Failure(exception)
 
-        override fun <R> flatMap(f: (T) -> Result<R>): Result<R> =
-            Failure(exception)
+        override
+        fun <R> flatMap(f: (T) -> Result<R>): Result<R> = Failure(exception)
 
-        override fun getOrElse(defaultValue: @UnsafeVariance T): T =
-            defaultValue
+        override
+        fun getOrElse(defaultValue: @UnsafeVariance T): T = defaultValue
 
         override fun orElse(
             defaultValue: () -> Result<@UnsafeVariance T>
@@ -67,8 +67,7 @@ sealed class Result<out T> : Serializable {
     }
 
     companion object {
-        operator
-        fun <T> invoke(t: T? = null): Result<T> = when (t) {
+        operator fun <T> invoke(t: T? = null): Result<T> = when (t) {
             null -> Failure(NullPointerException())
             else -> Success(t)
         }
