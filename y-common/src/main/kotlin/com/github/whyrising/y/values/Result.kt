@@ -15,6 +15,13 @@ sealed class Result<out T> : Serializable {
     abstract
     fun orElse(defaultValue: () -> Result<@UnsafeVariance T>): Result<T>
 
+    fun filter(predicate: (T) -> Boolean): Result<T> = flatMap { t: T ->
+        when (predicate(t)) {
+            true -> this
+            else -> failure("Condition didn't hold")
+        }
+    }
+
     internal abstract class None<T> : Result<T>() {
         override fun <R> map(f: (T) -> R): Result<R> = Empty
 

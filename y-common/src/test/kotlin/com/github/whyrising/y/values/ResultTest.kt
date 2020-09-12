@@ -453,4 +453,31 @@ class ResultTest : FreeSpec({
             }
         }
     }
+
+    "filter()" - {
+        val isEven = { n: Int -> n % 2 == 0 }
+
+        "when the condition holds, it should return Success" {
+            checkAll(Arb.int().filter(isEven)) { i: Int ->
+                val evenNumber = Result(i)
+
+                val r: Result<Int> = evenNumber.filter(isEven)
+
+                r shouldBe evenNumber
+            }
+        }
+
+        "when the condition fails, it should return a Failure" {
+            checkAll(Arb.int().filter(isEven)) { i: Int ->
+                val evenNumber = Result(i)
+                val isOdd = { n: Int -> n % 2 != 0 }
+
+                val r: Failure<Int> = evenNumber.filter(isOdd) as Failure<Int>
+                val e = r.exception
+
+                e.message shouldBe "Condition didn't hold"
+                shouldThrowExactly<IllegalStateException> { throw e }
+            }
+        }
+    }
 })
