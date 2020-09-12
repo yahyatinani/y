@@ -10,6 +10,10 @@ import io.kotest.matchers.reflection.shouldBeData
 import io.kotest.matchers.reflection.shouldBeSealed
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.filter
+import io.kotest.property.arbitrary.int
 import io.kotest.property.checkAll
 import java.io.Serializable
 
@@ -265,6 +269,29 @@ class ResultTest : FreeSpec({
                         e2.message shouldBe "$EXCEPTION_MESSAGE$msg"
                     }
                 }
+            }
+        }
+    }
+
+    "getOrElse" - {
+        val default = -1
+
+        "when called on Failure, it should return the default value" {
+            val result = Result.failure<Int>("test")
+
+            val r = result.getOrElse(default)
+
+            r shouldBe default
+        }
+
+        "when called on Success, it should return the actual value" {
+            checkAll(Arb.int().filter { it != default }) { i: Int ->
+                val result = Result(i)
+
+                val r = result.getOrElse(default)
+
+                r shouldNotBe default
+                r shouldBe i
             }
         }
     }

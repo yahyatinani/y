@@ -9,6 +9,8 @@ sealed class Result<out T> : Serializable {
 
     abstract fun <R> flatMap(f: (T) -> Result<R>): Result<R>
 
+    abstract fun getOrElse(defaultValue: @UnsafeVariance T): T
+
     internal data class Failure<out T>(
         internal val exception: RuntimeException
     ) : Result<T>() {
@@ -17,6 +19,9 @@ sealed class Result<out T> : Serializable {
 
         override fun <R> flatMap(f: (T) -> Result<R>): Result<R> =
             Failure(exception)
+
+        override fun getOrElse(defaultValue: @UnsafeVariance T): T =
+            defaultValue
 
         override fun toString(): String = "Failure(${exception.message})"
     }
@@ -39,6 +44,8 @@ sealed class Result<out T> : Serializable {
             } catch (e: Exception) {
                 Failure(RuntimeException(e))
             }
+
+        override fun getOrElse(defaultValue: @UnsafeVariance T): T = value
 
         override fun toString(): String = "Success($value)"
     }
