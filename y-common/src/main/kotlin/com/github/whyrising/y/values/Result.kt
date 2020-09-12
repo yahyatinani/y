@@ -10,6 +10,8 @@ sealed class Result<out T> : Serializable {
 
     abstract fun getOrElse(defaultValue: @UnsafeVariance T): T
 
+    abstract fun getOrElse(defaultValue: () -> @UnsafeVariance T): T
+
     abstract
     fun orElse(defaultValue: () -> Result<@UnsafeVariance T>): Result<T>
 
@@ -19,6 +21,8 @@ sealed class Result<out T> : Serializable {
         override fun <R> flatMap(f: (T) -> Result<R>): Result<R> = Empty
 
         override fun getOrElse(defaultValue: T): T = defaultValue
+
+        override fun getOrElse(defaultValue: () -> T): T = defaultValue()
 
         override fun orElse(defaultValue: () -> Result<T>): Result<T> = try {
             defaultValue()
@@ -42,6 +46,9 @@ sealed class Result<out T> : Serializable {
 
         override
         fun getOrElse(defaultValue: @UnsafeVariance T): T = defaultValue
+
+        override
+        fun getOrElse(defaultValue: () -> @UnsafeVariance T): T = defaultValue()
 
         override fun orElse(
             defaultValue: () -> Result<@UnsafeVariance T>
@@ -69,6 +76,9 @@ sealed class Result<out T> : Serializable {
         }
 
         override fun getOrElse(defaultValue: @UnsafeVariance T): T = value
+
+        override
+        fun getOrElse(defaultValue: () -> @UnsafeVariance T): T = value
 
         override fun orElse(
             defaultValue: () -> Result<@UnsafeVariance T>

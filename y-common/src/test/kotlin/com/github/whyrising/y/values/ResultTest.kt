@@ -297,7 +297,7 @@ class ResultTest : FreeSpec({
         }
     }
 
-    "getOrElse" - {
+    "getOrElse()" - {
         val default = -1
 
         "when called on Failure, it should return the default value" {
@@ -326,7 +326,36 @@ class ResultTest : FreeSpec({
         }
     }
 
-    "orElse" - {
+    "getOrEle() taking a constant function" - {
+        val default: () -> Int = { -1 }
+
+        "when called on Failure, it should return the default value" {
+            val result = Result.failure<Int>("test")
+
+            val r = result.getOrElse(default)
+
+            r shouldBe default()
+        }
+
+        "when called on Success, it should return the actual value" {
+            checkAll(Arb.int().filter { it != default() }) { i: Int ->
+                val result = Result(i)
+
+                val r = result.getOrElse(default)
+
+                r shouldNotBe default()
+                r shouldBe i
+            }
+        }
+
+        "when called on Empty, it should return the default value" {
+            val result: Result<Int> = Empty
+
+            result.getOrElse(default) shouldBe default()
+        }
+    }
+
+    "orElse()" - {
         val default: () -> Result<Int> = { Result(-1) }
 
         "when called on Success, it should return the actual value" {
