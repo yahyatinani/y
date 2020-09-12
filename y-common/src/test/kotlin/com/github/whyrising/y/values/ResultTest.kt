@@ -706,4 +706,34 @@ class ResultTest : FreeSpec({
             }
         }
     }
+
+    "forEach((T)->Unit)" - {
+        "when called on a Failure, it does nothing" {
+            val failure = Result.failure<Int>("test")
+            var i = 0
+
+            failure.forEach { i++ }
+
+            i shouldBe 0
+        }
+
+        "when called on Empty, it does nothing" {
+            val empty = Result<Int>()
+            var i = 0
+
+            empty.forEach { i++ }
+
+            i shouldBe 0
+        }
+
+        "when called on Success, it applies the effect" {
+            val empty = Result(10)
+            val default = 0
+            var i = default
+
+            empty.forEach { i++ }
+
+            i shouldBe default + 1
+        }
+    }
 })

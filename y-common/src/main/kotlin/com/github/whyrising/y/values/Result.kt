@@ -15,6 +15,8 @@ sealed class Result<out T> : Serializable {
     abstract
     fun orElse(defaultValue: () -> Result<@UnsafeVariance T>): Result<T>
 
+    abstract fun forEach(effect: (T) -> Unit)
+
     fun filter(message: String, predicate: (T) -> Boolean): Result<T> =
         flatMap {
             if (predicate(it)) this
@@ -44,6 +46,8 @@ sealed class Result<out T> : Serializable {
         }
 
         override fun mapFailure(message: String): Result<T> = this
+
+        override fun forEach(effect: (T) -> Unit) {}
 
         override fun toString(): String = "Empty"
     }
@@ -76,6 +80,8 @@ sealed class Result<out T> : Serializable {
         override fun mapFailure(message: String): Result<T> =
             Failure(RuntimeException(message, exception))
 
+        override fun forEach(effect: (T) -> Unit) {}
+
         override fun toString(): String = "Failure(${exception.message})"
     }
 
@@ -103,6 +109,10 @@ sealed class Result<out T> : Serializable {
         ): Result<T> = this
 
         override fun mapFailure(message: String): Result<T> = this
+
+        override fun forEach(effect: (T) -> Unit) {
+            effect(value)
+        }
 
         override fun toString(): String = "Success($value)"
     }
