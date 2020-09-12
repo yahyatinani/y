@@ -460,52 +460,98 @@ class ResultTest : FreeSpec({
     val isEven = { n: Int -> n % 2 == 0 }
     "filter(predicate: (T) -> Boolean)" - {
 
-        "when the condition holds, it should return Success" {
-            checkAll(Arb.int().filter(isEven)) { i: Int ->
-                val evenNumber = Result(i)
+        "when called on a Success" - {
+            "when the condition holds, it should return Success" {
+                checkAll(Arb.int().filter(isEven)) { i: Int ->
+                    val evenNumber = Result(i)
 
-                val r: Result<Int> = evenNumber.filter(isEven)
+                    val r: Result<Int> = evenNumber.filter(isEven)
 
-                r shouldBe evenNumber
+                    r shouldBe evenNumber
+                }
+            }
+
+            "when the condition fails, it should return a Failure" {
+                checkAll(Arb.int().filter(isEven)) { i: Int ->
+                    val evenNumber = Result(i)
+                    val isOdd = { n: Int -> n % 2 != 0 }
+
+                    val r = evenNumber.filter(isOdd) as Failure<Int>
+                    val e = r.exception
+
+                    e.message shouldBe "Condition didn't hold"
+                    shouldThrowExactly<IllegalStateException> { throw e }
+                }
             }
         }
 
-        "when the condition fails, it should return a Failure" {
-            checkAll(Arb.int().filter(isEven)) { i: Int ->
-                val evenNumber = Result(i)
-                val isOdd = { n: Int -> n % 2 != 0 }
+        "when called on a Failure, it should return it" {
+            checkAll { message: String ->
+                val failure = Result.failure<Int>(message)
 
-                val r: Failure<Int> = evenNumber.filter(isOdd) as Failure<Int>
-                val e = r.exception
+                val r = failure.filter { n: Int -> n % 2 != 0 }
 
-                e.message shouldBe "Condition didn't hold"
-                shouldThrowExactly<IllegalStateException> { throw e }
+                r shouldBe failure
             }
+        }
+
+        "when called on Empty, it should return Empty" {
+            val empty: Result<Int> = Empty
+
+            val r = empty.filter { n: Int -> n % 2 != 0 }
+
+            r shouldBe Empty
         }
     }
 
     "filter(message:String, predicate: (T) -> Boolean)" - {
 
-        "when the condition holds, it should return Success" {
-            checkAll(Arb.int().filter(isEven), Arb.string()) { i, message ->
-                val evenNumber = Result(i)
+        "when called on a Success" - {
+            "when the condition holds, it should return Success" {
+                checkAll(Arb.int().filter(isEven), Arb.string()) { i, msg ->
+                    val evenNumber = Result(i)
 
-                val r: Result<Int> = evenNumber.filter(message, isEven)
+                    val r: Result<Int> = evenNumber.filter(msg, isEven)
 
-                r shouldBe evenNumber
+                    r shouldBe evenNumber
+                }
+            }
+
+            "when the condition fails, it should return a Failure" {
+                checkAll(Arb.int().filter(isEven), Arb.string()) { i, msg ->
+                    val evenNumber = Result(i)
+                    val isOdd = { n: Int -> n % 2 != 0 }
+
+                    val r = evenNumber.filter(msg, isOdd) as Failure<Int>
+                    val e = r.exception
+
+                    e.message shouldBe msg
+                    shouldThrowExactly<IllegalStateException> { throw e }
+                }
             }
         }
 
-        "when the condition fails, it should return a Failure" {
-            checkAll(Arb.int().filter(isEven), Arb.string()) { i, message ->
-                val evenNumber = Result(i)
+        "when called on a Failure, it should return it" {
+            checkAll { message: String ->
+                val failure = Result.failure<Int>(message)
                 val isOdd = { n: Int -> n % 2 != 0 }
 
-                val r = evenNumber.filter(message, isOdd) as Failure<Int>
+                val r = failure.filter("Doesn't match", isOdd) as Failure<Int>
                 val e = r.exception
 
                 e.message shouldBe message
                 shouldThrowExactly<IllegalStateException> { throw e }
+            }
+        }
+
+        "when called on Empty, it should return Empty" {
+            checkAll { message: String ->
+                val empty: Result<Int> = Empty
+                val isOdd = { n: Int -> n % 2 != 0 }
+
+                val r = empty.filter(message, isOdd)
+
+                r shouldBe Empty
             }
         }
     }
