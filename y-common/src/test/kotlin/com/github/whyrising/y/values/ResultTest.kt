@@ -707,31 +707,43 @@ class ResultTest : FreeSpec({
         }
     }
 
-    "forEach((T)->Unit)" - {
-        "when called on a Failure, it does nothing" {
-            val failure = Result.failure<Int>("test")
-            var i = 0
+    "forEach(onSuccess(), onFailure(), onEmpty)" - {
 
-            failure.forEach { i++ }
-
-            i shouldBe 0
-        }
-
-        "when called on Empty, it does nothing" {
-            val empty = Result<Int>()
-            var i = 0
-
-            empty.forEach { i++ }
-
-            i shouldBe 0
-        }
-
-        "when called on Success, it applies the effect" {
-            val empty = Result(10)
+        "when called on a Failure, it should apply onFailure()" {
             val default = 0
             var i = default
+            val onSuccess: (Int) -> Unit = {}
+            val onFailure: (RuntimeException) -> Unit = { i++ }
+            val onEmpty: () -> Unit = {}
+            val failure = Result.failure<Int>("test")
 
-            empty.forEach { i++ }
+            failure.forEach(onSuccess, onFailure, onEmpty)
+
+            i shouldBe default + 1
+        }
+
+        "when called on a Empty, it should apply onEmpty()" {
+            val default = 0
+            var i = default
+            val onSuccess: (Int) -> Unit = {}
+            val onFailure: (RuntimeException) -> Unit = {}
+            val onEmpty: () -> Unit = { i++ }
+            val empty = Result<Int>()
+
+            empty.forEach(onSuccess, onFailure, onEmpty)
+
+            i shouldBe default + 1
+        }
+
+        "when called on a Success, it should apply onSuccess()" {
+            val default = 0
+            var i = default
+            val onSuccess: (Int) -> Unit = { i++ }
+            val onFailure: (RuntimeException) -> Unit = {}
+            val onEmpty: () -> Unit = {}
+            val success = Result(default)
+
+            success.forEach(onSuccess, onFailure, onEmpty)
 
             i shouldBe default + 1
         }

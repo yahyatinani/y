@@ -17,7 +17,11 @@ sealed class Result<out T> : Serializable {
 
     abstract fun mapFailure(message: String): Result<T>
 
-    abstract fun forEach(effect: (T) -> Unit)
+    abstract fun forEach(
+        onSuccess: (T) -> Unit = {},
+        onFailure: (RuntimeException) -> Unit = {},
+        onEmpty: () -> Unit = {}
+    )
 
     fun filter(message: String, predicate: (T) -> Boolean): Result<T> =
         flatMap {
@@ -47,7 +51,11 @@ sealed class Result<out T> : Serializable {
 
         override fun mapFailure(message: String): Result<T> = this
 
-        override fun forEach(effect: (T) -> Unit) {}
+        override fun forEach(
+            onSuccess: (T) -> Unit,
+            onFailure: (RuntimeException) -> Unit,
+            onEmpty: () -> Unit
+        ) = onEmpty()
 
         override fun toString(): String = "Empty"
     }
@@ -80,7 +88,11 @@ sealed class Result<out T> : Serializable {
         override fun mapFailure(message: String): Result<T> =
             Failure(RuntimeException(message, exception))
 
-        override fun forEach(effect: (T) -> Unit) {}
+        override fun forEach(
+            onSuccess: (T) -> Unit,
+            onFailure: (RuntimeException) -> Unit,
+            onEmpty: () -> Unit
+        ) = onFailure(exception)
 
         override fun toString(): String = "Failure(${exception.message})"
     }
@@ -110,9 +122,11 @@ sealed class Result<out T> : Serializable {
 
         override fun mapFailure(message: String): Result<T> = this
 
-        override fun forEach(effect: (T) -> Unit) {
-            effect(value)
-        }
+        override fun forEach(
+            onSuccess: (T) -> Unit,
+            onFailure: (RuntimeException) -> Unit,
+            onEmpty: () -> Unit
+        ) = onSuccess(value)
 
         override fun toString(): String = "Success($value)"
     }
