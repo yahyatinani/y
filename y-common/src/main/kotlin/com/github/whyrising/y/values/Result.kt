@@ -20,8 +20,10 @@ sealed class Result<out T> : Serializable {
 
         override fun getOrElse(defaultValue: T): T = defaultValue
 
-        override fun orElse(defaultValue: () -> Result<T>): Result<T> {
-            TODO("Not yet implemented")
+        override fun orElse(defaultValue: () -> Result<T>): Result<T> = try {
+            defaultValue()
+        } catch (e: Exception) {
+            handle(e)
         }
 
         override fun toString(): String = "Empty"
