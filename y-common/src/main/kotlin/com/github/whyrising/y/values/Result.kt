@@ -16,9 +16,7 @@ sealed class Result<out T> : Serializable {
     internal abstract class None<T> : Result<T>() {
         override fun <R> map(f: (T) -> R): Result<R> = Empty
 
-        override fun <R> flatMap(f: (T) -> Result<R>): Result<R> {
-            TODO("Not yet implemented")
-        }
+        override fun <R> flatMap(f: (T) -> Result<R>): Result<R> = Empty
 
         override fun getOrElse(defaultValue: T): T {
             TODO("Not yet implemented")

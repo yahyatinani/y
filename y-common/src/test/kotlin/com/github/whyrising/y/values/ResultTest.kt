@@ -291,6 +291,10 @@ class ResultTest : FreeSpec({
                 }
             }
         }
+
+        "when called on Empty, it should return Empty" {
+            Empty.flatMap(f) shouldBe Empty
+        }
     }
 
     "getOrElse" - {
