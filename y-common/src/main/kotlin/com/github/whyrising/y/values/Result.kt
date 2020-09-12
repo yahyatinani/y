@@ -7,11 +7,16 @@ sealed class Result<out T> : Serializable {
 
     abstract fun <R> map(f: (T) -> R): Result<R>
 
+    abstract fun <R> flatMap(f: (T) -> Result<R>): Result<R>
+
     internal data class Failure<out T>(
         internal val exception: RuntimeException
     ) : Result<T>() {
 
         override fun <R> map(f: (T) -> R): Result<R> = Failure(exception)
+
+        override fun <R> flatMap(f: (T) -> Result<R>): Result<R> =
+            Failure(exception)
 
         override fun toString(): String = "Failure(${exception.message})"
     }
@@ -25,6 +30,15 @@ sealed class Result<out T> : Serializable {
         } catch (e: Exception) {
             Failure(RuntimeException(e))
         }
+
+        override fun <R> flatMap(f: (T) -> Result<R>): Result<R> =
+            try {
+                f(value)
+            } catch (e: RuntimeException) {
+                failure(e)
+            } catch (e: Exception) {
+                Failure(RuntimeException(e))
+            }
 
         override fun toString(): String = "Success($value)"
     }

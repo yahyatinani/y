@@ -172,30 +172,98 @@ class ResultTest : FreeSpec({
                 }
             }
 
-            val success = Result(1)
 
-            "when g throws an exception, map shouldn't throw" {
-                checkAll { msg: String ->
-                    val g: (Int) -> Double = { throw RuntimeException(msg) }
-                    val h: (Int) -> Double = { throw Exception(msg) }
 
-                    shouldNotThrow<RuntimeException> { success.map(g) }
-                    shouldNotThrow<Exception> { success.map(h) }
+            "when the mapping function throws an exception" - {
+                val success = Result(1)
+
+                "map() shouldn't throw" {
+                    checkAll { msg: String ->
+                        val g: (Int) -> Double = { throw RuntimeException(msg) }
+                        val h: (Int) -> Double = { throw Exception(msg) }
+
+                        shouldNotThrow<RuntimeException> { success.map(g) }
+                        shouldNotThrow<Exception> { success.map(h) }
+                    }
+                }
+
+                "map() should wrap it and return a failure" {
+                    checkAll { msg: String ->
+                        val g: (Int) -> Double = { throw RuntimeException(msg) }
+                        val h: (Int) -> Double = { throw Exception(msg) }
+
+                        val r1 = success.map(g) as Failure<Double>
+                        val r2 = success.map(h) as Failure<Double>
+
+                        val e1 = r1.exception
+                        val e2 = r2.exception
+                        shouldThrowExactly<RuntimeException> { throw e1 }
+                        shouldThrowExactly<RuntimeException> { throw e2 }
+                        e1.message shouldBe msg
+                        e2.message shouldBe "$EXCEPTION_MESSAGE$msg"
+                    }
+                }
+            }
+        }
+    }
+
+    "flatMap()" - {
+        val f: (Int) -> Result<Double> = { i: Int -> Result(i.toDouble()) }
+
+        "when called on Failure, it should return a failure" {
+            val failure = Result.failure<Int>("test")
+
+            val r: Result<Double> = failure.flatMap(f)
+
+            r shouldBe failure
+        }
+
+        "when called on Success" - {
+            "it should return the mapped value in a Success" {
+                checkAll { i: Int ->
+                    val success = Result(i)
+
+                    val r: Result<Double> = success.flatMap(f)
+
+                    r shouldBe f(i)
                 }
             }
 
-            "when g throws an exception, it should wrap it & return a failure" {
-                checkAll { msg: String ->
-                    val g: (Int) -> Double = { throw RuntimeException(msg) }
-                    val h: (Int) -> Double = { throw Exception(msg) }
+            "when the mapping function throws an exception" - {
+                val success = Result(1)
+                "flatMap() shouldn't throw" {
+                    checkAll { msg: String ->
+                        val g: (Int) -> Result<Double> = {
+                            throw RuntimeException(msg)
+                        }
+                        val h: (Int) -> Result<Double> = {
+                            throw Exception(msg)
+                        }
 
-                    val r1 = success.map(g) as Failure<Double>
-                    val r2 = success.map(h) as Failure<Double>
+                        shouldNotThrow<RuntimeException> { success.flatMap(g) }
+                        shouldNotThrow<Exception> { success.flatMap(h) }
+                    }
+                }
 
-                    shouldThrowExactly<RuntimeException> { throw r1.exception }
-                    shouldThrowExactly<RuntimeException> { throw r2.exception }
-                    r1.exception.message shouldBe msg
-                    r2.exception.message shouldBe "$EXCEPTION_MESSAGE$msg"
+                "flatMap() should wrap it and return a failure" {
+                    checkAll { msg: String ->
+                        val g: (Int) -> Result<Double> = {
+                            throw RuntimeException(msg)
+                        }
+                        val h: (Int) -> Result<Double> = {
+                            throw Exception(msg)
+                        }
+
+                        val r1 = success.flatMap(g) as Failure<Double>
+                        val r2 = success.flatMap(h) as Failure<Double>
+                        val e1 = r1.exception
+                        val e2 = r2.exception
+
+                        shouldThrowExactly<RuntimeException> { throw e1 }
+                        shouldThrowExactly<RuntimeException> { throw e2 }
+                        e1.message shouldBe msg
+                        e2.message shouldBe "$EXCEPTION_MESSAGE$msg"
+                    }
                 }
             }
         }
