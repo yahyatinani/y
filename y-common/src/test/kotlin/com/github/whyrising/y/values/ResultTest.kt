@@ -318,6 +318,12 @@ class ResultTest : FreeSpec({
                 r shouldBe i
             }
         }
+
+        "when called on Empty, it should return the default value" {
+            val result: Result<Int> = Empty
+
+            result.getOrElse(default) shouldBe default
+        }
     }
 
     "orElse" - {

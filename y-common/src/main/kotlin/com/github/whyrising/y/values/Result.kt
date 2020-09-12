@@ -18,9 +18,7 @@ sealed class Result<out T> : Serializable {
 
         override fun <R> flatMap(f: (T) -> Result<R>): Result<R> = Empty
 
-        override fun getOrElse(defaultValue: T): T {
-            TODO("Not yet implemented")
-        }
+        override fun getOrElse(defaultValue: T): T = defaultValue
 
         override fun orElse(defaultValue: () -> Result<T>): Result<T> {
             TODO("Not yet implemented")
