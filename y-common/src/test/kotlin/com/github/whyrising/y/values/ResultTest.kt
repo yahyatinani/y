@@ -295,4 +295,59 @@ class ResultTest : FreeSpec({
             }
         }
     }
+
+    "orElse" - {
+        val default: () -> Result<Int> = { Result(-1) }
+
+        "when called on Success, it should return the actual value" {
+            checkAll { i: Int ->
+                val result = Result(i)
+
+                val r = result.orElse(default)
+
+                r shouldBe result
+            }
+        }
+
+        "when called on Failure" - {
+            val failure = Result.failure<Int>("test")
+
+            "it should return the default value" {
+
+                val r = failure.orElse(default)
+
+                r shouldBe default()
+            }
+
+            "when the default function throws an exception" - {
+
+                "orElse() shouldn't throw" {
+                    val faulty1 = { throw RuntimeException() }
+                    val faulty2 = { throw Exception() }
+
+                    shouldNotThrow<RuntimeException> { failure.orElse(faulty1) }
+                    shouldNotThrow<RuntimeException> { failure.orElse(faulty2) }
+                }
+
+                "orElse() should wrap it and return a failure" {
+
+                    checkAll { msg: String ->
+                        val faulty1 = { throw RuntimeException(msg) }
+                        val faulty2 = { throw Exception(msg) }
+
+                        val r1 = failure.orElse(faulty1) as Failure<Double>
+                        val r2 = failure.orElse(faulty2) as Failure<Double>
+
+                        val e1 = r1.exception
+                        val e2 = r2.exception
+
+                        e1.message shouldBe msg
+                        e2.message shouldBe "$EXCEPTION_MESSAGE$msg"
+                        shouldThrowExactly<RuntimeException> { throw e1 }
+                        shouldThrowExactly<RuntimeException> { throw e2 }
+                    }
+                }
+            }
+        }
+    }
 })

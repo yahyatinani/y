@@ -1,7 +1,6 @@
 package com.github.whyrising.y.values
 
 import java.io.Serializable
-import java.lang.IllegalStateException
 
 sealed class Result<out T> : Serializable {
 
@@ -10,6 +9,9 @@ sealed class Result<out T> : Serializable {
     abstract fun <R> flatMap(f: (T) -> Result<R>): Result<R>
 
     abstract fun getOrElse(defaultValue: @UnsafeVariance T): T
+
+    abstract
+    fun orElse(defaultValue: () -> Result<@UnsafeVariance T>): Result<T>
 
     internal data class Failure<out T>(
         internal val exception: RuntimeException
@@ -22,6 +24,16 @@ sealed class Result<out T> : Serializable {
 
         override fun getOrElse(defaultValue: @UnsafeVariance T): T =
             defaultValue
+
+        override fun orElse(
+            defaultValue: () -> Result<@UnsafeVariance T>
+        ): Result<T> = try {
+            defaultValue()
+        } catch (e: RuntimeException) {
+            Failure(e)
+        } catch (e: Exception) {
+            Failure(RuntimeException(e))
+        }
 
         override fun toString(): String = "Failure(${exception.message})"
     }
@@ -46,6 +58,10 @@ sealed class Result<out T> : Serializable {
             }
 
         override fun getOrElse(defaultValue: @UnsafeVariance T): T = value
+
+        override fun orElse(
+            defaultValue: () -> Result<@UnsafeVariance T>
+        ): Result<T> = this
 
         override fun toString(): String = "Success($value)"
     }
