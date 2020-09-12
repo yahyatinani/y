@@ -126,6 +126,16 @@ sealed class Result<out T> : Serializable {
                 else -> if (p(t)) Success(t) else Empty
             }
 
+        operator
+        fun <T> invoke(t: T?, message: String, p: (T) -> Boolean): Result<T> =
+            when (t) {
+                null -> Failure(NullPointerException(message))
+                else -> when {
+                    p(t) -> Success(t)
+                    else -> failure("$t does not match condition: $message")
+                }
+            }
+
         fun <T> failure(message: String): Result<T> =
             Failure(IllegalStateException(message))
 

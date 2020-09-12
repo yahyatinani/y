@@ -183,6 +183,49 @@ class ResultTest : FreeSpec({
         }
     }
 
+    "invoke(T?, String, predicate)" - {
+        "when T is null, return Failure with the message passed" {
+            checkAll { message: String ->
+                val result: Result<Int> = Result(null, message, isEven)
+
+                val exception = (result as Failure<Int>).exception
+
+                exception.message shouldBe message
+                shouldThrowExactly<NullPointerException> { throw exception }
+            }
+        }
+
+        "when T is valid" - {
+            "when the condition holds, it should return Success of T"  {
+                checkAll(
+                    Arb.int().filter(isEven),
+                    Arb.string()
+                ) { i: Int, message: String ->
+                    val result: Result<Int> = Result(i, message, isEven)
+
+                    result shouldBe Success(i)
+                }
+            }
+
+            "when condition fails, it should return a Failure with message "  {
+                checkAll(
+                    Arb.int().filter(complement(isEven)),
+                    Arb.string()
+                ) { i: Int, message: String ->
+                    val result: Result<Int> = Result(i, message, isEven)
+
+                    val exception = (result as Failure<Int>).exception
+
+                    exception.message shouldBe
+                        "$i does not match condition: $message"
+                    shouldThrowExactly<IllegalStateException> {
+                        throw exception
+                    }
+                }
+            }
+        }
+    }
+
     "failure() companion function" - {
         "when passed a string message, it should return Failure as Result" {
             checkAll { msg: String ->
