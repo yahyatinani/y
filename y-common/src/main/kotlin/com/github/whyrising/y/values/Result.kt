@@ -16,11 +16,9 @@ sealed class Result<out T> : Serializable {
     fun orElse(defaultValue: () -> Result<@UnsafeVariance T>): Result<T>
 
     fun filter(message: String, predicate: (T) -> Boolean): Result<T> =
-        flatMap { t: T ->
-            when (predicate(t)) {
-                true -> this
-                else -> failure(message)
-            }
+        flatMap {
+            if (predicate(it)) this
+            else failure(message)
         }
 
     fun filter(p: (T) -> Boolean): Result<T> =
