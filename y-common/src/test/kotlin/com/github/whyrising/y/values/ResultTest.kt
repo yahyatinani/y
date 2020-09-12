@@ -8,6 +8,8 @@ import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.reflection.shouldBeData
 import io.kotest.matchers.reflection.shouldBeSealed
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
@@ -455,8 +457,8 @@ class ResultTest : FreeSpec({
         }
     }
 
+    val isEven = { n: Int -> n % 2 == 0 }
     "filter(predicate: (T) -> Boolean)" - {
-        val isEven = { n: Int -> n % 2 == 0 }
 
         "when the condition holds, it should return Success" {
             checkAll(Arb.int().filter(isEven)) { i: Int ->
@@ -483,7 +485,6 @@ class ResultTest : FreeSpec({
     }
 
     "filter(message:String, predicate: (T) -> Boolean)" - {
-        val isEven = { n: Int -> n % 2 == 0 }
 
         "when the condition holds, it should return Success" {
             checkAll(Arb.int().filter(isEven), Arb.string()) { i, message ->
@@ -505,6 +506,35 @@ class ResultTest : FreeSpec({
 
                 e.message shouldBe message
                 shouldThrowExactly<IllegalStateException> { throw e }
+            }
+        }
+    }
+
+    "exits(p: (T) -> Boolean)" - {
+        "when the condition holds, it should return true" {
+            checkAll(Arb.int().filter(isEven)) { i: Int ->
+                val evenNumber = Result(i)
+
+                val b: Boolean = evenNumber.exists(isEven)
+
+                b.shouldBeTrue()
+            }
+        }
+
+        "when the condition fails, it should return false" {
+            checkAll(Arb.int().filter(isEven)) { i: Int ->
+                val isOdd = { n: Int -> n % 2 != 0 }
+                val evenNumber = Result(i)
+                val empty = Result<Int>()
+                val failure = Result<Int>(null)
+
+                val b1: Boolean = evenNumber.exists(isOdd)
+                val b2: Boolean = empty.exists(isOdd)
+                val b3: Boolean = failure.exists(isOdd)
+
+                b1.shouldBeFalse()
+                b2.shouldBeFalse()
+                b3.shouldBeFalse()
             }
         }
     }

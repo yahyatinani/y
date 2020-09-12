@@ -23,8 +23,10 @@ sealed class Result<out T> : Serializable {
             }
         }
 
-    fun filter(predicate: (T) -> Boolean): Result<T> =
-        filter("Condition didn't hold", predicate)
+    fun filter(p: (T) -> Boolean): Result<T> =
+        filter("Condition didn't hold", p)
+
+    fun exists(p: (T) -> Boolean): Boolean = map(p).getOrElse(false)
 
     internal abstract class None<T> : Result<T>() {
         override fun <R> map(f: (T) -> R): Result<R> = Empty
