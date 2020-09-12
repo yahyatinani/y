@@ -110,7 +110,11 @@ class ResultTest : FreeSpec({
         }
     }
 
-    "invoke()" - {
+    "invoke() without any arguments, it should return Empty as Result" {
+        Result<Int>() shouldBe Empty
+    }
+
+    "invoke(T?)" - {
         "when passed a null, it should return a Failure as Result" {
             val result = Result(null) as Failure
 
@@ -123,10 +127,6 @@ class ResultTest : FreeSpec({
 
                 result shouldBe Success(i)
             }
-        }
-
-        "without any arguments, it should return Empty as Result" {
-            Result<Int>() shouldBe Empty
         }
     }
 
