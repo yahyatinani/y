@@ -9,9 +9,11 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldBeTypeOf
 import io.kotest.property.Arb
+import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
@@ -96,9 +98,9 @@ class OptionTest : FreeSpec({
     }
 
     "getOrElse" - {
+        val default1 = 0
+        val default2 = ""
         "when called on None, it should return the default value" {
-            val default1 = 0
-            val default2 = ""
             val option1: Option<Int> = Option(null)
             val option2: Option<String> = Option(null)
 
@@ -107,12 +109,17 @@ class OptionTest : FreeSpec({
         }
 
         "when called on a Some, it should return the value" {
-            checkAll(Arb.int(), Arb.string()) { i: Int, str: String ->
+            checkAll(
+                Arb.int().filter { it != default1 },
+                Arb.string().filter { it != default2 }
+            ) { i: Int, str: String ->
                 val option1: Option<Int> = Option(i)
                 val option2: Option<String> = Option(str)
 
-                option1.getOrElse { 0 } shouldBe i
-                option2.getOrElse { "" } shouldBe str
+                option1.getOrElse { default1 } shouldBe i
+                option2.getOrElse { default2 } shouldBe str
+                option1.getOrElse { default1 } shouldNotBe default1
+                option2.getOrElse { default2 } shouldNotBe default2
             }
         }
     }
