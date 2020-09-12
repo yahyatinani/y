@@ -15,6 +15,19 @@ sealed class Result<out T> : Serializable {
     abstract
     fun orElse(defaultValue: () -> Result<@UnsafeVariance T>): Result<T>
 
+    fun filter(message: String, predicate: (T) -> Boolean): Result<T> =
+        flatMap {
+            if (predicate(it)) this
+            else failure(message)
+        }
+
+    fun filter(p: (T) -> Boolean): Result<T> =
+        filter("Condition didn't hold", p)
+
+    fun exists(p: (T) -> Boolean): Boolean = map(p).getOrElse(false)
+
+    abstract fun mapFailure(message: String): Result<T>
+
     internal abstract class None<T> : Result<T>() {
         override fun <R> map(f: (T) -> R): Result<R> = Empty
 
@@ -29,6 +42,8 @@ sealed class Result<out T> : Serializable {
         } catch (e: Exception) {
             handle(e)
         }
+
+        override fun mapFailure(message: String): Result<T> = this
 
         override fun toString(): String = "Empty"
     }
@@ -58,6 +73,9 @@ sealed class Result<out T> : Serializable {
             handle(e)
         }
 
+        override fun mapFailure(message: String): Result<T> =
+            Failure(RuntimeException(message, exception))
+
         override fun toString(): String = "Failure(${exception.message})"
     }
 
@@ -84,6 +102,8 @@ sealed class Result<out T> : Serializable {
             defaultValue: () -> Result<@UnsafeVariance T>
         ): Result<T> = this
 
+        override fun mapFailure(message: String): Result<T> = this
+
         override fun toString(): String = "Success($value)"
     }
 
@@ -94,6 +114,27 @@ sealed class Result<out T> : Serializable {
             null -> Failure(NullPointerException())
             else -> Success(t)
         }
+
+        operator fun <T> invoke(t: T?, message: String): Result<T> = when (t) {
+            null -> Failure(NullPointerException(message))
+            else -> Success(t)
+        }
+
+        operator fun <T> invoke(t: T?, p: (T) -> Boolean): Result<T> =
+            when (t) {
+                null -> Failure(NullPointerException("t is null!"))
+                else -> if (p(t)) Success(t) else Empty
+            }
+
+        operator
+        fun <T> invoke(t: T?, message: String, p: (T) -> Boolean): Result<T> =
+            when (t) {
+                null -> Failure(NullPointerException(message))
+                else -> when {
+                    p(t) -> Success(t)
+                    else -> failure("$t does not match condition: $message")
+                }
+            }
 
         fun <T> failure(message: String): Result<T> =
             Failure(IllegalStateException(message))

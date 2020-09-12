@@ -1,5 +1,6 @@
 package com.github.whyrising.y.values
 
+import com.github.whyrising.y.core.complement
 import com.github.whyrising.y.values.Result.Empty
 import com.github.whyrising.y.values.Result.Failure
 import com.github.whyrising.y.values.Result.None
@@ -8,6 +9,8 @@ import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.reflection.shouldBeData
 import io.kotest.matchers.reflection.shouldBeSealed
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
@@ -16,6 +19,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 import java.io.Serializable
 
@@ -23,6 +27,9 @@ const val EXCEPTION_MESSAGE = "java.lang.Exception: "
 
 @Suppress("UNCHECKED_CAST")
 class ResultTest : FreeSpec({
+    val isEven: (Int) -> Boolean = { it % 2 == 0 }
+    val idOdd = complement(isEven)
+
     "Result should be sealed" {
         Result::class.shouldBeSealed()
     }
@@ -107,7 +114,11 @@ class ResultTest : FreeSpec({
         }
     }
 
-    "invoke()" - {
+    "invoke() without any arguments, it should return Empty as Result" {
+        Result<Int>() shouldBe Empty
+    }
+
+    "invoke(T?)" - {
         "when passed a null, it should return a Failure as Result" {
             val result = Result(null) as Failure
 
@@ -121,9 +132,98 @@ class ResultTest : FreeSpec({
                 result shouldBe Success(i)
             }
         }
+    }
 
-        "without any arguments, it should return Empty as Result" {
-            Result<Int>() shouldBe Empty
+    "invoke(T?, String)" - {
+        "when T is null, return Failure with the message passed" {
+            checkAll { message: String ->
+                val result: Result<Int> = Result(null, message)
+
+                val exception = (result as Failure<Int>).exception
+
+                exception.message shouldBe message
+                shouldThrowExactly<NullPointerException> { throw exception }
+            }
+        }
+
+        "when T is valid, return a Success of T" {
+            checkAll { i: Int, message: String ->
+                val result: Result<Int> = Result(i, message)
+
+                result shouldBe Success(i)
+            }
+        }
+    }
+
+    "invoke(T?, predicate)" - {
+        "when T is null, return Failure" {
+            val result: Result<Int> = Result(null, isEven)
+
+            val exception = (result as Failure<Int>).exception
+
+            exception.message shouldBe "t is null!"
+            shouldThrowExactly<NullPointerException> { throw exception }
+        }
+
+        "when T is valid" - {
+            "when the condition holds, it should return Success of T" {
+                checkAll(Arb.int().filter(isEven)) { i: Int ->
+                    val result: Result<Int> = Result(i, isEven)
+
+                    result shouldBe Success(i)
+                }
+            }
+
+            "when condition fails, it should return Empty" {
+                checkAll(Arb.int().filter(idOdd)) { i: Int ->
+                    val result: Result<Int> = Result(i, isEven)
+
+                    result shouldBe Empty
+                }
+            }
+        }
+    }
+
+    "invoke(T?, String, predicate)" - {
+        "when T is null, return Failure with the message passed" {
+            checkAll { message: String ->
+                val result: Result<Int> = Result(null, message, isEven)
+
+                val exception = (result as Failure<Int>).exception
+
+                exception.message shouldBe message
+                shouldThrowExactly<NullPointerException> { throw exception }
+            }
+        }
+
+        "when T is valid" - {
+            "when the condition holds, it should return Success of T" {
+                checkAll(
+                    Arb.int().filter(isEven),
+                    Arb.string()
+                ) { i: Int, message: String ->
+                    val result: Result<Int> = Result(i, message, isEven)
+
+                    result shouldBe Success(i)
+                }
+            }
+
+            "when condition fails, it should return a Failure with message " {
+                checkAll(
+                    Arb.int().filter(idOdd),
+                    Arb.string()
+                ) { i: Int, message: String ->
+                    val result: Result<Int> = Result(i, message, isEven)
+
+                    val exception = (result as Failure<Int>).exception
+
+                    exception.message shouldBe
+                        "$i does not match condition: $message"
+                    shouldThrowExactly<IllegalStateException> {
+                        throw exception
+                    }
+                }
+            }
         }
     }
 
@@ -450,6 +550,159 @@ class ResultTest : FreeSpec({
                         shouldThrowExactly<RuntimeException> { throw e2 }
                     }
                 }
+            }
+        }
+    }
+
+    "filter(predicate: (T) -> Boolean)" - {
+
+        "when called on a Success" - {
+            "when the condition holds, it should return Success" {
+                checkAll(Arb.int().filter(isEven)) { i: Int ->
+                    val evenNumber = Result(i)
+
+                    val r: Result<Int> = evenNumber.filter(isEven)
+
+                    r shouldBe evenNumber
+                }
+            }
+
+            "when the condition fails, it should return a Failure" {
+                checkAll(Arb.int().filter(isEven)) { i: Int ->
+                    val evenNumber = Result(i)
+
+                    val r = evenNumber.filter(idOdd) as Failure<Int>
+                    val e = r.exception
+
+                    e.message shouldBe "Condition didn't hold"
+                    shouldThrowExactly<IllegalStateException> { throw e }
+                }
+            }
+        }
+
+        "when called on a Failure, it should return it" {
+            checkAll { message: String ->
+                val failure = Result.failure<Int>(message)
+
+                val r = failure.filter(idOdd)
+
+                r shouldBe failure
+            }
+        }
+
+        "when called on Empty, it should return Empty" {
+            val empty: Result<Int> = Empty
+
+            val r = empty.filter(idOdd)
+
+            r shouldBe Empty
+        }
+    }
+
+    "filter(message:String, predicate: (T) -> Boolean)" - {
+
+        "when called on a Success" - {
+            "when the condition holds, it should return Success" {
+                checkAll(Arb.int().filter(isEven), Arb.string()) { i, msg ->
+                    val evenNumber = Result(i)
+
+                    val r: Result<Int> = evenNumber.filter(msg, isEven)
+
+                    r shouldBe evenNumber
+                }
+            }
+
+            "when the condition fails, it should return a Failure" {
+                checkAll(Arb.int().filter(isEven), Arb.string()) { i, msg ->
+                    val evenNumber = Result(i)
+
+                    val r = evenNumber.filter(msg, idOdd) as Failure<Int>
+                    val e = r.exception
+
+                    e.message shouldBe msg
+                    shouldThrowExactly<IllegalStateException> { throw e }
+                }
+            }
+        }
+
+        "when called on a Failure, it should return it" {
+            checkAll { message: String ->
+                val failure = Result.failure<Int>(message)
+
+                val r = failure.filter("Doesn't match", idOdd) as Failure<Int>
+                val e = r.exception
+
+                e.message shouldBe message
+                shouldThrowExactly<IllegalStateException> { throw e }
+            }
+        }
+
+        "when called on Empty, it should return Empty" {
+            checkAll { message: String ->
+                val empty: Result<Int> = Empty
+
+                val r = empty.filter(message, idOdd)
+
+                r shouldBe Empty
+            }
+        }
+    }
+
+    "exits(p: (T) -> Boolean)" - {
+        "when the condition holds, it should return true" {
+            checkAll(Arb.int().filter(isEven)) { i: Int ->
+                val evenNumber = Result(i)
+
+                val b: Boolean = evenNumber.exists(isEven)
+
+                b.shouldBeTrue()
+            }
+        }
+
+        "when the condition fails, it should return false" {
+            checkAll(Arb.int().filter(isEven)) { i: Int ->
+                val evenNumber = Result(i)
+                val empty = Result<Int>()
+                val failure = Result<Int>(null)
+
+                val b1: Boolean = evenNumber.exists(idOdd)
+                val b2: Boolean = empty.exists(idOdd)
+                val b3: Boolean = failure.exists(idOdd)
+
+                b1.shouldBeFalse()
+                b2.shouldBeFalse()
+                b3.shouldBeFalse()
+            }
+        }
+    }
+
+    "mapFailure(message:String)" - {
+        "when called on Success or Empty, it should return `this`" {
+            checkAll { message: String ->
+                val success: Result<Int> = Result(10)
+                val empty: Result<Int> = Empty
+
+                val r1: Result<Int> = success.mapFailure(message)
+                val r2: Result<Int> = empty.mapFailure(message)
+
+                r1 shouldBe success
+                r2 shouldBe empty
+            }
+        }
+
+        """
+            when called on a Failure,
+            it should wrap it with the new message and return a new Failure
+        """ {
+            checkAll { oldMessage: String, newMessage: String ->
+                val failure: Result<Int> = Result.failure(oldMessage)
+
+                val r = failure.mapFailure(newMessage) as Failure<Int>
+                val exception = r.exception
+
+                exception.message shouldBe newMessage
+                exception.cause shouldBe (failure as Failure<Int>).exception
+                shouldThrowExactly<RuntimeException> { throw exception }
             }
         }
     }
