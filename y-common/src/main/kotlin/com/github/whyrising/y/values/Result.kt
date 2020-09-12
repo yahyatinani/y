@@ -26,6 +26,8 @@ sealed class Result<out T> : Serializable {
 
     fun exists(p: (T) -> Boolean): Boolean = map(p).getOrElse(false)
 
+    abstract fun mapFailure(message: String): Result<T>
+
     internal abstract class None<T> : Result<T>() {
         override fun <R> map(f: (T) -> R): Result<R> = Empty
 
@@ -40,6 +42,8 @@ sealed class Result<out T> : Serializable {
         } catch (e: Exception) {
             handle(e)
         }
+
+        override fun mapFailure(message: String): Result<T> = this
 
         override fun toString(): String = "Empty"
     }
@@ -69,6 +73,9 @@ sealed class Result<out T> : Serializable {
             handle(e)
         }
 
+        override fun mapFailure(message: String): Result<T> =
+            Failure(RuntimeException(message, exception))
+
         override fun toString(): String = "Failure(${exception.message})"
     }
 
@@ -94,6 +101,8 @@ sealed class Result<out T> : Serializable {
         override fun orElse(
             defaultValue: () -> Result<@UnsafeVariance T>
         ): Result<T> = this
+
+        override fun mapFailure(message: String): Result<T> = this
 
         override fun toString(): String = "Success($value)"
     }

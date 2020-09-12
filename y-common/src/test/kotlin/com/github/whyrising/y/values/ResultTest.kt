@@ -584,4 +584,35 @@ class ResultTest : FreeSpec({
             }
         }
     }
+
+    "mapFailure(message:String)" - {
+        "when called on Success or Empty, it should return `this`" {
+            checkAll { message: String ->
+                val success: Result<Int> = Result(10)
+                val empty: Result<Int> = Empty
+
+                val r1: Result<Int> = success.mapFailure(message)
+                val r2: Result<Int> = empty.mapFailure(message)
+
+                r1 shouldBe success
+                r2 shouldBe empty
+            }
+        }
+
+        """
+            when called on a Failure,
+            it should wrap it with the new message and return a new Failure
+        """ {
+            checkAll { oldMessage: String, newMessage: String ->
+                val failure: Result<Int> = Result.failure(oldMessage)
+
+                val r = failure.mapFailure(newMessage) as Failure<Int>
+                val exception = r.exception
+
+                exception.message shouldBe newMessage
+                exception.cause shouldBe (failure as Failure<Int>).exception
+                shouldThrowExactly<RuntimeException> { throw exception }
+            }
+        }
+    }
 })
