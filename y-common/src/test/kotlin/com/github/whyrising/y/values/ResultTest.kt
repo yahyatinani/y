@@ -19,6 +19,7 @@ import java.io.Serializable
 
 const val EXCEPTION_MESSAGE = "java.lang.Exception: "
 
+@Suppress("UNCHECKED_CAST")
 class ResultTest : FreeSpec({
     "Result should be sealed" {
         Result::class.shouldBeSealed()
