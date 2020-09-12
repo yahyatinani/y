@@ -120,6 +120,12 @@ sealed class Result<out T> : Serializable {
             else -> Success(t)
         }
 
+        operator fun <T> invoke(t: T?, p: (T) -> Boolean): Result<T> =
+            when (t) {
+                null -> Failure(NullPointerException("t is null!"))
+                else -> if (p(t)) Success(t) else Empty
+            }
+
         fun <T> failure(message: String): Result<T> =
             Failure(IllegalStateException(message))
 

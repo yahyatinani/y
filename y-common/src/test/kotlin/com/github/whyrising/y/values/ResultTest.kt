@@ -1,5 +1,6 @@
 package com.github.whyrising.y.values
 
+import com.github.whyrising.y.core.complement
 import com.github.whyrising.y.values.Result.Empty
 import com.github.whyrising.y.values.Result.Failure
 import com.github.whyrising.y.values.Result.None
@@ -147,6 +148,37 @@ class ResultTest : FreeSpec({
                 val result: Result<Int> = Result(i, message)
 
                 result shouldBe Success(i)
+            }
+        }
+    }
+
+    "invoke(T?, predicate)" - {
+        val isEven: (Int) -> Boolean = { it % 2 == 0 }
+
+        "when T is null, return Failure with the message passed" {
+            val result: Result<Int> = Result(null, isEven)
+
+            val exception = (result as Failure<Int>).exception
+
+            exception.message shouldBe "t is null!"
+            shouldThrowExactly<NullPointerException> { throw exception }
+        }
+
+        "when T is valid" - {
+            "when the condition holds, it should return Success of T"  {
+                checkAll(Arb.int().filter(isEven)) { i: Int ->
+                    val result: Result<Int> = Result(i, isEven)
+
+                    result shouldBe Success(i)
+                }
+            }
+
+            "when condition fails, it should return Empty"  {
+                checkAll(Arb.int().filter(complement(isEven))) { i: Int ->
+                    val result: Result<Int> = Result(i, isEven)
+
+                    result shouldBe Empty
+                }
             }
         }
     }
