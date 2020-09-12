@@ -75,8 +75,8 @@ sealed class Result<out T> : Serializable {
             Failure(IllegalStateException(exception))
 
         private fun <T> handle(e: Exception): Result<T> = when (e) {
-            is RuntimeException -> Failure(e)
-            else -> Failure(RuntimeException(e))
+            is RuntimeException -> failure(e)
+            else -> failure(RuntimeException(e))
         }
     }
 }
