@@ -115,6 +115,11 @@ sealed class Result<out T> : Serializable {
             else -> Success(t)
         }
 
+        operator fun <T> invoke(t: T?, message: String): Result<T> = when (t) {
+            null -> Failure(NullPointerException(message))
+            else -> Success(t)
+        }
+
         fun <T> failure(message: String): Result<T> =
             Failure(IllegalStateException(message))
 

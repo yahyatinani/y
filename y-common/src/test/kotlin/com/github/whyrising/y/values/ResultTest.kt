@@ -130,6 +130,27 @@ class ResultTest : FreeSpec({
         }
     }
 
+    "invoke(T?, String)" - {
+        "when T is null, return Failure with the message passed" {
+            checkAll { message: String ->
+                val result: Result<Int> = Result(null, message)
+
+                val exception = (result as Failure<Int>).exception
+
+                exception.message shouldBe message
+                shouldThrowExactly<NullPointerException> { throw exception }
+            }
+        }
+
+        "when T is valid, return a Success of T" {
+            checkAll { i: Int, message: String ->
+                val result: Result<Int> = Result(i, message)
+
+                result shouldBe Success(i)
+            }
+        }
+    }
+
     "failure() companion function" - {
         "when passed a string message, it should return Failure as Result" {
             checkAll { msg: String ->
