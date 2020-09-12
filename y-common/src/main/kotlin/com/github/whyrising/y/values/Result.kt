@@ -15,6 +15,8 @@ sealed class Result<out T> : Serializable {
     abstract
     fun orElse(defaultValue: () -> Result<@UnsafeVariance T>): Result<T>
 
+    abstract fun mapFailure(message: String): Result<T>
+
     abstract fun forEach(effect: (T) -> Unit)
 
     fun filter(message: String, predicate: (T) -> Boolean): Result<T> =
@@ -27,8 +29,6 @@ sealed class Result<out T> : Serializable {
         filter("Condition didn't hold", p)
 
     fun exists(p: (T) -> Boolean): Boolean = map(p).getOrElse(false)
-
-    abstract fun mapFailure(message: String): Result<T>
 
     internal abstract class None<T> : Result<T>() {
         override fun <R> map(f: (T) -> R): Result<R> = Empty
