@@ -5,7 +5,6 @@ import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
-import io.kotest.matchers.reflection.shouldBeCompanion
 import io.kotest.matchers.reflection.shouldBeData
 import io.kotest.matchers.reflection.shouldBeSealed
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
@@ -119,6 +118,10 @@ class ResultTest : FreeSpec({
                 result shouldBe Success(i)
             }
         }
+
+        "without any arguments, it should return Empty as Result" {
+            Result<Int>() shouldBe Empty
+        }
     }
 
     "failure() companion function" - {
@@ -159,18 +162,15 @@ class ResultTest : FreeSpec({
     }
 
     "Result should be generic and covariant" {
-        val result: Result<Number> = Result<Int>()
 
-        @Suppress("RemoveExplicitTypeArguments")
+        @Suppress("RemoveExplicitTypeArguments", "UNUSED_VARIABLE")
         val success: Success<Number> = Success<Int>(1)
-        val failure: Failure<Number> = Failure<Int>(RuntimeException(""))
 
-        success.value shouldBe 1
-        failure.exception.message shouldBe ""
-        shouldThrow<NullPointerException> {
-            @Suppress("UNCHECKED_CAST")
-            throw (result as Failure<Int>).exception
-        }
+        @Suppress("RemoveExplicitTypeArguments", "UNUSED_VARIABLE")
+        val result: Result<Number> = Result<Int>(12)
+
+        @Suppress("UNUSED_VARIABLE")
+        val failure: Failure<Number> = Failure<Int>(RuntimeException(""))
     }
 
     "map()" - {

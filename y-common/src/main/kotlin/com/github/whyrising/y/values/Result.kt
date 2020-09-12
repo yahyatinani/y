@@ -78,7 +78,9 @@ sealed class Result<out T> : Serializable {
     }
 
     companion object {
-        operator fun <T> invoke(t: T? = null): Result<T> = when (t) {
+        operator fun <T> invoke(): Result<T> = Empty
+
+        operator fun <T> invoke(t: T?): Result<T> = when (t) {
             null -> Failure(NullPointerException())
             else -> Success(t)
         }
