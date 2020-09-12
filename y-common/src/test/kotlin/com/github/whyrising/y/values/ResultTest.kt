@@ -28,6 +28,7 @@ const val EXCEPTION_MESSAGE = "java.lang.Exception: "
 @Suppress("UNCHECKED_CAST")
 class ResultTest : FreeSpec({
     val isEven: (Int) -> Boolean = { it % 2 == 0 }
+    val idOdd = complement(isEven)
 
     "Result should be sealed" {
         Result::class.shouldBeSealed()
@@ -165,7 +166,7 @@ class ResultTest : FreeSpec({
         }
 
         "when T is valid" - {
-            "when the condition holds, it should return Success of T"  {
+            "when the condition holds, it should return Success of T" {
                 checkAll(Arb.int().filter(isEven)) { i: Int ->
                     val result: Result<Int> = Result(i, isEven)
 
@@ -173,8 +174,8 @@ class ResultTest : FreeSpec({
                 }
             }
 
-            "when condition fails, it should return Empty"  {
-                checkAll(Arb.int().filter(complement(isEven))) { i: Int ->
+            "when condition fails, it should return Empty" {
+                checkAll(Arb.int().filter(idOdd)) { i: Int ->
                     val result: Result<Int> = Result(i, isEven)
 
                     result shouldBe Empty
@@ -196,7 +197,7 @@ class ResultTest : FreeSpec({
         }
 
         "when T is valid" - {
-            "when the condition holds, it should return Success of T"  {
+            "when the condition holds, it should return Success of T" {
                 checkAll(
                     Arb.int().filter(isEven),
                     Arb.string()
@@ -207,9 +208,9 @@ class ResultTest : FreeSpec({
                 }
             }
 
-            "when condition fails, it should return a Failure with message "  {
+            "when condition fails, it should return a Failure with message " {
                 checkAll(
-                    Arb.int().filter(complement(isEven)),
+                    Arb.int().filter(idOdd),
                     Arb.string()
                 ) { i: Int, message: String ->
                     val result: Result<Int> = Result(i, message, isEven)
@@ -569,9 +570,8 @@ class ResultTest : FreeSpec({
             "when the condition fails, it should return a Failure" {
                 checkAll(Arb.int().filter(isEven)) { i: Int ->
                     val evenNumber = Result(i)
-                    val isOdd = complement(isEven)
 
-                    val r = evenNumber.filter(isOdd) as Failure<Int>
+                    val r = evenNumber.filter(idOdd) as Failure<Int>
                     val e = r.exception
 
                     e.message shouldBe "Condition didn't hold"
@@ -584,7 +584,7 @@ class ResultTest : FreeSpec({
             checkAll { message: String ->
                 val failure = Result.failure<Int>(message)
 
-                val r = failure.filter(complement(isEven))
+                val r = failure.filter(idOdd)
 
                 r shouldBe failure
             }
@@ -593,7 +593,7 @@ class ResultTest : FreeSpec({
         "when called on Empty, it should return Empty" {
             val empty: Result<Int> = Empty
 
-            val r = empty.filter(complement(isEven))
+            val r = empty.filter(idOdd)
 
             r shouldBe Empty
         }
@@ -615,9 +615,8 @@ class ResultTest : FreeSpec({
             "when the condition fails, it should return a Failure" {
                 checkAll(Arb.int().filter(isEven), Arb.string()) { i, msg ->
                     val evenNumber = Result(i)
-                    val isOdd = complement(isEven)
 
-                    val r = evenNumber.filter(msg, isOdd) as Failure<Int>
+                    val r = evenNumber.filter(msg, idOdd) as Failure<Int>
                     val e = r.exception
 
                     e.message shouldBe msg
@@ -629,9 +628,8 @@ class ResultTest : FreeSpec({
         "when called on a Failure, it should return it" {
             checkAll { message: String ->
                 val failure = Result.failure<Int>(message)
-                val isOdd = complement(isEven)
 
-                val r = failure.filter("Doesn't match", isOdd) as Failure<Int>
+                val r = failure.filter("Doesn't match", idOdd) as Failure<Int>
                 val e = r.exception
 
                 e.message shouldBe message
@@ -642,9 +640,8 @@ class ResultTest : FreeSpec({
         "when called on Empty, it should return Empty" {
             checkAll { message: String ->
                 val empty: Result<Int> = Empty
-                val isOdd = complement(isEven)
 
-                val r = empty.filter(message, isOdd)
+                val r = empty.filter(message, idOdd)
 
                 r shouldBe Empty
             }
@@ -664,14 +661,13 @@ class ResultTest : FreeSpec({
 
         "when the condition fails, it should return false" {
             checkAll(Arb.int().filter(isEven)) { i: Int ->
-                val isOdd = complement(isEven)
                 val evenNumber = Result(i)
                 val empty = Result<Int>()
                 val failure = Result<Int>(null)
 
-                val b1: Boolean = evenNumber.exists(isOdd)
-                val b2: Boolean = empty.exists(isOdd)
-                val b3: Boolean = failure.exists(isOdd)
+                val b1: Boolean = evenNumber.exists(idOdd)
+                val b2: Boolean = empty.exists(idOdd)
+                val b3: Boolean = failure.exists(idOdd)
 
                 b1.shouldBeFalse()
                 b2.shouldBeFalse()
