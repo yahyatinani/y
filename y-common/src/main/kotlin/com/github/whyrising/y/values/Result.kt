@@ -216,5 +216,19 @@ sealed class Result<out T> : Serializable {
         } catch (e: Exception) {
             failure(e)
         }
+
+        fun <T> of(errMsg: String, f: () -> T): Result<T> {
+            fun format(e: Exception, errMsg: String) =
+                "${e.javaClass.name}: [errMsg: $errMsg] " +
+                    "[cause message: ${e.message}]"
+
+            return try {
+                Result(f())
+            } catch (e: RuntimeException) {
+                failure(format(e, errMsg))
+            } catch (e: Exception) {
+                failure(Exception(format(e, errMsg), e))
+            }
+        }
     }
 }

@@ -873,11 +873,52 @@ class ResultTest : FreeSpec({
         }
 
         "when f returns, `of` should return Result of `f`" {
-
             checkAll { i: Int ->
                 val f: () -> Int = { i }
 
                 val result: Result<Int> = Result.of(f)
+
+                result.forEach(onSuccess = { it shouldBe i })
+            }
+        }
+    }
+
+    "Result.of(errMsg: String, f: () -> T)" - {
+        """
+            when f throws, `of` should return a Failure of that exception 
+            along with an error message
+        """ {
+            checkAll { errMsg1: String, errMsg2: String ->
+                fun format1(e: Exception, errMsg: String) =
+                    "${e.javaClass.name}: [errMsg: $errMsg] " +
+                        "[cause message: ${e.message}]"
+
+                fun format2(e: Exception, errMsg: String): String =
+                    "java.lang.Exception: ${format1(e, errMsg)}"
+
+                val cause1 = IllegalStateException()
+                val cause2 = IOException()
+
+                val f: () -> Int = { throw cause1 }
+                val g: () -> Double = { throw cause2 }
+
+                val e1 = (Result.of(errMsg1, f) as Failure<Int>).exception
+                val e2 = (Result.of(errMsg2, g) as Failure<Double>).exception
+
+                e1.message shouldBe format1(cause1, errMsg1)
+                e2.message shouldBe format2(cause2, errMsg2)
+                shouldThrowExactly<IllegalStateException> { throw e1 }
+                shouldThrowExactly<IllegalStateException> { throw e2 }
+                e2.cause shouldBe Exception("${cause2.javaClass.name}: " +
+                    "[errMsg: $errMsg2] [cause message: ${cause2.message}]", e2)
+            }
+        }
+
+        "when f returns, `of` should return Result of `f`" {
+            checkAll { i: Int ->
+                val f: () -> Int = { i }
+
+                val result: Result<Int> = Result.of("Number not found!", f)
 
                 result.forEach(onSuccess = { it shouldBe i })
             }
