@@ -55,11 +55,7 @@ fun <T1, T2, R> lift(
     f: (T1) -> (T2) -> R
 ): (Option<T1>) -> (Option<T2>) -> Option<R> = { option1: Option<T1> ->
     { option2: Option<T2> ->
-        option1.flatMap { t1 ->
-            option2.map { t2: T2 ->
-                f(t1)(t2)
-            }
-        }
+        option1.map(f).flatMap { option2.map(it) }
     }
 }
 
@@ -69,13 +65,9 @@ fun <T1, T2, T3, R> lift(
 ): (Option<T1>) -> (Option<T2>) -> (Option<T3>) -> Option<R> = { option1 ->
     { option2 ->
         { option3 ->
-            option1.flatMap { t1 ->
-                option2.flatMap { t2 ->
-                    option3.map { t3 ->
-                        f(t1)(t2)(t3)
-                    }
-                }
-            }
+            option1.map(f)
+                .flatMap { option2.map(it) }
+                .flatMap { option3.map(it) }
         }
     }
 }
