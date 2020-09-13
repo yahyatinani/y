@@ -181,11 +181,7 @@ sealed class Result<out T> : Serializable {
             f: (T1) -> (T2) -> R
         ): (Result<T1>) -> (Result<T2>) -> Result<R> = { r1: Result<T1> ->
             { r2: Result<T2> ->
-                r1.flatMap { t1 ->
-                    r2.map { t2: T2 ->
-                        f(t1)(t2)
-                    }
-                }
+                r1.map(f).flatMap { r2.map(it) }
             }
         }
 
@@ -195,13 +191,7 @@ sealed class Result<out T> : Serializable {
         ): (Result<T1>) -> (Result<T2>) -> (Result<T3>) -> Result<R> = { r1 ->
             { r2 ->
                 { r3 ->
-                    r1.flatMap { t1 ->
-                        r2.flatMap { t2 ->
-                            r3.map { t3 ->
-                                f(t1)(t2)(t3)
-                            }
-                        }
-                    }
+                    r1.map(f).flatMap { r2.map(it) }.flatMap { r3.map(it) }
                 }
             }
         }
