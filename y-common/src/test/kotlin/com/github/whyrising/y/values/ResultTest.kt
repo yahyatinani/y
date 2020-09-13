@@ -1,6 +1,8 @@
 package com.github.whyrising.y.values
 
 import com.github.whyrising.y.core.complement
+import com.github.whyrising.y.core.str
+import com.github.whyrising.y.values.Result.Companion.lift
 import com.github.whyrising.y.values.Result.Empty
 import com.github.whyrising.y.values.Result.Failure
 import com.github.whyrising.y.values.Result.None
@@ -746,6 +748,56 @@ class ResultTest : FreeSpec({
             success.forEach(onSuccess, onFailure, onEmpty)
 
             i shouldBe default + 1
+        }
+    }
+
+    "lift(f:(T)->R) should transform f to Result(A) -> Result(B)" {
+        checkAll { n: Int, l: Long ->
+            val f1: (Int) -> String = { i: Int -> str(i) }
+            val f2: (Long) -> String = { i: Long -> str(i) }
+
+            val g1: (Result<Int>) -> Result<String> = lift(f1)
+            val g2: (Result<Long>) -> Result<String> = lift(f2)
+
+            g1(Result(n)) shouldBe Result(f1(n))
+            g2(Result(l)) shouldBe Result(f2(l))
+        }
+    }
+
+    "lift(f: T1->T2->R) should transform f to Result(A)->Result(B)->Result(C)" {
+        checkAll { n: Int, l: Long, f: Float ->
+            val f1: (Int) -> (Float) -> String = { { f -> str(it, f) } }
+            val f2: (Long) -> (Float) -> String = { { f -> str(it, f) } }
+
+            val g1: (Result<Int>) ->
+            (Result<Float>) ->
+            Result<String> = lift(f1)
+
+            val g2: (Result<Long>) ->
+            (Result<Float>) ->
+            Result<String> = lift(f2)
+
+            g1(Result(n))(Result(f)) shouldBe Result(f1(n)(f))
+            g2(Result(l))(Result(f)) shouldBe Result(f2(l)(f))
+        }
+    }
+
+    """
+        lift(f: T1->T2->T3->R) should transform f to 
+        Result(A) -> Result(B) -> Result(C) -> Result(D)
+    """ {
+        checkAll { n: Int, x: Float, y: Double ->
+            val f: (Int) ->
+            (Float) ->
+            (Double) ->
+            String = { { f -> { d -> str(it, f, d) } } }
+
+            val g: (Result<Int>) ->
+            (Result<Float>) ->
+            (Result<Double>) ->
+            Result<String> = lift(f)
+
+            g(Result(n))(Result(x))(Result(y)) shouldBe Result(f(n)(x)(y))
         }
     }
 })

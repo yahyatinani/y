@@ -173,5 +173,37 @@ sealed class Result<out T> : Serializable {
             is RuntimeException -> failure(e)
             else -> failure(RuntimeException(e))
         }
+
+        fun <T, R> lift(f: (T) -> R): (Result<T>) -> Result<R> = { it.map(f) }
+
+        @JvmName("Result_lift1")
+        fun <T1, T2, R> lift(
+            f: (T1) -> (T2) -> R
+        ): (Result<T1>) -> (Result<T2>) -> Result<R> = { r1: Result<T1> ->
+            { r2: Result<T2> ->
+                r1.flatMap { t1 ->
+                    r2.map { t2: T2 ->
+                        f(t1)(t2)
+                    }
+                }
+            }
+        }
+
+        @JvmName("Result_lift2")
+        fun <T1, T2, T3, R> lift(
+            f: (T1) -> (T2) -> (T3) -> R
+        ): (Result<T1>) -> (Result<T2>) -> (Result<T3>) -> Result<R> = { r1 ->
+            { r2 ->
+                { r3 ->
+                    r1.flatMap { t1 ->
+                        r2.flatMap { t2 ->
+                            r3.map { t3 ->
+                                f(t1)(t2)(t3)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
