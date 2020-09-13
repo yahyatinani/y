@@ -208,5 +208,13 @@ sealed class Result<out T> : Serializable {
             r3: Result<T3>,
             f: (T1) -> (T2) -> (T3) -> R
         ): Result<R> = r1.map(f).flatMap { r2.map(it) }.flatMap { r3.map(it) }
+
+        fun <T> of(f: () -> T): Result<T> = try {
+            Result(f())
+        } catch (e: RuntimeException) {
+            failure(e)
+        } catch (e: Exception) {
+            failure(e)
+        }
     }
 }

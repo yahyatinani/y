@@ -24,6 +24,7 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
+import java.io.IOException
 import java.io.Serializable
 
 const val EXCEPTION_MESSAGE = "java.lang.Exception: "
@@ -855,6 +856,31 @@ class ResultTest : FreeSpec({
             val r: Result<String> = map(r1, r2, r3, f)
 
             r shouldBe Result(f(n)(l)(d))
+        }
+    }
+
+    "Result.of(f: () -> T)" - {
+        "when f throws, `of` should return a failure of that exception" {
+            val f: () -> Int = { throw IllegalStateException() }
+            val g: () -> Double = { throw IOException() }
+
+            val exception1 = (Result.of(f) as Failure<Int>).exception
+            val exception2 = (Result.of(g) as Failure<Double>).exception
+
+            shouldThrowExactly<IllegalStateException> { throw exception1 }
+            shouldThrowExactly<IllegalStateException> { throw exception2 }
+            exception2.cause shouldBe IOException()
+        }
+
+        "when f returns, `of` should return Result of `f`" {
+
+            checkAll { i: Int ->
+                val f: () -> Int = { i }
+
+                val result: Result<Int> = Result.of(f)
+
+                result.forEach(onSuccess = { it shouldBe i })
+            }
         }
     }
 })
