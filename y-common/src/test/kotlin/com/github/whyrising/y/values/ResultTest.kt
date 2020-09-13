@@ -711,44 +711,65 @@ class ResultTest : FreeSpec({
     }
 
     "forEach(onSuccess(), onFailure(), onEmpty)" - {
+        val default = 0
 
-        "when called on a Failure, it should apply onFailure()" {
-            val default = 0
+        "when called with default effects, it should do nothing" {
+            val failure = Result.failure<Int>("test")
+            val empty = Result<Int>()
+            val success = Result(default)
+
+            failure.forEach()
+            empty.forEach()
+            success.forEach()
+        }
+
+        "when called on a Failure, it should apply onFailure() only" {
             var i = default
-            val onSuccess: (Int) -> Unit = {}
-            val onFailure: (RuntimeException) -> Unit = { i++ }
-            val onEmpty: () -> Unit = {}
+            var j = default
+            var k = default
+            val onSuccess: (Int) -> Unit = { i++ }
+            val onFailure: (RuntimeException) -> Unit = { j++ }
+            val onEmpty: () -> Unit = { k++ }
+
             val failure = Result.failure<Int>("test")
 
             failure.forEach(onSuccess, onFailure, onEmpty)
 
-            i shouldBe default + 1
+            i shouldBe default
+            j shouldBe default + 1
+            k shouldBe default
         }
 
-        "when called on a Empty, it should apply onEmpty()" {
-            val default = 0
+        "when called on a Empty, it should apply onEmpty() only" {
             var i = default
-            val onSuccess: (Int) -> Unit = {}
-            val onFailure: (RuntimeException) -> Unit = {}
-            val onEmpty: () -> Unit = { i++ }
+            var j = default
+            var k = default
+            val onSuccess: (Int) -> Unit = { i++ }
+            val onFailure: (RuntimeException) -> Unit = { j++ }
+            val onEmpty: () -> Unit = { k++ }
             val empty = Result<Int>()
 
             empty.forEach(onSuccess, onFailure, onEmpty)
 
-            i shouldBe default + 1
+            i shouldBe default
+            j shouldBe default
+            k shouldBe default + 1
         }
 
-        "when called on a Success, it should apply onSuccess()" {
-            val default = 0
+        "when called on a Success, it should apply onSuccess() only" {
             var i = default
+            var j = default
+            var k = default
             val onSuccess: (Int) -> Unit = { i++ }
-            val onFailure: (RuntimeException) -> Unit = {}
-            val onEmpty: () -> Unit = {}
+            val onFailure: (RuntimeException) -> Unit = { j++ }
+            val onEmpty: () -> Unit = { k++ }
             val success = Result(default)
 
             success.forEach(onSuccess, onFailure, onEmpty)
 
             i shouldBe default + 1
+            j shouldBe default
+            k shouldBe default
         }
     }
 

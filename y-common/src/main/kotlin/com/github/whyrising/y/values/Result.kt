@@ -92,7 +92,7 @@ sealed class Result<out T> : Serializable {
             onSuccess: (T) -> Unit,
             onFailure: (RuntimeException) -> Unit,
             onEmpty: () -> Unit
-        ) = onFailure(exception)
+        ): Unit = onFailure(exception)
 
         override fun toString(): String = "Failure(${exception.message})"
     }
