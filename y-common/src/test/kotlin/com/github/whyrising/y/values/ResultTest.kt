@@ -909,8 +909,7 @@ class ResultTest : FreeSpec({
                 e2.message shouldBe format2(cause2, errMsg2)
                 shouldThrowExactly<IllegalStateException> { throw e1 }
                 shouldThrowExactly<IllegalStateException> { throw e2 }
-                e2.cause shouldBe Exception("${cause2.javaClass.name}: " +
-                    "[errMsg: $errMsg2] [cause message: ${cause2.message}]", e2)
+                e2.cause shouldBe Exception(format1(cause2, errMsg2), e2)
             }
         }
 
