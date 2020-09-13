@@ -230,5 +230,16 @@ sealed class Result<out T> : Serializable {
                 failure(Exception(format(e, errMsg), e))
             }
         }
+
+        fun <T> of(value: T, errMsg: String, p: (T) -> Boolean): Result<T> =
+            try {
+                if (p(value)) Success(value)
+                else failure(
+                    "Assertion failed for value $value with message: $errMsg"
+                )
+            } catch (e: Exception) {
+                val message = "Exception while validating $value"
+                failure(IllegalStateException(message, e))
+            }
     }
 }

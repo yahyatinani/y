@@ -923,4 +923,41 @@ class ResultTest : FreeSpec({
             }
         }
     }
+
+    "Result.of(value: T, errMsg: String, p: (T) -> Boolean)" - {
+        "when p throws, `of` should return a Failure" {
+            val value = 111
+            val cause = IOException()
+            val p: (Int) -> Boolean = { throw cause }
+
+            val exception = (Result.of(value, "", p) as Failure<Int>).exception
+
+            exception.message shouldBe "Exception while validating $value"
+            shouldThrowExactly<IllegalStateException> { throw exception }
+            exception.cause shouldBe cause
+        }
+
+        "when p() returns" - {
+            "when condition holds, `of` should return Result of passed value" {
+                checkAll(Arb.int().filter(isEven)) { i: Int ->
+                    val result = Result.of(i, "", isEven)
+
+                    result shouldBe Result(i)
+                }
+            }
+
+            "when condition fails, `of` should return Failure of passed msg" {
+                checkAll(
+                    Arb.int().filter(idOdd),
+                    Arb.string()
+                ) { i: Int, msg: String ->
+
+                    val result = Result.of(i, msg, isEven) as Failure<Int>
+
+                    result.exception.message shouldBe
+                        "Assertion failed for value $i with message: $msg"
+                }
+            }
+        }
+    }
 })
