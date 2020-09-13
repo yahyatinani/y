@@ -78,9 +78,7 @@ fun <T, R> hLift(f: (T) -> R): (T) -> Option<R> = { Option(it).map(f) }
 fun <T1, T2, R> hLift(f: (T1) -> (T2) -> R): (T1) -> (T2) -> Option<R> =
     { t1 ->
         { t2 ->
-            Option(f(t1)).flatMap { f1 ->
-                Option(t2).map(f1)
-            }
+            Option(t1).map(f).flatMap { Option(t2).map(it) }
         }
     }
 
@@ -90,11 +88,9 @@ fun <T1, T2, T3, R> hLift(
 ): (T1) -> (T2) -> (T3) -> Option<R> = { t1: T1 ->
     { t2 ->
         { t3 ->
-            Option(f(t1)).flatMap { f1 ->
-                Option(f1(t2)).flatMap { f2 ->
-                    Option(t3).map(f2)
-                }
-            }
+            Option(t1).map(f)
+                .flatMap { Option(t2).map(it) }
+                .flatMap { Option(t3).map(it) }
         }
     }
 }
@@ -103,23 +99,16 @@ fun <T1, T2, R> map(
     op1: Option<T1>,
     op2: Option<T2>,
     f: (T1) -> (T2) -> R
-): Option<R> = op1.flatMap { t1 -> op2.map { t2 -> f(t1)(t2) } }
+): Option<R> = op1.map(f).flatMap { op2.map(it) }
 
 fun <T1, T2, T3, R> map(
     op1: Option<T1>,
     op2: Option<T2>,
     op3: Option<T3>,
     f: (T1) -> (T2) -> (T3) -> R
-): Option<R> = op1.flatMap { t1 ->
-    op2.flatMap { t2: T2 ->
-        op3.map { t3 -> f(t1)(t2)(t3) }
-    }
-}
+): Option<R> = op1.map(f).flatMap { op2.map(it) }.flatMap { op3.map(it) }
 
-fun <T, R> traverse(
-    coll: List<T>,
-    f: (T) -> Option<R>
-): Option<List<R>> =
+fun <T, R> traverse(coll: List<T>, f: (T) -> Option<R>): Option<List<R>> =
     coll.fold(Option(emptyList())) { acc, i ->
         map(f(i), acc) { s: R ->
             { list: List<R> ->
