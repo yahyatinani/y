@@ -1,6 +1,9 @@
 package com.github.whyrising.y.values
 
 import com.github.whyrising.y.core.complement
+import com.github.whyrising.y.core.str
+import com.github.whyrising.y.values.Result.Companion.lift
+import com.github.whyrising.y.values.Result.Companion.map
 import com.github.whyrising.y.values.Result.Empty
 import com.github.whyrising.y.values.Result.Failure
 import com.github.whyrising.y.values.Result.None
@@ -21,6 +24,7 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
+import java.io.IOException
 import java.io.Serializable
 
 const val EXCEPTION_MESSAGE = "java.lang.Exception: "
@@ -703,6 +707,256 @@ class ResultTest : FreeSpec({
                 exception.message shouldBe newMessage
                 exception.cause shouldBe (failure as Failure<Int>).exception
                 shouldThrowExactly<RuntimeException> { throw exception }
+            }
+        }
+    }
+
+    "forEach(onSuccess(), onFailure(), onEmpty)" - {
+        val default = 0
+
+        "when called with default effects, it should do nothing" {
+            val failure = Result.failure<Int>("test")
+            val empty = Result<Int>()
+            val success = Result(default)
+
+            failure.forEach()
+            empty.forEach()
+            success.forEach()
+        }
+
+        "when called on a Failure, it should apply onFailure() only" {
+            var i = default
+            var j = default
+            var k = default
+            val onSuccess: (Int) -> Unit = { i++ }
+            val onFailure: (RuntimeException) -> Unit = { j++ }
+            val onEmpty: () -> Unit = { k++ }
+
+            val failure = Result.failure<Int>("test")
+
+            failure.forEach(onSuccess, onFailure, onEmpty)
+
+            i shouldBe default
+            j shouldBe default + 1
+            k shouldBe default
+        }
+
+        "when called on a Empty, it should apply onEmpty() only" {
+            var i = default
+            var j = default
+            var k = default
+            val onSuccess: (Int) -> Unit = { i++ }
+            val onFailure: (RuntimeException) -> Unit = { j++ }
+            val onEmpty: () -> Unit = { k++ }
+            val empty = Result<Int>()
+
+            empty.forEach(onSuccess, onFailure, onEmpty)
+
+            i shouldBe default
+            j shouldBe default
+            k shouldBe default + 1
+        }
+
+        "when called on a Success, it should apply onSuccess() only" {
+            var i = default
+            var j = default
+            var k = default
+            val onSuccess: (Int) -> Unit = { i++ }
+            val onFailure: (RuntimeException) -> Unit = { j++ }
+            val onEmpty: () -> Unit = { k++ }
+            val success = Result(default)
+
+            success.forEach(onSuccess, onFailure, onEmpty)
+
+            i shouldBe default + 1
+            j shouldBe default
+            k shouldBe default
+        }
+    }
+
+    "lift(f:(T)->R) should transform f to Result(A) -> Result(B)" {
+        checkAll { n: Int, l: Long ->
+            val f1: (Int) -> String = { i: Int -> str(i) }
+            val f2: (Long) -> String = { i: Long -> str(i) }
+
+            val g1: (Result<Int>) -> Result<String> = lift(f1)
+            val g2: (Result<Long>) -> Result<String> = lift(f2)
+
+            g1(Result(n)) shouldBe Result(f1(n))
+            g2(Result(l)) shouldBe Result(f2(l))
+        }
+    }
+
+    "lift(f: T1->T2->R) should transform f to Result(A)->Result(B)->Result(C)" {
+        checkAll { n: Int, l: Long, f: Float ->
+            val f1: (Int) -> (Float) -> String = { { f -> str(it, f) } }
+            val f2: (Long) -> (Float) -> String = { { f -> str(it, f) } }
+
+            val g1: (Result<Int>) ->
+            (Result<Float>) ->
+            Result<String> = lift(f1)
+
+            val g2: (Result<Long>) ->
+            (Result<Float>) ->
+            Result<String> = lift(f2)
+
+            g1(Result(n))(Result(f)) shouldBe Result(f1(n)(f))
+            g2(Result(l))(Result(f)) shouldBe Result(f2(l)(f))
+        }
+    }
+
+    """
+        lift(f: T1->T2->T3->R) should transform f to 
+        Result(A) -> Result(B) -> Result(C) -> Result(D)
+    """ {
+        checkAll { n: Int, x: Float, y: Double ->
+            val f: (Int) ->
+            (Float) ->
+            (Double) ->
+            String = { { f -> { d -> str(it, f, d) } } }
+
+            val g: (Result<Int>) ->
+            (Result<Float>) ->
+            (Result<Double>) ->
+            Result<String> = lift(f)
+
+            g(Result(n))(Result(x))(Result(y)) shouldBe Result(f(n)(x)(y))
+        }
+    }
+
+    "map(Result(T1), Result(T2), f:(T1)->(T2)->R) should return Result(R)" {
+        checkAll { n: Int, l: Long, d: Double ->
+            val result1 = Result(n)
+            val result2 = Result(l)
+            val result3 = Result(d)
+            val f1: (Int) -> (Long) -> String = { { m -> str(it, m) } }
+            val f2: (Int) -> (Double) -> String = { { m -> str(it, m) } }
+
+            val r1: Result<String> = map(result1, result2, f1)
+            val r2: Result<String> = map(result1, result3, f2)
+
+            r1 shouldBe Result(f1(n)(l))
+            r2 shouldBe Result(f2(n)(d))
+        }
+    }
+
+    """
+        map(Result(A), Result(B), Result(C), f:(A)->(B)->(C)->D)
+        should return Result(D)
+    """ {
+        checkAll { n: Int, l: Long, d: Double ->
+            val r1 = Result(n)
+            val r2 = Result(l)
+            val r3 = Result(d)
+            val f: (Int) ->
+            (Long) ->
+            (Double) ->
+            String = { { m -> { k -> str(it, m, k) } } }
+
+            val r: Result<String> = map(r1, r2, r3, f)
+
+            r shouldBe Result(f(n)(l)(d))
+        }
+    }
+
+    "Result.of(f: () -> T)" - {
+        "when f throws, `of` should return a failure of that exception" {
+            val f: () -> Int = { throw IllegalStateException() }
+            val g: () -> Double = { throw IOException() }
+
+            val exception1 = (Result.of(f) as Failure<Int>).exception
+            val exception2 = (Result.of(g) as Failure<Double>).exception
+
+            shouldThrowExactly<IllegalStateException> { throw exception1 }
+            shouldThrowExactly<IllegalStateException> { throw exception2 }
+            exception2.cause shouldBe IOException()
+        }
+
+        "when f returns, `of` should return Result of `f`" {
+            checkAll { i: Int ->
+                val f: () -> Int = { i }
+
+                val result: Result<Int> = Result.of(f)
+
+                result.forEach(onSuccess = { it shouldBe i })
+            }
+        }
+    }
+
+    "Result.of(errMsg: String, f: () -> T)" - {
+        """
+            when f throws, `of` should return a Failure of that exception 
+            along with an error message
+        """ {
+            checkAll { errMsg1: String, errMsg2: String ->
+                fun format1(e: Exception, errMsg: String) =
+                    "${e.javaClass.name}: [errMsg: $errMsg] " +
+                        "[cause message: ${e.message}]"
+
+                fun format2(e: Exception, errMsg: String): String =
+                    "java.lang.Exception: ${format1(e, errMsg)}"
+
+                val cause1 = IllegalStateException()
+                val cause2 = IOException()
+
+                val f: () -> Int = { throw cause1 }
+                val g: () -> Double = { throw cause2 }
+
+                val e1 = (Result.of(errMsg1, f) as Failure<Int>).exception
+                val e2 = (Result.of(errMsg2, g) as Failure<Double>).exception
+
+                e1.message shouldBe format1(cause1, errMsg1)
+                e2.message shouldBe format2(cause2, errMsg2)
+                shouldThrowExactly<IllegalStateException> { throw e1 }
+                shouldThrowExactly<IllegalStateException> { throw e2 }
+                e2.cause shouldBe Exception(format1(cause2, errMsg2), e2)
+            }
+        }
+
+        "when f returns, `of` should return Result of `f`" {
+            checkAll { i: Int ->
+                val f: () -> Int = { i }
+
+                val result: Result<Int> = Result.of("Number not found!", f)
+
+                result.forEach(onSuccess = { it shouldBe i })
+            }
+        }
+    }
+
+    "Result.of(value: T, errMsg: String, p: (T) -> Boolean)" - {
+        "when p throws, `of` should return a Failure" {
+            val value = 111
+            val cause = IOException()
+            val p: (Int) -> Boolean = { throw cause }
+
+            val exception = (Result.of(value, "", p) as Failure<Int>).exception
+
+            exception.message shouldBe "Exception while validating $value"
+            shouldThrowExactly<IllegalStateException> { throw exception }
+            exception.cause shouldBe cause
+        }
+
+        "when p() returns" - {
+            "when condition holds, `of` should return Result of passed value" {
+                checkAll(Arb.int().filter(isEven)) { i: Int ->
+                    val result = Result.of(i, "", isEven)
+
+                    result shouldBe Result(i)
+                }
+            }
+
+            "when condition fails, `of` should return Failure of passed msg" {
+                checkAll(
+                    Arb.int().filter(idOdd),
+                    Arb.string()
+                ) { i: Int, msg: String ->
+
+                    val result = Result.of(i, msg, isEven) as Failure<Int>
+
+                    result.exception.message shouldBe
+                        "Assertion failed for value $i with message: $msg"
+                }
             }
         }
     }

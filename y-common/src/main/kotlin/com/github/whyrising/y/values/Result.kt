@@ -15,6 +15,14 @@ sealed class Result<out T> : Serializable {
     abstract
     fun orElse(defaultValue: () -> Result<@UnsafeVariance T>): Result<T>
 
+    abstract fun mapFailure(message: String): Result<T>
+
+    abstract fun forEach(
+        onSuccess: (T) -> Unit = {},
+        onFailure: (RuntimeException) -> Unit = {},
+        onEmpty: () -> Unit = {}
+    )
+
     fun filter(message: String, predicate: (T) -> Boolean): Result<T> =
         flatMap {
             if (predicate(it)) this
@@ -25,8 +33,6 @@ sealed class Result<out T> : Serializable {
         filter("Condition didn't hold", p)
 
     fun exists(p: (T) -> Boolean): Boolean = map(p).getOrElse(false)
-
-    abstract fun mapFailure(message: String): Result<T>
 
     internal abstract class None<T> : Result<T>() {
         override fun <R> map(f: (T) -> R): Result<R> = Empty
@@ -44,6 +50,12 @@ sealed class Result<out T> : Serializable {
         }
 
         override fun mapFailure(message: String): Result<T> = this
+
+        override fun forEach(
+            onSuccess: (T) -> Unit,
+            onFailure: (RuntimeException) -> Unit,
+            onEmpty: () -> Unit
+        ) = onEmpty()
 
         override fun toString(): String = "Empty"
     }
@@ -76,6 +88,12 @@ sealed class Result<out T> : Serializable {
         override fun mapFailure(message: String): Result<T> =
             Failure(RuntimeException(message, exception))
 
+        override fun forEach(
+            onSuccess: (T) -> Unit,
+            onFailure: (RuntimeException) -> Unit,
+            onEmpty: () -> Unit
+        ): Unit = onFailure(exception)
+
         override fun toString(): String = "Failure(${exception.message})"
     }
 
@@ -103,6 +121,12 @@ sealed class Result<out T> : Serializable {
         ): Result<T> = this
 
         override fun mapFailure(message: String): Result<T> = this
+
+        override fun forEach(
+            onSuccess: (T) -> Unit,
+            onFailure: (RuntimeException) -> Unit,
+            onEmpty: () -> Unit
+        ) = onSuccess(value)
 
         override fun toString(): String = "Success($value)"
     }
@@ -149,5 +173,73 @@ sealed class Result<out T> : Serializable {
             is RuntimeException -> failure(e)
             else -> failure(RuntimeException(e))
         }
+
+        fun <T, R> lift(f: (T) -> R): (Result<T>) -> Result<R> = { it.map(f) }
+
+        @JvmName("Result_lift1")
+        fun <T1, T2, R> lift(
+            f: (T1) -> (T2) -> R
+        ): (Result<T1>) -> (Result<T2>) -> Result<R> = { r1: Result<T1> ->
+            { r2: Result<T2> ->
+                r1.map(f).flatMap { r2.map(it) }
+            }
+        }
+
+        @JvmName("Result_lift2")
+        fun <T1, T2, T3, R> lift(
+            f: (T1) -> (T2) -> (T3) -> R
+        ): (Result<T1>) -> (Result<T2>) -> (Result<T3>) -> Result<R> = { r1 ->
+            { r2 ->
+                { r3 ->
+                    r1.map(f).flatMap { r2.map(it) }.flatMap { r3.map(it) }
+                }
+            }
+        }
+
+        fun <T1, T2, R> map(
+            r1: Result<T1>,
+            r2: Result<T2>,
+            f: (T1) -> (T2) -> R
+        ): Result<R> = r1.map(f).flatMap { r2.map(it) }
+
+        fun <T1, T2, T3, R> map(
+            r1: Result<T1>,
+            r2: Result<T2>,
+            r3: Result<T3>,
+            f: (T1) -> (T2) -> (T3) -> R
+        ): Result<R> = r1.map(f).flatMap { r2.map(it) }.flatMap { r3.map(it) }
+
+        fun <T> of(f: () -> T): Result<T> = try {
+            Result(f())
+        } catch (e: RuntimeException) {
+            failure(e)
+        } catch (e: Exception) {
+            failure(e)
+        }
+
+        fun <T> of(errMsg: String, f: () -> T): Result<T> {
+            fun format(e: Exception, errMsg: String) =
+                "${e.javaClass.name}: [errMsg: $errMsg] " +
+                    "[cause message: ${e.message}]"
+
+            return try {
+                Result(f())
+            } catch (e: RuntimeException) {
+                failure(format(e, errMsg))
+            } catch (e: Exception) {
+                failure(Exception(format(e, errMsg), e))
+            }
+        }
+
+        fun <T> of(value: T, errMsg: String, p: (T) -> Boolean): Result<T> =
+            try {
+                if (p(value)) Success(value)
+                else failure(
+                    "Assertion failed for value $value with message: $errMsg"
+                )
+            } catch (e: Exception) {
+                val message = "Exception while validating $value"
+                failure(IllegalStateException(message, e))
+            }
     }
 }
