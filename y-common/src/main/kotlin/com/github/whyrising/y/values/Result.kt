@@ -195,5 +195,18 @@ sealed class Result<out T> : Serializable {
                 }
             }
         }
+
+        fun <T1, T2, R> map(
+            r1: Result<T1>,
+            r2: Result<T2>,
+            f: (T1) -> (T2) -> R
+        ): Result<R> = r1.map(f).flatMap { r2.map(it) }
+
+        fun <T1, T2, T3, R> map(
+            r1: Result<T1>,
+            r2: Result<T2>,
+            r3: Result<T3>,
+            f: (T1) -> (T2) -> (T3) -> R
+        ): Result<R> = r1.map(f).flatMap { r2.map(it) }.flatMap { r3.map(it) }
     }
 }

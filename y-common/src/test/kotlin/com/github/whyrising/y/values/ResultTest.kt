@@ -3,6 +3,7 @@ package com.github.whyrising.y.values
 import com.github.whyrising.y.core.complement
 import com.github.whyrising.y.core.str
 import com.github.whyrising.y.values.Result.Companion.lift
+import com.github.whyrising.y.values.Result.Companion.map
 import com.github.whyrising.y.values.Result.Empty
 import com.github.whyrising.y.values.Result.Failure
 import com.github.whyrising.y.values.Result.None
@@ -798,6 +799,41 @@ class ResultTest : FreeSpec({
             Result<String> = lift(f)
 
             g(Result(n))(Result(x))(Result(y)) shouldBe Result(f(n)(x)(y))
+        }
+    }
+
+    "map(Result(T1), Result(T2), f:(T1)->(T2)->R) should return Result(R)" {
+        checkAll { n: Int, l: Long, d: Double ->
+            val result1 = Result(n)
+            val result2 = Result(l)
+            val result3 = Result(d)
+            val f1: (Int) -> (Long) -> String = { { m -> str(it, m) } }
+            val f2: (Int) -> (Double) -> String = { { m -> str(it, m) } }
+
+            val r1: Result<String> = map(result1, result2, f1)
+            val r2: Result<String> = map(result1, result3, f2)
+
+            r1 shouldBe Result(f1(n)(l))
+            r2 shouldBe Result(f2(n)(d))
+        }
+    }
+
+    """
+        map(Result(A), Result(B), Result(C), f:(A)->(B)->(C)->D)
+        should return Result(D)
+    """ {
+        checkAll { n: Int, l: Long, d: Double ->
+            val r1 = Result(n)
+            val r2 = Result(l)
+            val r3 = Result(d)
+            val f: (Int) ->
+            (Long) ->
+            (Double) ->
+            String = { { m -> { k -> str(it, m, k) } } }
+
+            val r: Result<String> = map(r1, r2, r3, f)
+
+            r shouldBe Result(f(n)(l)(d))
         }
     }
 })
