@@ -109,4 +109,35 @@ class AssertionsTest : FreeSpec({
             }
         }
     }
+
+    "assertNotNull(t: T, failMsg: String)" - {
+        "when condition holds, it should return Result of t" {
+            checkAll { i: Int ->
+                val result: Result<Int?> = assertNotNull(i, "")
+
+                result shouldBe Result(i)
+            }
+        }
+
+        "when condition fails, it should return a Failure with a message" {
+            checkAll { msg: String ->
+                val prefix = "Assertion failed for value null with message:"
+
+                val r = assertNotNull(null, msg) as Failure<Int?>
+
+                r.exception.message shouldBe "$prefix $msg"
+            }
+        }
+    }
+
+    "assertNotNull(t: T)" - {
+        "when condition fails, it should return Failure with a message" {
+            val prefix = "Assertion failed for value null with message:"
+            val default = "object should not be null"
+
+            val r = assertNotNull(null) as Failure<Int?>
+
+            r.exception.message shouldBe "$prefix $default"
+        }
+    }
 })

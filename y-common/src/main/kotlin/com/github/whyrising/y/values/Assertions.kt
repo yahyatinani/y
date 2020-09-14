@@ -15,3 +15,9 @@ fun assertFalse(
     condition: Boolean,
     errMsg: String = "Assertion error: condition should be false"
 ): Result<Boolean> = assertCondition(condition, errMsg) { !it }
+
+fun <T> assertNotNull(value: T, errMsg: String): Result<T> =
+    assertCondition(value, errMsg) { it != null }
+
+fun <T> assertNotNull(value: T): Result<T> =
+    assertNotNull(value, "object should not be null")
