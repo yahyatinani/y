@@ -8,7 +8,7 @@ object Libs {
     const val ktlintId = "org.jlleitschuh.gradle.ktlint"
 
     object Kotest {
-        private const val version = "4.2.0"
+        private const val version = "4.2.5"
         const val runner = "io.kotest:kotest-runner-junit5-jvm:$version"
         const val assertions = "io.kotest:kotest-assertions-core-jvm:$version"
         const val propertyTest = "io.kotest:kotest-property-jvm:$version"
