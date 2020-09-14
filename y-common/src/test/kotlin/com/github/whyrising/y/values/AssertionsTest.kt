@@ -165,4 +165,29 @@ class AssertionsTest : FreeSpec({
             }
         }
     }
+
+    "assertInRange(n: Int, min: Int, max: Int)" - {
+        val min = 10
+        val max = 45843
+        "when condition holds, it should return the Result of n" {
+
+
+            checkAll(Arb.int().filter { it in (min + 1) until max }) { n: Int ->
+                val r: Result<Int> = assertInRange(n, min, max)
+
+                r shouldBe Result(n)
+            }
+        }
+
+        "when condition fails, it should return a Failure" {
+            checkAll(Arb.int().filter { it < min || it > max }) { n: Int ->
+                val prefix = "Assertion failed for value $n with message:"
+                val default = "$n should be > $min and < $max"
+
+                val r = assertInRange(n, min, max) as Failure<Int>
+
+                r.exception.message shouldBe "$prefix $default"
+            }
+        }
+    }
 })

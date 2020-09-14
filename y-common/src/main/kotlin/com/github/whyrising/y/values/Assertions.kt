@@ -24,3 +24,8 @@ fun <T> assertNotNull(value: T): Result<T> =
 
 fun assertPositive(n: Int, errMsg: String = "number should be n"): Result<Int> =
     assertCondition(n, errMsg) { it > 0 }
+
+fun assertInRange(n: Int, min: Int, max: Int): Result<Int> =
+    assertCondition(n, "$n should be > $min and < $max") {
+        it in (min + 1) until max
+    }
