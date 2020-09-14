@@ -21,3 +21,6 @@ fun <T> assertNotNull(value: T, errMsg: String): Result<T> =
 
 fun <T> assertNotNull(value: T): Result<T> =
     assertNotNull(value, "object should not be null")
+
+fun assertPositive(n: Int, errMsg: String = "number should be n"): Result<Int> =
+    assertCondition(n, errMsg) { it > 0 }
