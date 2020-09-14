@@ -9,5 +9,9 @@ fun <T> assertCondition(value: T, p: (T) -> Boolean): Result<T> =
 fun assertTrue(
     condition: Boolean,
     errMsg: String = "Assertion error: condition should be true"
-): Result<Boolean> =
-    assertCondition(condition, errMsg) { it }
+): Result<Boolean> = assertCondition(condition, errMsg) { it }
+
+fun assertFalse(
+    condition: Boolean,
+    errMsg: String = "Assertion error: condition should be false"
+): Result<Boolean> = assertCondition(condition, errMsg) { !it }

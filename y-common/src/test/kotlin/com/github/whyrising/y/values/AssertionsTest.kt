@@ -87,4 +87,26 @@ class AssertionsTest : FreeSpec({
             }
         }
     }
+
+    "assertFalse()" - {
+        "when condition holds, it should return Result of false" {
+
+            val result: Result<Boolean> = assertFalse(false)
+
+            result shouldBe Result(false)
+        }
+
+        "when condition fails, it should return a Failure with error message" {
+            val default = "Assertion error: condition should be false"
+            val prefix = "Assertion failed for value true with message:"
+
+            checkAll { str: String ->
+                val r1 = assertFalse(true) as Failure<Boolean>
+                val r2 = assertFalse(true, str) as Failure<Boolean>
+
+                r1.exception.message shouldBe "$prefix $default"
+                r2.exception.message shouldBe "$prefix $str"
+            }
+        }
+    }
 })
