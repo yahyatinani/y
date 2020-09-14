@@ -190,4 +190,29 @@ class AssertionsTest : FreeSpec({
             }
         }
     }
+
+    "assertPositiveOrZero(n, message)" - {
+        "when condition holds, it should return the Result of n" {
+            checkAll(Arb.int().filter { it >= 0 }) { n: Int ->
+                val r = assertPositiveOrZero(n)
+
+                r shouldBe Result(n)
+            }
+        }
+
+        "when condition fails, it should return a Failure with a message" {
+            val negativesGen = Arb.int().filter { it < 0 }
+
+            checkAll(negativesGen, Arb.string()) { n: Int, msg: String ->
+                val prefix = "Assertion failed for value $n with message:"
+                val default = "$n should be >= 0"
+
+                val r1 = assertPositiveOrZero(n) as Failure<Int>
+                val r2 = assertPositiveOrZero(n, msg) as Failure<Int>
+
+                r1.exception.message shouldBe "$prefix $default"
+                r2.exception.message shouldBe "$prefix $msg"
+            }
+        }
+    }
 })
