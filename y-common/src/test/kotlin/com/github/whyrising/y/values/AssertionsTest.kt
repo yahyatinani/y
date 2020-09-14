@@ -55,7 +55,7 @@ class AssertionsTest : FreeSpec({
     "assertCondition(value: T, p: (T) -> Boolean)" - {
         "when condition fails, it should return Failure with default message" {
             checkAll(Arb.int().filter(idOdd)) { i: Int ->
-                val default = "Assertion error: condition should be true"
+                val default = "condition should be true"
                 val expectedErr = "Assertion failed for value $i " +
                     "with message: $default"
 
@@ -75,7 +75,7 @@ class AssertionsTest : FreeSpec({
         }
 
         "when condition fails, it should return a Failure with error message" {
-            val default = "Assertion error: condition should be true"
+            val default = "condition should be true"
             val prefix = "Assertion failed for value false with message:"
 
             checkAll { str: String ->
@@ -97,7 +97,7 @@ class AssertionsTest : FreeSpec({
         }
 
         "when condition fails, it should return a Failure with error message" {
-            val default = "Assertion error: condition should be false"
+            val default = "condition should be false"
             val prefix = "Assertion failed for value true with message:"
 
             checkAll { str: String ->
