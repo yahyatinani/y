@@ -1,7 +1,8 @@
 package com.github.whyrising.y.values
 
-import com.github.whyrising.y.core.complement
 import com.github.whyrising.y.core.str
+import com.github.whyrising.y.idOdd
+import com.github.whyrising.y.isEven
 import com.github.whyrising.y.values.Result.Companion.lift
 import com.github.whyrising.y.values.Result.Companion.map
 import com.github.whyrising.y.values.Result.Empty
@@ -31,8 +32,6 @@ const val EXCEPTION_MESSAGE = "java.lang.Exception: "
 
 @Suppress("UNCHECKED_CAST")
 class ResultTest : FreeSpec({
-    val isEven: (Int) -> Boolean = { it % 2 == 0 }
-    val idOdd = complement(isEven)
 
     "Result should be sealed" {
         Result::class.shouldBeSealed()

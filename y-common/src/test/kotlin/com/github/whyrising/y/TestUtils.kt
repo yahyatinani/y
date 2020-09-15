@@ -1,5 +1,6 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.core.complement
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.property.Arb
@@ -9,6 +10,9 @@ import io.kotest.property.arbitrary.arb
 import io.kotest.property.arbitrary.ascii
 import io.kotest.property.arbitrary.merge
 import io.kotest.property.arbitrary.string
+
+val isEven: (Int) -> Boolean = { it % 2 == 0 }
+val idOdd = complement(isEven)
 
 fun <A> Arb.Companion.nil(): Arb<A?> = arb(
     object : Shrinker<A?> {
