@@ -56,12 +56,11 @@ class AssertionsTest : FreeSpec({
         "when condition fails, it should return Failure with default message" {
             checkAll(Arb.int().filter(idOdd)) { i: Int ->
                 val default = "condition should be true"
-                val expectedErr = "Assertion failed for value $i " +
-                    "with message: $default"
+                val prefix = "Assertion failed for value $i with message:"
 
                 val r = assertCondition(i, isEven) as Failure<Int>
 
-                r.exception.message shouldBe expectedErr
+                r.exception.message shouldBe "$prefix $default"
             }
         }
     }
@@ -155,7 +154,7 @@ class AssertionsTest : FreeSpec({
 
             checkAll(genNegatives, Arb.string()) { n: Int, msg: String ->
                 val prefix = "Assertion failed for value $n with message:"
-                val default = "number should be n"
+                val default = "$n must be positive"
 
                 val r1 = assertPositive(n) as Failure<Int>
                 val r2 = assertPositive(n, msg) as Failure<Int>
@@ -170,7 +169,6 @@ class AssertionsTest : FreeSpec({
         val min = 10
         val max = 45843
         "when condition holds, it should return the Result of n" {
-
 
             checkAll(Arb.int().filter { it in (min + 1) until max }) { n: Int ->
                 val r: Result<Int> = assertInRange(n, min, max)
