@@ -27,10 +27,8 @@ import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 import io.kotest.property.forAll
-import java.lang.IllegalStateException
 import java.math.BigInteger
 import kotlin.system.measureTimeMillis
-import kotlin.time.measureTime
 
 class CoreTest : FreeSpec({
     "identity" - {
