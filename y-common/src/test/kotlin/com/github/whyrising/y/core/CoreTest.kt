@@ -6,8 +6,12 @@ import com.github.whyrising.y.foo2
 import com.github.whyrising.y.foo3
 import com.github.whyrising.y.foo4
 import com.github.whyrising.y.foo5
+import com.github.whyrising.y.values.Result
+import com.github.whyrising.y.values.Result.Failure
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.longs.shouldBeExactly
+import io.kotest.matchers.longs.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.bigInt
@@ -23,7 +27,10 @@ import io.kotest.property.arbitrary.short
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 import io.kotest.property.forAll
+import java.lang.IllegalStateException
 import java.math.BigInteger
+import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 class CoreTest : FreeSpec({
     "identity" - {
@@ -500,4 +507,97 @@ class CoreTest : FreeSpec({
             }
         }
     }
+
+    "retry(times: Int, delay: Long = 10, f: (A) -> B)" - {
+        "when f throws, it should retry x times " - {
+            "when f fails every time, retry should return a Failure" {
+                var i = 0
+                var j = 0
+                val times = 3
+                val e1 = IllegalStateException("failed")
+                val e2 = Exception("failed")
+                val f: (Int) -> Double = {
+                    i += 1
+                    throw e1
+                }
+                val g: (Int) -> Double = {
+                    j += 1
+                    throw e2
+                }
+
+                val r1 = retry(times, f)(i) as Failure<Double>
+                val r2 = retry(times, g)(j) as Failure<Double>
+
+                i shouldBeExactly times
+                r1.exception shouldBe e1
+                j shouldBeExactly times
+                r2.exception shouldBe IllegalStateException(e2)
+            }
+
+            "when f returns after few failures, retry should return a Success" {
+                var i = 0
+                val times = 3
+                val e = IllegalStateException("failed")
+                val f: (Int) -> Double = {
+                    i += 1
+                    if (i < 3) throw e
+                    else i.toDouble()
+                }
+
+                val r: Result<Double> = retry(times, f)(i)
+
+                r shouldBe Result(i.toDouble())
+            }
+
+            "delay should be 10 by default" {
+                var delay = 0L
+                val f: (Int) -> Double = { throw IllegalStateException() }
+                val sleepFun: (Long) -> Unit = { delay = it }
+
+                retry(3, f, sleep = sleepFun)(1)
+
+                delay shouldBeExactly 10L
+            }
+
+            "should sleep for the given delay" {
+                val f: (Int) -> Double = { throw IllegalStateException() }
+                val delay: Long = 50
+
+                measureTimeMillis {
+                    retry(2, f, delay = delay)(1)
+                } shouldBeGreaterThanOrEqual delay
+            }
+        }
+
+        "when f doesn't fail, retry should return a Success" {
+            val times = 3
+            checkAll { i: Int ->
+                val f: (Int) -> Double = { it.toDouble() }
+
+                val r: Result<Double> = retry(times, f)(i)
+
+                r shouldBe Result(i.toDouble())
+            }
+        }
+    }
 })
+
+fun <T, R> retry(
+    times: Int,
+    f: (T) -> R,
+    delay: Long = 10L,
+    sleep: (Long) -> Unit = Thread::sleep,
+): (T) -> Result<R> {
+    fun retry(t: T, result: Result<R>, e: Result<R>, count: Int): Result<R> =
+        result.orElse {
+            when (count) {
+                0 -> e
+                else -> {
+                    sleep(delay)
+                    retry(t, Result.of { f(t) }, result, count - 1)
+                }
+            }
+        }
+
+    return { t: T -> retry(t, Result.of { f(t) }, Result(), times - 1) }
+}
