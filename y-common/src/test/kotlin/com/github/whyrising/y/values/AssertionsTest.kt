@@ -166,8 +166,8 @@ class AssertionsTest : FreeSpec({
     }
 
     "assertInRange(n: Int, min: Int, max: Int)" - {
-        val min = 10
-        val max = 45843
+        val min = -45128
+        val max = 805248
         "when condition holds, it should return the Result of n" {
 
             checkAll(Arb.int().filter { it in (min + 1) until max }) { n: Int ->
