@@ -9,3 +9,5 @@ dependencies {
     testImplementation(Libs.Kotest.assertions)
     testImplementation(Libs.Kotest.propertyTest)
 }
+
+apply(from = "../publish-y.gradle.kts")

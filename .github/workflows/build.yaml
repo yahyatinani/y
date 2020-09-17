@@ -2,6 +2,10 @@ name: build
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '*.yml'
     branches:
       - master
       - release/*
@@ -44,6 +48,14 @@ jobs:
           file: ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
           name: codecov-y
           fail_ci_if_error: true
+
+      - name: publish snapshots
+        run: ./gradlew publish
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
 
       - name: Bundle the build report (when failure)
         if: failure()

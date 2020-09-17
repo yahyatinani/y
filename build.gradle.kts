@@ -12,9 +12,10 @@ plugins {
     base
     `java-library`
     kotlin("jvm") version Libs.kotlinVersion
-
+    id(Libs.Ktlint.id) version Libs.Ktlint.version
     jacoco
-    id(Libs.ktlintId) version Libs.ktlintVersion
+    id("maven-publish")
+    signing
 }
 
 dependencies {
@@ -23,7 +24,7 @@ dependencies {
 
 allprojects {
 
-    group = "com.github.whyrising"
+    group = "com.github.whyrising.y"
 
     version = Ci.publishVersion
 
@@ -53,7 +54,7 @@ subprojects {
         }
     }
 
-    apply(plugin = Libs.ktlintId)
+    apply(plugin = Libs.Ktlint.id)
     ktlint {
         debug.set(true)
     }
@@ -94,4 +95,14 @@ tasks.register<JacocoReport>("jacocoRootReport") {
 tasks.jacocoTestReport {
     // tests are required to run before generating the report
     dependsOn(tasks.test)
+}
+
+val extension = extensions.getByName("publishing") as PublishingExtension
+val publications: PublicationContainer = extension.publications
+
+signing {
+    useGpgCmd()
+
+    if (Ci.isRelease)
+        sign(publications)
 }
