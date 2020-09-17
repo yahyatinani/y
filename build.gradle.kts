@@ -55,6 +55,7 @@ subprojects {
     }
 
     apply(plugin = Libs.Ktlint.id)
+
     ktlint {
         debug.set(true)
     }

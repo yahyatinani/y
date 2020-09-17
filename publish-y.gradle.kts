@@ -18,20 +18,6 @@ fun Project.publishing(action: PublishingExtension.() -> Unit) =
 fun Project.signing(configure: SigningExtension.() -> Unit): Unit =
     configure(configure)
 
-val pubExtension = extensions.getByName("publishing") as PublishingExtension
-val publications: PublicationContainer = pubExtension.publications
-
-signing {
-    useGpgCmd()
-    if (signingKey != null && signingPassword != null) {
-        @Suppress("UnstableApiUsage")
-        useInMemoryPgpKeys(signingKey, signingPassword)
-    }
-
-    if (Ci.isRelease)
-        sign(publications)
-}
-
 publishing {
     repositories {
         maven {
@@ -50,8 +36,8 @@ publishing {
         }
     }
 
-    publications.withType<MavenPublication>().forEach {
-        it.apply {
+    publications {
+        create<MavenPublication>("y") {
             pom {
                 val devUrl = "http://github.com/whyrising/"
                 val libUrl = "$devUrl/y"
@@ -81,6 +67,22 @@ publishing {
                     url.set(libUrl)
                 }
             }
+
+            from(components["java"])
         }
     }
+}
+
+val pubExtension = extensions.getByName("publishing") as PublishingExtension
+val publications: PublicationContainer = pubExtension.publications
+
+signing {
+    useGpgCmd()
+    if (signingKey != null && signingPassword != null) {
+        @Suppress("UnstableApiUsage")
+        useInMemoryPgpKeys(signingKey, signingPassword)
+    }
+
+    if (Ci.isRelease)
+        sign(publications)
 }
