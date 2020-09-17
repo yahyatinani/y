@@ -22,7 +22,7 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
 
       - name: publish all release
-        run: ./gradlew publishYPublicationsToDeployRepository
+        run: ./gradlew publishYPublicationToDeployRepository
         env:
           RELEASE_VERSION: ${{ github.event.inputs.version }}
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
