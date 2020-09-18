@@ -18,6 +18,15 @@ fun Project.publishing(action: PublishingExtension.() -> Unit) =
 fun Project.signing(configure: SigningExtension.() -> Unit): Unit =
     configure(configure)
 
+val javadoc = tasks.named("javadoc")
+
+val javadocToJar by tasks.creating(Jar::class) {
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    description = "Assembles java doc to jar"
+    archiveClassifier.set("javadoc")
+    from(javadoc)
+}
+
 publishing {
     repositories {
         maven {
@@ -38,6 +47,8 @@ publishing {
 
     publications {
         create<MavenPublication>("y") {
+            artifact(javadocToJar)
+
             pom {
                 val devUrl = "http://github.com/whyrising/"
                 val libUrl = "$devUrl/y"

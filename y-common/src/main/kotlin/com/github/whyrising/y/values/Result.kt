@@ -2,8 +2,18 @@ package com.github.whyrising.y.values
 
 import java.io.Serializable
 
+/**
+ * Is a monadic container type which represents the Empty, Failure or Success
+ * values. It can be used when the data is optional or in case of failure.
+ * @since 0.0.1
+ */
 sealed class Result<out T> : Serializable {
 
+    /**
+     * @param f is the function expected to be applied to the value of
+     * `this` Result.
+     * @return It returns the `Result` of the result of applying f to `this`
+     */
     abstract fun <R> map(f: (T) -> R): Result<R>
 
     abstract fun <R> flatMap(f: (T) -> Result<R>): Result<R>

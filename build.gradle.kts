@@ -18,6 +18,10 @@ plugins {
     signing
 }
 
+tasks {
+    javadoc
+}
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
 }
