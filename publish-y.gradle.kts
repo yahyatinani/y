@@ -27,6 +27,13 @@ val javadocToJar by tasks.creating(Jar::class) {
     from(javadoc)
 }
 
+val sourcesJar by tasks.creating(Jar::class) {
+    val sourceSets: SourceSetContainer by project
+
+    archiveClassifier.set("sources")
+    from(sourceSets["main"].allSource)
+}
+
 publishing {
     repositories {
         maven {
@@ -48,6 +55,7 @@ publishing {
     publications {
         create<MavenPublication>("y") {
             artifact(javadocToJar)
+            artifact(sourcesJar)
 
             pom {
                 val devUrl = "http://github.com/whyrising/"
