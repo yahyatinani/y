@@ -5,13 +5,14 @@ buildscript {
     repositories {
         mavenCentral()
         mavenLocal()
+        gradlePluginPortal()
     }
 }
 
 plugins {
-    base
+    java
     `java-library`
-    kotlin("jvm") version Libs.kotlinVersion
+    kotlin("multiplatform") version Libs.kotlinVersion
     id(Libs.Ktlint.id) version Libs.Ktlint.version
     jacoco
     id("maven-publish")
@@ -22,28 +23,37 @@ tasks {
     javadoc
 }
 
-dependencies {
-    implementation(kotlin("stdlib-jdk8"))
-}
-
 allprojects {
 
-    group = "com.github.whyrising.y"
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    group = "y"
 
     version = Ci.publishVersion
 
     apply(plugin = "jacoco")
-
-    repositories {
-        jcenter()
-        mavenCentral()
-    }
 
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions.jvmTarget = Libs.jvmTargetVersion
         kotlinOptions.apiVersion = Libs.kotlinApiVersion
     }
 }
+
+kotlin {
+    targets {
+        jvm {
+            compilations.all {
+                kotlinOptions {
+                    jvmTarget = Libs.jvmTargetVersion
+                }
+            }
+        }
+    }
+}
+
 
 val testReport = tasks.register<TestReport>("testReport") {
     destinationDir = file("$buildDir/reports/tests/test")
