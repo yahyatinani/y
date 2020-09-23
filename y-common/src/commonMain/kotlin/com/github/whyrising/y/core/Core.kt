@@ -1,6 +1,6 @@
 package com.github.whyrising.y.core
 
-import java.math.BigInteger
+import kotlin.jvm.JvmName
 
 fun <T> identity(x: T): T = x
 
@@ -12,7 +12,8 @@ fun inc(x: Int): Int = x.inc()
 
 fun inc(x: Long): Long = x.inc()
 
-fun inc(x: BigInteger): BigInteger = x.inc()
+// TODO
+//fun inc(x: BigInteger): BigInteger = x.inc()
 
 fun inc(x: Float): Float = x.inc()
 
@@ -26,7 +27,8 @@ fun dec(x: Int): Int = x.dec()
 
 fun dec(x: Long): Long = x.dec()
 
-fun dec(x: BigInteger): BigInteger = x.dec()
+// TODO
+//fun dec(x: BigInteger): BigInteger = x.dec()
 
 fun dec(x: Float): Float = x.dec()
 
@@ -117,22 +119,22 @@ fun <T1, T2> complement(f: (T1) -> (T2) -> Boolean):
 @JvmName("complementY1")
 fun <T1, T2, T3> complement(f: (T1) -> (T2) -> (T3) -> Boolean):
     (T1) -> (T2) -> (T3) -> Boolean = { t1: T1 ->
-        { t2: T2 ->
-            { t3: T3 ->
-                !f(t1)(t2)(t3)
-            }
+    { t2: T2 ->
+        { t3: T3 ->
+            !f(t1)(t2)(t3)
         }
     }
+}
 
 @JvmName("complementY2")
 fun <T1, T2, T3, T4> complement(f: (T1) -> (T2) -> (T3) -> (T4) -> Boolean):
     (T1) -> (T2) -> (T3) -> (T4) -> Boolean = { t1: T1 ->
-        { t2: T2 ->
-            { t3: T3 ->
-                { t4: T4 -> !f(t1)(t2)(t3)(t4) }
-            }
+    { t2: T2 ->
+        { t3: T3 ->
+            { t4: T4 -> !f(t1)(t2)(t3)(t4) }
         }
     }
+}
 
 fun <T> compose(): (T) -> T = ::identity
 

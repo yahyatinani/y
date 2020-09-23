@@ -30,7 +30,7 @@ allprojects {
         jcenter()
     }
 
-    group = "y"
+    group = "com.github.whyrising.y"
 
     version = Ci.publishVersion
 
@@ -53,7 +53,6 @@ kotlin {
         }
     }
 }
-
 
 val testReport = tasks.register<TestReport>("testReport") {
     destinationDir = file("$buildDir/reports/tests/test")

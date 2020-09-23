@@ -1,5 +1,7 @@
 package com.github.whyrising.y.values
 
+import kotlin.jvm.JvmName
+
 sealed class Option<out T> {
     abstract fun isEmpty(): Boolean
 

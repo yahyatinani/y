@@ -47,8 +47,17 @@ kotlin {
     sourceSets {
         val commonMain by getting
 
+
         val jvmMain by getting {
             dependsOn(commonMain)
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(Libs.Kotest.runner)
+                implementation(Libs.Kotest.assertions)
+                implementation(Libs.Kotest.propertyTest)
+            }
         }
 
         val desktopMain by creating {
@@ -88,13 +97,8 @@ kotlin {
         }
     }
 }
-
-//dependencies {
-//    implementation(kotlin("stdlib-jdk8"))
-//
-//    testImplementation(Libs.Kotest.runner)
-//    testImplementation(Libs.Kotest.assertions)
-//    testImplementation(Libs.Kotest.propertyTest)
-//}
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
 
 apply(from = "../publish-y.gradle.kts")

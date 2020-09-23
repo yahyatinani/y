@@ -1,13 +1,16 @@
 package com.github.whyrising.y.values
 
-import java.io.Serializable
+import kotlin.jvm.JvmName
+
+//import java.io.Serializable
 
 /**
  * Is a monadic container type which represents the Empty, Failure or Success
  * values. It can be used when the data is optional or in case of failure.
  * @since 0.0.1
  */
-sealed class Result<out T> : Serializable {
+// TODO: Serializable
+sealed class Result<out T> {
 
     /**
      * @param f is the function expected to be applied to the value of
@@ -229,7 +232,8 @@ sealed class Result<out T> : Serializable {
 
         fun <T> of(errMsg: String, f: () -> T): Result<T> {
             fun format(e: Exception, errMsg: String) =
-                "${e.javaClass.name}: [errMsg: $errMsg] " +
+                // TODO : check name vs simpleName
+                "${e::class.simpleName}: [errMsg: $errMsg] " +
                     "[cause message: ${e.message}]"
 
             return try {

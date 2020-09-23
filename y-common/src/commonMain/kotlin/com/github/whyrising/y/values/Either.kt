@@ -1,5 +1,7 @@
 package com.github.whyrising.y.values
 
+import kotlin.jvm.JvmName
+
 sealed class Either<out L, out R> {
 
     abstract fun <T> map(f: (R) -> T): Either<L, T>
