@@ -889,7 +889,7 @@ class ResultTest : FreeSpec({
         """ {
             checkAll { errMsg1: String, errMsg2: String ->
                 fun format1(e: Exception, errMsg: String) =
-                    "${e.javaClass.name}: [errMsg: $errMsg] " +
+                    "${e::class.simpleName}: [errMsg: $errMsg] " +
                         "[cause message: ${e.message}]"
 
                 fun format2(e: Exception, errMsg: String): String =
