@@ -1,15 +1,16 @@
 package com.github.whyrising.y.values
 
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmName
-
-//import java.io.Serializable
 
 /**
  * Is a monadic container type which represents the Empty, Failure or Success
  * values. It can be used when the data is optional or in case of failure.
  * @since 0.0.1
  */
-// TODO: Serializable
+@Serializable
 sealed class Result<out T> {
 
     /**
@@ -47,6 +48,7 @@ sealed class Result<out T> {
 
     fun exists(p: (T) -> Boolean): Boolean = map(p).getOrElse(false)
 
+    @Serializable
     internal abstract class None<T> : Result<T>() {
         override fun <R> map(f: (T) -> R): Result<R> = Empty
 
@@ -73,9 +75,26 @@ sealed class Result<out T> {
         override fun toString(): String = "Empty"
     }
 
+    @Serializable
     internal object Empty : None<Nothing>()
 
+    class FailureAsStringSerializer<T> : KSerializer<Failure<T>> {
+        override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Color", PrimitiveKind.STRING)
+
+        override fun serialize(encoder: Encoder, value: Color) {
+            val string = value.rgb.toString(16).padStart(6, '0')
+            encoder.encodeString(string)
+        }
+
+        override fun deserialize(decoder: Decoder): Color {
+            val string = decoder.decodeString()
+            return Color(string.toInt(16))
+        }
+    }
+
+    @Serializable
     internal data class Failure<out T>(
+        @Contextual
         internal val exception: RuntimeException
     ) : Result<T>() {
 
@@ -110,6 +129,7 @@ sealed class Result<out T> {
         override fun toString(): String = "Failure(${exception.message})"
     }
 
+    @Serializable
     internal data class Success<out T>(internal val value: T) : Result<T>() {
 
         override fun <R> map(f: (T) -> R): Result<R> = try {

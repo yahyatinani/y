@@ -15,4 +15,10 @@ object Libs {
         const val version = "9.3.0"
         const val id = "org.jlleitschuh.gradle.ktlint"
     }
+
+    object Kotlinx {
+        private const val version = "1.0.0-RC2"
+        const val serialization =
+            "org.jetbrains.kotlinx:kotlinx-serialization-json:$version"
+    }
 }

@@ -25,8 +25,10 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.IOException
-import java.io.Serializable
+
 
 const val EXCEPTION_MESSAGE = "java.lang.Exception: "
 
@@ -35,10 +37,6 @@ class ResultTest : FreeSpec({
 
     "Result should be sealed" {
         Result::class.shouldBeSealed()
-    }
-
-    "Result should be serializable" {
-        Result::class.shouldBeSubtypeOf<Serializable>()
     }
 
     "Failure" - {
@@ -63,6 +61,12 @@ class ResultTest : FreeSpec({
         }
 
         "should be a data class" { Failure::class.shouldBeData() }
+
+        "Failure should be serializable" {
+            val string = Json.encodeToString(Result.failure<Int>("err"))
+
+            string shouldBe "{\"value\":err}"
+        }
     }
 
     "Success" - {
@@ -97,6 +101,12 @@ class ResultTest : FreeSpec({
         }
 
         "should be a data class" { Success::class.shouldBeData() }
+
+        "Success should be serializable" {
+            val string = Json.encodeToString(Success(1))
+
+            string shouldBe "{\"value\":1}"
+        }
     }
 
     "Empty" - {
