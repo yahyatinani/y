@@ -3,6 +3,11 @@ package com.github.whyrising.y.values
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlin.jvm.JvmName
 
 /**
@@ -78,23 +83,22 @@ sealed class Result<out T> {
     @Serializable
     internal object Empty : None<Nothing>()
 
-    class FailureAsStringSerializer<T> : KSerializer<Failure<T>> {
-        override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Color", PrimitiveKind.STRING)
+    internal
+    class RuntimeExceptionAsStringSerializer : KSerializer<RuntimeException> {
+        override val descriptor: SerialDescriptor =
+            PrimitiveSerialDescriptor("RuntimeException", PrimitiveKind.STRING)
 
-        override fun serialize(encoder: Encoder, value: Color) {
-            val string = value.rgb.toString(16).padStart(6, '0')
-            encoder.encodeString(string)
-        }
+        override fun serialize(encoder: Encoder, value: RuntimeException) =
+            encoder.encodeString(value.toString())
 
-        override fun deserialize(decoder: Decoder): Color {
-            val string = decoder.decodeString()
-            return Color(string.toInt(16))
-        }
+        override fun deserialize(decoder: Decoder): RuntimeException =
+            RuntimeException(decoder.decodeString())
     }
 
     @Serializable
     internal data class Failure<out T>(
         @Contextual
+        @Serializable(with = RuntimeExceptionAsStringSerializer::class)
         internal val exception: RuntimeException
     ) : Result<T>() {
 

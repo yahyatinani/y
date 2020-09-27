@@ -62,10 +62,13 @@ class ResultTest : FreeSpec({
 
         "should be a data class" { Failure::class.shouldBeData() }
 
-        "Failure should be serializable" {
+        "should be serializable" {
             val string = Json.encodeToString(Result.failure<Int>("err"))
+            val expected = "" +
+                "{\"type\":\"com.github.whyrising.y.values.Result.Failure\"," +
+                "\"exception\":\"java.lang.IllegalStateException: err\"}"
 
-            string shouldBe "{\"value\":err}"
+            string shouldBe expected
         }
     }
 
@@ -102,7 +105,7 @@ class ResultTest : FreeSpec({
 
         "should be a data class" { Success::class.shouldBeData() }
 
-        "Success should be serializable" {
+        "should be serializable" {
             val string = Json.encodeToString(Success(1))
 
             string shouldBe "{\"value\":1}"
@@ -124,6 +127,13 @@ class ResultTest : FreeSpec({
 
         "toString() should return `Empty`" {
             Empty.toString() shouldBe "Empty"
+        }
+
+        "should be serializable" {
+            val string = Json.encodeToString(Empty)
+            val expected = "{}"
+
+            string shouldBe expected
         }
     }
 
