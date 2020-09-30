@@ -4,20 +4,18 @@ import kotlin.jvm.JvmName
 
 fun <T> identity(x: T): T = x
 
-fun inc(x: Byte): Byte = x.inc()
+class NotANumberError(x: Any) : RuntimeException("`$x` is not a number!")
 
-fun inc(x: Short): Short = x.inc()
-
-fun inc(x: Int): Int = x.inc()
-
-fun inc(x: Long): Long = x.inc()
-
-// TODO
-//fun inc(x: BigInteger): BigInteger = x.inc()
-
-fun inc(x: Float): Float = x.inc()
-
-fun inc(x: Double): Double = x.inc()
+inline fun <reified T> inc(x: Any): T = when (x) {
+    is Byte -> x.inc() as T
+    is Short -> x.inc() as T
+    is Int -> x.inc() as T
+    is Long -> x.inc() as T
+    is Float -> x.inc() as T
+    is Double -> x.inc() as T
+// TODO is BigInteger -> x.inc() as T
+    else -> throw NotANumberError(x)
+}
 
 fun dec(x: Byte): Byte = x.dec()
 

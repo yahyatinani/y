@@ -6,6 +6,7 @@ import com.github.whyrising.y.foo2
 import com.github.whyrising.y.foo3
 import com.github.whyrising.y.foo4
 import com.github.whyrising.y.foo5
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
@@ -117,15 +118,6 @@ class CoreTest : FreeSpec({
             }
         }
 
-        // TODO
-//        "Increment BigIntegers" {
-//            forAll(Arb.bigInt(45)) { n: BigInteger ->
-//                val r: BigInteger = inc(n)
-//
-//                r == n.inc()
-//            }
-//        }
-
         "Increment Floats" {
             forAll(Arb.float()) { n: Float ->
                 val r: Float = inc(n)
@@ -140,6 +132,14 @@ class CoreTest : FreeSpec({
 
                 r.equals(n.inc())
             }
+        }
+
+        "when passing an illegal argument, it should throw NotANumberError" {
+            val x = "str"
+
+            val e = shouldThrowExactly<NotANumberError> { inc(x) }
+
+            e.message shouldBe "`$x` is not a number!"
         }
     }
 
@@ -442,8 +442,8 @@ class CoreTest : FreeSpec({
         }
 
         "one function, should return the same function" {
-            val f1: (Int) -> Int = ::inc
-            val g1: (Float) -> Float = ::inc
+            val f1: (Int) -> Int = ::identity
+            val g1: (Float) -> Float = ::identity
 
             val f2: (Int) -> Int = compose(f1)
             val g2: (Float) -> Float = compose(g1)
