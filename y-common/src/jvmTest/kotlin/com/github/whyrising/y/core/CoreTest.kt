@@ -139,7 +139,8 @@ class CoreTest : FreeSpec({
 
             val e = shouldThrowExactly<NotANumberError> { inc(x) }
 
-            e.message shouldBe "`$x` is not a number!"
+            e.message shouldBe "Either `$x` is not a number or this type is" +
+                " not supported."
         }
     }
 
@@ -197,7 +198,8 @@ class CoreTest : FreeSpec({
 
             val e = shouldThrowExactly<NotANumberError> { dec(x) }
 
-            e.message shouldBe "`$x` is not a number!"
+            e.message shouldBe "Either `$x` is not a number or this type is" +
+                " not supported."
         }
     }
 

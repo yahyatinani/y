@@ -4,7 +4,9 @@ import kotlin.jvm.JvmName
 
 fun <T> identity(x: T): T = x
 
-class NotANumberError(x: Any) : RuntimeException("`$x` is not a number!")
+class NotANumberError(x: Any) : RuntimeException(
+    "Either `$x` is not a number or this type is not supported."
+)
 
 inline fun <reified T> inc(x: Any): T = when (x) {
     is Byte -> x.inc() as T
