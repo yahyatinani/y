@@ -17,20 +17,16 @@ inline fun <reified T> inc(x: Any): T = when (x) {
     else -> throw NotANumberError(x)
 }
 
-fun dec(x: Byte): Byte = x.dec()
-
-fun dec(x: Short): Short = x.dec()
-
-fun dec(x: Int): Int = x.dec()
-
-fun dec(x: Long): Long = x.dec()
-
-// TODO
-//fun dec(x: BigInteger): BigInteger = x.dec()
-
-fun dec(x: Float): Float = x.dec()
-
-fun dec(x: Double): Double = x.dec()
+inline fun <reified T> dec(x: Any): T = when (x) {
+    is Byte -> x.dec() as T
+    is Short -> x.dec() as T
+    is Int -> x.dec() as T
+    is Long -> x.dec() as T
+    is Float -> x.dec() as T
+    is Double -> x.dec() as T
+// TODO is BigInteger -> x.dec() as T
+    else -> throw NotANumberError(x)
+}
 
 fun str(): String = ""
 

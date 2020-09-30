@@ -176,15 +176,6 @@ class CoreTest : FreeSpec({
             }
         }
 
-        // TODO
-//        "Decrement BigIntegers" {
-//            forAll(Arb.bigInt(45)) { n: BigInteger ->
-//                val r: BigInteger = dec(n)
-//
-//                r == n.dec()
-//            }
-//        }
-
         "Decrement Floats" {
             forAll(Arb.float()) { n: Float ->
                 val r: Float = dec(n)
@@ -199,6 +190,14 @@ class CoreTest : FreeSpec({
 
                 r.equals(n.dec())
             }
+        }
+
+        "when passing an illegal argument, it should throw NotANumberError" {
+            val x = "str"
+
+            val e = shouldThrowExactly<NotANumberError> { dec(x) }
+
+            e.message shouldBe "`$x` is not a number!"
         }
     }
 
