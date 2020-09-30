@@ -143,11 +143,13 @@ fun <T> compose(): (T) -> T = ::identity
 fun <T> compose(f: T): T = f
 
 inline fun <R2, R> compose(
-    crossinline f: (R2) -> R, crossinline g: () -> R2
+    crossinline f: (R2) -> R,
+    crossinline g: () -> R2
 ): () -> R = { f(g()) }
 
 inline fun <T1, R2, R> compose(
-    crossinline f: (R2) -> R, crossinline g: (T1) -> R2
+    crossinline f: (R2) -> R,
+    crossinline g: (T1) -> R2
 ): (T1) -> R = { t1: T1 -> f(g(t1)) }
 
 @JvmName("composeY1")
