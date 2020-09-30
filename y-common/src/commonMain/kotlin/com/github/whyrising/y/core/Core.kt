@@ -46,21 +46,25 @@ fun <T1, T2, T3, T> str(x: T1, y: T2, z: T3, vararg args: T): String =
         "$acc${str(arg)}"
     }.let { "${str(x, y, z)}$it" }
 
-fun <T1, T2, R> curry(f: (T1, T2) -> R): (T1) -> (T2) -> R = { t1: T1 ->
+inline fun <T1, T2, R> curry(
+    crossinline f: (T1, T2) -> R
+): (T1) -> (T2) -> R = { t1: T1 ->
     { t2: T2 ->
         f(t1, t2)
     }
 }
 
-fun <T1, T2, T3, R> curry(f: (T1, T2, T3) -> R): (T1) -> (T2) -> (T3) -> R =
+inline fun <T1, T2, T3, R> curry(
+    crossinline f: (T1, T2, T3) -> R
+): (T1) -> (T2) -> (T3) -> R =
     { t1: T1 ->
         { t2: T2 ->
             { t3: T3 -> f(t1, t2, t3) }
         }
     }
 
-fun <T1, T2, T3, T4, R> curry(
-    f: (T1, T2, T3, T4) -> R
+inline fun <T1, T2, T3, T4, R> curry(
+    crossinline f: (T1, T2, T3, T4) -> R
 ): (T1) -> (T2) -> (T3) -> (T4) -> R =
     { t1: T1 ->
         { t2: T2 ->
@@ -72,8 +76,8 @@ fun <T1, T2, T3, T4, R> curry(
         }
     }
 
-fun <T1, T2, T3, T4, T5, R> curry(
-    f: (T1, T2, T3, T4, T5) -> R
+inline fun <T1, T2, T3, T4, T5, R> curry(
+    crossinline f: (T1, T2, T3, T4, T5) -> R
 ): (T1) -> (T2) -> (T3) -> (T4) -> (T5) -> R =
     { t1: T1 ->
         { t2: T2 ->
@@ -87,8 +91,8 @@ fun <T1, T2, T3, T4, T5, R> curry(
         }
     }
 
-fun <T1, T2, T3, T4, T5, T6, R> curry(
-    f: (T1, T2, T3, T4, T5, T6) -> R
+inline fun <T1, T2, T3, T4, T5, T6, R> curry(
+    crossinline f: (T1, T2, T3, T4, T5, T6) -> R
 ): (T1) -> (T2) -> (T3) -> (T4) -> (T5) -> (T6) -> R =
     { t1: T1 ->
         { t2: T2 ->
@@ -102,19 +106,20 @@ fun <T1, T2, T3, T4, T5, T6, R> curry(
         }
     }
 
-fun complement(f: () -> Boolean): () -> Boolean = { !f() }
+inline fun complement(crossinline f: () -> Boolean): () -> Boolean = { !f() }
 
-fun <T> complement(f: (T) -> Boolean): (T) -> Boolean = { t: T ->
-    !f(t)
-}
+inline fun <T> complement(crossinline f: (T) -> Boolean): (T) -> Boolean =
+    { t: T -> !f(t) }
 
 @JvmName("complementY")
-fun <T1, T2> complement(f: (T1) -> (T2) -> Boolean):
-    (T1) -> (T2) -> Boolean = { t1: T1 -> { t2: T2 -> !f(t1)(t2) } }
+inline fun <T1, T2> complement(
+    crossinline f: (T1) -> (T2) -> Boolean
+): (T1) -> (T2) -> Boolean = { t1: T1 -> { t2: T2 -> !f(t1)(t2) } }
 
 @JvmName("complementY1")
-fun <T1, T2, T3> complement(f: (T1) -> (T2) -> (T3) -> Boolean):
-    (T1) -> (T2) -> (T3) -> Boolean = { t1: T1 ->
+inline fun <T1, T2, T3> complement(
+    crossinline f: (T1) -> (T2) -> (T3) -> Boolean
+): (T1) -> (T2) -> (T3) -> Boolean = { t1: T1 ->
     { t2: T2 ->
         { t3: T3 ->
             !f(t1)(t2)(t3)
@@ -123,8 +128,9 @@ fun <T1, T2, T3> complement(f: (T1) -> (T2) -> (T3) -> Boolean):
 }
 
 @JvmName("complementY2")
-fun <T1, T2, T3, T4> complement(f: (T1) -> (T2) -> (T3) -> (T4) -> Boolean):
-    (T1) -> (T2) -> (T3) -> (T4) -> Boolean = { t1: T1 ->
+inline fun <T1, T2, T3, T4> complement(
+    crossinline f: (T1) -> (T2) -> (T3) -> (T4) -> Boolean
+): (T1) -> (T2) -> (T3) -> (T4) -> Boolean = { t1: T1 ->
     { t2: T2 ->
         { t3: T3 ->
             { t4: T4 -> !f(t1)(t2)(t3)(t4) }
@@ -136,21 +142,24 @@ fun <T> compose(): (T) -> T = ::identity
 
 fun <T> compose(f: T): T = f
 
-fun <R2, R> compose(f: (R2) -> R, g: () -> R2): () -> R = { f(g()) }
+inline fun <R2, R> compose(
+    crossinline f: (R2) -> R, crossinline g: () -> R2
+): () -> R = { f(g()) }
 
-fun <T1, R2, R> compose(f: (R2) -> R, g: (T1) -> R2): (T1) -> R =
-    { t1: T1 -> f(g(t1)) }
+inline fun <T1, R2, R> compose(
+    crossinline f: (R2) -> R, crossinline g: (T1) -> R2
+): (T1) -> R = { t1: T1 -> f(g(t1)) }
 
 @JvmName("composeY1")
-fun <T1, T2, R2, R> compose(
-    f: (R2) -> R,
-    g: (T1) -> (T2) -> R2
+inline fun <T1, T2, R2, R> compose(
+    crossinline f: (R2) -> R,
+    crossinline g: (T1) -> (T2) -> R2
 ): (T1) -> (T2) -> R = { t1: T1 -> { t2: T2 -> f(g(t1)(t2)) } }
 
 @JvmName("composeY2")
-fun <T1, T2, T3, R2, R> compose(
-    f: (R2) -> R,
-    g: (T1) -> (T2) -> (T3) -> R2
+inline fun <T1, T2, T3, R2, R> compose(
+    crossinline f: (R2) -> R,
+    crossinline g: (T1) -> (T2) -> (T3) -> R2
 ): (T1) -> (T2) -> (T3) -> R = { t1: T1 ->
     { t2: T2 ->
         { t3: T3 ->
