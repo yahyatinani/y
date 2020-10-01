@@ -45,15 +45,7 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(Libs.Kotlinx.serialization)
-            }
-        }
-
-        val jvmMain by getting {
-            dependsOn(commonMain)
-        }
+        val commonMain by getting
 
         val jvmTest by getting {
             dependencies {
@@ -64,6 +56,7 @@ kotlin {
         }
     }
 }
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
