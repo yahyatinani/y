@@ -50,6 +50,14 @@ kotlin {
                 implementation(Libs.Kotlinx.serialization)
             }
         }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(Libs.Kotest.runner)
+                implementation(Libs.Kotest.assertions)
+                implementation(Libs.Kotest.propertyTest)
+            }
+        }
     }
 }
 
