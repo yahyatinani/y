@@ -177,7 +177,7 @@ class PersistentListTest : FreeSpec({
         }
 
         // TODO: Serializable
-        // TODO: Hash
+        // TODO: IHashEq
     }
 
     "PersistentList.Cons" - {
@@ -235,6 +235,7 @@ class PersistentListTest : FreeSpec({
 
                 (list1 == list2).shouldBeTrue()
                 (list1 == listOf(1)).shouldBeTrue()
+                (list1 == arrayListOf(1)).shouldBeTrue()
             }
 
             "should return false" {
@@ -246,11 +247,75 @@ class PersistentListTest : FreeSpec({
                 (list1.equals("list3")).shouldBeFalse()
                 (list1 == list2).shouldBeFalse()
                 (list2 == list3).shouldBeFalse()
+                (list1 == setOf(1)).shouldBeFalse()
             }
         }
 
         "toString()" {
             PersistentList(1, 2, 3, 4, 5).toString() shouldBe "(1 2 3 4 5)"
+        }
+
+        "count" {
+            checkAll { expect: List<Int> ->
+                val list = PersistentList(*expect.toTypedArray())
+
+                list.count shouldBeExactly expect.size
+            }
+        }
+
+        "empty()" {
+            val list = PersistentList(1, 2, 3)
+
+            list.empty() shouldBe Empty
+        }
+
+        "equiv()" - {
+            "should return false" {
+                val list1 = PersistentList(1)
+                val list2 = PersistentList(2)
+                val list3 = PersistentList(2, null)
+                val list4 = PersistentList(null, 2)
+                val list5 = PersistentList(2, 3)
+                val list6 = PersistentList(Any())
+                val list7 = PersistentList(Any())
+
+                (list1.equiv(null)).shouldBeFalse()
+                (list1.equiv("list3")).shouldBeFalse()
+                (list1.equiv(list2)).shouldBeFalse()
+                (list1.equiv(list3)).shouldBeFalse()
+                (list3.equiv(list5)).shouldBeFalse()
+                (list4.equiv(list5)).shouldBeFalse()
+                (list1.equiv(setOf(1))).shouldBeFalse()
+                (list6.equiv(list7)).shouldBeFalse()
+            }
+
+            "should return true" {
+                val list1 = PersistentList(1)
+                val list2 = PersistentList(1)
+                val list3 = PersistentList(1L)
+                val list5 = PersistentList(PersistentList(1))
+                val list6 = PersistentList(listOf(1L))
+
+                list1.equiv(list2).shouldBeTrue()
+                list1.equiv(listOf(1)).shouldBeTrue()
+                list1.equiv(arrayListOf(1)).shouldBeTrue()
+                list1.equiv(list3).shouldBeTrue()
+
+                list5.equiv(list6).shouldBeTrue()
+                list6.equiv(list5).shouldBeTrue()
+            }
+        }
+
+        "conj() should return a persistent list of 1 element" {
+
+            checkAll { l: List<Int>, i: Int ->
+                val list = PersistentList(*l.toTypedArray())
+
+                val r = list.conj(i) as PersistentList<Int>
+
+                r.count shouldBeExactly l.size + 1
+                r.first() shouldBeExactly i
+            }
         }
 
         "implementation of List<E>" - {

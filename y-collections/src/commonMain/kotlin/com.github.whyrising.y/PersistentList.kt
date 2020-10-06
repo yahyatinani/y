@@ -18,10 +18,11 @@ sealed class PersistentList<out E> :
         override fun cons(e: @UnsafeVariance E): ISeq<E> = Cons(e, this)
 
         override fun equals(other: Any?): Boolean {
-            if (other == null) return false
-
-            if (!(other is ISeq<*> || other is Iterable<*>))
-                return false
+            //TODO: reconsider the use of ISeq if PersistentMap was an ISeq
+            when (other) {
+                null -> return false
+                !is List<*> -> return false
+            }
 
             val otherIter = (other as Iterable<*>).iterator()
             val thisIter = this.iterator()
@@ -50,17 +51,28 @@ sealed class PersistentList<out E> :
 
         override val count: Int = _rest.count + 1
 
-        override fun empty(): IPersistentCollection<E> {
-            TODO("Not yet implemented")
+        override fun empty(): IPersistentCollection<E> = Empty
+
+        override fun equiv(other: Any?): Boolean {
+            //TODO: reconsider the use of ISeq if PersistentMap was an ISeq
+            when (other) {
+                null -> return false
+                !is List<*> -> return false
+            }
+
+            val otherIter = (other as Iterable<*>).iterator()
+            val thisIter = this.iterator()
+
+            while (thisIter.hasNext() && otherIter.hasNext()) {
+                if (!equiv(thisIter.next(), otherIter.next()))
+                    return false
+            }
+
+            return !otherIter.hasNext()
         }
 
-        override fun equiv(any: Any?): Boolean {
-            TODO("Not yet implemented")
-        }
-
-        override fun conj(e: @UnsafeVariance E): IPersistentCollection<E> {
-            TODO("Not yet implemented")
-        }
+        override fun conj(e: @UnsafeVariance E): IPersistentCollection<E> =
+            Cons(e, this)
 
         // List implementation
         override val size: Int = count
@@ -128,7 +140,7 @@ sealed class PersistentList<out E> :
 
         override fun empty(): AEmpty<E> = this
 
-        override fun equiv(any: Any?): Boolean = equals(any)
+        override fun equiv(other: Any?): Boolean = equals(other)
 
         override fun conj(e: @UnsafeVariance E): PersistentList<E> =
             Cons(e, Empty)

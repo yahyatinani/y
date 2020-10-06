@@ -5,7 +5,7 @@ interface IPersistentCollection<out E> {
 
     fun empty(): IPersistentCollection<E>
 
-    fun equiv(any: Any?): Boolean
+    fun equiv(other: Any?): Boolean
 
     fun conj(e: @UnsafeVariance E): IPersistentCollection<E>
 }
