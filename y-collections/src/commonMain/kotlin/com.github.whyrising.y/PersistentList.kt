@@ -78,7 +78,12 @@ sealed class PersistentList<out E> :
         override val size: Int = count
 
         override fun contains(element: @UnsafeVariance E): Boolean {
-            TODO("Not yet implemented - it needs equiv")
+            val iter = iterator()
+
+            while (iter.hasNext())
+                if (equiv(iter.next(), element)) return true
+
+            return false
         }
 
         override
