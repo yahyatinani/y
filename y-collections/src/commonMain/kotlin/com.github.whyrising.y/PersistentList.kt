@@ -87,9 +87,10 @@ sealed class PersistentList<out E> :
         }
 
         override
-        fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
-            TODO("Not yet implemented - it needs equiv")
-        }
+        fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean =
+            elements.fold(true) { acc: Boolean, e: E ->
+                acc && contains(e)
+            }
 
         override fun get(index: Int): E {
             if (index >= count || index < 0)

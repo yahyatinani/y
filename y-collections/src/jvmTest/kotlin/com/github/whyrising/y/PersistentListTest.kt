@@ -334,6 +334,13 @@ class PersistentListTest : FreeSpec({
                 list.contains(10).shouldBeFalse()
             }
 
+            "containsAll(Collection)"{
+                val list = PersistentList(1, 2, 3, 4L, 1.4f)
+
+                list.containsAll(listOf(3, 2, 4L)).shouldBeTrue()
+                list.containsAll(listOf(3, 2, 0)).shouldBeFalse()
+            }
+
             "isEmpty() should return false" {
                 Cons(1, Empty).isEmpty().shouldBeFalse()
             }
