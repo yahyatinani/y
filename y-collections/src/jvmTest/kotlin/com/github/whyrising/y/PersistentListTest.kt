@@ -18,6 +18,7 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.merge
 import io.kotest.property.checkAll
+import java.util.*
 
 class PersistentListTest : FreeSpec({
 
@@ -227,23 +228,29 @@ class PersistentListTest : FreeSpec({
             }
         }
 
-        "equals() should return true" {
-            val list1 = PersistentList(1)
-            val list2 = PersistentList(1)
+        "equals()" - {
+            "should return true" {
+                val list1 = PersistentList(1)
+                val list2 = PersistentList(1)
 
-            (list1 == list2).shouldBeTrue()
-            (list1 == listOf(1)).shouldBeTrue()
+                (list1 == list2).shouldBeTrue()
+                (list1 == listOf(1)).shouldBeTrue()
+            }
+
+            "should return false" {
+                val list1 = PersistentList(1)
+                val list2 = PersistentList(2)
+                val list3 = PersistentList(2, null)
+
+                (list1.equals(null)).shouldBeFalse()
+                (list1.equals("list3")).shouldBeFalse()
+                (list1 == list2).shouldBeFalse()
+                (list2 == list3).shouldBeFalse()
+            }
         }
 
-        "equals() should return false" {
-            val list1 = PersistentList(1)
-            val list2 = PersistentList(2)
-            val list3 = PersistentList(2, null)
-
-            (list1.equals(null)).shouldBeFalse()
-            (list1.equals("list3")).shouldBeFalse()
-            (list1 == list2).shouldBeFalse()
-            (list2 == list3).shouldBeFalse()
+        "toString()" {
+            PersistentList(1, 2, 3, 4, 5).toString() shouldBe "(1 2 3 4 5)"
         }
 
         "implementation of List<E>" - {
@@ -259,17 +266,133 @@ class PersistentListTest : FreeSpec({
                 Cons(1, Empty).isEmpty().shouldBeFalse()
             }
 
+            "get(index)" - {
+                val ints = listOf(1, 2, 3, 4, 5, 6)
+                val list = PersistentList(*ints.toTypedArray())
+
+                "when index is valid, it should return an element by index" {
+                    for ((index, value) in ints.withIndex()) {
+                        list[index] shouldBeExactly value
+                    }
+                }
+
+                """when index is out of bounds, it should throw
+                   IndexOutOfBoundsException in constant-time""" {
+                    val index1 = 10
+                    val index2 = -5
+                    val e1 = shouldThrowExactly<IndexOutOfBoundsException> {
+                        list[index1]
+                    }
+                    val e2 = shouldThrowExactly<IndexOutOfBoundsException> {
+                        list[index2]
+                    }
+
+                    e1.message shouldBe "index = $index1"
+                    e2.message shouldBe "index = $index2"
+                }
+            }
+
             "iterator()" {
                 val list: PersistentList<Int> = Cons(1, Empty)
 
                 val seqIter = list.iterator() as SeqIterator
 
+                seqIter.next shouldBe list
                 seqIter.next shouldBeSameInstanceAs list
             }
-        }
 
-        "toString()" {
-            PersistentList(1, 2, 3, 4, 5).toString() shouldBe "(1 2 3 4 5)"
+            "lastIndexOf(element)" - {
+                val list = PersistentList(1, 1, 6, 6, 4, 5, 4)
+
+                "when the element is not in the list, it should return -1" {
+                    list.lastIndexOf(10) shouldBeExactly -1
+                }
+
+                """|when the element is in the list,
+                   |it should return the index of the last occurrence
+                   |of the specified element
+                """ {
+                    list.lastIndexOf(6) shouldBeExactly 3
+                    list.lastIndexOf(1) shouldBeExactly 1
+                    list.lastIndexOf(4) shouldBeExactly 6
+                }
+            }
+
+            "listIterator()" {
+                val list = PersistentList(1, 2, 3)
+                val expected = list.toList().listIterator()
+
+                val listIterator = list.listIterator()
+
+                shouldThrowExactly<NoSuchElementException> {
+                    listIterator.previous()
+                }
+                listIterator.next() shouldBe expected.next()
+                listIterator.next() shouldBe expected.next()
+                listIterator.next() shouldBe expected.next()
+                listIterator.hasNext() shouldBe expected.hasNext()
+                listIterator.hasPrevious() shouldBe expected.hasPrevious()
+                listIterator.nextIndex() shouldBe expected.nextIndex()
+                listIterator.previousIndex() shouldBe expected.previousIndex()
+                shouldThrowExactly<NoSuchElementException> {
+                    listIterator.next()
+                }
+            }
+
+            "listIterator(index)" - {
+                val list = PersistentList(1, 2, 3)
+
+                "when index is valid, it should return a list iterator" {
+                    val index = 1
+                    val expect = list.toList().listIterator(index)
+
+                    val listIterator = list.listIterator(index)
+
+                    listIterator.previous() shouldBe expect.previous()
+                    listIterator.next() shouldBe expect.next()
+                    listIterator.next() shouldBe expect.next()
+                    listIterator.next() shouldBe expect.next()
+                    listIterator.hasNext() shouldBe expect.hasNext()
+                    listIterator.hasPrevious() shouldBe expect.hasPrevious()
+                    listIterator.nextIndex() shouldBe expect.nextIndex()
+                    listIterator.previousIndex() shouldBe expect.previousIndex()
+                    shouldThrowExactly<NoSuchElementException> {
+                        listIterator.next()
+                    }
+                }
+
+                "when index is out of bounds, it should throw"{
+                    shouldThrowExactly<IndexOutOfBoundsException> {
+                        list.listIterator(4)
+                    }
+                }
+            }
+
+            "subList(start, end)" - {
+                val list = PersistentList(1, 2, 3, 4)
+
+                "when passing valid indices, it returns a sublist of this" {
+                    val expectedSub = listOf(2, 3)
+
+                    val sublist = list.subList(1, 3)
+
+                    sublist.size shouldBe 2
+                    sublist shouldBe expectedSub
+                }
+
+                "when passing out of bounds indices, it should throw" {
+
+                    shouldThrowExactly<IndexOutOfBoundsException> {
+                        list.subList(-1, 3)
+                    }
+                    shouldThrowExactly<IndexOutOfBoundsException> {
+                        list.subList(1, 6)
+                    }
+                    shouldThrowExactly<IndexOutOfBoundsException> {
+                        list.subList(-1, 6)
+                    }
+                }
+            }
         }
     }
 })

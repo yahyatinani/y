@@ -66,41 +66,46 @@ sealed class PersistentList<out E> :
         override val size: Int = count
 
         override fun contains(element: @UnsafeVariance E): Boolean {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented - it needs equiv")
         }
 
         override
         fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented - it needs equiv")
         }
 
         override fun get(index: Int): E {
-            TODO("Not yet implemented")
+            if (index >= count || index < 0)
+                throw IndexOutOfBoundsException("index = $index")
+
+            tailrec fun get(_index: Int, e: E, rest: ISeq<E>): E {
+                if (_index == index) return e
+
+                return get(_index.inc(), rest.first(), rest.rest())
+            }
+
+            return get(0, this.first, rest())
         }
 
         override fun indexOf(element: @UnsafeVariance E): Int {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented - it needs equiv")
         }
 
         override fun isEmpty(): Boolean = false
 
         override fun iterator(): Iterator<E> = SeqIterator(this)
 
-        override fun lastIndexOf(element: @UnsafeVariance E): Int {
-            TODO("Not yet implemented")
-        }
+        override fun lastIndexOf(element: @UnsafeVariance E): Int =
+            this.toList().lastIndexOf(element)
 
-        override fun listIterator(): ListIterator<E> {
-            TODO("Not yet implemented")
-        }
+        override fun listIterator(): ListIterator<E> =
+            this.toList().listIterator()
 
-        override fun listIterator(index: Int): ListIterator<E> {
-            TODO("Not yet implemented")
-        }
+        override fun listIterator(index: Int): ListIterator<E> =
+            this.toList().listIterator(index)
 
-        override fun subList(fromIndex: Int, toIndex: Int): List<E> {
-            TODO("Not yet implemented")
-        }
+        override fun subList(fromIndex: Int, toIndex: Int): List<E> =
+            this.toList().subList(fromIndex, toIndex)
 
         companion object {
             private const val INIT_HASH_CODE = 0
@@ -132,7 +137,7 @@ sealed class PersistentList<out E> :
         override val size: Int = 0
 
         override fun contains(element: @UnsafeVariance E): Boolean {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented - it doesn't get called")
         }
 
         override
@@ -143,7 +148,7 @@ sealed class PersistentList<out E> :
             throw IndexOutOfBoundsException("Can't call get on an empty list")
 
         override fun indexOf(element: @UnsafeVariance E): Int {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented - it doesn't get called")
         }
 
         override fun isEmpty(): Boolean = true
@@ -155,7 +160,7 @@ sealed class PersistentList<out E> :
         }
 
         override fun lastIndexOf(element: @UnsafeVariance E): Int {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented - it doesn't get called")
         }
 
         override fun listIterator(): ListIterator<E> =
