@@ -8,33 +8,19 @@ import io.kotest.matchers.shouldBe
 class UtilTest : FreeSpec({
 
     class UnsupportedNumber : Number() {
-        override fun toByte(): Byte {
-            TODO("Not yet implemented")
-        }
+        override fun toByte(): Byte = 0
 
-        override fun toChar(): Char {
-            TODO("Not yet implemented")
-        }
+        override fun toChar(): Char = 'a'
 
-        override fun toDouble(): Double {
-            TODO("Not yet implemented")
-        }
+        override fun toDouble(): Double = 0.0
 
-        override fun toFloat(): Float {
-            TODO("Not yet implemented")
-        }
+        override fun toFloat(): Float = 0.0f
 
-        override fun toInt(): Int {
-            TODO("Not yet implemented")
-        }
+        override fun toInt(): Int = 0
 
-        override fun toLong(): Long {
-            TODO("Not yet implemented")
-        }
+        override fun toLong(): Long = 0
 
-        override fun toShort(): Short {
-            TODO("Not yet implemented")
-        }
+        override fun toShort(): Short = 0
 
         override fun toString(): String = "UnsupportedNumber"
     }
