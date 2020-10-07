@@ -106,7 +106,10 @@ sealed class PersistentList<out E> :
         }
 
         override fun indexOf(element: @UnsafeVariance E): Int {
-            TODO("Not yet implemented - it needs equiv")
+            for ((index, n) in this.withIndex())
+                if (equiv(n, element)) return index
+
+            return -1
         }
 
         override fun isEmpty(): Boolean = false

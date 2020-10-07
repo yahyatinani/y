@@ -341,6 +341,15 @@ class PersistentListTest : FreeSpec({
                 list.containsAll(listOf(3, 2, 0)).shouldBeFalse()
             }
 
+            "indexOf(element)" {
+                val list = PersistentList(1L, 2.0, 3, 4)
+
+                list.indexOf(3) shouldBeExactly 2
+                list.indexOf(4L) shouldBeExactly 3
+                list.indexOf(1) shouldBeExactly 0
+                list.indexOf(6) shouldBeExactly -1
+            }
+
             "isEmpty() should return false" {
                 Cons(1, Empty).isEmpty().shouldBeFalse()
             }
