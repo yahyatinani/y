@@ -225,11 +225,15 @@ sealed class PersistentList<out E> :
     internal object Empty : AEmpty<Nothing>()
 
     companion object {
-        operator fun <E> invoke(): PersistentList<E> = Empty
+        internal operator fun <E> invoke(): PersistentList<E> = Empty
 
-        operator fun <E> invoke(vararg args: E): PersistentList<E> =
+        internal operator fun <E> invoke(vararg args: E): PersistentList<E> =
             args.foldRight(Empty) { e: E, acc: IPersistentList<E> ->
                 Cons(e, acc)
             }
     }
 }
+
+fun <E> l(): PersistentList<E> = Empty
+
+fun <E> l(vararg elements: E): PersistentList<E> = PersistentList(*elements)

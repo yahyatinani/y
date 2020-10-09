@@ -513,4 +513,14 @@ class PersistentListTest : FreeSpec({
             }
         }
     }
+
+    "l(args)" - {
+        "l() without args should return an empty PersistentList" {
+            l<Int>() shouldBe Empty
+        }
+
+        "l(args) with args should return a PersistentList" {
+            l(1, 2, 3, 4) shouldBe PersistentList(1, 2, 3, 4)
+        }
+    }
 })
