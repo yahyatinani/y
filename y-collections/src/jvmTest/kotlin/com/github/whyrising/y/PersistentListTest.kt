@@ -18,6 +18,9 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.merge
 import io.kotest.property.checkAll
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.*
 
 class PersistentListTest : FreeSpec({
@@ -175,9 +178,6 @@ class PersistentListTest : FreeSpec({
                 seq.count shouldBe 1
             }
         }
-
-        // TODO: Serializable
-        // TODO: IHashEq
     }
 
     "PersistentList.Cons" - {
@@ -480,6 +480,36 @@ class PersistentListTest : FreeSpec({
                         list.subList(-1, 6)
                     }
                 }
+            }
+        }
+    }
+
+    "Serialization" - {
+        "serialize" {
+            checkAll { ints: List<Int> ->
+                val list = PersistentList(*ints.toTypedArray())
+
+                val encodeToString = Json.encodeToString(list)
+
+                encodeToString shouldBe Json.encodeToString(ints)
+            }
+
+            checkAll { strings: List<String> ->
+                val list = PersistentList(*strings.toTypedArray())
+
+                val encodeToString = Json.encodeToString(list)
+
+                encodeToString shouldBe Json.encodeToString(strings)
+            }
+        }
+
+        "deserialize" {
+            checkAll { ints: List<Int> ->
+                val intsStr = Json.encodeToString(ints)
+
+                val list = Json.decodeFromString<PersistentList<Int>>(intsStr)
+
+                list shouldBe PersistentList(*ints.toTypedArray())
             }
         }
     }

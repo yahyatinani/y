@@ -1,5 +1,33 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.PersistentList.Empty
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+internal class PersistentListSerializer<E>(element: KSerializer<E>) :
+    KSerializer<PersistentList<E>> {
+
+    private val listSerializer = ListSerializer(element)
+
+    override val descriptor: SerialDescriptor = element.descriptor
+
+    override fun deserialize(decoder: Decoder): PersistentList<E> {
+        val list = listSerializer.deserialize(decoder)
+
+        return list.foldRight(Empty) { e: E, acc: IPersistentCollection<E> ->
+            acc.conj(e)
+        } as PersistentList<E>
+    }
+
+    override fun serialize(encoder: Encoder, value: PersistentList<E>) =
+        listSerializer.serialize(encoder, value)
+}
+
+@Serializable(with = PersistentListSerializer::class)
 sealed class PersistentList<out E> :
     IPersistentList<E>, ISeq<E>, List<E>, ConstantCount {
 
