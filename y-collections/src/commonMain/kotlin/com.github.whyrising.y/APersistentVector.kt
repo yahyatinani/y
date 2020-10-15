@@ -11,4 +11,6 @@ abstract class APersistentVector<out E> : IPersistentVector<E> {
 
         return "[${str.trim()}]"
     }
+
+    override fun length(): Int = count
 }

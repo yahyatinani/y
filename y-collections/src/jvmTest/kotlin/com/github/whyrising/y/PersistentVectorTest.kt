@@ -160,6 +160,14 @@ class PersistentVectorTest : FreeSpec({
             }
         }
 
+        "length()" {
+            checkAll { list: List<Int> ->
+                val vec = PersistentVector(*list.toTypedArray())
+
+                vec.length() shouldBeExactly list.size
+            }
+        }
+
         val default = -1
         "nth(index)" {
             val list = (1..1056).toList()
