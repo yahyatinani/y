@@ -20,7 +20,6 @@ sealed class PersistentVector<out E>(
         return rootNode
     }
 
-
     fun conj(e: @UnsafeVariance E): PersistentVector<E> {
         // empty slot available in tail?
         if (count - tailOffset(count) < BF) {
@@ -62,7 +61,7 @@ sealed class PersistentVector<out E>(
         }
     }
 
-    internal abstract class AEmptyPersistentVector<E> : PersistentVector<E>(
+    internal abstract class AEmptyVector<E> : PersistentVector<E>(
         0,
         SHIFT,
         EmptyNode,
@@ -71,7 +70,7 @@ sealed class PersistentVector<out E>(
         override fun toString(): String = "[]"
     }
 
-    internal object EmptyPersistentVector : AEmptyPersistentVector<Nothing>()
+    internal object EmptyVector : AEmptyVector<Nothing>()
 
     internal class Vector<out E>(
         _count: Int,
@@ -81,16 +80,23 @@ sealed class PersistentVector<out E>(
     ) : PersistentVector<E>(_count, _shift, _root, _tail)
 
     companion object {
-        operator fun <E> invoke(): PersistentVector<E> = EmptyPersistentVector
+        operator fun <E> invoke(): PersistentVector<E> = EmptyVector
 
         @Suppress("UNCHECKED_CAST")
         operator fun <E> invoke(vararg args: E): PersistentVector<E> {
             val argsCount = args.size
 
-            if (argsCount == 0) return EmptyPersistentVector
-
-            val tail = args as Array<Any?>
-            return Vector(argsCount, SHIFT, EmptyNode, tail)
+            return when {
+                argsCount == 0 -> EmptyVector
+                argsCount <= BF -> {
+                    val tail = args as Array<Any?>
+                    Vector(argsCount, SHIFT, EmptyNode, tail)
+                }
+                else -> // TODO: reimplement using TransientVector
+                    args.fold<E, PersistentVector<E>>(EmptyVector) { acc, e ->
+                        acc.conj(e)
+                    }
+            }
         }
 
         private fun tailOffset(count: Int): Int = when {

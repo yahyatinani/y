@@ -1,6 +1,6 @@
 package com.github.whyrising.y
 
-import com.github.whyrising.y.PersistentVector.EmptyPersistentVector
+import com.github.whyrising.y.PersistentVector.EmptyVector
 import com.github.whyrising.y.PersistentVector.Node
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -25,7 +25,7 @@ class PersistentVectorTest : FreeSpec({
         "Node does have an array of nodes" {
             val array = arrayOfNulls<Int>(33)
 
-            val node = PersistentVector.Node<Int>(array as Array<Any?>)
+            val node = Node<Int>(array as Array<Any?>)
 
             node.array shouldBeSameInstanceAs array
         }
@@ -41,8 +41,8 @@ class PersistentVectorTest : FreeSpec({
     }
 
     "PersistentVector" - {
-        "invoke() should return the EmptyPersistentVector" {
-            PersistentVector<Int>() shouldBe EmptyPersistentVector
+        "invoke() should return the EmptyVector" {
+            PersistentVector<Int>() shouldBe EmptyVector
         }
 
         "invoke(args)" - {
@@ -52,13 +52,33 @@ class PersistentVectorTest : FreeSpec({
                     val tail = vec.tail
 
                     if (vec.count == 0)
-                        vec shouldBeSameInstanceAs EmptyPersistentVector
+                        vec shouldBeSameInstanceAs EmptyVector
                     vec.shift shouldBeExactly SHIFT
                     vec.count shouldBeExactly list.size
                     vec.root shouldBeSameInstanceAs EmptyNode
                     tail.size shouldBeExactly list.size
                     tail shouldContainAll list
                 }
+            }
+
+            "when args count > 32, it should call conj" {
+                val list = (1..100).toList()
+
+                val vec = PersistentVector(*list.toTypedArray())
+                val tail = vec.tail
+                val root = vec.root
+
+                vec.shift shouldBeExactly SHIFT
+                vec.count shouldBeExactly list.size
+                tail.size shouldBeExactly 4
+                root.array[0].shouldNotBeNull()
+                root.array[1].shouldNotBeNull()
+                root.array[2].shouldNotBeNull()
+                root.array[3].shouldBeNull()
+                tail[0] shouldBe 97
+                tail[1] shouldBe 98
+                tail[2] shouldBe 99
+                tail[3] shouldBe 100
             }
         }
 
@@ -141,7 +161,7 @@ class PersistentVectorTest : FreeSpec({
         }
     }
 
-    "EmptyPersistentVector" - {
+    "EmptyVector" - {
         "toString() should return []" {
             PersistentVector<Int>().toString() shouldBe "[]"
         }
