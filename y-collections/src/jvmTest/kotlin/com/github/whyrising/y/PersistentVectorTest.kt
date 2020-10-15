@@ -159,6 +159,25 @@ class PersistentVectorTest : FreeSpec({
                 }
             }
         }
+
+        "nth(index)" {
+            val list = (1..1056).toList()
+
+            val vec = PersistentVector(*list.toTypedArray())
+
+            shouldThrowExactly<IndexOutOfBoundsException> { vec.nth(2000) }
+            shouldThrowExactly<IndexOutOfBoundsException> { vec.nth(list.size) }
+            shouldThrowExactly<IndexOutOfBoundsException> { vec.nth(-1) }
+            vec.nth(1055) shouldBeExactly 1056
+            vec.nth(1024) shouldBeExactly 1025
+            vec.nth(1023) shouldBeExactly 1024
+        }
+
+        "toString()" {
+            val vec = PersistentVector(1, 2, 3, 4)
+
+            vec.toString() shouldBe "[1 2 3 4]"
+        }
     }
 
     "EmptyVector" - {

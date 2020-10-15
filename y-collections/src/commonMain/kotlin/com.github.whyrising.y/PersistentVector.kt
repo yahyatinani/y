@@ -10,7 +10,7 @@ sealed class PersistentVector<out E>(
     internal val shift: Int,
     internal val root: Node<E>,
     internal val tail: Array<Any?>
-) : IPersistentVector<E> {
+) : IPersistentVector<E>, Indexed<E> {
 
     private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
         val rootNode = Node<E>(parent.array.copyOf())
@@ -47,6 +47,29 @@ sealed class PersistentVector<out E>(
         return Vector(count + 1, newShift, newRoot, arrayOf(e))
     }
 
+    @Suppress("UNCHECKED_CAST")
+    private fun leafArrayBy(index: Int): Array<E> = when {
+        index >= count || index < 0 -> throw IndexOutOfBoundsException()
+        index >= tailOffset(count) -> tail as Array<E>
+        else -> {
+            var level = shift
+            var node = root
+
+            while (level > 0) {
+                node = node.array[(index ushr level) and 0x01f] as Node<E>
+                level -= SHIFT
+            }
+
+            node.array as Array<E>
+        }
+    }
+
+    override fun nth(index: Int): E {
+        val leaf = leafArrayBy(index)
+
+        return leaf[index and 0x01f]
+    }
+
     internal sealed class Node<out T>(val array: Array<Any?>) {
         internal class Node2<out T>(_array: Array<Any?>) :
             Node<T>(_array)
@@ -77,7 +100,19 @@ sealed class PersistentVector<out E>(
         _shift: Int,
         _root: Node<E>,
         _tail: Array<Any?>
-    ) : PersistentVector<E>(_count, _shift, _root, _tail)
+    ) : PersistentVector<E>(_count, _shift, _root, _tail) {
+
+        override fun toString(): String {
+            var i = 0
+            var str = ""
+            while (i < count) {
+                str += "${nth(i)} "
+                i++
+            }
+
+            return "[${str.trim()}]"
+        }
+    }
 
     companion object {
         operator fun <E> invoke(): PersistentVector<E> = EmptyVector
