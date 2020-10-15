@@ -10,7 +10,7 @@ sealed class PersistentVector<out E>(
     internal val shift: Int,
     internal val root: Node<E>,
     internal val tail: Array<Any?>
-) {
+) : IPersistentVector<E> {
 
     private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
         val rootNode = Node<E>(parent.array.copyOf())
@@ -20,7 +20,7 @@ sealed class PersistentVector<out E>(
         return rootNode
     }
 
-    fun conj(e: @UnsafeVariance E): PersistentVector<E> {
+    override fun conj(e: @UnsafeVariance E): PersistentVector<E> {
         // empty slot available in tail?
         if (count - tailOffset(count) < BF) {
             val newTail = tail.copyOf(tail.size + 1)
