@@ -2,15 +2,15 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 
-const val SHIFT = 5
-const val BF = 32
+internal const val SHIFT = 5
+internal const val BF = 32
 
 sealed class PersistentVector<out E>(
     override val count: Int,
     internal val shift: Int,
     internal val root: Node<E>,
     internal val tail: Array<Any?>
-) : IPersistentVector<E>, Indexed<E> {
+) : APersistentVector<E>() {
 
     private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
         val rootNode = Node<E>(parent.array.copyOf())
@@ -91,7 +91,7 @@ sealed class PersistentVector<out E>(
         }
     }
 
-    internal abstract class AEmptyVector<E> : PersistentVector<E>(
+    internal object EmptyVector : PersistentVector<Nothing>(
         0,
         SHIFT,
         EmptyNode,
@@ -100,26 +100,12 @@ sealed class PersistentVector<out E>(
         override fun toString(): String = "[]"
     }
 
-    internal object EmptyVector : AEmptyVector<Nothing>()
-
     internal class Vector<out E>(
         _count: Int,
         _shift: Int,
         _root: Node<E>,
         _tail: Array<Any?>
-    ) : PersistentVector<E>(_count, _shift, _root, _tail) {
-
-        override fun toString(): String {
-            var i = 0
-            var str = ""
-            while (i < count) {
-                str += "${nth(i)} "
-                i++
-            }
-
-            return "[${str.trim()}]"
-        }
-    }
+    ) : PersistentVector<E>(_count, _shift, _root, _tail)
 
     companion object {
         operator fun <E> invoke(): PersistentVector<E> = EmptyVector
