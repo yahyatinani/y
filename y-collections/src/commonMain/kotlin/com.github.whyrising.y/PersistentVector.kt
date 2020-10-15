@@ -6,7 +6,7 @@ const val SHIFT = 5
 const val BF = 32
 
 sealed class PersistentVector<out E>(
-    internal val count: Int,
+    override val count: Int,
     internal val shift: Int,
     internal val root: Node<E>,
     internal val tail: Array<Any?>

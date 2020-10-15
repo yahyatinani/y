@@ -173,6 +173,14 @@ class PersistentVectorTest : FreeSpec({
             vec.nth(1023) shouldBeExactly 1024
         }
 
+        "count" {
+            checkAll { list: List<Int> ->
+                val vec = PersistentVector(*list.toTypedArray())
+
+                vec.count shouldBeExactly list.size
+            }
+        }
+
         "toString()" {
             val vec = PersistentVector(1, 2, 3, 4)
 
