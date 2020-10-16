@@ -14,8 +14,8 @@ sealed class PersistentVector<out E>(
 
     private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
         val rootNode = Node<E>(parent.array.copyOf())
-        val index = ((count - 1) ushr level) and 0x01f
-        rootNode.array[index] = tail
+        val subIndex = ((count - 1) ushr level) and 0x01f
+        rootNode.array[subIndex] = tail
 
         return rootNode
     }

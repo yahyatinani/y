@@ -5,6 +5,7 @@ import com.github.whyrising.y.PersistentVector.Node
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -100,44 +101,36 @@ class PersistentVectorTest : FreeSpec({
 
             @Suppress("UNCHECKED_CAST")
             "when the tail is full, it should push tail into the vec" - {
-                "when size is 32 and there is enough room in the root" {
-                    val e = 99
-                    val list = (1..32).toList()
-                    val pv = PersistentVector(*list.toTypedArray())
+                "when the vec level is 5" {
+                    val listGen = Arb.list(Arb.int(), (32..1024)).filter {
+                        it.size % 32 == 0
+                    }
 
-                    val vec = pv.conj(e)
-                    val tail = vec.tail
-                    val root = vec.root
-                    val firstNodeElements = (root.array[0] as Node<Int>).array
+                    checkAll(listGen, Arb.int()) { l: List<Int>, i: Int ->
+                        val tempVec = PersistentVector(*l.toTypedArray())
+                        val tempTail = tempVec.tail
 
-                    vec.shift shouldBeExactly SHIFT
-                    vec.count shouldBeExactly 33
-                    root.array.size shouldBeExactly 32
-                    firstNodeElements shouldBeSameInstanceAs pv.tail
-                    for ((index, n) in list.withIndex())
-                        firstNodeElements[index] as Int shouldBeExactly n
-                    tail.size shouldBeExactly 1
-                    tail[0] as Int shouldBeExactly e
-                }
+                        val vec = tempVec.conj(i)
+                        val tail = vec.tail
 
-                "when size is 64 and there is enough room in the root" {
-                    val e = 99
-                    val list1 = (1..32).toList()
-                    val list2 = (33..64).toList()
-                    val chunk1 = PersistentVector(*list1.toTypedArray())
-                    val chunk2 = list2.fold(chunk1) { v, i -> v.conj(i) }
+                        var index = 31
+                        var isMostRightLeafFound = false
+                        while (index >= 0 && !isMostRightLeafFound) {
+                            val o = vec.root.array[index]
+                            if (o != null) {
+                                val mostRightLeaf = (o as Node<Int>).array
+                                mostRightLeaf shouldBeSameInstanceAs tempTail
+                                isMostRightLeafFound = true
+                            }
+                            index--
+                        }
 
-                    val vec = chunk2.conj(e)
-                    val root = vec.root
-                    val tail = vec.tail
-                    val firstNodeElements = (root.array[0] as Node<Int>).array
-                    val secondNodeElements = (root.array[1] as Node<Int>).array
-
-                    firstNodeElements shouldBeSameInstanceAs chunk1.tail
-                    secondNodeElements shouldBeSameInstanceAs chunk2.tail
-                    vec.count shouldBeExactly 65
-                    tail.size shouldBeExactly 1
-                    tail[0] as Int shouldBeExactly e
+                        isMostRightLeafFound.shouldBeTrue()
+                        vec.shift shouldBeExactly SHIFT
+                        vec.count shouldBeExactly l.size + 1
+                        tail.size shouldBeExactly 1
+                        tail[0] shouldBe i
+                    }
                 }
 
                 "root overflow" {
