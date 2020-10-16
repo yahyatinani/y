@@ -101,7 +101,7 @@ class PersistentVectorTest : FreeSpec({
 
             @Suppress("UNCHECKED_CAST")
             "when the tail is full, it should push tail into the vec" - {
-                "when the vec level is 5" {
+                "when the level is 5, it should insert the tail in root node" {
                     val listGen = Arb.list(Arb.int(), (32..1024)).filter {
                         it.size % 32 == 0
                     }
@@ -113,6 +113,8 @@ class PersistentVectorTest : FreeSpec({
                         val vec = tempVec.conj(i)
                         val tail = vec.tail
 
+
+                        vec.shift shouldBeExactly SHIFT
                         var index = 31
                         var isMostRightLeafFound = false
                         while (index >= 0 && !isMostRightLeafFound) {
@@ -126,11 +128,46 @@ class PersistentVectorTest : FreeSpec({
                         }
 
                         isMostRightLeafFound.shouldBeTrue()
-                        vec.shift shouldBeExactly SHIFT
                         vec.count shouldBeExactly l.size + 1
                         tail.size shouldBeExactly 1
                         tail[0] shouldBe i
                     }
+                }
+
+                """when the level is > 5, it should iterate through the
+                                            levels then insert the tail""" {
+                    val e = 99
+                    val list = (1..1088).toList()
+                    val tempVec = PersistentVector(*list.toTypedArray())
+                    val tempTail = tempVec.tail
+
+                    val vec = tempVec.conj(e)
+                    val root = vec.root
+                    val mostRightLeaf = ((root.array[1] as Node<Int>).array[1]
+                        as Node<Int>).array
+
+                    vec.shift shouldBeExactly SHIFT * 2
+                    mostRightLeaf shouldBeSameInstanceAs tempTail
+                    vec.tail[0] shouldBe e
+                    vec.count shouldBeExactly list.size + 1
+                }
+
+                """when the level is > 5 and the path is null,
+                    it should create a new path then insert the tail""" {
+                    val e = 99
+                    val list = (1..2080).toList()
+                    val tempVec = PersistentVector(*list.toTypedArray())
+                    val tempTail = tempVec.tail
+
+                    val vec = tempVec.conj(e)
+                    val root = vec.root
+                    val mostRightLeaf = ((root.array[2] as Node<Int>).array[0]
+                        as Node<Int>).array
+
+                    vec.shift shouldBeExactly SHIFT * 2
+                    mostRightLeaf shouldBeSameInstanceAs tempTail
+                    vec.tail[0] shouldBe e
+                    vec.count shouldBeExactly list.size + 1
                 }
 
                 "root overflow" {

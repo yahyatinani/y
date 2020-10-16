@@ -12,10 +12,18 @@ sealed class PersistentVector<out E>(
     internal val tail: Array<Any?>
 ) : APersistentVector<E>() {
 
+    @Suppress("UNCHECKED_CAST")
     private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
-        val rootNode = Node<E>(parent.array.copyOf())
         val subIndex = ((count - 1) ushr level) and 0x01f
-        rootNode.array[subIndex] = tail
+        val rootNode = Node<E>(parent.array.copyOf())
+
+        val nodeToInsert: Node<E> = if (level == SHIFT) tail
+        else when (val child = parent.array[subIndex]) {
+            null -> newPath(level - 5, tail)
+            else -> pushTail(level - SHIFT, child as Node<E>, tail)
+        }
+
+        rootNode.array[subIndex] = nodeToInsert
 
         return rootNode
     }
@@ -26,7 +34,7 @@ sealed class PersistentVector<out E>(
             val newTail = tail.copyOf(tail.size + 1)
             newTail[tail.size] = e
 
-            return Vector(count + 1, SHIFT, root, newTail)
+            return Vector(count + 1, shift, root, newTail)
         }
 
         val tailNode = Node<E>(tail)
