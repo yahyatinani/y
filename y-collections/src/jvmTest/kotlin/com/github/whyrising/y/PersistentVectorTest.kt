@@ -5,6 +5,7 @@ import com.github.whyrising.y.PersistentVector.Node
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
@@ -17,6 +18,7 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.checkAll
+import kotlinx.atomicfu.atomic
 
 const val SHIFT = 5
 
@@ -26,7 +28,7 @@ class PersistentVectorTest : FreeSpec({
         "Node does have an array of nodes" {
             val array = arrayOfNulls<Int>(33)
 
-            val node = Node<Int>(array as Array<Any?>)
+            val node = Node<Int>(atomic(false), array as Array<Any?>)
 
             node.array shouldBeSameInstanceAs array
         }
@@ -88,12 +90,17 @@ class PersistentVectorTest : FreeSpec({
             "when the vec size is < 32, it should add e to the tail" {
                 val ints = Arb.int().filter { it != i }
                 checkAll(Arb.list(ints, 0..31)) { list ->
-                    val vec = PersistentVector(*list.toTypedArray()).conj(i)
+                    val tempVec = PersistentVector(*list.toTypedArray())
+
+                    val vec = tempVec.conj(i)
                     val tail = vec.tail
+                    val root = vec.root
 
                     vec.shift shouldBeExactly SHIFT
                     vec.count shouldBeExactly list.size + 1
-                    vec.root shouldBeSameInstanceAs EmptyNode
+                    root shouldBeSameInstanceAs EmptyNode
+                    root.isMutable.value.shouldBeFalse()
+                    root.isMutable shouldBeSameInstanceAs tempVec.root.isMutable
                     tail.size shouldBeExactly list.size + 1
                     tail[list.size] as Int shouldBeExactly i
                 }
@@ -120,13 +127,17 @@ class PersistentVectorTest : FreeSpec({
                         while (index >= 0 && !isMostRightLeafFound) {
                             val o = vec.root.array[index]
                             if (o != null) {
-                                val mostRightLeaf = (o as Node<Int>).array
-                                mostRightLeaf shouldBeSameInstanceAs tempTail
+                                val mostRightLeaf = o as Node<Int>
+                                val array = mostRightLeaf.array
+                                array shouldBeSameInstanceAs tempTail
+                                mostRightLeaf.isMutable shouldBeSameInstanceAs
+                                    tempVec.root.isMutable
                                 isMostRightLeafFound = true
                             }
                             index--
                         }
 
+                        vec.root.isMutable.value.shouldBeFalse()
                         isMostRightLeafFound.shouldBeTrue()
                         vec.count shouldBeExactly l.size + 1
                         tail.size shouldBeExactly 1
@@ -150,6 +161,8 @@ class PersistentVectorTest : FreeSpec({
                     mostRightLeaf shouldBeSameInstanceAs tempTail
                     vec.tail[0] shouldBe e
                     vec.count shouldBeExactly list.size + 1
+                    root.isMutable shouldBeSameInstanceAs tempVec.root.isMutable
+                    root.isMutable.value.shouldBeFalse()
                 }
 
                 """when the level is > 5 and the path is null,
@@ -158,34 +171,46 @@ class PersistentVectorTest : FreeSpec({
                     val list = (1..2080).toList()
                     val tempVec = PersistentVector(*list.toTypedArray())
                     val tempTail = tempVec.tail
+                    val tempIsMutable = tempVec.root.isMutable
 
                     val vec = tempVec.conj(e)
                     val root = vec.root
-                    val mostRightLeaf = ((root.array[2] as Node<Int>).array[0]
-                        as Node<Int>).array
+                    val subRoot = root.array[2] as Node<Int>
+                    val mostRightLeaf = subRoot.array[0] as Node<Int>
 
                     vec.shift shouldBeExactly SHIFT * 2
-                    mostRightLeaf shouldBeSameInstanceAs tempTail
+                    mostRightLeaf.array shouldBeSameInstanceAs tempTail
                     vec.tail[0] shouldBe e
                     vec.count shouldBeExactly list.size + 1
+                    root.isMutable.value.shouldBeFalse()
+                    root.isMutable shouldBeSameInstanceAs tempIsMutable
+                    subRoot.isMutable.value.shouldBeFalse()
+                    subRoot.isMutable shouldBeSameInstanceAs tempIsMutable
+                    mostRightLeaf.isMutable.value.shouldBeFalse()
+                    mostRightLeaf.isMutable shouldBeSameInstanceAs tempIsMutable
                 }
 
                 "root overflow" {
                     val e = 99
                     val list = (1..1056).toList()
+                    val tempVec = PersistentVector(*list.toTypedArray())
 
-                    val vec = list.fold(PersistentVector<Int>()) { v, i ->
-                        v.conj(i)
-                    }.conj(e)
-                    val leaf33 = (vec.root.array[1] as Node<Int>).array[0]
-                        as Node<Int>
+                    val vec = tempVec.conj(e)
+                    val root = vec.root
+                    val mostRightLeaf =
+                        (root.array[1] as Node<Int>).array[0] as Node<Int>
+
 
                     vec.count shouldBeExactly list.size + 1
                     vec.shift shouldBeExactly 10
                     vec.tail[0] as Int shouldBeExactly e
-                    vec.root.array[0].shouldNotBeNull()
-                    leaf33.array[0] shouldBe 1025
-                    leaf33.array[31] shouldBe 1056
+                    root.array[0].shouldNotBeNull()
+                    root.array[1].shouldNotBeNull()
+                    root.isMutable shouldBeSameInstanceAs tempVec.root.isMutable
+                    root.isMutable.value.shouldBeFalse()
+                    mostRightLeaf.array shouldBeSameInstanceAs tempVec.tail
+                    mostRightLeaf.array[0] shouldBe 1025
+                    mostRightLeaf.array[31] shouldBe 1056
                 }
             }
         }
@@ -237,6 +262,12 @@ class PersistentVectorTest : FreeSpec({
 
             vec.toString() shouldBe "[1 2 3 4]"
         }
+
+        "it's root should be immutable" {
+            val vec = PersistentVector(1, 2, 3)
+
+            vec.root.isMutable.value.shouldBeFalse()
+        }
     }
 
     "EmptyVector" - {
@@ -267,6 +298,12 @@ class PersistentVectorTest : FreeSpec({
             array.size shouldBeExactly 32
             array[0].shouldBeNull()
             array[31].shouldBeNull()
+        }
+
+        "it's root should be immutable" {
+            val emptyVec = PersistentVector<Int>()
+
+            emptyVec.root.isMutable.value.shouldBeFalse()
         }
     }
 })

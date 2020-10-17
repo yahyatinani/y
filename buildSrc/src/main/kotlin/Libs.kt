@@ -22,4 +22,10 @@ object Libs {
         const val serialization =
             "org.jetbrains.kotlinx:kotlinx-serialization-json:$version"
     }
+
+    object Atomicfu {
+        private const val version = "0.14.4"
+
+        const val atomicfcu = "org.jetbrains.kotlinx:atomicfu:$version"
+    }
 }

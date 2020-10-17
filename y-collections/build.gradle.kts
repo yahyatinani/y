@@ -48,6 +48,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(Libs.Kotlinx.serialization)
+                implementation(Libs.Atomicfu.atomicfcu)
             }
         }
 

@@ -1,6 +1,8 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
+import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.atomicfu.atomic
 
 internal const val SHIFT = 5
 internal const val BF = 32
@@ -14,12 +16,12 @@ sealed class PersistentVector<out E>(
 
     @Suppress("UNCHECKED_CAST")
     private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
+        val rootNode = Node<E>(parent.isMutable, parent.array.copyOf())
         val subIndex = ((count - 1) ushr level) and 0x01f
-        val rootNode = Node<E>(parent.array.copyOf())
 
         val nodeToInsert: Node<E> = if (level == SHIFT) tail
         else when (val child = parent.array[subIndex]) {
-            null -> newPath(level - 5, tail)
+            null -> newPath(root.isMutable, level - 5, tail)
             else -> pushTail(level - SHIFT, child as Node<E>, tail)
         }
 
@@ -37,16 +39,16 @@ sealed class PersistentVector<out E>(
             return Vector(count + 1, shift, root, newTail)
         }
 
-        val tailNode = Node<E>(tail)
+        val tailNode = Node<E>(root.isMutable, tail)
         var newShift = shift
         val newRoot: Node<E>
 
         when {
             // root overflow?
             (count ushr SHIFT) > (1 shl shift) -> {
-                newRoot = Node()
+                newRoot = Node(root.isMutable)
                 newRoot.array[0] = root
-                newRoot.array[1] = newPath(shift, tailNode)
+                newRoot.array[1] = newPath(root.isMutable, shift, tailNode)
                 newShift += SHIFT
             }
             else -> newRoot = pushTail(shift, root, tailNode)
@@ -85,17 +87,26 @@ sealed class PersistentVector<out E>(
         else -> nth(index)
     }
 
-    internal sealed class Node<out T>(val array: Array<Any?>) {
-        internal class Node2<out T>(_array: Array<Any?>) :
-            Node<T>(_array)
+    internal sealed class Node<out T>(
+        val isMutable: AtomicBoolean,
+        val array: Array<Any?>
+    ) {
+        internal class Node2<out T>(
+            isMutable: AtomicBoolean,
+            _array: Array<Any?>
+        ) : Node<T>(isMutable, _array)
 
         internal object EmptyNode :
-            PersistentVector.Node<Nothing>(arrayOfNulls(BF))
+            PersistentVector.Node<Nothing>(atomic(false), arrayOfNulls(BF))
 
         companion object {
-            operator fun <T> invoke(): Node2<T> = Node2(arrayOfNulls(BF))
+            operator fun <T> invoke(isMutable: AtomicBoolean): Node2<T> =
+                Node2(isMutable, arrayOfNulls(BF))
 
-            operator fun <T> invoke(nodes: Array<Any?>): Node2<T> = Node2(nodes)
+            operator fun <T> invoke(
+                isMutable: AtomicBoolean,
+                nodes: Array<Any?>
+            ): Node2<T> = Node2(isMutable, nodes)
         }
     }
 
@@ -140,13 +151,14 @@ sealed class PersistentVector<out E>(
             else -> ((count - 1) ushr SHIFT) shl SHIFT
         }
 
-        private tailrec fun <E> newPath(level: Int, node: Node<E>): Node<E> {
+        private tailrec fun <E> newPath(
+            isMutable: AtomicBoolean, level: Int, node: Node<E>): Node<E> {
             if (level == 0) return node
 
-            val path = Node<E>()
+            val path = Node<E>(isMutable)
             path.array[0] = node
 
-            return newPath(level - SHIFT, path)
+            return newPath(isMutable, level - SHIFT, path)
         }
     }
 }
