@@ -3,6 +3,7 @@ package com.github.whyrising.y
 import com.github.whyrising.y.PersistentVector.EmptyVector
 import com.github.whyrising.y.PersistentVector.Node
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
+import com.github.whyrising.y.PersistentVector.TransientVector
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -13,6 +14,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
@@ -304,6 +306,29 @@ class PersistentVectorTest : FreeSpec({
             val emptyVec = PersistentVector<Int>()
 
             emptyVec.root.isMutable.value.shouldBeFalse()
+        }
+    }
+
+    "TransientVector" - {
+        "constructor" {
+            val v = PersistentVector(*(1..57).toList().toTypedArray())
+            val vRoot = v.root
+
+            val tv = TransientVector(v)
+            val tvRoot = tv.root.value
+
+            tv.count.value shouldBeExactly v.count
+            tv.shift.value shouldBeExactly v.shift
+            tv.tail.value shouldBeSameInstanceAs v.tail
+            tvRoot shouldNotBeSameInstanceAs vRoot
+            tvRoot.array shouldNotBeSameInstanceAs vRoot.array
+            tvRoot.array.size shouldBeExactly vRoot.array.size
+            tvRoot.isMutable shouldNotBeSameInstanceAs vRoot.isMutable
+            tvRoot.isMutable.value.shouldBeTrue()
+            vRoot.array.fold(0) { index: Int, e: Any? ->
+                e shouldBe tvRoot.array[index]
+                index + 1
+            }
         }
     }
 })

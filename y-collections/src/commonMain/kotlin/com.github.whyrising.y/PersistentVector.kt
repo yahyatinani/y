@@ -2,6 +2,8 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.atomicfu.AtomicInt
+import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 
 internal const val SHIFT = 5
@@ -125,6 +127,29 @@ sealed class PersistentVector<out E>(
         _root: Node<E>,
         _tail: Array<Any?>
     ) : PersistentVector<E>(_count, _shift, _root, _tail)
+
+    internal class TransientVector<E> private constructor(
+        var count: AtomicInt,
+        var shift: AtomicInt,
+        var root: AtomicRef<Node<E>>,
+        var tail: AtomicRef<Array<Any?>>
+    ) {
+
+        companion object {
+            private fun <E> mutableNode(node: Node<E>): Node<E> {
+                return Node(atomic(true), node.array.copyOf())
+            }
+
+            operator
+            fun <E> invoke(vec: PersistentVector<E>): TransientVector<E> =
+                TransientVector(
+                    atomic(vec.count),
+                    atomic(vec.shift),
+                    atomic(mutableNode(vec.root)),
+                    atomic(vec.tail)
+                )
+        }
+    }
 
     companion object {
         operator fun <E> invoke(): PersistentVector<E> = EmptyVector
