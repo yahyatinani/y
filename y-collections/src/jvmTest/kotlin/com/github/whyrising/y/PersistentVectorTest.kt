@@ -4,6 +4,7 @@ import com.github.whyrising.y.PersistentVector.EmptyVector
 import com.github.whyrising.y.PersistentVector.Node
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.PersistentVector.TransientVector
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -310,16 +311,18 @@ class PersistentVectorTest : FreeSpec({
     }
 
     "TransientVector" - {
+
+
         "constructor" {
             val v = PersistentVector(*(1..57).toList().toTypedArray())
             val vRoot = v.root
 
             val tv = TransientVector(v)
-            val tvRoot = tv.root.value
+            val tvRoot = tv.root
 
-            tv.count.value shouldBeExactly v.count
-            tv.shift.value shouldBeExactly v.shift
-            tv.tail.value shouldBeSameInstanceAs v.tail
+            tv.count shouldBeExactly v.count
+            tv.shift shouldBeExactly v.shift
+            tv.tail shouldBeSameInstanceAs v.tail
             tvRoot shouldNotBeSameInstanceAs vRoot
             tvRoot.array shouldNotBeSameInstanceAs vRoot.array
             tvRoot.array.size shouldBeExactly vRoot.array.size
@@ -328,6 +331,96 @@ class PersistentVectorTest : FreeSpec({
             vRoot.array.fold(0) { index: Int, e: Any? ->
                 e shouldBe tvRoot.array[index]
                 index + 1
+            }
+        }
+
+        "invalidate() should set isMutable to false" {
+            val v = PersistentVector(*(1..57).toList().toTypedArray())
+            val tv = TransientVector(v)
+            val isMutable = tv.root.isMutable
+
+            tv.invalidate()
+
+            tv.root.isMutable shouldBeSameInstanceAs isMutable
+            tv.root.isMutable.value.shouldBeFalse()
+        }
+
+        "assertMutable()" - {
+            "when called on a mutable transient, it shouldn't throw" {
+                val v = PersistentVector(*(1..57).toList().toTypedArray())
+                val tv = TransientVector(v)
+
+                shouldNotThrow<Exception> { tv.assertMutable() }
+            }
+
+            "when called on an invalidated transient, it should throw" {
+                val v = PersistentVector(*(1..57).toList().toTypedArray())
+                val tv = TransientVector(v)
+                tv.invalidate()
+
+                val e = shouldThrowExactly<IllegalStateException> {
+                    tv.assertMutable()
+                }
+
+                e.message shouldBe "Transient used after persistent() call"
+            }
+        }
+
+        "count" - {
+            """when called on a mutable transient,
+                        it should return the count of the transient vector""" {
+                val v = PersistentVector(*(1..57).toList().toTypedArray())
+                val tv = TransientVector(v)
+
+                tv.root.isMutable.value.shouldBeTrue()
+                tv.count shouldBeExactly v.count
+            }
+
+            """when called on a invalidated transient,
+                                it should throw IllegalStateException""" {
+                val v = PersistentVector(*(1..57).toList().toTypedArray())
+                val tv = TransientVector(v)
+                tv.invalidate()
+
+                val e = shouldThrowExactly<IllegalStateException> { tv.count }
+
+                e.message shouldBe "Transient used after persistent() call"
+            }
+        }
+
+        "persistent()" - {
+            "when called on a invalidated transient, when it should throw" {
+                val v = PersistentVector(*(1..57).toList().toTypedArray())
+                val tv = TransientVector(v)
+                tv.invalidate()
+
+                val e = shouldThrowExactly<IllegalStateException> {
+                    tv.persistent()
+                }
+
+                e.message shouldBe "Transient used after persistent() call"
+            }
+
+            """when called on a mutable transient,
+                it should return the PersistentVector of that transient,
+                                                        and invalidate it""" {
+                val v = PersistentVector(*(1..57).toList().toTypedArray())
+                val tv = TransientVector(v)
+                tv.tail = v.tail.copyOf(32)
+
+                val vec = tv.persistent()
+                val root = vec.root
+
+                root.isMutable.value.shouldBeFalse()
+                root shouldBeSameInstanceAs tv.root
+                tv.root.isMutable.value.shouldBeFalse()
+                vec.count shouldBeExactly v.count
+                vec.shift shouldBeExactly v.shift
+                vec.tail.size shouldBeExactly 25
+                v.tail.fold(0) { index: Int, e: Any? ->
+                    vec.tail[index] shouldBe e
+                    index + 1
+                }
             }
         }
     }

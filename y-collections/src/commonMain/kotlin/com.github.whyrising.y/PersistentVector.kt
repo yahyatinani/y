@@ -129,25 +129,63 @@ sealed class PersistentVector<out E>(
     ) : PersistentVector<E>(_count, _shift, _root, _tail)
 
     internal class TransientVector<E> private constructor(
-        var count: AtomicInt,
-        var shift: AtomicInt,
-        var root: AtomicRef<Node<E>>,
-        var tail: AtomicRef<Array<Any?>>
-    ) {
+        size: Int,
+        shift: Int,
+        root: Node<E>,
+        tail: Array<Any?>
+    ) : ConstantCount, ITransientCollection<E> {
+
+        private val _count: AtomicInt = atomic(size)
+        private val _shift: AtomicInt = atomic(shift)
+        private val _root: AtomicRef<Node<E>> = atomic(mutableNode(root))
+        private val _tail: AtomicRef<Array<Any?>> = atomic(tail)
+
+        fun assertMutable() {
+            if (!_root.value.isMutable.value)
+                throw IllegalStateException(
+                    "Transient used after persistent() call")
+        }
+
+        override val count: Int by lazy {
+            assertMutable()
+            _count.value
+        }
+
+        val shift: Int
+            get() = _shift.value
+
+        val root: Node<E>
+            get() = _root.value
+
+        internal var tail: Array<Any?>
+            get() = _tail.value
+            set(value) {
+                _tail.value = value
+            }
+
+        internal fun invalidate() {
+            _root.value.isMutable.value = false
+        }
+
+        override fun persistent(): PersistentVector<E> {
+            assertMutable()
+            invalidate()
+
+            val trimmedTail =
+                arrayOfNulls<Any?>(_count.value - tailOffset(_count.value))
+
+            _tail.value.copyInto(trimmedTail, 0, 0, trimmedTail.size)
+
+            return Vector(_count.value, _shift.value, _root.value, trimmedTail)
+        }
 
         companion object {
-            private fun <E> mutableNode(node: Node<E>): Node<E> {
-                return Node(atomic(true), node.array.copyOf())
-            }
+            private fun <E> mutableNode(node: Node<E>): Node<E> =
+                Node(atomic(true), node.array.copyOf())
 
             operator
             fun <E> invoke(vec: PersistentVector<E>): TransientVector<E> =
-                TransientVector(
-                    atomic(vec.count),
-                    atomic(vec.shift),
-                    atomic(mutableNode(vec.root)),
-                    atomic(vec.tail)
-                )
+                TransientVector(vec.count, vec.shift, vec.root, vec.tail)
         }
     }
 
