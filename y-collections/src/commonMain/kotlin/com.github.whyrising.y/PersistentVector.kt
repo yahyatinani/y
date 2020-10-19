@@ -14,7 +14,7 @@ sealed class PersistentVector<out E>(
     internal val shift: Int,
     internal val root: Node<E>,
     internal val tail: Array<Any?>
-) : APersistentVector<E>() {
+) : APersistentVector<E>(), IMutableCollection<E> {
 
     @Suppress("UNCHECKED_CAST")
     private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
@@ -89,7 +89,9 @@ sealed class PersistentVector<out E>(
         else -> nth(index)
     }
 
-    internal sealed class Node<out T>(
+    override fun asTransient(): TransientVector<E> = TransientVector(this)
+
+    sealed class Node<out T>(
         val isMutable: AtomicBoolean,
         val array: Array<Any?>
     ) {
@@ -102,13 +104,13 @@ sealed class PersistentVector<out E>(
             PersistentVector.Node<Nothing>(atomic(false), arrayOfNulls(BF))
 
         companion object {
-            operator fun <T> invoke(isMutable: AtomicBoolean): Node2<T> =
+            operator fun <T> invoke(isMutable: AtomicBoolean): Node<T> =
                 Node2(isMutable, arrayOfNulls(BF))
 
             operator fun <T> invoke(
                 isMutable: AtomicBoolean,
                 nodes: Array<Any?>
-            ): Node2<T> = Node2(isMutable, nodes)
+            ): Node<T> = Node2(isMutable, nodes)
         }
     }
 
@@ -128,7 +130,7 @@ sealed class PersistentVector<out E>(
         _tail: Array<Any?>
     ) : PersistentVector<E>(_count, _shift, _root, _tail)
 
-    internal class TransientVector<out E> private constructor(
+    class TransientVector<out E> private constructor(
         size: Int,
         shift: Int,
         root: Node<E>,
@@ -273,10 +275,11 @@ sealed class PersistentVector<out E>(
                     val tail = args as Array<Any?>
                     Vector(argsCount, SHIFT, EmptyNode, tail)
                 }
-                else -> // TODO: reimplement using TransientVector
+                else -> {
                     args.fold<E, PersistentVector<E>>(EmptyVector) { acc, e ->
                         acc.conj(e)
                     }
+                }
             }
         }
 

@@ -271,6 +271,17 @@ class PersistentVectorTest : FreeSpec({
 
             vec.root.isMutable.value.shouldBeFalse()
         }
+
+        "asTransient() should turn this vector into a transient vector" {
+            val vec = PersistentVector(1, 2, 3, 4, 5, 6, 7, 8)
+
+            val tVec: TransientVector<Int> = vec.asTransient()
+
+            tVec.count shouldBeExactly vec.count
+            tVec.shift shouldBeExactly vec.shift
+            tVec.root.isMutable.value.shouldBeTrue()
+            assertArraysAreEquiv(tVec.tail, vec.tail)
+        }
     }
 
     "EmptyVector" - {
