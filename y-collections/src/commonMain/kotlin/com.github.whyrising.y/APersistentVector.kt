@@ -13,4 +13,11 @@ abstract class APersistentVector<out E> : IPersistentVector<E> {
     }
 
     override fun length(): Int = count
+
+    protected fun indexOutOfBounds(index: Int) = index >= count || index < 0
+
+    override fun nth(index: Int, default: @UnsafeVariance E): E = when {
+        indexOutOfBounds(index) -> default
+        else -> nth(index)
+    }
 }

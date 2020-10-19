@@ -59,8 +59,6 @@ sealed class PersistentVector<out E>(
         return Vector(count + 1, newShift, newRoot, arrayOf(e))
     }
 
-    private fun indexOutOfBounds(index: Int) = index >= count || index < 0
-
     @Suppress("UNCHECKED_CAST")
     private fun leafArrayBy(index: Int): Array<E> = when {
         indexOutOfBounds(index) -> throw IndexOutOfBoundsException()
@@ -82,11 +80,6 @@ sealed class PersistentVector<out E>(
         val leaf = leafArrayBy(index)
 
         return leaf[index and 0x01f]
-    }
-
-    override fun nth(index: Int, default: @UnsafeVariance E): E = when {
-        indexOutOfBounds(index) -> default
-        else -> nth(index)
     }
 
     override fun asTransient(): TransientVector<E> = TransientVector(this)
