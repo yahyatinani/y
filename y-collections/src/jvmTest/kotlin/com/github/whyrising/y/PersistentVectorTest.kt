@@ -20,6 +20,8 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.map
+import io.kotest.property.arbitrary.merge
 import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
 
@@ -281,6 +283,23 @@ class PersistentVectorTest : FreeSpec({
             tVec.shift shouldBeExactly vec.shift
             tVec.root.isMutable.value.shouldBeTrue()
             assertArraysAreEquiv(tVec.tail, vec.tail)
+        }
+
+        "hashCode()" {
+            val instsUnull = Arb.list(Arb.int().merge(Arb.int().map { null }))
+            checkAll(instsUnull) { l: List<Int?> ->
+                val prime = 31
+                val emptyVecHash = EmptyVector.hashCode()
+                val expectedHash = l.fold(emptyVecHash) { hashCode, i ->
+                    prime * hashCode + i.hashCode()
+                }
+                val vec = v(*l.toTypedArray())
+
+                vec._hashCode shouldBeExactly 0
+
+                vec.hashCode() shouldBeExactly expectedHash
+                vec.hashCode() shouldBeExactly expectedHash // for coverage
+            }
         }
     }
 
