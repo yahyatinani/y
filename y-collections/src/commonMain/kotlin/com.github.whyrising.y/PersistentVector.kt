@@ -128,7 +128,7 @@ sealed class PersistentVector<out E>(
         _tail: Array<Any?>
     ) : PersistentVector<E>(_count, _shift, _root, _tail)
 
-    internal class TransientVector<E> private constructor(
+    internal class TransientVector<out E> private constructor(
         size: Int,
         shift: Int,
         root: Node<E>,
@@ -146,10 +146,11 @@ sealed class PersistentVector<out E>(
                     "Transient used after persistent() call")
         }
 
-        override val count: Int by lazy {
-            assertMutable()
-            _count.value
-        }
+        override val count: Int
+            get() {
+                assertMutable()
+                return _count.value
+            }
 
         val shift: Int
             get() = _shift.value
@@ -165,6 +166,65 @@ sealed class PersistentVector<out E>(
 
         internal fun invalidate() {
             _root.value.isMutable.value = false
+        }
+
+        private fun assertNodeCreatedByThisVector(node: Node<E>): Node<E> =
+            when (node.isMutable) {
+                root.isMutable -> node
+                else -> Node(root.isMutable, node.array.copyOf())
+            }
+
+        @Suppress("UNCHECKED_CAST")
+        private
+        fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
+            val subIndex = ((count - 1) ushr level) and 0x01f
+
+            val rootNode = assertNodeCreatedByThisVector(parent)
+
+            val nodeToInsert: Node<E> = if (level == SHIFT) tail
+            else when (val child = rootNode.array[subIndex]) {
+                null -> newPath(root.isMutable, level - 5, tail)
+                else -> pushTail(level - SHIFT, child as Node<E>, tail)
+            }
+
+            rootNode.array[subIndex] = nodeToInsert
+
+            return rootNode
+        }
+
+        override fun conj(e: @UnsafeVariance E): TransientVector<E> {
+            assertMutable()
+
+            val oldCount = count
+            // empty slot available in tail?
+            if (oldCount - tailOffset(oldCount) < BF) {
+                tail[oldCount and 0x01f] = e
+                ++_count.value
+
+                return this
+            }
+
+            val tailNode = Node<E>(root.isMutable, tail)
+            tail = arrayOfNulls(BF)
+            tail[0] = e
+
+            var newShift = shift
+            val newRoot: Node<E>
+            when {
+                (count ushr SHIFT) > (1 shl shift) -> {
+                    newRoot = Node(root.isMutable)
+                    newRoot.array[0] = root
+                    newRoot.array[1] = newPath(root.isMutable, shift, tailNode)
+                    newShift += SHIFT
+                }
+                else -> newRoot = pushTail(shift, root, tailNode)
+            }
+
+            _root.value = newRoot
+            _shift.value = newShift
+            ++_count.value
+
+            return this
         }
 
         override fun persistent(): PersistentVector<E> {
@@ -183,9 +243,20 @@ sealed class PersistentVector<out E>(
             private fun <E> mutableNode(node: Node<E>): Node<E> =
                 Node(atomic(true), node.array.copyOf())
 
+            private fun maximizeTail(tail: Array<Any?>): Array<Any?> {
+                val maxTail = arrayOfNulls<Any?>(BF)
+
+                return tail.copyInto(maxTail, 0, 0, tail.size)
+            }
+
             operator
             fun <E> invoke(vec: PersistentVector<E>): TransientVector<E> =
-                TransientVector(vec.count, vec.shift, vec.root, vec.tail)
+                TransientVector(
+                    vec.count,
+                    vec.shift,
+                    vec.root,
+                    maximizeTail(vec.tail)
+                )
         }
     }
 
