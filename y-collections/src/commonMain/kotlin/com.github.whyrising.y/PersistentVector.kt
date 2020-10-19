@@ -276,9 +276,9 @@ sealed class PersistentVector<out E>(
                     Vector(argsCount, SHIFT, EmptyNode, tail)
                 }
                 else -> {
-                    args.fold<E, PersistentVector<E>>(EmptyVector) { acc, e ->
-                        acc.conj(e)
-                    }
+                    val empty: TransientVector<E> = EmptyVector.asTransient()
+
+                    args.fold(empty) { tVec, e -> tVec.conj(e) }.persistent()
                 }
             }
         }
