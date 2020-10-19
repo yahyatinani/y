@@ -476,6 +476,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "when tail overflow, it should push tail into the vec" - {
+                @Suppress("UNCHECKED_CAST")
                 "when level is 5, it should insert the tail in root node" {
                     val listGen = Arb.list(Arb.int(), (32..1024)).filter {
                         it.size % 32 == 0
@@ -597,6 +598,23 @@ class PersistentVectorTest : FreeSpec({
                 }
             }
         }
+    }
+
+    "v() should return an empty persistent vector" {
+        val empty = v<Int>()
+
+        empty shouldBeSameInstanceAs EmptyVector
+    }
+
+    "v(args) should return an empty persistent vector" {
+        val vec = v(1, 2, 3, 4)
+
+        vec.count shouldBeExactly 4
+
+        vec.nth(0) shouldBeExactly 1
+        vec.nth(1) shouldBeExactly 2
+        vec.nth(2) shouldBeExactly 3
+        vec.nth(3) shouldBeExactly 4
     }
 }) {
     companion object {

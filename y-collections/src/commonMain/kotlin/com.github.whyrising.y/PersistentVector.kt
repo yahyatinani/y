@@ -263,10 +263,10 @@ sealed class PersistentVector<out E>(
     }
 
     companion object {
-        operator fun <E> invoke(): PersistentVector<E> = EmptyVector
+        internal operator fun <E> invoke(): PersistentVector<E> = EmptyVector
 
         @Suppress("UNCHECKED_CAST")
-        operator fun <E> invoke(vararg args: E): PersistentVector<E> {
+        internal operator fun <E> invoke(vararg args: E): PersistentVector<E> {
             val argsCount = args.size
 
             return when {
@@ -299,3 +299,7 @@ sealed class PersistentVector<out E>(
         }
     }
 }
+
+fun <E> v(): PersistentVector<E> = PersistentVector.EmptyVector
+
+fun <E> v(vararg elements: E): PersistentVector<E> = PersistentVector(*elements)
