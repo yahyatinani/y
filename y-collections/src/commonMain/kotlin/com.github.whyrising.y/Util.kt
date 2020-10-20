@@ -1,5 +1,8 @@
 package com.github.whyrising.y
 
+internal const val INIT_HASH_CODE = 0
+internal const val HASH_PRIME = 31
+
 enum class Category {
     INTEGER,
     FLOATING
