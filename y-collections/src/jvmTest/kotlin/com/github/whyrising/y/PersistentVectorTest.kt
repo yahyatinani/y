@@ -1,5 +1,7 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.APersistentVector.Seq
+import com.github.whyrising.y.PersistentList.Empty
 import com.github.whyrising.y.PersistentVector.EmptyVector
 import com.github.whyrising.y.PersistentVector.Node
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
@@ -285,20 +287,27 @@ class PersistentVectorTest : FreeSpec({
             assertArraysAreEquiv(tVec.tail, vec.tail)
         }
 
-        "seq()" {
-            val emptyVec = v<Int>()
-            val seq: ISeq<Int>? = v(1, 2, 3, 4, 5).seq()
+        "seq()" - {
+            "when called on an empty vector, it should return null" {
+                val emptyVec = v<Int>()
 
-            emptyVec.seq().shouldBeNull()
-            //TODO - failing
-//            seq.shouldNotBeNull()
-//
-//            seq.first() shouldBeExactly 1
-//            (seq.rest() == l(2, 3, 4, 5)).shouldBeTrue()
-//
-//            val cons = seq.cons(8)
-//            cons.first() shouldBeExactly 8
-//            cons.rest() shouldNotBeSameInstanceAs seq
+                emptyVec.seq() shouldBeSameInstanceAs Empty
+            }
+
+            "when called on a filled vector, it should return a Seq instance" {
+                val vec = v(1, 2, 3)
+
+                val seq = vec.seq() as Seq<Int>
+                val rest = seq.rest()
+
+                seq.shouldNotBeNull()
+                seq.count shouldBeExactly 3
+                seq.first() shouldBeExactly 1
+
+                rest.count shouldBeExactly 2
+                rest.rest().first() shouldBeExactly 3
+                rest.rest().rest() shouldBeSameInstanceAs Empty
+            }
         }
 
         "hashCode()" {

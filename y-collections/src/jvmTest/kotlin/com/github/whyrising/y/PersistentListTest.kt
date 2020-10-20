@@ -8,7 +8,6 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
@@ -180,10 +179,10 @@ class PersistentListTest : FreeSpec({
             }
         }
 
-        "seq() should return null" {
+        "seq() should return Empty" {
             val emptyList = l<Int>()
 
-            emptyList.seq().shouldBeNull()
+            emptyList.seq() shouldBeSameInstanceAs Empty
         }
     }
 

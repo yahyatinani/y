@@ -55,7 +55,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E> {
         return !otherIter.hasNext()
     }
 
-    override fun seq(): ISeq<E>? = this
+    override fun seq(): ISeq<E> = this
 
     override fun empty(): IPersistentCollection<E> = Empty
 

@@ -77,7 +77,7 @@ sealed class PersistentList<out E> :
         override fun conj(e: @UnsafeVariance E): PersistentList<E> =
             Cons(e, Empty)
 
-        override fun seq(): ISeq<E>? = null
+        override fun seq(): ISeq<E> = this
 
         // List implementation
         override val size: Int = 0

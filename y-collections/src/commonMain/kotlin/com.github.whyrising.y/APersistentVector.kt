@@ -15,10 +15,10 @@ abstract class APersistentVector<out E>
         return "[${str.trim()}]"
     }
 
-    override fun seq(): ISeq<E>? {
-        if (count == 0) return null
+    override fun seq(): ISeq<E> {
+        if (count == 0) return Seq.emptySeq()
 
-        return null
+        return Seq(this)
     }
 
     override fun hashCode(): Int {
@@ -148,5 +148,28 @@ abstract class APersistentVector<out E>
 
     override fun subList(fromIndex: Int, toIndex: Int): List<E> {
         TODO("Not yet implemented - needs Subvec")
+    }
+
+    class Seq<out E>(
+        private val pv: IPersistentVector<E>,
+        private val index: Int = 0
+    ) : ASeq<E>() {
+
+        override fun first(): E = pv.nth(index)
+
+        override fun rest(): ISeq<E> {
+            val i = index + 1
+
+            if (i < pv.count) return Seq(pv, i)
+
+            return emptySeq()
+        }
+
+        override val count: Int
+            get() = pv.count - index
+
+        companion object {
+            internal fun <E> emptySeq(): ISeq<E> = PersistentList.Empty
+        }
     }
 }
