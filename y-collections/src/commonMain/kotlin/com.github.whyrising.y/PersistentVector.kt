@@ -84,6 +84,32 @@ sealed class PersistentVector<out E>(
 
     override fun asTransient(): TransientVector<E> = TransientVector(this)
 
+    @Suppress("UNCHECKED_CAST")
+    private fun rangedIterator(start: Int, end: Int): Iterator<E> =
+        object : Iterator<E> {
+            var i = start
+            var base = i - (i % BF)
+            var array: Array<Any?>? = when {
+                start < count -> leafArrayBy(i) as Array<Any?>
+                else -> null
+            }
+
+            override fun hasNext(): Boolean = i < end
+
+            override fun next(): E {
+                if (!hasNext()) throw NoSuchElementException()
+
+                if (i - base == BF) {
+                    array = leafArrayBy(i) as Array<Any?>
+                    base += BF
+                }
+
+                return array?.get(i++ and 0x01f) as E
+            }
+        }
+
+    override fun iterator(): Iterator<E> = rangedIterator(0, count)
+
     sealed class Node<out T>(
         val isMutable: AtomicBoolean,
         val array: Array<Any?>

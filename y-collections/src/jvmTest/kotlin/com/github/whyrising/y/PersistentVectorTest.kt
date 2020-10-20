@@ -301,6 +301,187 @@ class PersistentVectorTest : FreeSpec({
                 vec.hashCode() shouldBeExactly expectedHash // for coverage
             }
         }
+
+        "equals()" {
+            (v(1, 2, 3, 4).equals(null)).shouldBeFalse()
+
+            (v(1) == v(1, 2, 3)).shouldBeFalse()
+
+            (v(1, 2, 3) == v(1, 2, 3)).shouldBeTrue()
+
+            (v(1, 2, 3) == v(1, 2, 5)).shouldBeFalse()
+
+            (v(v(1)) == v(v(1))).shouldBeTrue()
+
+            (v(1, 2, 3) == listOf(1, 4)).shouldBeFalse()
+
+            (v(1, 2, 3) == listOf(1, 2, 5)).shouldBeFalse()
+
+// TODO:            (v(1, 2, 3) == listOf(1, 2, 3)).shouldBeTrue()
+        }
+
+        "List implementation" - {
+            "size()" {
+                checkAll { l: List<Int> ->
+                    val vec = v(*l.toTypedArray())
+
+                    val list = vec as List<Int>
+
+                    list.size shouldBeExactly l.size
+                }
+            }
+
+            "get()" {
+                val genA = Arb.list(Arb.int()).filter { it.isNotEmpty() }
+                checkAll(genA) { l: List<Int> ->
+                    val vec = v(*l.toTypedArray())
+
+                    val list = vec as List<Int>
+
+                    list[0] shouldBeExactly l[0]
+                }
+            }
+
+            "isEmpty()" {
+                v<Int>().isEmpty().shouldBeTrue()
+
+                v(1, 2, 3, 4).isEmpty().shouldBeFalse()
+            }
+
+            "iterator()" {
+                checkAll { list: List<Int> ->
+                    val vec = v(*list.toTypedArray())
+
+                    val iter = vec.iterator()
+
+                    if (list.isEmpty()) iter.hasNext().shouldBeFalse()
+                    else iter.hasNext().shouldBeTrue()
+
+                    list.fold(Unit) { _: Unit, i: Int ->
+                        iter.next() shouldBeExactly i
+                    }
+
+                    iter.hasNext().shouldBeFalse()
+                    shouldThrowExactly<NoSuchElementException> { iter.next() }
+                }
+            }
+
+            "indexOf(element)" {
+                val vec = v(1L, 2.0, 3, 4)
+
+                vec.indexOf(3) shouldBeExactly 2
+                vec.indexOf(4L) shouldBeExactly 3
+                vec.indexOf(1) shouldBeExactly 0
+                vec.indexOf(6) shouldBeExactly -1
+            }
+
+            "lastIndexOf(element)" - {
+                val vec = v(1, 1, 6, 6, 4, 5, 4)
+
+                "when the element is not in the list, it should return -1" {
+                    vec.lastIndexOf(10) shouldBeExactly -1
+                }
+
+                """|when the element is in the list,
+                   |it should return the index of the last occurrence of
+                   |the specified element
+                """ {
+                    vec.lastIndexOf(6) shouldBeExactly 3
+                    vec.lastIndexOf(1) shouldBeExactly 1
+                    vec.lastIndexOf(4) shouldBeExactly 6
+                }
+            }
+
+            "listIterator(index)" {
+                val vec = v(1, 2, 3, 4, 5)
+
+                val iter = vec.listIterator(2)
+
+                iter.hasPrevious().shouldBeTrue()
+                iter.hasNext().shouldBeTrue()
+
+                iter.nextIndex() shouldBeExactly 2
+                iter.previousIndex() shouldBeExactly 1
+
+                iter.next() shouldBeExactly vec[2]
+
+                iter.previousIndex() shouldBeExactly 2
+                iter.nextIndex() shouldBeExactly 3
+
+                iter.previous() shouldBeExactly vec[2]
+
+                iter.previousIndex() shouldBeExactly 1
+                iter.nextIndex() shouldBeExactly 2
+
+                iter.next() shouldBeExactly vec[2]
+                iter.next() shouldBeExactly vec[3]
+                iter.next() shouldBeExactly vec[4]
+
+                iter.hasNext().shouldBeFalse()
+
+                shouldThrowExactly<NoSuchElementException> {
+                    iter.next()
+                }
+
+                iter.previous()
+                iter.previous()
+                iter.previous()
+                iter.previous()
+                iter.previous()
+
+                iter.hasPrevious().shouldBeFalse()
+
+                shouldThrowExactly<NoSuchElementException> {
+                    iter.previous()
+                }
+            }
+
+            "listIterator()" {
+                val vec = v(1, 2, 3, 4, 5)
+
+                val iter = vec.listIterator()
+
+                iter.hasPrevious().shouldBeFalse()
+                iter.hasNext().shouldBeTrue()
+
+                iter.nextIndex() shouldBeExactly 0
+                iter.previousIndex() shouldBeExactly -1
+
+                iter.next() shouldBeExactly vec[0]
+
+                iter.previousIndex() shouldBeExactly 0
+                iter.nextIndex() shouldBeExactly 1
+
+                iter.previous() shouldBeExactly vec[0]
+
+                iter.previousIndex() shouldBeExactly -1
+                iter.nextIndex() shouldBeExactly 0
+
+                iter.next() shouldBeExactly vec[0]
+                iter.next() shouldBeExactly vec[1]
+                iter.next() shouldBeExactly vec[2]
+                iter.next() shouldBeExactly vec[3]
+                iter.next() shouldBeExactly vec[4]
+
+                iter.hasNext().shouldBeFalse()
+
+                shouldThrowExactly<NoSuchElementException> {
+                    iter.next()
+                }
+
+                iter.previous()
+                iter.previous()
+                iter.previous()
+                iter.previous()
+                iter.previous()
+
+                iter.hasPrevious().shouldBeFalse()
+
+                shouldThrowExactly<NoSuchElementException> {
+                    iter.previous()
+                }
+            }
+        }
     }
 
     "EmptyVector" - {
