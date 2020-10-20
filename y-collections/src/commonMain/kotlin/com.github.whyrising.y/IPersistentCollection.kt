@@ -1,6 +1,6 @@
 package com.github.whyrising.y
 
-interface IPersistentCollection<out E> {
+interface IPersistentCollection<out E> : Seqable<E> {
     val count: Int
 
     fun empty(): IPersistentCollection<E>

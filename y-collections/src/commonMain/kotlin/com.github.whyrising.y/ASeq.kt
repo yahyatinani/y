@@ -55,6 +55,9 @@ abstract class ASeq<out E> : ISeq<E>, List<E> {
         return !otherIter.hasNext()
     }
 
+    override fun seq(): ISeq<E>? = this
+
+    //List Implementation
     override val size: Int
         get() = count
 
@@ -94,7 +97,9 @@ abstract class ASeq<out E> : ISeq<E>, List<E> {
     }
 
     override fun isEmpty(): Boolean = false
+
     override fun iterator(): Iterator<E> = SeqIterator(this)
+
     override fun lastIndexOf(element: @UnsafeVariance E): Int =
         this.toList().lastIndexOf(element)
 
