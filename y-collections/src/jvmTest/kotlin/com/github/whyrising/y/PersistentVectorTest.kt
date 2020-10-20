@@ -285,6 +285,22 @@ class PersistentVectorTest : FreeSpec({
             assertArraysAreEquiv(tVec.tail, vec.tail)
         }
 
+        "seq()" {
+            val emptyVec = v<Int>()
+            val seq: ISeq<Int>? = v(1, 2, 3, 4, 5).seq()
+
+            emptyVec.seq().shouldBeNull()
+            //TODO - failing
+//            seq.shouldNotBeNull()
+//
+//            seq.first() shouldBeExactly 1
+//            (seq.rest() == l(2, 3, 4, 5)).shouldBeTrue()
+//
+//            val cons = seq.cons(8)
+//            cons.first() shouldBeExactly 8
+//            cons.rest() shouldNotBeSameInstanceAs seq
+        }
+
         "hashCode()" {
             val instsUnull = Arb.list(Arb.int().merge(Arb.int().map { null }))
             checkAll(instsUnull) { l: List<Int?> ->

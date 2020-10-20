@@ -2,7 +2,8 @@ package com.github.whyrising.y
 
 internal const val INIT_HASH_CODE = 0
 
-abstract class APersistentVector<out E> : IPersistentVector<E>, List<E> {
+abstract class APersistentVector<out E>
+    : IPersistentVector<E>, List<E>, Seqable<E> {
     internal var _hashCode: Int = INIT_HASH_CODE
 
     override fun toString(): String {
@@ -14,6 +15,12 @@ abstract class APersistentVector<out E> : IPersistentVector<E>, List<E> {
         }
 
         return "[${str.trim()}]"
+    }
+
+    override fun seq(): ISeq<E>? {
+        if (count == 0) return null
+
+        return null
     }
 
     override fun hashCode(): Int {
