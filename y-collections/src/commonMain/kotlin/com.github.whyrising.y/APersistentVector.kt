@@ -152,8 +152,8 @@ abstract class APersistentVector<out E>
 
     class Seq<out E>(
         private val pv: IPersistentVector<E>,
-        private val index: Int = 0
-    ) : ASeq<E>() {
+        override val index: Int = 0
+    ) : ASeq<E>(), IndexedSeq {
 
         override fun first(): E = pv.nth(index)
 

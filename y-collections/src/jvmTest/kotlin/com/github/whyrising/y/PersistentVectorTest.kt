@@ -298,13 +298,15 @@ class PersistentVectorTest : FreeSpec({
                 val vec = v(1, 2, 3)
 
                 val seq = vec.seq() as Seq<Int>
-                val rest = seq.rest()
+                val rest = seq.rest() as Seq<Int>
 
                 seq.shouldNotBeNull()
                 seq.count shouldBeExactly 3
                 seq.first() shouldBeExactly 1
+                seq.index shouldBeExactly 0
 
                 rest.count shouldBeExactly 2
+                rest.index shouldBeExactly 1
                 rest.rest().first() shouldBeExactly 3
                 rest.rest().rest() shouldBeSameInstanceAs Empty
             }
