@@ -57,6 +57,12 @@ abstract class ASeq<out E> : ISeq<E>, List<E> {
 
     override fun seq(): ISeq<E>? = this
 
+    override fun empty(): IPersistentCollection<E> = Empty
+
+    override fun cons(e: @UnsafeVariance E): ISeq<E> = Cons(e, this)
+
+    override fun conj(e: @UnsafeVariance E): IPersistentCollection<E> = cons(e)
+
     //List Implementation
     override val size: Int
         get() = count
