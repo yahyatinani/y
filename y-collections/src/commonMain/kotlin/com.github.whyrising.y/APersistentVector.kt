@@ -114,7 +114,16 @@ abstract class APersistentVector<out E>
         get() = count
 
     override fun contains(element: @UnsafeVariance E): Boolean {
-        TODO("Not yet implemented - needs seq()")
+        var seq = seq()
+        var i = 0
+        while (i < count) {
+            if (equiv(nth(i), seq.first()))
+                return true
+            seq = seq.rest()
+            i++
+        }
+
+        return false
     }
 
     override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {

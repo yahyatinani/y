@@ -579,6 +579,13 @@ class PersistentVectorTest : FreeSpec({
                     iter.previous()
                 }
             }
+
+            "contains(element)" {
+                val vec = v(1, 2, 3, 4)
+
+                vec.contains(1).shouldBeTrue()
+                vec.contains(1L).shouldBeTrue()
+            }
         }
     }
 
