@@ -6,6 +6,8 @@ import com.github.whyrising.y.PersistentVector.EmptyVector
 import com.github.whyrising.y.PersistentVector.Node
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.PersistentVector.TransientVector
+import com.github.whyrising.y.mocks.MockSeq
+import com.github.whyrising.y.mocks.User
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec

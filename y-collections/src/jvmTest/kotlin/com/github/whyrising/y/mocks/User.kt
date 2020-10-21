@@ -1,4 +1,4 @@
-package com.github.whyrising.y
+package com.github.whyrising.y.mocks
 
 class User(val id: Int) {
     override fun hashCode(): Int = 18

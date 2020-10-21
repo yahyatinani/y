@@ -2,6 +2,8 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentList.Cons
 import com.github.whyrising.y.PersistentList.Empty
+import com.github.whyrising.y.mocks.MockSeq
+import com.github.whyrising.y.mocks.User
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
