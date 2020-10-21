@@ -47,7 +47,7 @@ class PersistentListTest : FreeSpec({
             }
         }
 
-        "equals()" {
+        "equals(x)" {
             l(1, 2, 3).equals(null).shouldBeFalse()
 
             (l(1, 2, 3) == mapOf(1 to 2)).shouldBeFalse()
@@ -67,6 +67,50 @@ class PersistentListTest : FreeSpec({
             (l(1, 2, 3) == MockSeq(v(1, 2, 4))).shouldBeFalse()
 
             (l(1, 2, 3) == MockSeq(v(1, 2, 3, 4))).shouldBeFalse()
+        }
+
+        "equiv(x)" {
+            // assert equals behaviour
+            l(1, 2, 3).equiv(null).shouldBeFalse()
+
+            l(1, 2, 3).equiv(mapOf(1 to 2)).shouldBeFalse()
+
+            l(1, 2, 3).equiv(listOf(1, 2, 3, 4)).shouldBeFalse()
+
+            l(User(1)).equiv(listOf(User(2))).shouldBeFalse()
+
+            l(1, 2, 3).equiv(l(1, 2, 8)).shouldBeFalse()
+
+            l(1, 2, 3).equiv(Empty).shouldBeFalse()
+
+            l(1, 2, 3).equiv(MockSeq(v(1, 2, 4))).shouldBeFalse()
+
+            l(1, 2, 3).equiv(MockSeq(v(1, 2, 3, 4))).shouldBeFalse()
+
+            l(1, 2, 3).equiv(listOf(1, 2, 3)).shouldBeTrue()
+
+            l(1).equiv(arrayListOf(1)).shouldBeTrue()
+
+            l(1, 2, 3).equiv(MockSeq(v(1, 2, 3))).shouldBeTrue()
+
+            // assert equiv behaviour
+            l(1).equiv("list").shouldBeFalse()
+
+            l(1).equiv(l(2, null)).shouldBeFalse()
+
+            l(2, null).equiv(l(2, 3)).shouldBeFalse()
+
+            l(null, 2).equiv(l(2, 3)).shouldBeFalse()
+
+            l(1).equiv(l(1)).shouldBeFalse()
+
+            l(Any()).equiv(setOf(Any())).shouldBeFalse()
+
+            l(1).equiv(l(1L)).shouldBeTrue()
+
+            l(l(1)).equiv(l(listOf(1L))).shouldBeTrue()
+
+            l(l(1L)).equiv(PersistentList(listOf(1))).shouldBeTrue()
         }
     }
 
@@ -274,43 +318,6 @@ class PersistentListTest : FreeSpec({
             val list = PersistentList(1, 2, 3)
 
             list.empty() shouldBe Empty
-        }
-
-        "equiv()" - {
-            "should return false" {
-                val list1 = PersistentList(1)
-                val list2 = PersistentList(2)
-                val list3 = PersistentList(2, null)
-                val list4 = PersistentList(null, 2)
-                val list5 = PersistentList(2, 3)
-                val list6 = PersistentList(Any())
-                val list7 = PersistentList(Any())
-
-                (list1.equiv(null)).shouldBeFalse()
-                (list1.equiv("list3")).shouldBeFalse()
-                (list1.equiv(list2)).shouldBeFalse()
-                (list1.equiv(list3)).shouldBeFalse()
-                (list3.equiv(list5)).shouldBeFalse()
-                (list4.equiv(list5)).shouldBeFalse()
-                (list1.equiv(setOf(1))).shouldBeFalse()
-                (list6.equiv(list7)).shouldBeFalse()
-            }
-
-            "should return true" {
-                val list1 = PersistentList(1)
-                val list2 = PersistentList(1)
-                val list3 = PersistentList(1L)
-                val list5 = PersistentList(PersistentList(1))
-                val list6 = PersistentList(listOf(1L))
-
-                list1.equiv(list2).shouldBeTrue()
-                list1.equiv(listOf(1)).shouldBeTrue()
-                list1.equiv(arrayListOf(1)).shouldBeTrue()
-                list1.equiv(list3).shouldBeTrue()
-
-                list5.equiv(list6).shouldBeTrue()
-                list6.equiv(list5).shouldBeTrue()
-            }
         }
 
         "conj() should return a persistent list of 1 element" {

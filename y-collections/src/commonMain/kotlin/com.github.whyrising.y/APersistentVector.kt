@@ -89,6 +89,55 @@ abstract class APersistentVector<out E>
         return true
     }
 
+    override fun equiv(other: Any?): Boolean {
+        when (other) {
+            null -> return false
+            other.hashCode() != hashCode() -> return false
+            is IPersistentVector<*> -> {
+                if (count != other.count) return false
+
+                var i = 0
+                while (i < count) {
+                    if (!equiv(nth(i), other.nth(i)))
+                        return false
+                    i++
+                }
+
+                return true
+            }
+            is List<*> -> {
+                if (other.size != count)
+                    return false
+
+                val i1 = iterator()
+                val i2 = other.iterator()
+
+                while (i1.hasNext())
+                    if (!equiv(i1.next(), i2.next()))
+                        return false
+
+                return true
+            }
+            else -> {
+                if (other !is Sequential) return false
+
+                var seq: ISeq<E> = toSeq(other)
+
+                var i = 0
+                while (i < count) {
+                    if (!equiv(nth(i), seq.first()))
+                        return false
+                    seq = seq.rest()
+                    i++
+                }
+
+                if (seq != emptySeq<E>()) return false
+            }
+        }
+
+        return true
+    }
+
     override fun length(): Int = count
 
     protected fun indexOutOfBounds(index: Int) = index >= count || index < 0

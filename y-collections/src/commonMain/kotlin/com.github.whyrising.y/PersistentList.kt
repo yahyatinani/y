@@ -37,7 +37,6 @@ sealed class PersistentList<out E> :
         internal val _rest: IPersistentList<E>
     ) : PersistentList<E>() {
 
-
         override fun first(): E = first
 
         override fun rest(): ISeq<E> = _rest as ISeq<E>

@@ -59,6 +59,8 @@ sealed class PersistentVector<out E>(
         return Vector(count + 1, newShift, newRoot, arrayOf(e))
     }
 
+    override fun empty(): IPersistentCollection<E> = EmptyVector
+
     @Suppress("UNCHECKED_CAST")
     private fun leafArrayBy(index: Int): Array<E> = when {
         indexOutOfBounds(index) -> throw IndexOutOfBoundsException()

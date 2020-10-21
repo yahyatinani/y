@@ -1,7 +1,7 @@
 package com.github.whyrising.y
 
-interface IPersistentVector<out E> : Indexed<E>, Sequential {
+interface IPersistentVector<out E> : IPersistentCollection<E>, Indexed<E>, Sequential {
     fun length(): Int
 
-    fun conj(e: @UnsafeVariance E): IPersistentVector<E>
+    override fun conj(e: @UnsafeVariance E): IPersistentVector<E>
 }
