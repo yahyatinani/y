@@ -341,7 +341,7 @@ class PersistentVectorTest : FreeSpec({
         }
 
         "equals(x)" {
-            (v(1, 2, 3, 4).equals(null)).shouldBeFalse()
+            v(1, 2, 3, 4).equals(null).shouldBeFalse()
 
             (v(1) == v(1, 2, 3)).shouldBeFalse()
 
@@ -370,31 +370,31 @@ class PersistentVectorTest : FreeSpec({
 
         "equiv(x)" {
             // assert equals behaviour
-            (v(1, 2, 3, 4).equiv(null)).shouldBeFalse()
+            v(1, 2, 3, 4).equiv(null).shouldBeFalse()
 
-            (v(1).equiv(v(1, 2, 3))).shouldBeFalse()
+            v(1).equiv(v(1, 2, 3)).shouldBeFalse()
 
-            (v(1, 2, 3).equiv(v(1, 2, 3))).shouldBeTrue()
+            v(1, 2, 3).equiv(v(1, 2, 3)).shouldBeTrue()
 
-            (v(1, 2, 3).equiv(v(1, 2, 5))).shouldBeFalse()
+            v(1, 2, 3).equiv(v(1, 2, 5)).shouldBeFalse()
 
-            (v(v(1)).equiv(v(v(1)))).shouldBeTrue()
+            v(v(1)).equiv(v(v(1))).shouldBeTrue()
 
-            (v(1, 2, 3).equiv(listOf(1, 4))).shouldBeFalse()
+            v(1, 2, 3).equiv(listOf(1, 4)).shouldBeFalse()
 
-            (v(1, 2, 3).equiv(listOf(1, 2, 5))).shouldBeFalse()
+            v(1, 2, 3).equiv(listOf(1, 2, 5)).shouldBeFalse()
 
-            (v(1, 2, 3).equiv(listOf(1, 2, 3))).shouldBeTrue()
+            v(1, 2, 3).equiv(listOf(1, 2, 3)).shouldBeTrue()
 
-            (v(User(1)).equiv(listOf(User(2)))).shouldBeFalse()
+            v(User(1)).equiv(listOf(User(2))).shouldBeFalse()
 
-            (v(1, 2).equiv(mapOf(1 to 2))).shouldBeFalse()
+            v(1, 2).equiv(mapOf(1 to 2)).shouldBeFalse()
 
-            (v(1, 2).equiv(MockSeq(v(1, 2)))).shouldBeTrue()
+            v(1, 2).equiv(MockSeq(v(1, 2))).shouldBeTrue()
 
-            (v(1, 2).equiv(MockSeq(v(1, 3)))).shouldBeFalse()
+            v(1, 2).equiv(MockSeq(v(1, 3))).shouldBeFalse()
 
-            (v(1, 2).equiv(MockSeq(v(1, 2, 4)))).shouldBeFalse()
+            v(1, 2).equiv(MockSeq(v(1, 2, 4))).shouldBeFalse()
 
             // assert equiv behaviour
             v(1).equiv("vec").shouldBeFalse()
@@ -414,6 +414,8 @@ class PersistentVectorTest : FreeSpec({
             v(l(1)).equiv(PersistentList(listOf(1L))).shouldBeTrue()
 
             v(listOf(1L)).equiv(l(l(1))).shouldBeTrue()
+
+            v(1.1).equiv(l(1.1)).shouldBeTrue()
         }
 
         "List implementation" - {

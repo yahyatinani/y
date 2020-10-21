@@ -87,6 +87,8 @@ class PersistentListTest : FreeSpec({
 
             l(1, 2, 3).equiv(MockSeq(v(1, 2, 3, 4))).shouldBeFalse()
 
+            l(1).equiv(l(1)).shouldBeTrue()
+
             l(1, 2, 3).equiv(listOf(1, 2, 3)).shouldBeTrue()
 
             l(1).equiv(arrayListOf(1)).shouldBeTrue()
@@ -102,8 +104,6 @@ class PersistentListTest : FreeSpec({
 
             l(null, 2).equiv(l(2, 3)).shouldBeFalse()
 
-            l(1).equiv(l(1)).shouldBeFalse()
-
             l(Any()).equiv(setOf(Any())).shouldBeFalse()
 
             l(1).equiv(l(1L)).shouldBeTrue()
@@ -111,6 +111,8 @@ class PersistentListTest : FreeSpec({
             l(l(1)).equiv(l(listOf(1L))).shouldBeTrue()
 
             l(l(1L)).equiv(PersistentList(listOf(1))).shouldBeTrue()
+
+            l(1.1).equiv(v(1.1)).shouldBeTrue()
         }
     }
 

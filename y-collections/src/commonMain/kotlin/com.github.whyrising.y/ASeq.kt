@@ -9,7 +9,10 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
         fold("") { acc, e -> "$acc $e" }.trim()
     })"
 
-    override fun equals(other: Any?): Boolean {
+    private fun compareWith(
+        other: Any?,
+        areEqual: (e1: E, e2: Any?) -> Boolean
+    ): Boolean {
         //TODO : Refactor after implementing the LazySeq
         when (other) {
             null -> return false
@@ -22,7 +25,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
                 val thisIter = this.iterator()
 
                 while (thisIter.hasNext() && otherIter.hasNext()) {
-                    if (thisIter.next() != otherIter.next())
+                    if (!areEqual(thisIter.next(), otherIter.next()))
                         return false
                 }
 
@@ -34,7 +37,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
 
                 var i = 0
                 while (i < count) {
-                    if (seq.first() != otherSeq.first())
+                    if (!areEqual(seq.first(), otherSeq.first()))
                         return false
 
                     i++
@@ -46,6 +49,14 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
             }
             else -> return false
         }
+    }
+
+    override fun equals(other: Any?): Boolean = compareWith(other) { e1, e2 ->
+        e1 == e2
+    }
+
+    override fun equiv(other: Any?): Boolean = compareWith(other) { e1, e2 ->
+        equiv(e1, e2)
     }
 
     override fun hashCode(): Int {
@@ -56,45 +67,6 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
         }
 
         return _hashCode
-    }
-
-    override fun equiv(other: Any?): Boolean {
-        //TODO : Refactor after implementing the LazySeq
-        when (other) {
-            null -> return false
-            hashCode() != other.hashCode() -> return false
-            is List<*> -> {
-                if (count != other.size)
-                    return false
-
-                val otherIter = (other as Iterable<*>).iterator()
-                val thisIter = this.iterator()
-
-                while (thisIter.hasNext() && otherIter.hasNext()) {
-                    if (!equiv(thisIter.next(), otherIter.next()))
-                        return false
-                }
-
-                return !otherIter.hasNext()
-            }
-            is Sequential -> {
-                var seq = seq()
-                var otherSeq: ISeq<E> = toSeq(other)
-
-                var i = 0
-                while (i < count) {
-                    if (!equiv(seq.first(), otherSeq.first()))
-                        return false
-
-                    i++
-                    seq = seq.rest()
-                    otherSeq = otherSeq.rest()
-                }
-
-                return otherSeq == empty()
-            }
-            else -> return false
-        }
     }
 
     override fun seq(): ISeq<E> = this

@@ -40,7 +40,10 @@ abstract class APersistentVector<out E>
         return hash
     }
 
-    override fun equals(other: Any?): Boolean {
+    private fun compareWith(
+        other: Any?,
+        areEqual: (e1: E, e2: Any?) -> Boolean
+    ): Boolean {
         when (other) {
             null -> return false
             other.hashCode() != hashCode() -> return false
@@ -49,7 +52,7 @@ abstract class APersistentVector<out E>
 
                 var i = 0
                 while (i < count) {
-                    if (nth(i) != other.nth(i))
+                    if (!areEqual(nth(i), other.nth(i)))
                         return false
                     i++
                 }
@@ -64,7 +67,7 @@ abstract class APersistentVector<out E>
                 val i2 = other.iterator()
 
                 while (i1.hasNext())
-                    if (i1.next() != i2.next())
+                    if (!areEqual(i1.next(), i2.next()))
                         return false
 
                 return true
@@ -76,7 +79,7 @@ abstract class APersistentVector<out E>
 
                 var i = 0
                 while (i < count) {
-                    if (nth(i) != seq.first())
+                    if (!areEqual(nth(i), seq.first()))
                         return false
                     seq = seq.rest()
                     i++
@@ -89,53 +92,12 @@ abstract class APersistentVector<out E>
         return true
     }
 
-    override fun equiv(other: Any?): Boolean {
-        when (other) {
-            null -> return false
-            other.hashCode() != hashCode() -> return false
-            is IPersistentVector<*> -> {
-                if (count != other.count) return false
+    override fun equals(other: Any?): Boolean = compareWith(other) { e1, e2 ->
+        e1 == e2
+    }
 
-                var i = 0
-                while (i < count) {
-                    if (!equiv(nth(i), other.nth(i)))
-                        return false
-                    i++
-                }
-
-                return true
-            }
-            is List<*> -> {
-                if (other.size != count)
-                    return false
-
-                val i1 = iterator()
-                val i2 = other.iterator()
-
-                while (i1.hasNext())
-                    if (!equiv(i1.next(), i2.next()))
-                        return false
-
-                return true
-            }
-            else -> {
-                if (other !is Sequential) return false
-
-                var seq: ISeq<E> = toSeq(other)
-
-                var i = 0
-                while (i < count) {
-                    if (!equiv(nth(i), seq.first()))
-                        return false
-                    seq = seq.rest()
-                    i++
-                }
-
-                if (seq != emptySeq<E>()) return false
-            }
-        }
-
-        return true
+    override fun equiv(other: Any?): Boolean = compareWith(other) { e1, e2 ->
+        equiv(e1, e2)
     }
 
     override fun length(): Int = count
