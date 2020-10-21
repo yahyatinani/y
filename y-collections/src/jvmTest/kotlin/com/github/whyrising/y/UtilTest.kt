@@ -3,6 +3,7 @@ package com.github.whyrising.y
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 
 class UtilTest : FreeSpec({
@@ -82,6 +83,37 @@ class UtilTest : FreeSpec({
         "equiv(x: Number, y: Number)" {
             LongOps.equiv(1, 1L).shouldBeTrue()
             DoubleOps.equiv(1f, 1.0).shouldBeTrue()
+        }
+    }
+
+    "toSeq(x)" - {
+        "ASeq" {
+            val x: Any = Cons(1, PersistentList.Empty)
+
+            val seq: ISeq<Int> = toSeq(x)
+
+            seq.first() shouldBeExactly 1
+        }
+
+        "Seqable" {
+            val x: Any = v(1, 2)
+
+            val seq: ISeq<Int> = toSeq(x)
+
+            seq.first() shouldBeExactly 1
+        }
+
+        ""
+
+        "not supported" {
+            val x: Any = true
+
+            val e = shouldThrowExactly<IllegalArgumentException> {
+                toSeq<Int>(x)
+            }
+
+            e.message shouldBe
+                "Don't know how to create ISeq from: ${x::class.simpleName}"
         }
     }
 })

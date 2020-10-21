@@ -312,20 +312,25 @@ class PersistentVectorTest : FreeSpec({
             }
         }
 
-        "hashCode()" {
-            val instsUnull = Arb.list(Arb.int().merge(Arb.int().map { null }))
-            checkAll(instsUnull) { l: List<Int?> ->
-                val prime = 31
-                val emptyVecHash = EmptyVector.hashCode()
-                val expectedHash = l.fold(emptyVecHash) { hashCode, i ->
-                    prime * hashCode + i.hashCode()
+        "hashCode()" - {
+            "when called on EmptyVector, it should return 1" {
+                EmptyVector.hashCode() shouldBeExactly 1
+            }
+
+            "when called on a populated vectorm it should calculate the hash" {
+
+                val gen = Arb.list(Arb.int().merge(Arb.int().map { null }))
+                checkAll(gen) { list: List<Int?> ->
+                    val prime = 31
+                    val emptyVecHash = EmptyVector.hashCode()
+                    val expectedHash = list.fold(emptyVecHash) { hash, i ->
+                        prime * hash + i.hashCode()
+                    }
+                    val vec = v(*list.toTypedArray())
+
+                    vec.hashCode() shouldBeExactly expectedHash
+                    vec.hashCode() shouldBeExactly expectedHash // for coverage
                 }
-                val vec = v(*l.toTypedArray())
-
-                vec._hashCode shouldBeExactly 0
-
-                vec.hashCode() shouldBeExactly expectedHash
-                vec.hashCode() shouldBeExactly expectedHash // for coverage
             }
         }
 
@@ -344,7 +349,17 @@ class PersistentVectorTest : FreeSpec({
 
             (v(1, 2, 3) == listOf(1, 2, 5)).shouldBeFalse()
 
-// TODO:            (v(1, 2, 3) == listOf(1, 2, 3)).shouldBeTrue()
+            (v(1, 2, 3) == listOf(1, 2, 3)).shouldBeTrue()
+
+            (v(User(1)) == listOf(User(2))).shouldBeFalse()
+
+            (v(1, 2) == mapOf(1 to 2)).shouldBeFalse()
+
+            (v(1, 2) == MockSeq(v(1, 2))).shouldBeTrue()
+
+            (v(1, 2) == MockSeq(v(1, 3))).shouldBeFalse()
+
+            (v(1, 2) == MockSeq(v(1, 2, 4))).shouldBeFalse()
         }
 
         "List implementation" - {

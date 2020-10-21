@@ -1,8 +1,10 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.APersistentVector.Seq.Companion.emptySeq
+
 abstract class APersistentVector<out E>
     : IPersistentVector<E>, List<E>, Seqable<E> {
-    internal var _hashCode: Int = INIT_HASH_CODE
+    private var _hashCode: Int = INIT_HASH_CODE
 
     override fun toString(): String {
         var i = 0
@@ -27,6 +29,7 @@ abstract class APersistentVector<out E>
         if (hash != INIT_HASH_CODE) return hash
 
         var index = 0
+        hash = 1
         while (index < count) {
             hash = 31 * hash + nth(index).hashCode()
 
@@ -34,36 +37,56 @@ abstract class APersistentVector<out E>
         }
         _hashCode = hash
 
-        return _hashCode
+        return hash
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other == null)
-            return false
+        when (other) {
+            null -> return false
+            other.hashCode() != hashCode() -> return false
+            is IPersistentVector<*> -> {
+                if (count != other.count) return false
 
-        if (other is PersistentVector<*>) {
-            if (count != other.count) return false
+                var i = 0
+                while (i < count) {
+                    if (nth(i) != other.nth(i))
+                        return false
+                    i++
+                }
 
-            var i = 0
-            while (i < count) {
-                if (nth(i) != other.nth(i))
-                    return false
-                i++
+                return true
             }
+            is List<*> -> {
+                if (other.size != count)
+                    return false
 
-            return true
-        } else if (other is List<*>) {
-//            if (count != other.size)
-//            val i1 = (this as List<E>).iterator()
-//            val i2 = other.iterator()
-//
-//            while (i1.hasNext())
-//                if (i1.next() != i2.next())
-//                    return false
+                val i1 = iterator()
+                val i2 = other.iterator()
 
-            return false
+                while (i1.hasNext())
+                    if (i1.next() != i2.next())
+                        return false
+
+                return true
+            }
+            else -> {
+                if (other !is Sequential) return false
+
+                var seq: ISeq<E> = toSeq(other)
+
+                var i = 0
+                while (i < count) {
+                    if (nth(i) != seq.first())
+                        return false
+                    seq = seq.rest()
+                    i++
+                }
+
+                if (seq != emptySeq<E>()) return false
+            }
         }
-        TODO()
+
+        return true
     }
 
     override fun length(): Int = count

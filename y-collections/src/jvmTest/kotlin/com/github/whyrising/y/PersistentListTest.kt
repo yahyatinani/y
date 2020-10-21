@@ -44,6 +44,28 @@ class PersistentListTest : FreeSpec({
                 }
             }
         }
+
+        "equals()" {
+            l(1, 2, 3).equals(null).shouldBeFalse()
+
+            (l(1, 2, 3) == mapOf(1 to 2)).shouldBeFalse()
+
+            (l(1, 2, 3) == listOf(1, 2, 3)).shouldBeTrue()
+
+            (l(1, 2, 3) == listOf(1, 2, 3, 4)).shouldBeFalse()
+
+            (l(User(1)) == listOf(User(2))).shouldBeFalse()
+
+            (l(1, 2, 3) == l(1, 2, 8)).shouldBeFalse()
+
+            (l(1, 2, 3) == Empty).shouldBeFalse()
+
+            (l(1, 2, 3) == MockSeq(v(1, 2, 3))).shouldBeTrue()
+
+            (l(1, 2, 3) == MockSeq(v(1, 2, 4))).shouldBeFalse()
+
+            (l(1, 2, 3) == MockSeq(v(1, 2, 3, 4))).shouldBeFalse()
+        }
     }
 
     "PersistentList.Empty" - {
@@ -231,29 +253,6 @@ class PersistentListTest : FreeSpec({
                     integers.fold(Empty.hashCode()) { hashCode: Int, i: Int? ->
                         prime * hashCode + i.hashCode()
                     }
-            }
-        }
-
-        "equals()" - {
-            "should return true" {
-                val list1 = PersistentList(1)
-                val list2 = PersistentList(1)
-
-                (list1 == list2).shouldBeTrue()
-                (list1 == listOf(1)).shouldBeTrue()
-                (list1 == arrayListOf(1)).shouldBeTrue()
-            }
-
-            "should return false" {
-                val list1 = PersistentList(1)
-                val list2 = PersistentList(2)
-                val list3 = PersistentList(2, null)
-
-                (list1.equals(null)).shouldBeFalse()
-                (list1.equals("list3")).shouldBeFalse()
-                (list1 == list2).shouldBeFalse()
-                (list2 == list3).shouldBeFalse()
-                (list1 == setOf(1)).shouldBeFalse()
             }
         }
 

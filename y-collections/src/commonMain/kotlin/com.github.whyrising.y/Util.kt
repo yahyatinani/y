@@ -47,3 +47,11 @@ fun <E> equiv(e1: E, e2: Any?): Boolean = when {
         else -> false
     }
 }
+
+@Suppress("UNCHECKED_CAST")
+fun <E> toSeq(x: Any): ISeq<E> = when (x) {
+    is ASeq<*> -> x as ASeq<E>
+    is Seqable<*> -> x.seq() as ISeq<E>
+    else -> throw IllegalArgumentException(
+        "Don't know how to create ISeq from: ${x::class.simpleName}")
+}

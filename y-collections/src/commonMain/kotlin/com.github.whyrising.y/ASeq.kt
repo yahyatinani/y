@@ -10,21 +10,42 @@ abstract class ASeq<out E> : ISeq<E>, List<E> {
     })"
 
     override fun equals(other: Any?): Boolean {
-        //TODO: reconsider the use of ISeq if PersistentMap was an ISeq
+        //TODO : Refactor after implementing the LazySeq
         when (other) {
             null -> return false
-            !is List<*> -> return false
+            hashCode() != other.hashCode() -> return false
+            is List<*> -> {
+                if (count != other.size)
+                    return false
+
+                val otherIter = (other as Iterable<*>).iterator()
+                val thisIter = this.iterator()
+
+                while (thisIter.hasNext() && otherIter.hasNext()) {
+                    if (thisIter.next() != otherIter.next())
+                        return false
+                }
+
+                return !otherIter.hasNext()
+            }
+            is Sequential -> {
+                var seq = seq()
+                var otherSeq: ISeq<E> = toSeq(other)
+
+                var i = 0
+                while (i < count) {
+                    if (seq.first() != otherSeq.first())
+                        return false
+
+                    i++
+                    seq = seq.rest()
+                    otherSeq = otherSeq.rest()
+                }
+
+                return otherSeq == empty()
+            }
+            else -> return false
         }
-
-        val otherIter = (other as Iterable<*>).iterator()
-        val thisIter = this.iterator()
-
-        while (thisIter.hasNext() && otherIter.hasNext()) {
-            if (thisIter.next() != otherIter.next())
-                return false
-        }
-
-        return !otherIter.hasNext()
     }
 
     override fun hashCode(): Int {
