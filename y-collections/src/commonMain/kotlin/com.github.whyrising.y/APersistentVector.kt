@@ -18,7 +18,7 @@ abstract class APersistentVector<out E>
     }
 
     override fun seq(): ISeq<E> {
-        if (count == 0) return Seq.emptySeq()
+        if (count == 0) return emptySeq()
 
         return Seq(this)
     }

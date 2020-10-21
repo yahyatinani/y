@@ -1,5 +1,5 @@
 package com.github.whyrising.y
 
-interface IndexedSeq {
+interface IndexedSeq : Sequential {
     val index: Int
 }

@@ -2,7 +2,7 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentList.Empty
 
-abstract class ASeq<out E> : ISeq<E>, List<E> {
+abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
     private var _hashCode: Int = INIT_HASH_CODE
 
     override fun toString(): String = "(${
