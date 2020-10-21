@@ -117,7 +117,7 @@ abstract class APersistentVector<out E>
         var seq = seq()
         var i = 0
         while (i < count) {
-            if (equiv(nth(i), seq.first()))
+            if (equiv(element, nth(i)))
                 return true
             seq = seq.rest()
             i++
@@ -127,7 +127,11 @@ abstract class APersistentVector<out E>
     }
 
     override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
-        TODO("Not yet implemented")
+        for (e in elements)
+            if (!contains(e))
+                return false
+
+        return true
     }
 
     override fun get(index: Int): E = nth(index)
