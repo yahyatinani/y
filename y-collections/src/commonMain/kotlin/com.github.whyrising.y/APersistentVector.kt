@@ -5,9 +5,7 @@ import com.github.whyrising.y.APersistentVector.Seq.Companion.emptySeq
 abstract class APersistentVector<out E> :
     IPersistentVector<E>,
     List<E>,
-    Seqable<E>,
-    RandomAccess,
-    ILookup<Int, E> {
+    RandomAccess {
 
     private var _hashCode: Int = INIT_HASH_CODE
 
@@ -120,6 +118,8 @@ abstract class APersistentVector<out E> :
     }
 
     override fun valAt(key: Int): E? = valAt(key, null)
+
+    override fun containsKey(key: Int): Boolean = key in 0 until count
 
     // List implementation
     override val size: Int

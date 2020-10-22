@@ -434,6 +434,13 @@ class PersistentVectorTest : FreeSpec({
             vec.valAt(2) shouldBe 3
         }
 
+        "containsKey(key)" {
+            val vec = v(1, 2, 3, 4)
+
+            vec.containsKey(0).shouldBeTrue()
+            vec.containsKey(10).shouldBeFalse()
+        }
+
         "List implementation" - {
             "size()" {
                 checkAll { l: List<Int> ->
