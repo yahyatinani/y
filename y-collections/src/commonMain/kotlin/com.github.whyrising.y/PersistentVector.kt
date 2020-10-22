@@ -47,7 +47,7 @@ sealed class PersistentVector<out E>(
                 }
             }
             count -> conj(value)
-            else -> throw IndexOutOfBoundsException("$index")
+            else -> throw IndexOutOfBoundsException("index = $index")
         }
     }
 

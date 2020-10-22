@@ -1,0 +1,68 @@
+package com.github.whyrising.y
+
+import com.github.whyrising.y.PersistentVector.EmptyVector
+import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.reflection.shouldBeSubtypeOf
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+
+class MapEntryTest : FreeSpec({
+    "assertions" {
+        IMapEntry::class.shouldBeSubtypeOf<Map.Entry<*, *>>()
+    }
+
+    "key/value" {
+        val entry: IMapEntry<String, Int> = MapEntry("a", 1)
+
+        entry.key shouldBe "a"
+        entry.value shouldBeExactly 1
+    }
+
+    "nth(index)" {
+        val entry = MapEntry("a", 1)
+
+        entry.nth(0) shouldBe "a"
+        entry.nth(1) shouldBe 1
+        val e = shouldThrowExactly<IndexOutOfBoundsException> {
+            entry.nth(2)
+        }
+
+        e.message shouldBe "index = 2"
+    }
+
+    "count" {
+        MapEntry("a", 1).count shouldBeExactly 2
+    }
+
+    "empty()" {
+        val entry = MapEntry("a", 1)
+
+        entry.empty() shouldBeSameInstanceAs EmptyVector
+    }
+
+    "conj(e)" {
+        val entry = MapEntry("a", 1)
+
+        val vec = entry.conj(15)
+
+        vec.count shouldBeExactly 3
+        vec.nth(0) shouldBe "a"
+        vec.nth(1) shouldBe 1
+        vec.nth(2) shouldBe 15
+    }
+
+    "assocN(index, value)" {
+        val entry = MapEntry("a", 1)
+
+        entry.assocN(0, "b").nth(0) shouldBe "b"
+        entry.assocN(1, 15).nth(1) shouldBe 15
+        entry.assocN(2, 15).nth(2) shouldBe 15
+        val e = shouldThrowExactly<IndexOutOfBoundsException> {
+            entry.assocN(3, 15).nth(3)
+        }
+
+        e.message shouldBe "index = 3"
+    }
+})
