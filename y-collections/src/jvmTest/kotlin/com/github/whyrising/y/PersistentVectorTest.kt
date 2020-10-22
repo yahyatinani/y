@@ -421,9 +421,17 @@ class PersistentVectorTest : FreeSpec({
         "valAt(key, default)" {
             val vec = v(1, 2, 3, 4)
 
-            vec.valAt(4, default) shouldBeExactly default
-            vec.valAt(0, default) shouldBeExactly 1
-            vec.valAt(2, default) shouldBeExactly 3
+            vec.valAt(4, default) shouldBe default
+            vec.valAt(0, default) shouldBe 1
+            vec.valAt(2, default) shouldBe 3
+        }
+
+        "valAt(key)" {
+            val vec = v(1, 2, 3, 4)
+
+            vec.valAt(4) shouldBe null
+            vec.valAt(0) shouldBe 1
+            vec.valAt(2) shouldBe 3
         }
 
         "List implementation" - {

@@ -114,10 +114,12 @@ abstract class APersistentVector<out E> :
         else -> nth(index)
     }
 
-    override fun valAt(key: Int, default: @UnsafeVariance E): E = when (key) {
+    override fun valAt(key: Int, default: @UnsafeVariance E?): E? = when (key) {
         in 0 until count -> nth(key)
         else -> default
     }
+
+    override fun valAt(key: Int): E? = valAt(key, null)
 
     // List implementation
     override val size: Int
