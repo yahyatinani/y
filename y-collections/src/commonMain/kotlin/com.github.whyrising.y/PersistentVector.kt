@@ -16,6 +16,41 @@ sealed class PersistentVector<out E>(
     internal val tail: Array<Any?>
 ) : APersistentVector<E>(), IMutableCollection<E> {
 
+    override
+    fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E> {
+        @Suppress("UNCHECKED_CAST")
+        fun assoc(level: Int, node: Node<E>): Node<E> {
+            val copy: Node<E> = Node(node.isMutable, node.array.copyOf())
+
+            when (level) {
+                0 -> copy.array[index and 0x01f] = value
+                else -> {
+                    val subIndex = (index ushr level) and 0x01f
+                    copy.array[subIndex] =
+                        assoc(level - SHIFT, (node.array[subIndex] as Node<E>))
+                }
+            }
+
+            return copy
+        }
+
+        return when (index) {
+            in 0 until count -> {
+                when {
+                    index >= tailOffset(count) -> {
+                        val newTail = tail.copyOf()
+                        newTail[index and 0x01f] = value
+
+                        Vector(count, shift, root, newTail)
+                    }
+                    else -> Vector(count, shift, assoc(shift, root), tail)
+                }
+            }
+            count -> conj(value)
+            else -> throw IndexOutOfBoundsException("$index")
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
         val rootNode = Node<E>(parent.isMutable, parent.array.copyOf())

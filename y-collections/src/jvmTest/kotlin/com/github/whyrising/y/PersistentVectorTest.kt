@@ -94,6 +94,14 @@ class PersistentVectorTest : FreeSpec({
             }
         }
 
+        "length()" {
+            checkAll { list: List<Int> ->
+                val vec = PersistentVector(*list.toTypedArray())
+
+                vec.length() shouldBeExactly list.size
+            }
+        }
+
         "conj(e)" - {
             val i = 7
             "when level is 5 and there is room in tail, it should add to it" {
@@ -224,16 +232,84 @@ class PersistentVectorTest : FreeSpec({
             }
         }
 
-        "empty()" {
-            v(1, 2, 3, 4).empty() shouldBeSameInstanceAs EmptyVector
+        "assocN(index, val)" - {
+
+            "when index out of bounds, it should throw an exception"{
+                val vec = v(1, 2, 3, 4)
+
+                shouldThrowExactly<IndexOutOfBoundsException> {
+                    vec.assocN(10, 15)
+                }
+            }
+
+            "when index equals the count of the vector, it should conj" {
+                val vec = v(1, 2, 3, 4)
+                val index = vec.count
+                val value = 15
+
+                val rvec = vec.assocN(index, value)
+
+                rvec shouldNotBeSameInstanceAs vec
+                rvec.count shouldBeExactly vec.count + 1
+                rvec.nth(index) shouldBeExactly value
+                vec.fold(0) { i: Int, n: Int ->
+                    rvec.nth(i) shouldBeExactly n
+                    i + 1
+                }
+            }
+
+            "when index within vec bounds, update the associate value" - {
+                "when the vec is empty, it should conj the value" {
+                    val value = 15
+                    val vec = v<Int>()
+
+                    val rvec = vec.assocN(0, value)
+
+                    rvec shouldNotBeSameInstanceAs vec
+                    rvec.count shouldBeExactly 1
+                    rvec.nth(0) shouldBeExactly value
+                }
+
+                "when index within the tail" {
+                    val vec = v(1, 2, 3, 4)
+                    val index1 = vec.count - 1
+                    val index2 = 0
+                    val value = 15
+
+                    val rvec1 = vec.assocN(index1, value)
+                    val rvec2 = vec.assocN(index2, value)
+
+                    rvec2.nth(index2) shouldBeExactly value
+                    rvec1 shouldNotBeSameInstanceAs vec
+                    rvec1.count shouldBeExactly vec.count
+                    rvec1.nth(index1) shouldBeExactly value
+                    vec.fold(0) { i: Int, n: Int ->
+                        when (i) {
+                            index1 -> rvec1.nth(i) shouldBeExactly value
+                            else -> rvec1.nth(i) shouldBeExactly n
+                        }
+                        i + 1
+                    }
+                }
+
+                "when index within the tree and level 5" {
+                    val vec = v(*(1..50).toList().toTypedArray())
+                    val index = 30
+                    val value = 99
+
+                    val rvec = vec.assocN(index, value)
+
+                    rvec shouldNotBeSameInstanceAs vec
+                    rvec.nth(index) shouldBeExactly value
+                    rvec.count shouldBeExactly vec.count
+
+                    vec.nth(index) shouldBeExactly 31
+                }
+            }
         }
 
-        "length()" {
-            checkAll { list: List<Int> ->
-                val vec = PersistentVector(*list.toTypedArray())
-
-                vec.length() shouldBeExactly list.size
-            }
+        "empty()" {
+            v(1, 2, 3, 4).empty() shouldBeSameInstanceAs EmptyVector
         }
 
         val default = -1

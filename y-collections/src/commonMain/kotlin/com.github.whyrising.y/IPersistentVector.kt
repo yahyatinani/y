@@ -8,5 +8,7 @@ interface IPersistentVector<out E> :
 
     fun length(): Int
 
+    fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E>
+
     override fun conj(e: @UnsafeVariance E): IPersistentVector<E>
 }
