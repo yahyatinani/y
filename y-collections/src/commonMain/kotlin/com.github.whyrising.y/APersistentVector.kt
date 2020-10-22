@@ -2,8 +2,13 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.APersistentVector.Seq.Companion.emptySeq
 
-abstract class APersistentVector<out E>
-    : IPersistentVector<E>, List<E>, Seqable<E> {
+abstract class APersistentVector<out E> :
+    IPersistentVector<E>,
+    List<E>,
+    Seqable<E>,
+    RandomAccess,
+    ILookup<Int, E> {
+
     private var _hashCode: Int = INIT_HASH_CODE
 
     override fun toString(): String {
@@ -107,6 +112,11 @@ abstract class APersistentVector<out E>
     override fun nth(index: Int, default: @UnsafeVariance E): E = when {
         indexOutOfBounds(index) -> default
         else -> nth(index)
+    }
+
+    override fun valAt(key: Int, default: @UnsafeVariance E): E = when (key) {
+        in 0 until count -> nth(key)
+        else -> default
     }
 
     // List implementation
