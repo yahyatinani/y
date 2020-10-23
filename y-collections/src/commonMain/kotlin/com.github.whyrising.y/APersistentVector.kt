@@ -269,12 +269,12 @@ abstract class APersistentVector<out E> :
             }
         }
 
-        override fun nth(index: Int): E {
+        override fun nth(index: Int): E = (start + index).let {
             when {
                 index < 0 -> throw IndexOutOfBoundsException(
                     "The index should be >= 0: $index")
-                start + index >= end -> throw IndexOutOfBoundsException()
-                else -> return vec.nth(start + index)
+                it >= end -> throw IndexOutOfBoundsException()
+                else -> return vec.nth(it)
             }
         }
 
@@ -292,8 +292,7 @@ abstract class APersistentVector<out E> :
         override fun conj(e: @UnsafeVariance E): IPersistentVector<E> =
             SubVector(vec.conj(e), start, end + 1)
 
-        override val count: Int
-            get() = end - start
+        override val count: Int = end - start
 
         override fun empty(): IPersistentCollection<E> = EmptyVector
     }
