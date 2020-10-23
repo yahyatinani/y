@@ -270,7 +270,12 @@ abstract class APersistentVector<out E> :
         }
 
         override fun nth(index: Int): E {
-            TODO("Not yet implemented")
+            when {
+                index < 0 -> throw IndexOutOfBoundsException(
+                    "The index should be >= 0: $index")
+                start + index >= end -> throw IndexOutOfBoundsException()
+                else -> return vec.nth(start + index)
+            }
         }
 
         override

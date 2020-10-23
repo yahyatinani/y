@@ -1102,6 +1102,21 @@ class PersistentVectorTest : FreeSpec({
             SubVector(vec, start, end).empty() shouldBeSameInstanceAs
                 EmptyVector
         }
+
+        "nth(index)" {
+            val vec = v(1, 2, 3, 4, 5)
+            val subvec = SubVector(vec, 1, 5)
+
+            shouldThrowExactly<IndexOutOfBoundsException> {
+                subvec.nth(-1)
+            }.message shouldBe "The index should be >= 0: -1"
+
+            shouldThrowExactly<IndexOutOfBoundsException> { subvec.nth(4) }
+            shouldThrowExactly<IndexOutOfBoundsException> { subvec.nth(5) }
+
+            subvec.nth(0) shouldBeExactly 2
+            subvec.nth(2) shouldBeExactly 4
+        }
     }
 
     "v() should return an empty persistent vector" {
