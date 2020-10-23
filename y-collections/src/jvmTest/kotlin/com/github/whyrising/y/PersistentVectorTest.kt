@@ -517,6 +517,17 @@ class PersistentVectorTest : FreeSpec({
             vec.containsKey(10).shouldBeFalse()
         }
 
+        "entryAt(key)" {
+            val vec = v(1, 2, 3, 4)
+
+            val entry = vec.entryAt(2) as IMapEntry<Int, Int>
+
+            entry.key shouldBeExactly 2
+            entry.value shouldBeExactly 3
+
+            vec.entryAt(6).shouldBeNull()
+        }
+
         "List implementation" - {
             "size()" {
                 checkAll { l: List<Int> ->

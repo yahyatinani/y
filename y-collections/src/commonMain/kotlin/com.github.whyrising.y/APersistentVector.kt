@@ -121,6 +121,11 @@ abstract class APersistentVector<out E> :
 
     override fun containsKey(key: Int): Boolean = key in 0 until count
 
+    override fun entryAt(key: Int): IMapEntry<Int, E>? = when (key) {
+        !in 0..count -> null
+        else -> MapEntry(key, nth(key))
+    }
+
     // List implementation
     override val size: Int
         get() = count
