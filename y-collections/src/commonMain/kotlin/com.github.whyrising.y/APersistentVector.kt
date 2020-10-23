@@ -1,6 +1,7 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.APersistentVector.Seq.Companion.emptySeq
+import com.github.whyrising.y.PersistentVector.EmptyVector
 
 abstract class APersistentVector<out E> :
     IPersistentVector<E>,
@@ -130,6 +131,10 @@ abstract class APersistentVector<out E> :
     fun assoc(index: Int, value: @UnsafeVariance E): IPersistentVector<E> =
         assocN(index, value)
 
+    override fun subvec(start: Int, end: Int): IPersistentVector<E> {
+        TODO("Not yet implemented")
+    }
+
     // List implementation
     override val size: Int
         get() = count
@@ -238,6 +243,50 @@ abstract class APersistentVector<out E> :
 
         companion object {
             internal fun <E> emptySeq(): ISeq<E> = PersistentList.Empty
+        }
+    }
+
+    class SubVector<out E> private constructor(
+        internal val vec: IPersistentVector<E>,
+        internal val start: Int,
+        internal val end: Int
+    ) : APersistentVector<E>() {
+
+        companion object {
+            operator fun <E> invoke(
+                vec: IPersistentVector<E>,
+                start: Int,
+                end: Int
+            ): IPersistentVector<E> = when {
+                start > end -> throw IndexOutOfBoundsException(
+                    "Make sure that the start < end: $start < $end!")
+                start < 0 -> throw IndexOutOfBoundsException(
+                    "Make sure that the start >= 0: $start >= 0!")
+                end > vec.count -> throw IndexOutOfBoundsException(
+                    "Make sure that the end <= count: $end <= ${vec.count}!")
+                start == end -> EmptyVector
+                else -> SubVector(vec, start, end)
+            }
+        }
+
+        override fun nth(index: Int): E {
+            TODO("Not yet implemented")
+        }
+
+        override
+        fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E> {
+            TODO("Not yet implemented")
+        }
+
+        override fun conj(e: @UnsafeVariance E): IPersistentVector<E> {
+            TODO("Not yet implemented")
+        }
+
+        override val count: Int
+            get() = TODO("Not yet implemented")
+
+        override fun empty(): IPersistentCollection<E> {
+            TODO("Not yet implemented")
         }
     }
 }

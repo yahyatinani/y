@@ -11,4 +11,6 @@ interface IPersistentVector<out E> :
     fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E>
 
     override fun conj(e: @UnsafeVariance E): IPersistentVector<E>
+
+    fun subvec(start: Int, end: Int): IPersistentVector<E>
 }

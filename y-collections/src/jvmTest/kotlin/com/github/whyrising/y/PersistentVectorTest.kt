@@ -1,6 +1,7 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.APersistentVector.Seq
+import com.github.whyrising.y.APersistentVector.SubVector
 import com.github.whyrising.y.PersistentList.Empty
 import com.github.whyrising.y.PersistentVector.EmptyVector
 import com.github.whyrising.y.PersistentVector.Node
@@ -1034,6 +1035,52 @@ class PersistentVectorTest : FreeSpec({
                     subRoot2.isMutable shouldBeSameInstanceAs tvIsMutable
                     mostRightLeaf.isMutable shouldBeSameInstanceAs tvIsMutable
                 }
+            }
+        }
+    }
+
+    "SubVector" - {
+        "invoke()/ctor" - {
+            "when start & end is out of bounds, it should throw exception" {
+                val vec = v(1, 2, 3, 4, 5)
+
+                val e1 = shouldThrowExactly<IndexOutOfBoundsException> {
+                    SubVector(vec, 3, 2)
+                }
+
+                e1.message shouldBe "Make sure that the start < end: 3 < 2!"
+
+                val e2 = shouldThrowExactly<IndexOutOfBoundsException> {
+                    SubVector(vec, -1, 2)
+                }
+
+                e2.message shouldBe "Make sure that the start >= 0: -1 >= 0!"
+
+                val e3 = shouldThrowExactly<IndexOutOfBoundsException> {
+                    SubVector(vec, 1, 7)
+                }
+
+                e3.message shouldBe "Make sure that the end <= count: 7 <= 5!"
+            }
+
+            "when end == start, it should return the EmptyVector" {
+                val vec = v(1, 2, 3, 4, 5)
+
+                val empty = SubVector(vec, 2, 2)
+
+                empty shouldBeSameInstanceAs EmptyVector
+            }
+
+            "when start & end are valid, it should return a SubVector" {
+                val start = 1
+                val end = 3
+                val vec = v(1, 2, 3, 4, 5)
+
+                val subvec = SubVector(vec, start, end) as SubVector<Int>
+
+                subvec.vec shouldBeSameInstanceAs vec
+                subvec.start shouldBeExactly start
+                subvec.end shouldBeExactly end
             }
         }
     }
