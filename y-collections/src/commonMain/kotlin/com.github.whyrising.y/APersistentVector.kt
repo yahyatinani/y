@@ -126,6 +126,10 @@ abstract class APersistentVector<out E> :
         else -> MapEntry(key, nth(key))
     }
 
+    override
+    fun assoc(index: Int, value: @UnsafeVariance E): IPersistentVector<E> =
+        assocN(index, value)
+
     // List implementation
     override val size: Int
         get() = count

@@ -60,7 +60,7 @@ class MapEntryTest : FreeSpec({
         entry.assocN(1, 15).nth(1) shouldBe 15
         entry.assocN(2, 15).nth(2) shouldBe 15
         val e = shouldThrowExactly<IndexOutOfBoundsException> {
-            entry.assocN(3, 15).nth(3)
+            entry.assocN(3, 15)
         }
 
         e.message shouldBe "index = 3"

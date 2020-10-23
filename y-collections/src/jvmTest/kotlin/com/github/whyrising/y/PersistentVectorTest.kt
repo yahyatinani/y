@@ -528,6 +528,19 @@ class PersistentVectorTest : FreeSpec({
             vec.entryAt(6).shouldBeNull()
         }
 
+        "assoc(key, value)" {
+            val vec = v(1, 2, 3, 4)
+
+            vec.assoc(0, 74).nth(0) shouldBe 74
+            vec.assoc(1, 73).nth(1) shouldBe 73
+            vec.assoc(2, 56).nth(2) shouldBe 56
+            val e = shouldThrowExactly<IndexOutOfBoundsException> {
+                vec.assoc(20, 177)
+            }
+
+            e.message shouldBe "index = 20"
+        }
+
         "List implementation" - {
             "size()" {
                 checkAll { l: List<Int> ->
