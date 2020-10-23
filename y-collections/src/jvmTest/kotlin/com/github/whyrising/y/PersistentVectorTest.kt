@@ -1117,6 +1117,62 @@ class PersistentVectorTest : FreeSpec({
             subvec.nth(0) shouldBeExactly 2
             subvec.nth(2) shouldBeExactly 4
         }
+
+        "conj(e)" {
+            val start = 1
+            val end = 5
+            val vec = v(1, 2, 3, 4, 5)
+            val subvec = SubVector(vec, start, end)
+            val e = 66
+
+            val rsubvec = subvec.conj(e) as SubVector<Int>
+            val lastElement = rsubvec.nth(rsubvec.count - 1)
+
+            rsubvec.start shouldBeExactly start
+            rsubvec.end shouldBeExactly end + 1
+            rsubvec.count shouldBeExactly subvec.count + 1
+            rsubvec.nth(0) shouldBeExactly 2
+            lastElement shouldBeExactly e
+
+            vec.count shouldBeExactly 5
+        }
+
+        "assocN(index, value)" - {
+            "when the index is out of bounds, it should throw an exception" {
+                val vec = v(1, 2, 3, 4, 5)
+                val subvec = SubVector(vec, 1, 5)
+
+                shouldThrowExactly<IndexOutOfBoundsException> {
+                    subvec.assocN(5, 75)
+                }.message shouldBe "Index 5 is out of bounds."
+            }
+
+            "when index == count, it should append the value to the end" {
+                val vec = v(1, 2, 3, 4, 5)
+                val subvec = SubVector(vec, 1, 5)
+
+                val r = subvec.assocN(4, 75)  as SubVector<Int>
+
+                r.nth(4) shouldBeExactly 75
+            }
+
+            "when 0 <= index < count, it should update the associate element" {
+                val start = 1
+                val end = 5
+                val index = 3
+                val value = 62
+                val vec = v(1, 2, 3, 4, 5)
+                val subvec = SubVector(vec, start, end)
+
+                val r = subvec.assocN(index, value)  as SubVector<Int>
+
+                r.nth(index) shouldBeExactly value
+                r.start shouldBeExactly start
+                r.end shouldBeExactly end
+                r.count shouldBeExactly subvec.count
+                vec.count shouldBeExactly 5
+            }
+        }
     }
 
     "v() should return an empty persistent vector" {

@@ -279,13 +279,18 @@ abstract class APersistentVector<out E> :
         }
 
         override
-        fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E> {
-            TODO("Not yet implemented")
-        }
+        fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E> =
+            (start + index).let {
+                when {
+                    it > end -> throw IndexOutOfBoundsException(
+                        "Index $index is out of bounds.")
+                    it == end -> conj(value)
+                    else -> SubVector(vec.assocN(it, value), start, end)
+                }
+            }
 
-        override fun conj(e: @UnsafeVariance E): IPersistentVector<E> {
-            TODO("Not yet implemented")
-        }
+        override fun conj(e: @UnsafeVariance E): IPersistentVector<E> =
+            SubVector(vec.conj(e), start, end + 1)
 
         override val count: Int
             get() = end - start
