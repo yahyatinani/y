@@ -1073,7 +1073,7 @@ class PersistentVectorTest : FreeSpec({
 
             "when start & end are valid, it should return a SubVector" {
                 val start = 1
-                val end = 3
+                val end = 5
                 val vec = v(1, 2, 3, 4, 5)
 
                 val subvec = SubVector(vec, start, end) as SubVector<Int>
@@ -1082,6 +1082,16 @@ class PersistentVectorTest : FreeSpec({
                 subvec.start shouldBeExactly start
                 subvec.end shouldBeExactly end
             }
+        }
+
+        "count" {
+            val start = 1
+            val end = 5
+            val vec = v(1, 2, 3, 4, 5)
+
+            val subvec = SubVector(vec, start, end) as SubVector<Int>
+
+            subvec.count shouldBeExactly end - start
         }
     }
 

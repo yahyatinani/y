@@ -283,7 +283,7 @@ abstract class APersistentVector<out E> :
         }
 
         override val count: Int
-            get() = TODO("Not yet implemented")
+            get() = end - start
 
         override fun empty(): IPersistentCollection<E> {
             TODO("Not yet implemented")
