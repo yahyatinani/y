@@ -1093,6 +1093,15 @@ class PersistentVectorTest : FreeSpec({
 
             subvec.count shouldBeExactly end - start
         }
+
+        "empty()" {
+            val start = 1
+            val end = 5
+            val vec = v(1, 2, 3, 4, 5)
+
+            SubVector(vec, start, end).empty() shouldBeSameInstanceAs
+                EmptyVector
+        }
     }
 
     "v() should return an empty persistent vector" {
