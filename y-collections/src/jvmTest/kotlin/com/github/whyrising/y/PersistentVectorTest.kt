@@ -733,6 +733,18 @@ class PersistentVectorTest : FreeSpec({
 
                 vec.containsAll(v(1, 2, "b")).shouldBeFalse()
             }
+
+            "subList(fromIndex, toIndex)" {
+                val fromIndex = 1
+                val toIndex = 5
+                val vec = v(1, 2, 3, 4, 5, 6)
+
+                val subvec = vec.subList(fromIndex, toIndex) as SubVector<Int>
+
+                subvec.vec shouldBeSameInstanceAs vec
+                subvec.start shouldBeExactly fromIndex
+                subvec.end shouldBeExactly toIndex
+            }
         }
     }
 

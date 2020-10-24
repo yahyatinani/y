@@ -237,9 +237,9 @@ abstract class APersistentVector<out E> :
 
     override fun listIterator(): ListIterator<E> = listIterator(0)
 
-    override fun subList(fromIndex: Int, toIndex: Int): List<E> {
-        TODO("Not yet implemented - needs Subvec")
-    }
+    @Suppress("UNCHECKED_CAST")
+    override fun subList(fromIndex: Int, toIndex: Int): List<E> =
+        SubVector(this, fromIndex, toIndex) as List<E>
 
     class Seq<out E>(
         private val pv: IPersistentVector<E>,
