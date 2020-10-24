@@ -131,9 +131,8 @@ abstract class APersistentVector<out E> :
     fun assoc(index: Int, value: @UnsafeVariance E): IPersistentVector<E> =
         assocN(index, value)
 
-    override fun subvec(start: Int, end: Int): IPersistentVector<E> {
-        TODO("Not yet implemented")
-    }
+    override fun subvec(start: Int, end: Int): IPersistentVector<E> =
+        SubVector(this, start, end)
 
     protected open fun rangedIterator(start: Int, end: Int): Iterator<E> =
         object : Iterator<E> {
@@ -271,23 +270,6 @@ abstract class APersistentVector<out E> :
         internal val end: Int
     ) : APersistentVector<E>() {
 
-        companion object {
-            operator fun <E> invoke(
-                vec: IPersistentVector<E>,
-                start: Int,
-                end: Int
-            ): IPersistentVector<E> = when {
-                start > end -> throw IndexOutOfBoundsException(
-                    "Make sure that the start < end: $start < $end!")
-                start < 0 -> throw IndexOutOfBoundsException(
-                    "Make sure that the start >= 0: $start >= 0!")
-                end > vec.count -> throw IndexOutOfBoundsException(
-                    "Make sure that the end <= count: $end <= ${vec.count}!")
-                start == end -> EmptyVector
-                else -> SubVector(vec, start, end)
-            }
-        }
-
         override fun nth(index: Int): E = (start + index).let {
             when {
                 index < 0 -> throw IndexOutOfBoundsException(
@@ -318,6 +300,23 @@ abstract class APersistentVector<out E> :
         override fun iterator(): Iterator<E> = when (vec) {
             is APersistentVector<E> -> vec.rangedIterator(start, end)
             else -> super.iterator()
+        }
+
+        companion object {
+            operator fun <E> invoke(
+                vec: IPersistentVector<E>,
+                start: Int,
+                end: Int
+            ): IPersistentVector<E> = when {
+                start > end -> throw IndexOutOfBoundsException(
+                    "Make sure that the start < end: $start < $end!")
+                start < 0 -> throw IndexOutOfBoundsException(
+                    "Make sure that the start >= 0: $start >= 0!")
+                end > vec.count -> throw IndexOutOfBoundsException(
+                    "Make sure that the end <= count: $end <= ${vec.count}!")
+                start == end -> EmptyVector
+                else -> SubVector(vec, start, end)
+            }
         }
     }
 }

@@ -543,6 +543,18 @@ class PersistentVectorTest : FreeSpec({
             e.message shouldBe "index = 20"
         }
 
+        "subvec(start, end)" {
+            val start = 1
+            val end = 5
+            val vec = v(1, 2, 3, 4, 5, 6)
+
+            val subvec = vec.subvec(start, end) as SubVector<Int>
+
+            subvec.vec shouldBeSameInstanceAs vec
+            subvec.start shouldBeExactly start
+            subvec.end shouldBeExactly end
+        }
+
         "List implementation" - {
             "size()" {
                 checkAll { l: List<Int> ->
