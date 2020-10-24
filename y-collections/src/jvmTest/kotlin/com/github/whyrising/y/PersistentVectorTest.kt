@@ -555,6 +555,42 @@ class PersistentVectorTest : FreeSpec({
             subvec.end shouldBeExactly end
         }
 
+        "compareTo(other)" - {
+            "when this.count < other.count, it should return -1" {
+                val vec1 = v(1, 2, 3)
+                val vec2 = v(1, 2, 3, 4)
+
+                vec1.compareTo(vec2) shouldBeExactly -1
+            }
+
+            "when this count > other count, it should return 1" {
+                val vec1 = v(1, 2, 3, 4)
+                val vec2 = v(1, 2, 3)
+
+                vec1.compareTo(vec2) shouldBeExactly 1
+            }
+
+            "when this count == other count" - {
+
+                "when all items are equal, it should return 0" {
+                    v(1, 2, 3).compareTo(v(1, 2, 3)) shouldBeExactly 0
+                    v<Number>(1L, 2).compareTo(v(1.0, 2)) shouldBeExactly 0
+                    v<Any>(v(1, 2)).compareTo(v(v(1L, 2.0))) shouldBeExactly 0
+                }
+
+                "when this items < than other's, it should return -1" {
+                    v(null, 2, 3).compareTo(v(1, 2, 3)) shouldBeExactly -1
+                    v<Number>(1L, 2).compareTo(v(1.1, 2)) shouldBeExactly -1
+                }
+
+                "when this items > than other's, it should return 1" {
+                    v<Int?>(1, 2, 3).compareTo(v(null, 2, 3)) shouldBeExactly 1
+                    v<Number>(1.1, 2).compareTo(v(1L, 2)) shouldBeExactly 1
+                    v<Any>(v(1.1, 2)).compareTo(v(v(1L, 2.0))) shouldBeExactly 1
+                }
+            }
+        }
+
         "List implementation" - {
             "size()" {
                 checkAll { l: List<Int> ->

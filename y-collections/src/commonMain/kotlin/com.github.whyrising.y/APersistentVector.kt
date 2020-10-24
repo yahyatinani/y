@@ -6,6 +6,7 @@ import com.github.whyrising.y.PersistentVector.EmptyVector
 abstract class APersistentVector<out E> :
     IPersistentVector<E>,
     List<E>,
+    Comparable<IPersistentVector<@UnsafeVariance E>>,
     RandomAccess {
 
     private var _hashCode: Int = INIT_HASH_CODE
@@ -145,6 +146,25 @@ abstract class APersistentVector<out E> :
                 else -> throw NoSuchElementException()
             }
         }
+
+    override fun compareTo(other: IPersistentVector<@UnsafeVariance E>): Int {
+        return when {
+            count < other.count -> -1
+            count > other.count -> 1
+            else -> {
+                var i = 0
+                while (i < count) {
+                    val r = compare(nth(i), other.nth(i))
+
+                    if (r != 0) return r
+
+                    i++
+                }
+
+                0
+            }
+        }
+    }
 
     // List implementation
     override val size: Int
