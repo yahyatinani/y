@@ -122,7 +122,7 @@ sealed class PersistentVector<out E>(
     override fun asTransient(): TransientVector<E> = TransientVector(this)
 
     @Suppress("UNCHECKED_CAST")
-    private fun rangedIterator(start: Int, end: Int): Iterator<E> =
+    override fun rangedIterator(start: Int, end: Int): Iterator<E> =
         object : Iterator<E> {
             var i = start
             var base = i - (i % BF)
@@ -133,15 +133,16 @@ sealed class PersistentVector<out E>(
 
             override fun hasNext(): Boolean = i < end
 
-            override fun next(): E {
-                if (!hasNext()) throw NoSuchElementException()
+            override fun next(): E = when {
+                hasNext() -> {
+                    if (i - base == BF) {
+                        array = leafArrayBy(i) as Array<Any?>
+                        base += BF
+                    }
 
-                if (i - base == BF) {
-                    array = leafArrayBy(i) as Array<Any?>
-                    base += BF
+                    array?.get(i++ and 0x01f) as E
                 }
-
-                return array?.get(i++ and 0x01f) as E
+                else -> throw NoSuchElementException()
             }
         }
 

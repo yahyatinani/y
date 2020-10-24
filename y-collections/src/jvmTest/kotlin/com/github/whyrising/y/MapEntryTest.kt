@@ -3,6 +3,8 @@ package com.github.whyrising.y
 import com.github.whyrising.y.PersistentVector.EmptyVector
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
@@ -64,5 +66,19 @@ class MapEntryTest : FreeSpec({
         }
 
         e.message shouldBe "index = 3"
+    }
+
+    "iterator()" {
+        val entry = MapEntry("a", 1)
+
+        val iter = entry.iterator()
+
+        iter.hasNext().shouldBeTrue()
+
+        iter.next() shouldBe "a"
+        iter.next() shouldBe 1
+
+        iter.hasNext().shouldBeFalse()
+        shouldThrowExactly<NoSuchElementException> { iter.next() }
     }
 })

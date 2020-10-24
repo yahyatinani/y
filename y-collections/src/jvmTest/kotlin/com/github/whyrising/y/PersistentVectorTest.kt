@@ -9,6 +9,7 @@ import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.PersistentVector.TransientVector
 import com.github.whyrising.y.mocks.MockSeq
 import com.github.whyrising.y.mocks.User
+import com.github.whyrising.y.mocks.VectorMock
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
@@ -705,7 +706,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "contains(element)" {
-                val vec = v(1, 2, 3, 4)
+                val vec = v(1, 2, 3, 4L)
 
                 vec.contains(1).shouldBeTrue()
                 vec.contains(1L).shouldBeTrue()
@@ -1151,7 +1152,7 @@ class PersistentVectorTest : FreeSpec({
                 val vec = v(1, 2, 3, 4, 5)
                 val subvec = SubVector(vec, 1, 5)
 
-                val r = subvec.assocN(4, 75)  as SubVector<Int>
+                val r = subvec.assocN(4, 75) as SubVector<Int>
 
                 r.nth(4) shouldBeExactly 75
             }
@@ -1164,13 +1165,81 @@ class PersistentVectorTest : FreeSpec({
                 val vec = v(1, 2, 3, 4, 5)
                 val subvec = SubVector(vec, start, end)
 
-                val r = subvec.assocN(index, value)  as SubVector<Int>
+                val r = subvec.assocN(index, value) as SubVector<Int>
 
                 r.nth(index) shouldBeExactly value
                 r.start shouldBeExactly start
                 r.end shouldBeExactly end
                 r.count shouldBeExactly subvec.count
                 vec.count shouldBeExactly 5
+            }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        "iterator()" - {
+            "iterator of a subvec of APersistentVector" {
+                val start = 1
+                val end = 4
+                val vec = v(1, 2, 3, 4, 5)
+
+                val subvec = SubVector(vec, start, end)
+
+                val iter = (subvec as List<Int>).iterator()
+
+                iter.hasNext().shouldBeTrue()
+
+                var i = start
+                while (i < end) {
+                    iter.next() shouldBeExactly vec[i]
+
+                    i++
+                }
+
+                iter.hasNext().shouldBeFalse()
+                shouldThrowExactly<NoSuchElementException> { iter.next() }
+            }
+
+            "iterator of the subvec of a subvec of APersistentVector"  {
+                val start = 0
+                val end = 3
+                val vec = v(1, 2, 3, 4, 5)
+                val subvec = SubVector(vec, 1, 4)
+                val subSubVec = SubVector(subvec, start, end)
+
+                val iter = (subSubVec as List<Int>).iterator()
+
+                iter.hasNext().shouldBeTrue()
+
+                var i = start
+                while (i < end) {
+                    iter.next() shouldBeExactly subvec.nth(i)
+                    i++
+                }
+
+                iter.hasNext().shouldBeFalse()
+                shouldThrowExactly<NoSuchElementException> { iter.next() }
+            }
+
+            "when the inner vector is not a APersistentVector, return super" {
+                val start = 1
+                val end = 4
+                val vec = v(1, 2, 3, 4, 5)
+
+                val subvec = SubVector(VectorMock(vec), start, end)
+
+                val iter = (subvec as List<Int>).iterator()
+
+                iter.hasNext().shouldBeTrue()
+
+                var i = start
+                while (i < end) {
+                    iter.next() shouldBeExactly vec[i]
+
+                    i++
+                }
+
+                iter.hasNext().shouldBeFalse()
+                shouldThrowExactly<NoSuchElementException> { iter.next() }
             }
         }
     }

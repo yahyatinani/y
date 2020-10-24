@@ -135,6 +135,18 @@ abstract class APersistentVector<out E> :
         TODO("Not yet implemented")
     }
 
+    protected open fun rangedIterator(start: Int, end: Int): Iterator<E> =
+        object : Iterator<E> {
+            var i = start
+
+            override fun hasNext(): Boolean = i < end
+
+            override fun next(): E = when {
+                hasNext() -> nth(i++)
+                else -> throw NoSuchElementException()
+            }
+        }
+
     // List implementation
     override val size: Int
         get() = count
@@ -175,8 +187,15 @@ abstract class APersistentVector<out E> :
 
     override fun isEmpty(): Boolean = count == 0
 
-    override fun iterator(): Iterator<E> {
-        TODO("not needed yet, until another class inherit this class")
+    override fun iterator(): Iterator<E> = object : Iterator<E> {
+        var i = 0
+
+        override fun hasNext(): Boolean = i < count
+
+        override fun next(): E = when {
+            hasNext() -> nth(i++)
+            else -> throw NoSuchElementException()
+        }
     }
 
     override fun lastIndexOf(element: @UnsafeVariance E): Int {
@@ -246,7 +265,7 @@ abstract class APersistentVector<out E> :
         }
     }
 
-    class SubVector<out E> private constructor(
+    internal class SubVector<out E> private constructor(
         internal val vec: IPersistentVector<E>,
         internal val start: Int,
         internal val end: Int
@@ -295,5 +314,10 @@ abstract class APersistentVector<out E> :
         override val count: Int = end - start
 
         override fun empty(): IPersistentCollection<E> = EmptyVector
+
+        override fun iterator(): Iterator<E> = when (vec) {
+            is APersistentVector<E> -> vec.rangedIterator(start, end)
+            else -> super.iterator()
+        }
     }
 }
