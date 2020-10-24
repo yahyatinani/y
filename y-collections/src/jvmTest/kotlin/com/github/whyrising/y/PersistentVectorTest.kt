@@ -591,6 +591,15 @@ class PersistentVectorTest : FreeSpec({
             }
         }
 
+        "invoke(index) should return the associate value of the given index" {
+            val vec = v(1, 2, 3, 4)
+
+            vec(0) shouldBeExactly 1
+            vec(1) shouldBeExactly 2
+            vec(3) shouldBeExactly 4
+            shouldThrowExactly<IndexOutOfBoundsException> { vec.nth(2000) }
+        }
+
         "List implementation" - {
             "size()" {
                 checkAll { l: List<Int> ->

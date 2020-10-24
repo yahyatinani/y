@@ -166,6 +166,8 @@ abstract class APersistentVector<out E> :
         }
     }
 
+    operator fun invoke(index: Int): E = nth(index)
+
     // List implementation
     override val size: Int
         get() = count
