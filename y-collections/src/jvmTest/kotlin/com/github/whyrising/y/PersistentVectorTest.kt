@@ -19,6 +19,7 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
@@ -598,6 +599,10 @@ class PersistentVectorTest : FreeSpec({
             vec(1) shouldBeExactly 2
             vec(3) shouldBeExactly 4
             shouldThrowExactly<IndexOutOfBoundsException> { vec.nth(2000) }
+        }
+
+        "should be RandomAccess" {
+            APersistentVector::class.shouldBeSubtypeOf<RandomAccess>()
         }
 
         "List implementation" - {
