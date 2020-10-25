@@ -694,11 +694,11 @@ class PersistentVectorTest : FreeSpec({
                     vec.count shouldBeExactly v.size - 1
                     vec.tail.size shouldBeExactly 32
                     root.isMutable shouldBeSameInstanceAs v.root.isMutable
-                    root.array.fold(Unit) {_: Unit, element: Any? -> 
+                    root.array.fold(Unit) { _: Unit, element: Any? ->
                         element.shouldNotBeNull()
                     }
                 }
-                
+
                 """when level > 10 & root contains only 1 element after 
                    popping, it should decrease level and eliminate the 
                    empty node""" {
@@ -711,7 +711,7 @@ class PersistentVectorTest : FreeSpec({
                     vec.count shouldBeExactly v.size - 1
                     vec.tail.size shouldBeExactly 32
                     root.isMutable shouldBeSameInstanceAs v.root.isMutable
-                    root.array.fold(Unit) {_: Unit, element: Any? ->
+                    root.array.fold(Unit) { _: Unit, element: Any? ->
                         element.shouldNotBeNull()
                     }
                 }
@@ -1427,6 +1427,30 @@ class PersistentVectorTest : FreeSpec({
 
                 iter.hasNext().shouldBeFalse()
                 shouldThrowExactly<NoSuchElementException> { iter.next() }
+            }
+        }
+
+        "pop()" - {
+            "when the subvec count > 1, it should decrease the end by 1" {
+                val start = 1
+                val end = 4
+                val vec = v(1, 2, 3, 4, 5)
+                val subvec = SubVector(vec, start, end) as SubVector<Int>
+
+                val popped = subvec.pop() as SubVector<Int>
+
+                popped.start shouldBeExactly start
+                popped.vec shouldBeSameInstanceAs vec
+                popped.end shouldBeExactly end - 1
+            }
+            
+            "when the subvec count = 1, it should return the empty vector" {
+                val start = 1
+                val end = 2
+                val vec = v(1, 2, 3, 4, 5)
+                val subvec = SubVector(vec, start, end) as SubVector<Int>
+
+                subvec.pop() shouldBeSameInstanceAs EmptyVector
             }
         }
     }

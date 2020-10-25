@@ -334,8 +334,9 @@ abstract class APersistentVector<out E> :
             else -> super.iterator()
         }
 
-        override fun pop(): IPersistentStack<E> {
-            TODO("pop() : Not yet implemented")
+        override fun pop(): IPersistentStack<E> = when (count) {
+            1 -> EmptyVector
+            else -> SubVector(vec, start, end - 1)
         }
 
         companion object {
