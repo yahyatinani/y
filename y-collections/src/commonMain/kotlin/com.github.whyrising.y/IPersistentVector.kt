@@ -3,6 +3,7 @@ package com.github.whyrising.y
 interface IPersistentVector<out E> :
     Associative<Int, E>,
     IPersistentCollection<E>,
+    IPersistentStack<E>,
     Indexed<E>,
     Sequential {
 

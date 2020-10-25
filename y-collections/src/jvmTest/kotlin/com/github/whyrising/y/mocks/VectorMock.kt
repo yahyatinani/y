@@ -2,6 +2,7 @@ package com.github.whyrising.y.mocks
 
 import com.github.whyrising.y.IMapEntry
 import com.github.whyrising.y.IPersistentCollection
+import com.github.whyrising.y.IPersistentStack
 import com.github.whyrising.y.IPersistentVector
 import com.github.whyrising.y.ISeq
 import com.github.whyrising.y.PersistentVector
@@ -63,6 +64,14 @@ class VectorMock<out E>(val vec: PersistentVector<E>) : IPersistentVector<E> {
     override fun nth(index: Int): E = vec.nth(index)
 
     override fun nth(index: Int, default: @UnsafeVariance E): E {
+        TODO("Not yet implemented")
+    }
+
+    override fun peek(): E? {
+        TODO("Not yet implemented")
+    }
+
+    override fun pop(): IPersistentStack<E> {
         TODO("Not yet implemented")
     }
 }

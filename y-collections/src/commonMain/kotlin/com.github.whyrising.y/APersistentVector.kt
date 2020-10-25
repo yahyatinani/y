@@ -8,7 +8,7 @@ abstract class APersistentVector<out E> :
     List<E>,
     Comparable<IPersistentVector<@UnsafeVariance E>>,
     RandomAccess,
-    Reversible<E>, IPersistentStack<E> {
+    Reversible<E> {
 
     private var _hashCode: Int = INIT_HASH_CODE
 
