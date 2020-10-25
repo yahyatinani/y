@@ -1,14 +1,41 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.PersistentVector.EmptyVector
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 internal const val SHIFT = 5
 internal const val BF = 32
 
+internal class PersistentVectorSerializer<E>(element: KSerializer<E>) :
+    KSerializer<PersistentVector<E>> {
+
+    private val listSerializer = ListSerializer(element)
+
+    override val descriptor: SerialDescriptor = element.descriptor
+
+    override fun deserialize(decoder: Decoder): PersistentVector<E> {
+        val list = listSerializer.deserialize(decoder)
+
+        return list.fold(EmptyVector) { vec: PersistentVector<E>, e: E ->
+            vec.conj(e)
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: PersistentVector<E>) =
+        listSerializer.serialize(encoder, value)
+}
+
+@Serializable(with = PersistentVectorSerializer::class)
 sealed class PersistentVector<out E>(
     override val count: Int,
     internal val shift: Int,
@@ -411,6 +438,6 @@ sealed class PersistentVector<out E>(
     }
 }
 
-fun <E> v(): PersistentVector<E> = PersistentVector.EmptyVector
+fun <E> v(): PersistentVector<E> = EmptyVector
 
 fun <E> v(vararg elements: E): PersistentVector<E> = PersistentVector(*elements)

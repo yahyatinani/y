@@ -32,6 +32,9 @@ import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.merge
 import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 const val SHIFT = 5
 
@@ -1443,7 +1446,7 @@ class PersistentVectorTest : FreeSpec({
                 popped.vec shouldBeSameInstanceAs vec
                 popped.end shouldBeExactly end - 1
             }
-            
+
             "when the subvec count = 1, it should return the empty vector" {
                 val start = 1
                 val end = 2
@@ -1510,6 +1513,28 @@ class PersistentVectorTest : FreeSpec({
         vec.nth(1) shouldBeExactly 2
         vec.nth(2) shouldBeExactly 3
         vec.nth(3) shouldBeExactly 4
+    }
+
+    "Serialization" - {
+        "serialize" {
+            val l = listOf(1, 2, 3, 4)
+            val encoded = Json.encodeToString(l)
+
+            val vec = v(*l.toTypedArray())
+
+            val encodeToString = Json.encodeToString(vec)
+
+            encodeToString shouldBe encoded
+        }
+
+        "deserialize" {
+            val l = listOf(1, 2, 3, 4)
+            val str = Json.encodeToString(l)
+
+            val vec = Json.decodeFromString<PersistentVector<Int>>(str)
+
+            vec shouldBe PersistentList(*l.toTypedArray())
+        }
     }
 }) {
     companion object {
