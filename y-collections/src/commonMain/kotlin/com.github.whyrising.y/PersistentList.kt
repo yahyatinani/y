@@ -52,9 +52,7 @@ sealed class PersistentList<out E> :
 
         override fun peek(): E? = first
 
-        override fun pop(): IPersistentStack<E> {
-            TODO("Not yet implemented")
-        }
+        override fun pop(): IPersistentStack<E> = _rest
     }
 
     internal abstract class AEmpty<out E> : PersistentList<E>() {
@@ -86,9 +84,7 @@ sealed class PersistentList<out E> :
 
         override fun peek(): E? = null
 
-        override fun pop(): IPersistentStack<E> {
-            TODO("Not yet implemented")
-        }
+        override fun pop(): IPersistentStack<E> = this
 
         // List implementation
         override val size: Int = 0

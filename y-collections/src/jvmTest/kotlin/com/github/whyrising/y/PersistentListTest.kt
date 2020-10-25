@@ -122,6 +122,12 @@ class PersistentListTest : FreeSpec({
             l(1, 2, 3).peek() shouldBe 1
             l(5, 4, 8).peek() shouldBe 5
         }
+
+        "pop()" {
+            l<Int>().pop() shouldBeSameInstanceAs Empty
+            l(1).pop() shouldBeSameInstanceAs Empty
+            l(1, 2, 3).pop() shouldBe l(2, 3)
+        }
     }
 
     "PersistentList.Empty" - {
