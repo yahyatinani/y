@@ -49,6 +49,12 @@ sealed class PersistentList<out E> :
 
         override fun conj(e: @UnsafeVariance E): IPersistentCollection<E> =
             Cons(e, this)
+
+        override fun peek(): E? = first
+
+        override fun pop(): IPersistentStack<E> {
+            TODO("Not yet implemented")
+        }
     }
 
     internal abstract class AEmpty<out E> : PersistentList<E>() {
@@ -77,6 +83,12 @@ sealed class PersistentList<out E> :
             Cons(e, Empty)
 
         override fun seq(): ISeq<E> = this
+
+        override fun peek(): E? = null
+
+        override fun pop(): IPersistentStack<E> {
+            TODO("Not yet implemented")
+        }
 
         // List implementation
         override val size: Int = 0

@@ -10,6 +10,7 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
@@ -113,6 +114,13 @@ class PersistentListTest : FreeSpec({
             l(l(1L)).equiv(PersistentList(listOf(1))).shouldBeTrue()
 
             l(1.1).equiv(v(1.1)).shouldBeTrue()
+        }
+
+        "peek()" {
+            l<Int>().peek().shouldBeNull()
+            l(5).peek() shouldBe 5
+            l(1, 2, 3).peek() shouldBe 1
+            l(5, 4, 8).peek() shouldBe 5
         }
     }
 
