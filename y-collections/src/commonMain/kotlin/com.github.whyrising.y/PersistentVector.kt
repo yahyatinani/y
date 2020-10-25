@@ -122,6 +122,60 @@ sealed class PersistentVector<out E>(
     override fun asTransient(): TransientVector<E> = TransientVector(this)
 
     @Suppress("UNCHECKED_CAST")
+    private fun popTail(level: Int, node: Node<E>): Node<E>? =
+        (((count - 2) ushr level) and 0x01f).let { subIndex ->
+            when {
+                level > SHIFT -> {
+                    val newChild =
+                        popTail(level - SHIFT, node.array[subIndex] as Node<E>)
+
+                    when {
+                        newChild == null && subIndex == 0 -> null
+                        else -> {
+                            val n = Node<E>(node.isMutable, node.array.copyOf())
+                            n.array[subIndex] = newChild
+
+                            n
+                        }
+                    }
+                }
+                subIndex == 0 -> null
+                else -> {
+                    val n = Node<E>(node.isMutable, node.array.copyOf())
+                    n.array[subIndex] = null
+
+                    n
+                }
+            }
+        }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun pop(): PersistentVector<E> = when {
+        isEmpty() -> EmptyVector
+        count == 1 -> EmptyVector
+        count - tailOffset(count) > 1 -> {
+            val newTail = tail.copyOf(count - 1)
+
+            Vector(count - 1, shift, root, newTail)
+        }
+        else -> {
+            val newTail = leafArrayBy(count - 2)
+
+            var newRoot: Node<E>? = popTail(shift, root)
+            var newShift = shift
+
+            if (newRoot == null) newRoot = EmptyNode
+
+            if (shift > SHIFT && newRoot.array[1] == null) {
+                newRoot = newRoot.array[0] as Node<E>
+                newShift -= SHIFT
+            }
+
+            Vector(count - 1, newShift, newRoot, newTail as Array<Any?>)
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
     override fun rangedIterator(start: Int, end: Int): Iterator<E> =
         object : Iterator<E> {
             var i = start

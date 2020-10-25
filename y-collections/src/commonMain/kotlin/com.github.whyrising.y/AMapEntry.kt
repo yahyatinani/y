@@ -1,5 +1,7 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.PersistentVector.EmptyVector
+
 abstract class AMapEntry<out K, out V> :
     APersistentVector<Any?>(), IMapEntry<K, V> {
 
@@ -21,6 +23,9 @@ abstract class AMapEntry<out K, out V> :
     override val count: Int
         get() = 2
 
-    override
-    fun empty(): IPersistentCollection<Any?> = PersistentVector.EmptyVector
+    override fun empty(): IPersistentCollection<Any?> = EmptyVector
+
+    override fun pop(): IPersistentStack<Any?> {
+        TODO("pop() : Not yet implemented")
+    }
 }

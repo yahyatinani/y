@@ -8,7 +8,7 @@ abstract class APersistentVector<out E> :
     List<E>,
     Comparable<IPersistentVector<@UnsafeVariance E>>,
     RandomAccess,
-    Reversible<E> {
+    Reversible<E>, IPersistentStack<E> {
 
     private var _hashCode: Int = INIT_HASH_CODE
 
@@ -151,6 +151,11 @@ abstract class APersistentVector<out E> :
                 else -> throw NoSuchElementException()
             }
         }
+
+    override fun peek(): E? = when {
+        count > 0 -> nth(count - 1)
+        else -> null
+    }
 
     override fun compareTo(other: IPersistentVector<@UnsafeVariance E>): Int {
         return when {
@@ -327,6 +332,10 @@ abstract class APersistentVector<out E> :
         override fun iterator(): Iterator<E> = when (vec) {
             is APersistentVector<E> -> vec.rangedIterator(start, end)
             else -> super.iterator()
+        }
+
+        override fun pop(): IPersistentStack<E> {
+            TODO("pop() : Not yet implemented")
         }
 
         companion object {

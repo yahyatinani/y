@@ -624,6 +624,100 @@ class PersistentVectorTest : FreeSpec({
             }
         }
 
+        "peek() should return the last element in the vector" {
+            v<Int>().peek().shouldBeNull()
+            v(1, 2, 3).peek() shouldBe 3
+            v(1, 2, 3, 4).peek() shouldBe 4
+            v(1, 2, 3, 4, 5).peek() shouldBe 5
+        }
+
+        "pop()" - {
+            "when the vec count == 1 or 0, it should return the EmptyVector" {
+                v<Int>().pop() shouldBeSameInstanceAs EmptyVector
+                v(5).pop() shouldBeSameInstanceAs EmptyVector
+            }
+
+            "when tail length > 1, it should remove the last element in it" {
+                checkAll(Arb.list(Arb.int(), 2..32)) { list: List<Int> ->
+                    val v = v(*list.toTypedArray())
+
+                    val vec = v.pop()
+
+                    vec.count shouldBeExactly v.count - 1
+                    vec.shift shouldBeExactly v.shift
+                    vec.root shouldBeSameInstanceAs v.root
+                    vec.tail.size shouldBeExactly v.count - 1
+                    vec(v.count - 2) shouldBeExactly v.nth(v.count - 2)
+                }
+            }
+
+            "when tail length == 1" - {
+                """when level = 5 & root contains only 1 element after popping,
+                   root should become the empty node""" {
+                    val v = v(*(1..33).toList().toTypedArray())
+
+                    val vec = v.pop()
+
+                    vec.count shouldBeExactly v.count - 1
+                    vec.shift shouldBeExactly v.shift
+                    vec.root shouldBeSameInstanceAs EmptyNode
+                    vec.tail.size shouldBeExactly v.count - 1
+                    vec(v.count - 2) shouldBeExactly v.nth(v.count - 2)
+                }
+
+                """when level = 5 & root contains more than 1 element after 
+                   popping, it should set the rightmost leaf to null""" {
+                    val v = v(*(1..65).toList().toTypedArray())
+
+                    val vec = v.pop()
+                    val root = vec.root
+
+                    vec.shift shouldBeExactly 5
+                    vec.count shouldBeExactly v.size - 1
+                    vec.tail.size shouldBeExactly 32
+                    vec.nth(0) shouldBeExactly 1
+                    vec.tail[31] shouldBe 64
+
+                    root.isMutable shouldBeSameInstanceAs v.root.isMutable
+                    root.array[1].shouldBeNull()
+                }
+
+                """when level > 5 & root contains only 1 element after 
+                   popping, it should decrease level and eliminate the empty
+                   node""" {
+                    val v = v(*(1..1057).toList().toTypedArray())
+
+                    val vec = v.pop()
+                    val root = vec.root
+
+                    vec.shift shouldBeExactly 5
+                    vec.count shouldBeExactly v.size - 1
+                    vec.tail.size shouldBeExactly 32
+                    root.isMutable shouldBeSameInstanceAs v.root.isMutable
+                    root.array.fold(Unit) {_: Unit, element: Any? -> 
+                        element.shouldNotBeNull()
+                    }
+                }
+                
+                """when level > 10 & root contains only 1 element after 
+                   popping, it should decrease level and eliminate the 
+                   empty node""" {
+                    val v = v(*(1..32801).toList().toTypedArray())
+
+                    val vec = v.pop()
+                    val root = vec.root
+
+                    vec.shift shouldBeExactly 10
+                    vec.count shouldBeExactly v.size - 1
+                    vec.tail.size shouldBeExactly 32
+                    root.isMutable shouldBeSameInstanceAs v.root.isMutable
+                    root.array.fold(Unit) {_: Unit, element: Any? ->
+                        element.shouldNotBeNull()
+                    }
+                }
+            }
+        }
+
         "List implementation" - {
             "size()" {
                 checkAll { l: List<Int> ->
@@ -847,7 +941,7 @@ class PersistentVectorTest : FreeSpec({
             array[31].shouldBeNull()
         }
 
-        "it's root should be immutable" {
+        "its root should be immutable" {
             val emptyVec = PersistentVector<Int>()
 
             emptyVec.root.isMutable.value.shouldBeFalse()
