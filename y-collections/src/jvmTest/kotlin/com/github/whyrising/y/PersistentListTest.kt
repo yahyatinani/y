@@ -128,6 +128,15 @@ class PersistentListTest : FreeSpec({
             l(1).pop() shouldBeSameInstanceAs Empty
             l(1, 2, 3).pop() shouldBe l(2, 3)
         }
+
+        "+ operator should act like conj" {
+            val list = l(1, 2)
+
+            val r = list + 5
+
+            r.count shouldBeExactly list.count + 1
+            (r as ISeq<Int>).first() shouldBeExactly 5
+        }
     }
 
     "PersistentList.Empty" - {

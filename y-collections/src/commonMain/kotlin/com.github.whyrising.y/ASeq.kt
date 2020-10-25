@@ -77,6 +77,9 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
 
     override fun conj(e: @UnsafeVariance E): IPersistentCollection<E> = cons(e)
 
+    operator fun plus(element: @UnsafeVariance E): IPersistentCollection<E> =
+        conj(element)
+
     //List Implementation
     override val size: Int
         get() = count
