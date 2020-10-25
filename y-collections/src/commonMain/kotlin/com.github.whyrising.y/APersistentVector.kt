@@ -178,6 +178,9 @@ abstract class APersistentVector<out E> :
 
     operator fun invoke(index: Int): E = nth(index)
 
+    operator fun plus(element: @UnsafeVariance E): IPersistentVector<E> =
+        conj(element)
+
     // List implementation
     override val size: Int
         get() = count

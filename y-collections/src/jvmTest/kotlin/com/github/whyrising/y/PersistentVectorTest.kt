@@ -721,6 +721,15 @@ class PersistentVectorTest : FreeSpec({
             }
         }
 
+        "+ operator should act like conj" {
+            val vec = v(1, 2, 3, 4)
+
+            val r = vec + 5
+
+            r.count shouldBeExactly vec.count + 1
+            r.nth(4) shouldBeExactly 5
+        }
+
         "List implementation" - {
             "size()" {
                 checkAll { l: List<Int> ->
