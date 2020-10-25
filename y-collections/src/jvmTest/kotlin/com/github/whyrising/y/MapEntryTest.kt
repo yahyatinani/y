@@ -81,4 +81,14 @@ class MapEntryTest : FreeSpec({
         iter.hasNext().shouldBeFalse()
         shouldThrowExactly<NoSuchElementException> { iter.next() }
     }
+
+    @Suppress("UNCHECKED_CAST")
+    "pop()" {
+        val entry = MapEntry("a", 1)
+
+        val r = entry.pop() as PersistentVector<String>
+
+        r.count shouldBeExactly 1
+        r[0] shouldBe "a"
+    }
 })

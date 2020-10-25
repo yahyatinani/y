@@ -25,7 +25,5 @@ abstract class AMapEntry<out K, out V> :
 
     override fun empty(): IPersistentCollection<Any?> = EmptyVector
 
-    override fun pop(): IPersistentStack<Any?> {
-        TODO("pop() : Not yet implemented")
-    }
+    override fun pop(): IPersistentStack<Any?> = PersistentVector(key)
 }
