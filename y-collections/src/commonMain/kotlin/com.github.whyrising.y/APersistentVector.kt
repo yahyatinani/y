@@ -7,7 +7,8 @@ abstract class APersistentVector<out E> :
     IPersistentVector<E>,
     List<E>,
     Comparable<IPersistentVector<@UnsafeVariance E>>,
-    RandomAccess {
+    RandomAccess,
+    Reversible<E> {
 
     private var _hashCode: Int = INIT_HASH_CODE
 
@@ -22,10 +23,14 @@ abstract class APersistentVector<out E> :
         return "[${str.trim()}]"
     }
 
-    override fun seq(): ISeq<E> {
-        if (count == 0) return emptySeq()
+    override fun seq(): ISeq<E> = when (count) {
+        0 -> emptySeq()
+        else -> Seq(this)
+    }
 
-        return Seq(this)
+    override fun reverse(): ISeq<E> = when {
+        count > 0 -> RSeq(this, count - 1)
+        else -> emptySeq()
     }
 
     override fun hashCode(): Int {
@@ -340,5 +345,20 @@ abstract class APersistentVector<out E> :
                 else -> SubVector(vec, start, end)
             }
         }
+    }
+
+    internal class RSeq<E>(
+        internal val vec: IPersistentVector<E>,
+        override var index: Int
+    ) : ASeq<E>(), IndexedSeq {
+
+        override fun first(): E = vec.nth(index)
+
+        override fun rest(): ISeq<E> = when {
+            index > 0 -> RSeq(vec, index - 1)
+            else -> emptySeq()
+        }
+
+        override val count: Int = index + 1
     }
 }

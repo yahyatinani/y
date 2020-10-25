@@ -1,5 +1,6 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.APersistentVector.RSeq
 import com.github.whyrising.y.APersistentVector.Seq
 import com.github.whyrising.y.APersistentVector.SubVector
 import com.github.whyrising.y.PersistentList.Empty
@@ -603,6 +604,24 @@ class PersistentVectorTest : FreeSpec({
 
         "should be RandomAccess" {
             APersistentVector::class.shouldBeSubtypeOf<RandomAccess>()
+        }
+
+        "reverse()" - {
+            "when the the vec is empty, it should return the empty seq" {
+                val rseq: ISeq<Int> = v<Int>().reverse()
+
+                rseq shouldBeSameInstanceAs Empty
+            }
+
+            "when vec is populated, it should return the reversed seq of it " {
+                val vec = v(1, 2, 3, 4, 5)
+
+                val rseq = vec.reverse() as RSeq<Int>
+
+                rseq.vec shouldBeSameInstanceAs vec
+                rseq.index shouldBeExactly vec.count - 1
+                rseq.count shouldBeExactly vec.count
+            }
         }
 
         "List implementation" - {
@@ -1314,6 +1333,46 @@ class PersistentVectorTest : FreeSpec({
 
                 iter.hasNext().shouldBeFalse()
                 shouldThrowExactly<NoSuchElementException> { iter.next() }
+            }
+        }
+    }
+
+    "RSeq" - {
+        "first" {
+            checkAll(Arb.list(Arb.int(), 1..20)) { list: List<Int> ->
+                val vec = v(*list.toTypedArray())
+                val lastIndex = list.size - 1
+
+                val rSeq = RSeq(vec, lastIndex)
+
+                rSeq.count shouldBeExactly vec.count
+                rSeq.first() shouldBeExactly vec[lastIndex]
+            }
+        }
+
+        "rest()" - {
+            "when the index is 0, it should return the empty seq" {
+                val vec = v(1)
+                val rseq = RSeq(vec, vec.size - 1)
+
+                val rest = rseq.rest()
+
+                rest shouldBeSameInstanceAs Empty
+            }
+
+            "when index > 0, it should return the rest of the reversed seq" {
+                checkAll(Arb.list(Arb.int(), 2..20)) { list: List<Int> ->
+                    val vec = v(*list.toTypedArray())
+                    val lastIndex = list.size - 1
+
+                    val rest = RSeq(vec, lastIndex).rest() as RSeq<Int>
+
+                    rest.index shouldBeExactly lastIndex - 1
+                    rest.count shouldBeExactly rest.index + 1
+                    rest.first() shouldBeExactly vec[lastIndex - 1]
+
+                    rest.rest().count shouldBeExactly rest.index
+                }
             }
         }
     }
