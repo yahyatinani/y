@@ -6,4 +6,6 @@ interface IPersistentMap<out K, out V> {
 
     fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V):
         IPersistentMap<K, V>
+
+    fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V>
 }

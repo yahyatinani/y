@@ -53,7 +53,7 @@ sealed class PersistentArrayMap<out K, out V>(
             throw RuntimeException("The key $key is already present.")
 
         // TODO: if pairs.size >= HASHTABLE_THRESHOLD, create a HashMap
-        
+
         newPairs = arrayOfNulls(array.size + 1)
 
         if (array.isNotEmpty())
@@ -64,6 +64,24 @@ sealed class PersistentArrayMap<out K, out V>(
         return createArrayMap(newPairs)
     }
 
+    override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> =
+        indexOf(key).let { index ->
+            when {
+                keyIsAlreadyAvailable(index) -> {
+                    val size = array.size - 1
+
+                    if (size == 0) return EmptyArrayMap
+
+                    val newPairs: Array<Pair<K, V>?> = arrayOfNulls(size)
+                    array.copyInto(newPairs, 0, 0, index)
+                    array.copyInto(newPairs, index, index + 1, array.size)
+
+                    return createArrayMap(newPairs)
+                }
+                else -> return this
+            }
+
+        }
 
     internal object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(
         emptyArray()

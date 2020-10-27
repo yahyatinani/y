@@ -149,6 +149,33 @@ class ArrayMapTest : FreeSpec({
                 // TODO : when PersistentHashMap is  implemented
             }
         }
+
+        "dissoc(key)" - {
+            "when key doesn't exit, it should return the same instance" {
+                val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
+                val map = PersistentArrayMap(*array)
+
+                map.dissoc(9) shouldBeSameInstanceAs map
+            }
+
+            "when key exists and size is 1, it should return the empty map" {
+                val map = PersistentArrayMap(2L to "2")
+
+                map.dissoc(2) shouldBeSameInstanceAs EmptyArrayMap
+            }
+
+            "when key exists, it should return a new map without that key" {
+                val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
+                val map = PersistentArrayMap(*array)
+
+                val newMap = map.dissoc(2) as PersistentArrayMap<Any?, String>
+                val pairs = newMap.array
+
+                pairs.size shouldBeExactly array.size - 1
+                pairs[0] shouldBe array[0]
+                pairs[1] shouldBe array[2]
+            }
+        }
     }
 
     "EmptyArrayMap" - {
