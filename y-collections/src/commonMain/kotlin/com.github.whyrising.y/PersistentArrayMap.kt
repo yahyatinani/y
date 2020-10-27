@@ -44,6 +44,26 @@ sealed class PersistentArrayMap<out K, out V>(
         return createArrayMap(newPairs)
     }
 
+    override fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V):
+        IPersistentMap<K, V> {
+        val index: Int = indexOf(key)
+        val newPairs: Array<out Pair<K, V>?>
+
+        if (keyIsAlreadyAvailable(index))
+            throw RuntimeException("The key $key is already present.")
+
+        // TODO: if pairs.size >= HASHTABLE_THRESHOLD, create a HashMap
+        
+        newPairs = arrayOfNulls(array.size + 1)
+
+        if (array.isNotEmpty())
+            array.copyInto(newPairs, 0, 0, array.size)
+
+        newPairs[newPairs.size - 1] = Pair(key, value)
+
+        return createArrayMap(newPairs)
+    }
+
 
     internal object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(
         emptyArray()

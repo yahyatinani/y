@@ -75,7 +75,7 @@ class ArrayMapTest : FreeSpec({
                 }
             }
 
-            """when map already have the key and different value,
+            """when map already has the key and different value,
                it should replace it in a new map""" {
                 val key = 2
                 val value = "78"
@@ -100,7 +100,7 @@ class ArrayMapTest : FreeSpec({
                 pairs[2].second shouldBe "3"
             }
 
-            """when map already have the key and same value,
+            """when map already has the key and same value,
                it should return the same map""" {
                 val key = 2
                 val value = "2"
@@ -110,6 +110,43 @@ class ArrayMapTest : FreeSpec({
                 val newMap = map.assoc(key, value) as ArrayMap<Any, String>
 
                 newMap shouldBeSameInstanceAs map
+            }
+        }
+
+        "assocNew(key, val)" - {
+            "when map already has the key, it should throw" {
+                val value = "78"
+                val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
+                val map = PersistentArrayMap(*array)
+
+                shouldThrowExactly<RuntimeException> {
+                    map.assocNew(2, value)
+                }.message shouldBe "The key 2 is already present."
+            }
+
+            "when new key, it should add the association to the new map" {
+                val key = 4
+                val value = "4"
+                val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
+                val map = PersistentArrayMap(*array)
+
+                val newMap = map.assocNew(key, value) as ArrayMap<Any, String>
+                val pairs = newMap.pairs
+
+                pairs.size shouldBeExactly array.size + 1
+
+                pairs[0].first shouldBe 1L
+                pairs[0].second shouldBe "1"
+
+                pairs[2].first shouldBe 3
+                pairs[2].second shouldBe "3"
+
+                pairs[array.size].first shouldBe key
+                pairs[array.size].second shouldBe value
+            }
+
+            "when size >= THRESHOLD, it should return PersistentHashMap" {
+                // TODO : when PersistentHashMap is  implemented
             }
         }
     }
