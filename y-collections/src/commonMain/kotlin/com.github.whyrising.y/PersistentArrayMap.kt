@@ -114,9 +114,7 @@ sealed class PersistentArrayMap<out K, out V>(
     override val count: Int = array.size
 
 
-    override fun empty(): IPersistentCollection<V> {
-        TODO("Not yet implemented")
-    }
+    override fun empty(): IPersistentCollection<V> = EmptyArrayMap
 
     override fun conj(e: @UnsafeVariance V): IPersistentCollection<V> {
         TODO("Not yet implemented")
