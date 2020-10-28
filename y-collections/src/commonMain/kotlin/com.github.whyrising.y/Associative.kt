@@ -1,6 +1,6 @@
 package com.github.whyrising.y
 
-interface Associative<out K, out V> : IPersistentCollection<V>, ILookup<K, V> {
+interface Associative<out K, out V> : ILookup<K, V> {
     fun containsKey(key: @UnsafeVariance K): Boolean
 
     fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>?

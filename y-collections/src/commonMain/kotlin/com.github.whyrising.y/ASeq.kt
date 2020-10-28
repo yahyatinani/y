@@ -33,7 +33,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
             }
             is Sequential -> {
                 var seq = seq()
-                var otherSeq: ISeq<E> = toSeq(other)
+                var otherSeq = toSeq<E>(other) as ISeq<E>
 
                 var i = 0
                 while (i < count) {

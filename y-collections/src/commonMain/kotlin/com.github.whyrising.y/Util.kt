@@ -49,7 +49,8 @@ fun <E> equiv(e1: E, e2: Any?): Boolean = when {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <E> toSeq(x: Any): ISeq<E> = when (x) {
+fun <E> toSeq(x: Any?): ISeq<E>? = when (x) {
+    null -> null
     is ASeq<*> -> x as ASeq<E>
     is Seqable<*> -> x.seq() as ISeq<E>
     else -> throw IllegalArgumentException(

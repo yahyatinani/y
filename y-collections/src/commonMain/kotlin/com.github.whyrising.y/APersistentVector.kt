@@ -85,7 +85,7 @@ abstract class APersistentVector<out E> :
             else -> {
                 if (other !is Sequential) return false
 
-                var seq: ISeq<E> = toSeq(other)
+                var seq = toSeq<E>(other) as ISeq<E>
 
                 var i = 0
                 while (i < count) {

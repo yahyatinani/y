@@ -11,7 +11,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
-class ArrayMapTest : FreeSpec({
+class PersistentArrayMapTest : FreeSpec({
     "ArrayMap" - {
         "invoke() should return EmptyArrayMap" {
             val emptyMap = PersistentArrayMap<String, Int>()
@@ -244,6 +244,63 @@ class ArrayMapTest : FreeSpec({
 
             PersistentArrayMap(*array).empty() shouldBeSameInstanceAs
                 EmptyArrayMap
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        "conj(entry)" - {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap(*array)
+
+            "when entry is a Map.Entry, it should call assoc() on it" {
+                val newMap = map.conj(MapEntry("a", 99))
+                    as ArrayMap<String, Int>
+
+                newMap.count shouldBeExactly array.size
+                newMap.array[0].second shouldBeExactly 99
+                newMap.array[1].second shouldBeExactly 2
+                newMap.array[2].second shouldBeExactly 3
+            }
+
+            "when entry is a IPersistentVector" - {
+                "when count != 2, it should throw" {
+                    shouldThrowExactly<IllegalArgumentException> {
+                        map.conj(v("a", 99, 75))
+                    }.message shouldBe
+                        "Vector [a 99 75] count should be 2 to conj in a map"
+                }
+
+                "when count == 2, it should call assoc() on it" {
+                    val newMap = map.conj(v("a", 99))
+                        as ArrayMap<String, Int>
+
+                    newMap.count shouldBeExactly array.size
+                    newMap.array[0].second shouldBeExactly 99
+                    newMap.array[1].second shouldBeExactly 2
+                    newMap.array[2].second shouldBeExactly 3
+                }
+            }
+
+            "when entry is null, it should return this" {
+                map.conj(null) shouldBeSameInstanceAs map
+            }
+
+            "when entry is a seq of MapEntry" - {
+                "when an element is not a MapEntry, it should throw" {
+                    shouldThrowExactly<IllegalArgumentException> {
+                        map.conj(l(MapEntry("x", 42), "item"))
+                    }.message shouldBe
+                        "All elements of the seq must be of type Map.Entry" +
+                        " to conj: item"
+                }
+
+                "when all elements are MapEntry, it should assoc() all" {
+                    val entries = l(MapEntry("x", 42), MapEntry("y", 47))
+
+                    val newMap = map.conj(entries) as ArrayMap<String, Int>
+
+                    newMap.count shouldBeExactly array.size + entries.count
+                }
+            }
         }
     }
 

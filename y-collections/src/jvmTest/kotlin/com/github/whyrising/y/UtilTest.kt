@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 
 class UtilTest : FreeSpec({
@@ -87,10 +88,14 @@ class UtilTest : FreeSpec({
     }
 
     "toSeq(x)" - {
+        "when x is null, it should return null" {
+            toSeq<Int>(null).shouldBeNull()
+        }
+
         "ASeq" {
             val x: Any = Cons(1, PersistentList.Empty)
 
-            val seq: ISeq<Int> = toSeq(x)
+            val seq = toSeq<Int>(x) as ISeq<Int>
 
             seq.first() shouldBeExactly 1
         }
@@ -98,12 +103,10 @@ class UtilTest : FreeSpec({
         "Seqable" {
             val x: Any = v(1, 2)
 
-            val seq: ISeq<Int> = toSeq(x)
+            val seq = toSeq<Int>(x) as ISeq<Int>
 
             seq.first() shouldBeExactly 1
         }
-
-        ""
 
         "not supported" {
             val x: Any = true

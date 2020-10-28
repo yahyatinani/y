@@ -1,6 +1,9 @@
 package com.github.whyrising.y
 
-interface IPersistentMap<out K, out V> : Associative<K, V> {
+interface IPersistentMap<out K, out V> :
+    Associative<K, V>,
+    IPersistentCollection<Any?> {
+
     override fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V):
         IPersistentMap<K, V>
 

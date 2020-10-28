@@ -113,11 +113,35 @@ sealed class PersistentArrayMap<out K, out V>(
 
     override val count: Int = array.size
 
+    override fun empty(): IPersistentCollection<Any?> = EmptyArrayMap
 
-    override fun empty(): IPersistentCollection<V> = EmptyArrayMap
+    @Suppress("UNCHECKED_CAST")
+    override fun conj(entry: Any?): IPersistentCollection<Any?> = when (entry) {
+        null -> this
+        is Map.Entry<*, *> -> assoc(entry.key as K, entry.value as V)
+        is IPersistentVector<*> -> when {
+            entry.count != 2 -> throw IllegalArgumentException(
+                "Vector $entry count should be 2 to conj in a map")
+            else -> assoc(entry.nth(0) as K, entry.nth(1) as V)
+        }
+        else -> {
+            var result: IPersistentMap<K, V> = this
+            var seq = toSeq<Any?>(entry) as ISeq<Any?>
 
-    override fun conj(e: @UnsafeVariance V): IPersistentCollection<V> {
-        TODO("Not yet implemented")
+            for (i in 0 until seq.count) {
+                val e = seq.first()
+
+                if (e !is Map.Entry<*, *>)
+                    throw IllegalArgumentException(
+                        "All elements of the seq must be of type Map.Entry " +
+                            "to conj: $e")
+
+                result = result.assoc(e.key as K, e.value as V)
+                seq = seq.rest()
+            }
+
+            result
+        }
     }
 
     override fun equiv(other: Any?): Boolean {
