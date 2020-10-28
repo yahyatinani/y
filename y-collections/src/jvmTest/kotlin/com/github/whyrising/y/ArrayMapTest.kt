@@ -231,6 +231,13 @@ class ArrayMapTest : FreeSpec({
                 map.valAt("z").shouldBeNull()
             }
         }
+
+        "count()" {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+
+            PersistentArrayMap<String, Int>().count shouldBeExactly 0
+            PersistentArrayMap(*array).count shouldBeExactly array.size
+        }
     }
 
     "EmptyArrayMap" - {

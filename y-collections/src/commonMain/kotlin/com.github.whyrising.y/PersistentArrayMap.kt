@@ -107,6 +107,25 @@ sealed class PersistentArrayMap<out K, out V>(
         }
     }
 
+    override fun seq(): ISeq<V> {
+        TODO("Not yet implemented")
+    }
+
+    override val count: Int = array.size
+
+
+    override fun empty(): IPersistentCollection<V> {
+        TODO("Not yet implemented")
+    }
+
+    override fun conj(e: @UnsafeVariance V): IPersistentCollection<V> {
+        TODO("Not yet implemented")
+    }
+
+    override fun equiv(other: Any?): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
 
     internal object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(
