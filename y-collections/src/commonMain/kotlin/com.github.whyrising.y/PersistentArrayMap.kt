@@ -83,6 +83,32 @@ sealed class PersistentArrayMap<out K, out V>(
 
         }
 
+    override fun containsKey(key: @UnsafeVariance K): Boolean =
+        keyIsAlreadyAvailable(indexOf(key))
+
+    override fun entryAt(
+        key: @UnsafeVariance K
+    ): IMapEntry<K, V>? = indexOf(key).let { index ->
+        when {
+            keyIsAlreadyAvailable(index) -> {
+                val (first, second) = array[index]
+                MapEntry(first, second)
+            }
+            else -> null
+        }
+    }
+
+    override fun valAt(
+        key: @UnsafeVariance K, default: @UnsafeVariance V?
+    ): V? = indexOf(key).let { index ->
+        when {
+            keyIsAlreadyAvailable(index) -> array[index].second
+            else -> default
+        }
+    }
+
+    override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
+
     internal object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(
         emptyArray()
     ) {

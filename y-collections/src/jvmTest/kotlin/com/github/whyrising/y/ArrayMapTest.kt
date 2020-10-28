@@ -4,7 +4,10 @@ import com.github.whyrising.y.PersistentArrayMap.ArrayMap
 import com.github.whyrising.y.PersistentArrayMap.EmptyArrayMap
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
@@ -174,6 +177,58 @@ class ArrayMapTest : FreeSpec({
                 pairs.size shouldBeExactly array.size - 1
                 pairs[0] shouldBe array[0]
                 pairs[1] shouldBe array[2]
+            }
+        }
+
+        "containsKey(key)" {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap(*array)
+
+            map.containsKey("a").shouldBeTrue()
+            map.containsKey("b").shouldBeTrue()
+
+            map.containsKey("d").shouldBeFalse()
+        }
+
+        "entryAt(key)" - {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap(*array)
+
+            "when key doesn't exit, it should return null" {
+                map.entryAt("d").shouldBeNull()
+            }
+
+            "when key does exist, it should return a MapEntry" {
+                val mapEntry = map.entryAt("a") as MapEntry<String, Int>
+
+                mapEntry.key shouldBe "a"
+                mapEntry.value shouldBe 1
+            }
+        }
+
+        "valAt(key, default)" - {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap(*array)
+
+            "when key exists, it should return the assoc value" {
+                map.valAt("a", -1) shouldBe 1
+            }
+
+            "when key doesn't exist, it should return the default value" {
+                map.valAt("z", -1) shouldBe -1
+            }
+        }
+
+        "valAt(key)" - {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap(*array)
+
+            "when key exists, it should return the assoc value" {
+                map.valAt("a") shouldBe 1
+            }
+
+            "when key doesn't exist, it should return the default value" {
+                map.valAt("z").shouldBeNull()
             }
         }
     }

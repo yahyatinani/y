@@ -1,7 +1,7 @@
 package com.github.whyrising.y
 
-interface ILookup<K, out V> {
-    fun valAt(key: K, default: @UnsafeVariance V?): V?
+interface ILookup<out K, out V> {
+    fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V?
 
-    fun valAt(key: K): V?
+    fun valAt(key: @UnsafeVariance K): V?
 }
