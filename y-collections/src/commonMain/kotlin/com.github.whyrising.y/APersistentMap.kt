@@ -131,6 +131,12 @@ abstract class APersistentMap<out K, out V> :
         }
     }
 
+    operator fun invoke(
+        key: @UnsafeVariance K, default: @UnsafeVariance V?
+    ): V? = valAt(key, default)
+
+    operator fun invoke(key: @UnsafeVariance K): V? = valAt(key)
+
     // Map implementation
     override val size: Int
         get() = count

@@ -414,6 +414,21 @@ class PersistentArrayMapTest : FreeSpec({
             (am("a" to 1, "b" to 2) == am("a" to 1, "b" to 2L)).shouldBeFalse()
         }
 
+        "invoke() operator" - {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val map = am(*array)
+
+            "invoke(key, default)" {
+                map("a", -1) shouldBe 1
+                map("z", -1) shouldBe -1
+            }
+
+            "invoke(key)" {
+                map("a") shouldBe 1
+                map("z").shouldBeNull()
+            }
+        }
+
         "Map implementation" - {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
             val map = am(*array)
