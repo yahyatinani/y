@@ -9,27 +9,27 @@ abstract class APersistentMap<out K, out V> :
     MapEquivalence {
 
     @Suppress("UNCHECKED_CAST")
-    override fun conj(entry: Any?): IPersistentCollection<Any?> = when (entry) {
+    override fun conj(e: Any?): IPersistentCollection<Any?> = when (e) {
         null -> this
-        is Entry<*, *> -> assoc(entry.key as K, entry.value as V)
+        is Entry<*, *> -> assoc(e.key as K, e.value as V)
         is IPersistentVector<*> -> when {
-            entry.count != 2 -> throw IllegalArgumentException(
-                "Vector $entry count should be 2 to conj in a map")
-            else -> assoc(entry.nth(0) as K, entry.nth(1) as V)
+            e.count != 2 -> throw IllegalArgumentException(
+                "Vector $e count should be 2 to conj in a map")
+            else -> assoc(e.nth(0) as K, e.nth(1) as V)
         }
         else -> {
             var result: IPersistentMap<K, V> = this
-            var seq = toSeq<Any?>(entry) as ISeq<Any?>
+            var seq = toSeq<Any?>(e) as ISeq<Any?>
 
             for (i in 0 until seq.count) {
-                val e = seq.first()
+                val entry = seq.first()
 
-                if (e !is Entry<*, *>)
+                if (entry !is Entry<*, *>)
                     throw IllegalArgumentException(
                         "All elements of the seq must be of type Map.Entry " +
-                            "to conj: $e")
+                            "to conj: $entry")
 
-                result = result.assoc(e.key as K, e.value as V)
+                result = result.assoc(entry.key as K, entry.value as V)
                 seq = seq.rest()
             }
 
