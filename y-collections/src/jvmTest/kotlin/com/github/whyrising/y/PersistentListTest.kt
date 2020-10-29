@@ -328,7 +328,14 @@ class PersistentListTest : FreeSpec({
         }
 
         "toString()" {
-            PersistentList(1, 2, 3, 4, 5).toString() shouldBe "(1 2 3 4 5)"
+            checkAll { args: List<Int> ->
+                val list = PersistentList(*args.toTypedArray())
+                var expectedStr = "("
+                for (i in 0 until list.count) expectedStr += "${list[i]} "
+                expectedStr = "${expectedStr.trim()})"
+
+                list.toString() shouldBe expectedStr
+            }
         }
 
         "count" {

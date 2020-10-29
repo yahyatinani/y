@@ -1,8 +1,10 @@
 package com.github.whyrising.y
 
+import kotlin.collections.Map.Entry
+
 sealed class PersistentArrayMap<out K, out V>(
     internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
-) : IPersistentMap<K, V> {
+) : APersistentMap<K, V>() {
 
     @Suppress("UNCHECKED_CAST")
     private fun createArrayMap(newPairs: Array<out Pair<K, V>?>) =
@@ -107,48 +109,34 @@ sealed class PersistentArrayMap<out K, out V>(
         }
     }
 
-    override fun seq(): ISeq<V> {
-        TODO("Not yet implemented")
+    override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
+
+    override fun seq(): ISeq<MapEntry<K, V>> = when (count) {
+        0 -> emptySeq()
+        else -> Seq(array, 0)
     }
 
     override val count: Int = array.size
 
     override fun empty(): IPersistentCollection<Any?> = EmptyArrayMap
 
-    @Suppress("UNCHECKED_CAST")
-    override fun conj(entry: Any?): IPersistentCollection<Any?> = when (entry) {
-        null -> this
-        is Map.Entry<*, *> -> assoc(entry.key as K, entry.value as V)
-        is IPersistentVector<*> -> when {
-            entry.count != 2 -> throw IllegalArgumentException(
-                "Vector $entry count should be 2 to conj in a map")
-            else -> assoc(entry.nth(0) as K, entry.nth(1) as V)
-        }
-        else -> {
-            var result: IPersistentMap<K, V> = this
-            var seq = toSeq<Any?>(entry) as ISeq<Any?>
+    override
+    fun iterator(): Iterator<Entry<K, V>> = object : Iterator<Entry<K, V>> {
 
-            for (i in 0 until seq.count) {
-                val e = seq.first()
+        var index = 0
 
-                if (e !is Map.Entry<*, *>)
-                    throw IllegalArgumentException(
-                        "All elements of the seq must be of type Map.Entry " +
-                            "to conj: $e")
+        override fun hasNext(): Boolean = index < array.size
 
-                result = result.assoc(e.key as K, e.value as V)
-                seq = seq.rest()
+        override fun next(): Entry<K, V> = when {
+            index >= array.size -> throw NoSuchElementException()
+            else -> {
+                val pair = array[index]
+                index++
+
+                MapEntry(pair.first, pair.second)
             }
-
-            result
         }
     }
-
-    override fun equiv(other: Any?): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
 
     internal object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(
         emptyArray()
@@ -160,6 +148,24 @@ sealed class PersistentArrayMap<out K, out V>(
     internal class ArrayMap<out K, out V>(
         internal val pairs: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
     ) : PersistentArrayMap<K, V>(pairs)
+
+    internal class Seq<out K, out V>(
+        private val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>,
+        val index: Int
+    ) : ASeq<MapEntry<K, V>>() {
+
+        override val count: Int = array.size - index
+
+        override
+        fun first(): MapEntry<K, V> = array[index].let { (first, second) ->
+            MapEntry(first, second)
+        }
+
+        override fun rest(): ISeq<MapEntry<K, V>> = when {
+            index < count -> Seq(array, index + 1)
+            else -> emptySeq()
+        }
+    }
 
     companion object {
         operator fun <K, V> invoke(): PersistentArrayMap<K, V> = EmptyArrayMap

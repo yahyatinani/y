@@ -2,6 +2,8 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentArrayMap.ArrayMap
 import com.github.whyrising.y.PersistentArrayMap.EmptyArrayMap
+import com.github.whyrising.y.PersistentList.Empty
+import com.github.whyrising.y.mocks.MockPersistentMap
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -10,6 +12,7 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import kotlin.collections.Map.Entry
 
 class PersistentArrayMapTest : FreeSpec({
     "ArrayMap" - {
@@ -232,6 +235,35 @@ class PersistentArrayMapTest : FreeSpec({
             }
         }
 
+        "seq()" - {
+            "when map is empty, it should return an empty seq" {
+                PersistentArrayMap<String, Int>().seq() shouldBeSameInstanceAs
+                    Empty
+            }
+
+            "when map is populated, it should return a seq of entries" {
+                val array = arrayOf("a" to 1, "b" to 2)
+                val map = PersistentArrayMap(*array)
+
+                val seq = map.seq()
+                val rest = seq.rest()
+                val resOfRest = rest.rest()
+
+                seq.toString() shouldBe "([a 1] [b 2])"
+
+                seq.count shouldBeExactly map.size
+
+                seq.first() shouldBe MapEntry("a", 1)
+
+                rest.count shouldBeExactly map.size - 1
+
+                rest.first() shouldBe MapEntry("b", 2)
+
+                resOfRest shouldBeSameInstanceAs Empty
+
+            }
+        }
+
         "count()" {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
 
@@ -300,6 +332,137 @@ class PersistentArrayMapTest : FreeSpec({
 
                     newMap.count shouldBeExactly array.size + entries.count
                 }
+            }
+        }
+
+        "equiv(other)" - {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap(*array)
+
+            "when other is not a Map, it should return false" {
+                map.equiv("map").shouldBeFalse()
+            }
+
+            "when other is Map but different sizes, it should return false" {
+                map.equiv(mapOf("a" to 1)).shouldBeFalse()
+            }
+
+            "when maps have same size but not equiv, it should return false" {
+                map.equiv(mapOf("a" to 1, "b" to 7, "c" to 3)).shouldBeFalse()
+                map.equiv(mapOf("a" to 1, "x" to 7, "c" to 3)).shouldBeFalse()
+            }
+
+            "when maps have same size and equiv, it should return true" {
+                map.equiv(mapOf("a" to 1L, "b" to 2, "c" to 3L)).shouldBeTrue()
+            }
+
+            "when other is IPersistentMap but not marked, return false" {
+                val other = MockPersistentMap("a" to 1L, "b" to 2, "c" to 3L)
+
+                map.equiv(other).shouldBeFalse()
+            }
+        }
+
+        "iterator()" {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap(*array)
+            val iter = map.iterator()
+
+            iter.hasNext().shouldBeTrue()
+
+            iter.next() shouldBe MapEntry("a", 1)
+            iter.next() shouldBe MapEntry("b", 2)
+            iter.next() shouldBe MapEntry("c", 3)
+
+            iter.hasNext().shouldBeFalse()
+
+            shouldThrowExactly<NoSuchElementException> {
+                iter.next() shouldBe MapEntry("c", 3)
+            }
+        }
+
+        "Map implementation" - {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap(*array)
+            val emptyMap = PersistentArrayMap<String, Int>()
+
+            "size()" {
+                map.size shouldBeExactly array.size
+            }
+
+            "isEmpty()" {
+                map.isEmpty().shouldBeFalse()
+                emptyMap.isEmpty().shouldBeTrue()
+            }
+
+            "containsValue(value)" {
+                map.containsValue(1).shouldBeTrue()
+                map.containsValue(3).shouldBeTrue()
+                map.containsValue(10).shouldBeFalse()
+                map.containsValue(40).shouldBeFalse()
+            }
+
+            "get(key)" {
+                map["a"] shouldBe 1
+                map["x"].shouldBeNull()
+            }
+
+            "keys should return an instance of AbstractSet" {
+                val keys = map.keys as AbstractSet<String>
+                val iterator = keys.iterator()
+
+                keys.size shouldBeExactly array.size
+
+                keys.contains("a").shouldBeTrue()
+                keys.contains("x").shouldBeFalse()
+
+                iterator.hasNext().shouldBeTrue()
+                iterator.next() shouldBe "a"
+                iterator.next() shouldBe "b"
+                iterator.next() shouldBe "c"
+                iterator.hasNext().shouldBeFalse()
+                shouldThrowExactly<NoSuchElementException> {
+                    iterator.next()
+                }
+            }
+
+            "values should return an instance of AbstractCollection" {
+                val values = map.values as AbstractCollection<Int>
+                val iterator = values.iterator()
+
+                values.size shouldBeExactly array.size
+
+                iterator.hasNext().shouldBeTrue()
+                iterator.next() shouldBe 1
+                iterator.next() shouldBe 2
+                iterator.next() shouldBe 3
+                iterator.hasNext().shouldBeFalse()
+                shouldThrowExactly<NoSuchElementException> {
+                    iterator.next()
+                }
+            }
+
+            "entries should return an instance of AbstractSet" {
+                val entries = map.entries as AbstractSet<Entry<String, Number>>
+                val iterator = entries.iterator()
+
+                entries.size shouldBeExactly array.size
+
+                @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
+                entries.contains("x").shouldBeFalse()
+                entries.contains(MapEntry("x", 1)).shouldBeFalse()
+                entries.contains(MapEntry("a", 1)).shouldBeTrue()
+
+                iterator.hasNext().shouldBeTrue()
+                iterator.next() shouldBe MapEntry("a", 1)
+                iterator.next() shouldBe MapEntry("b", 2)
+                iterator.next() shouldBe MapEntry("c", 3)
+                iterator.hasNext().shouldBeFalse()
+                shouldThrowExactly<NoSuchElementException> {
+                    iterator.next()
+                }
+
+                entries.hashCode() shouldBeExactly map.hashCode()
             }
         }
     }

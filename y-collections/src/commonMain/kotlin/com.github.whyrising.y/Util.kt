@@ -77,3 +77,5 @@ fun <E> compare(e1: E, e2: E): Int = when {
     }
     else -> -1
 }
+
+internal fun <E> emptySeq(): ISeq<E> = PersistentList.Empty
