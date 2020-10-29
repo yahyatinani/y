@@ -141,8 +141,9 @@ sealed class PersistentArrayMap<out K, out V>(
     internal object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(
         emptyArray()
     ) {
-
         override fun toString(): String = "{}"
+
+        override fun hashCode(): Int = 0
     }
 
     internal class ArrayMap<out K, out V>(

@@ -390,6 +390,16 @@ class PersistentArrayMapTest : FreeSpec({
             am("a" to 1, "b" to 2, "c" to 3).toString() shouldBe "{a 1, b 2, c 3}"
         }
 
+        "hashCode()" {
+            val array = arrayOf("a" to 1, "b" to 2)
+            val map = am(*array)
+            val expHash = ("a".hashCode() xor 1.hashCode()) +
+                ("b".hashCode() xor 2.hashCode())
+
+            map.hashCode() shouldBeExactly expHash
+            map.hashCode shouldBeExactly expHash
+        }
+
         "Map implementation" - {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
             val map = am(*array)
@@ -479,6 +489,10 @@ class PersistentArrayMapTest : FreeSpec({
     "EmptyArrayMap" - {
         "toString() should return `{}`" {
             am<String, Int>().toString() shouldBe "{}"
+        }
+
+        "hashCode()" {
+            am<String, Int>().hashCode() shouldBeExactly 0
         }
     }
 })

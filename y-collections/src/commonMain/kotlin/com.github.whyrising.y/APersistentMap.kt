@@ -8,6 +8,10 @@ abstract class APersistentMap<out K, out V> :
     Iterable<Entry<K, V>>,
     MapEquivalence {
 
+    var hashCode = 0
+        private set
+
+    @Suppress("UNCHECKED_CAST")
     override fun toString(): String {
         var seq = seq() as ISeq<MapEntry<K, V>>
         var s = "{"
@@ -23,6 +27,27 @@ abstract class APersistentMap<out K, out V> :
         s += '}'
 
         return s
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun hashCode(): Int {
+        var cashed = hashCode
+
+        if (cashed == 0) {
+            var seq = seq() as ISeq<MapEntry<K, V>>
+
+            while (seq != emptySeq<MapEntry<K, V>>()) {
+                val entry = seq.first()
+
+                cashed += entry.key.hashCode() xor entry.value.hashCode()
+
+                seq = seq.rest()
+            }
+
+            hashCode = cashed
+        }
+
+        return cashed
     }
 
     @Suppress("UNCHECKED_CAST")
