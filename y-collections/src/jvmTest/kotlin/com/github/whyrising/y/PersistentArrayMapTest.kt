@@ -14,20 +14,28 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.collections.Map.Entry
 
+private fun <K, V> am(vararg pairs: Pair<K, V>) = PersistentArrayMap(*pairs)
+
 class PersistentArrayMapTest : FreeSpec({
     "ArrayMap" - {
         "invoke() should return EmptyArrayMap" {
-            val emptyMap = PersistentArrayMap<String, Int>()
+            val emptyMap = am<String, Int>()
 
             emptyMap shouldBeSameInstanceAs EmptyArrayMap
             emptyMap.array.size shouldBeExactly 0
         }
 
         "invoke(pairs)" - {
+            "when pairs is empty, it should return EmptyMap" {
+                val array = arrayOf<Pair<String, Int>>()
+
+                am(*array) shouldBeSameInstanceAs EmptyArrayMap
+            }
+
             "it should return an ArrayMap" {
                 val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
 
-                val map = PersistentArrayMap(*array)
+                val map = am(*array)
                 val pairs = map.array
 
                 pairs shouldBe array
@@ -35,24 +43,24 @@ class PersistentArrayMapTest : FreeSpec({
 
             "when duplicate keys, it should throw an exception" {
                 shouldThrowExactly<IllegalArgumentException> {
-                    PersistentArrayMap("a" to 1, "b" to 2, "b" to 3)
+                    am("a" to 1, "b" to 2, "b" to 3)
                 }
                 shouldThrowExactly<IllegalArgumentException> {
-                    PersistentArrayMap("a" to 1, "a" to 2, "b" to 3)
+                    am("a" to 1, "a" to 2, "b" to 3)
                 }
                 shouldThrowExactly<IllegalArgumentException> {
-                    PersistentArrayMap("a" to 1, "b" to 2, "a" to 3)
+                    am("a" to 1, "b" to 2, "a" to 3)
                 }
 
                 shouldThrowExactly<IllegalArgumentException> {
-                    PersistentArrayMap(1L to "a", 1 to "b")
+                    am(1L to "a", 1 to "b")
                 }
             }
         }
 
         "assoc(key, val)" - {
             "when map is empty, it should add the new entry" {
-                val map = PersistentArrayMap<String, Int>()
+                val map = am<String, Int>()
 
                 val newMap = map.assoc("a", 1) as ArrayMap<String, Int>
                 val pairs = newMap.pairs
@@ -64,7 +72,7 @@ class PersistentArrayMapTest : FreeSpec({
             "when the key is new, it should add it to the map" - {
                 "when size < threshold, it should return a PersistentArrayMap" {
                     val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-                    val map = PersistentArrayMap(*array)
+                    val map = am(*array)
 
                     val newMap = map.assoc("d", 4) as ArrayMap<String, Int>
                     val pairs = newMap.pairs
@@ -86,7 +94,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val key = 2
                 val value = "78"
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val map = PersistentArrayMap(*array)
+                val map = am(*array)
 
                 val newMap = map.assoc(key, value) as ArrayMap<Any, String>
                 val pairs = newMap.pairs
@@ -111,7 +119,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val key = 2
                 val value = "2"
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val map = PersistentArrayMap(*array)
+                val map = am(*array)
 
                 val newMap = map.assoc(key, value) as ArrayMap<Any, String>
 
@@ -123,7 +131,7 @@ class PersistentArrayMapTest : FreeSpec({
             "when map already has the key, it should throw" {
                 val value = "78"
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val map = PersistentArrayMap(*array)
+                val map = am(*array)
 
                 shouldThrowExactly<RuntimeException> {
                     map.assocNew(2, value)
@@ -134,7 +142,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val key = 4
                 val value = "4"
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val map = PersistentArrayMap(*array)
+                val map = am(*array)
 
                 val newMap = map.assocNew(key, value) as ArrayMap<Any, String>
                 val pairs = newMap.pairs
@@ -159,20 +167,20 @@ class PersistentArrayMapTest : FreeSpec({
         "dissoc(key)" - {
             "when key doesn't exit, it should return the same instance" {
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val map = PersistentArrayMap(*array)
+                val map = am(*array)
 
                 map.dissoc(9) shouldBeSameInstanceAs map
             }
 
             "when key exists and size is 1, it should return the empty map" {
-                val map = PersistentArrayMap(2L to "2")
+                val map = am(2L to "2")
 
                 map.dissoc(2) shouldBeSameInstanceAs EmptyArrayMap
             }
 
             "when key exists, it should return a new map without that key" {
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val map = PersistentArrayMap(*array)
+                val map = am(*array)
 
                 val newMap = map.dissoc(2) as PersistentArrayMap<Any?, String>
                 val pairs = newMap.array
@@ -185,7 +193,7 @@ class PersistentArrayMapTest : FreeSpec({
 
         "containsKey(key)" {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val map = PersistentArrayMap(*array)
+            val map = am(*array)
 
             map.containsKey("a").shouldBeTrue()
             map.containsKey("b").shouldBeTrue()
@@ -195,7 +203,7 @@ class PersistentArrayMapTest : FreeSpec({
 
         "entryAt(key)" - {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val map = PersistentArrayMap(*array)
+            val map = am(*array)
 
             "when key doesn't exit, it should return null" {
                 map.entryAt("d").shouldBeNull()
@@ -211,7 +219,7 @@ class PersistentArrayMapTest : FreeSpec({
 
         "valAt(key, default)" - {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val map = PersistentArrayMap(*array)
+            val map = am(*array)
 
             "when key exists, it should return the assoc value" {
                 map.valAt("a", -1) shouldBe 1
@@ -224,7 +232,7 @@ class PersistentArrayMapTest : FreeSpec({
 
         "valAt(key)" - {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val map = PersistentArrayMap(*array)
+            val map = am(*array)
 
             "when key exists, it should return the assoc value" {
                 map.valAt("a") shouldBe 1
@@ -261,21 +269,21 @@ class PersistentArrayMapTest : FreeSpec({
         "count()" {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
 
-            PersistentArrayMap<String, Int>().count shouldBeExactly 0
-            PersistentArrayMap(*array).count shouldBeExactly array.size
+            am<String, Int>().count shouldBeExactly 0
+            am(*array).count shouldBeExactly array.size
         }
 
         "empty()" {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
 
-            PersistentArrayMap(*array).empty() shouldBeSameInstanceAs
+            am(*array).empty() shouldBeSameInstanceAs
                 EmptyArrayMap
         }
 
         @Suppress("UNCHECKED_CAST")
         "conj(entry)" - {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val map = PersistentArrayMap(*array)
+            val map = am(*array)
 
             "when entry is a Map.Entry, it should call assoc() on it" {
                 val newMap = map.conj(MapEntry("a", 99))
@@ -331,7 +339,7 @@ class PersistentArrayMapTest : FreeSpec({
 
         "equiv(other)" - {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val map = PersistentArrayMap(*array)
+            val map = am(*array)
 
             "when other is not a Map, it should return false" {
                 map.equiv("map").shouldBeFalse()
@@ -346,7 +354,7 @@ class PersistentArrayMapTest : FreeSpec({
                 map.equiv(mapOf("a" to 1, "x" to 7, "c" to 3)).shouldBeFalse()
             }
 
-            "when maps have same size and equiv, it should return true" {
+            "when maps have same size and are equiv, return true" {
                 map.equiv(mapOf("a" to 1L, "b" to 2, "c" to 3L)).shouldBeTrue()
             }
 
@@ -359,7 +367,7 @@ class PersistentArrayMapTest : FreeSpec({
 
         "iterator()" {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val map = PersistentArrayMap(*array)
+            val map = am(*array)
             val iter = map.iterator()
 
             iter.hasNext().shouldBeTrue()
@@ -375,10 +383,17 @@ class PersistentArrayMapTest : FreeSpec({
             }
         }
 
+        "toString()" {
+            am<String, Int>().toString() shouldBe "{}"
+            am("a" to 1).toString() shouldBe "{a 1}"
+            am("a" to 1, "b" to 2).toString() shouldBe "{a 1, b 2}"
+            am("a" to 1, "b" to 2, "c" to 3).toString() shouldBe "{a 1, b 2, c 3}"
+        }
+
         "Map implementation" - {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val map = PersistentArrayMap(*array)
-            val emptyMap = PersistentArrayMap<String, Int>()
+            val map = am(*array)
+            val emptyMap = am<String, Int>()
 
             "size()" {
                 map.size shouldBeExactly array.size
@@ -463,7 +478,7 @@ class PersistentArrayMapTest : FreeSpec({
 
     "EmptyArrayMap" - {
         "toString() should return `{}`" {
-            PersistentArrayMap<String, Int>().toString() shouldBe "{}"
+            am<String, Int>().toString() shouldBe "{}"
         }
     }
 })

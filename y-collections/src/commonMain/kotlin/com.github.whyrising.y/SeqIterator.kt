@@ -17,7 +17,6 @@ data class SeqIterator<out E>(
     }
 
     override fun next(): E {
-
         if (!hasNext()) throw NoSuchElementException()
 
         currentSeq = next

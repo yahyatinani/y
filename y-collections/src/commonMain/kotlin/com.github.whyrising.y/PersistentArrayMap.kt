@@ -179,13 +179,18 @@ sealed class PersistentArrayMap<out K, out V>(
 
         @Suppress("UNCHECKED_CAST")
         operator
-        fun <K, V> invoke(vararg pairs: Pair<K, V>): PersistentArrayMap<K, V> {
-            for (i in pairs.indices)
-                for (j in i + 1 until pairs.size)
-                    if (areKeysEqual(pairs[i].first, pairs[j].first))
-                        throw IllegalArgumentException("Duplicate key: $i")
+        fun <K, V> invoke(vararg pairs: Pair<K, V>): PersistentArrayMap<K, V> =
+            when {
+                pairs.isEmpty() -> EmptyArrayMap
+                else -> {
+                    for (i in pairs.indices)
+                        for (j in i + 1 until pairs.size)
+                            if (areKeysEqual(pairs[i].first, pairs[j].first))
+                                throw IllegalArgumentException(
+                                    "Duplicate key: $i")
 
-            return ArrayMap(pairs as Array<Pair<K, V>>)
-        }
+                    ArrayMap(pairs as Array<Pair<K, V>>)
+                }
+            }
     }
 }

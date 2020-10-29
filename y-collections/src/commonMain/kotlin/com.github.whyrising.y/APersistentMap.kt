@@ -8,6 +8,23 @@ abstract class APersistentMap<out K, out V> :
     Iterable<Entry<K, V>>,
     MapEquivalence {
 
+    override fun toString(): String {
+        var seq = seq() as ISeq<MapEntry<K, V>>
+        var s = "{"
+
+        while (seq != emptySeq<MapEntry<K, V>>()) {
+            val entry = seq.first()
+            s += "${entry.key} ${entry.value}"
+            seq = seq.rest()
+
+            if (seq != emptySeq<MapEntry<K, V>>()) s += ", "
+        }
+
+        s += '}'
+
+        return s
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun conj(e: Any?): IPersistentCollection<Any?> = when (e) {
         null -> this
