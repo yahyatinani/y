@@ -51,6 +51,31 @@ abstract class APersistentMap<out K, out V> :
     }
 
     @Suppress("UNCHECKED_CAST")
+    override fun equals(other: Any?): Boolean {
+        when {
+            other !is Map<*, *> -> return false
+            count != other.size -> return false
+            else -> {
+                var seq = seq()
+                val map = other as Map<K, V>
+
+                for (i in 0 until count) {
+                    val entry = seq.first() as Entry<K, V>
+                    val key = entry.key
+                    val keyFound = map.containsKey(key)
+
+                    if (!keyFound || entry.value != map.getValue(key))
+                        return false
+
+                    seq = seq.rest()
+                }
+
+                return true
+            }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
     override fun conj(e: Any?): IPersistentCollection<Any?> = when (e) {
         null -> this
         is Entry<*, *> -> assoc(e.key as K, e.value as V)

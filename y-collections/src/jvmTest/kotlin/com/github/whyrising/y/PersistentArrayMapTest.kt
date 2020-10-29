@@ -400,6 +400,20 @@ class PersistentArrayMapTest : FreeSpec({
             map.hashCode shouldBeExactly expHash
         }
 
+        "equals(other)" {
+            (am("a" to 1, "b" to 2) == am("a" to 1, "b" to 2)).shouldBeTrue()
+
+            (am("a" to 1, "b" to 2).equals("string")).shouldBeFalse()
+
+            (am("a" to 1, "b" to 2) == am("a" to 1)).shouldBeFalse()
+
+            (am("a" to 1, "b" to 2) == am("a" to 1, "x" to 2)).shouldBeFalse()
+
+            (am("a" to 1, "b" to 2) == am("a" to 1, "b" to 10)).shouldBeFalse()
+
+            (am("a" to 1, "b" to 2) == am("a" to 1, "b" to 2L)).shouldBeFalse()
+        }
+
         "Map implementation" - {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
             val map = am(*array)
