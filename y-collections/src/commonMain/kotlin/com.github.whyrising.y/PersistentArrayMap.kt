@@ -161,9 +161,11 @@ sealed class PersistentArrayMap<out K, out V>(
             MapEntry(first, second)
         }
 
-        override fun rest(): ISeq<MapEntry<K, V>> = when {
-            index < count -> Seq(array, index + 1)
-            else -> emptySeq()
+        override fun rest(): ISeq<MapEntry<K, V>> = (index + 1).let { i ->
+            when {
+                i < array.size -> Seq(array, i)
+                else -> emptySeq()
+            }
         }
     }
 

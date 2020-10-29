@@ -237,30 +237,24 @@ class PersistentArrayMapTest : FreeSpec({
 
         "seq()" - {
             "when map is empty, it should return an empty seq" {
-                PersistentArrayMap<String, Int>().seq() shouldBeSameInstanceAs
+                am<String, Int>().seq() shouldBeSameInstanceAs
                     Empty
             }
 
             "when map is populated, it should return a seq of entries" {
-                val array = arrayOf("a" to 1, "b" to 2)
-                val map = PersistentArrayMap(*array)
+                val array = arrayOf("a" to 1)
+                val map = am(*array)
 
                 val seq = map.seq()
                 val rest = seq.rest()
-                val resOfRest = rest.rest()
 
-                seq.toString() shouldBe "([a 1] [b 2])"
+                seq.toString() shouldBe "([a 1])"
 
                 seq.count shouldBeExactly map.size
 
                 seq.first() shouldBe MapEntry("a", 1)
 
-                rest.count shouldBeExactly map.size - 1
-
-                rest.first() shouldBe MapEntry("b", 2)
-
-                resOfRest shouldBeSameInstanceAs Empty
-
+                rest shouldBeSameInstanceAs Empty
             }
         }
 
