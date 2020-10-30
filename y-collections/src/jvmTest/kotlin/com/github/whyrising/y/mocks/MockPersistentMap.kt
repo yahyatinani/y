@@ -63,4 +63,12 @@ class MockPersistentMap<K, V> private constructor(
     }
 
     override fun iterator(): Iterator<Map.Entry<K, V>> = map.iterator()
+
+    override fun keyz(): ISeq<K> {
+        TODO("Not yet implemented")
+    }
+
+    override fun vals(): ISeq<V> {
+        TODO("Not yet implemented")
+    }
 }

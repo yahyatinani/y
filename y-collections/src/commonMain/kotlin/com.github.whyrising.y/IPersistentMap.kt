@@ -12,4 +12,8 @@ interface IPersistentMap<out K, out V> :
         IPersistentMap<K, V>
 
     fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V>
+
+    fun keyz(): ISeq<K>
+
+    fun vals(): ISeq<V>
 }

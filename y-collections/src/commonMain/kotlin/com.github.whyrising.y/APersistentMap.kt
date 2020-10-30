@@ -137,6 +137,10 @@ abstract class APersistentMap<out K, out V> :
 
     operator fun invoke(key: @UnsafeVariance K): V? = valAt(key)
 
+    override fun keyz(): ISeq<K> = KeySeq(this)
+
+    override fun vals(): ISeq<V> = ValSeq(this)
+
     // Map implementation
     override val size: Int
         get() = count

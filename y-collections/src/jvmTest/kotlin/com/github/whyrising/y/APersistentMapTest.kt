@@ -133,4 +133,20 @@ class APersistentMapTest : FreeSpec({
             }
         }
     }
+
+    "IPersistentMap.keys()" {
+        val map = am("a" to 1, "b" to 2, "c" to 3)
+
+        val keys: ISeq<String> = map.keyz()
+
+        keys shouldBe l("a", "b", "c")
+    }
+
+    "IPersistentMap.vals()" {
+        val map = am("a" to 1, "b" to 2, "c" to 3)
+
+        val vals: ISeq<Int> = map.vals()
+
+        vals shouldBe l(1, 2, 3)
+    }
 })
