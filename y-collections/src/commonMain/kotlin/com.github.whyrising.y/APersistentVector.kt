@@ -134,8 +134,8 @@ abstract class APersistentVector<out E> :
     }
 
     override
-    fun assoc(index: Int, value: @UnsafeVariance E): IPersistentVector<E> =
-        assocN(index, value)
+    fun assoc(key: Int, value: @UnsafeVariance E): IPersistentVector<E> =
+        assocN(key, value)
 
     override fun subvec(start: Int, end: Int): IPersistentVector<E> =
         SubVector(this, start, end)
