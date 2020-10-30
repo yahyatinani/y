@@ -207,4 +207,27 @@ abstract class APersistentMap<out K, out V> :
             override fun iterator(): Iterator<Entry<K, V>> =
                 this@APersistentMap.iterator()
         }
+
+    internal class KeySeq<out K, out V> private constructor(
+        val seq: ISeq<K>, val map: Iterable<Entry<K, V>>?
+    ) : ASeq<K>() {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun first(): K = (seq.first() as Entry<K, V>).key
+
+        override fun rest(): ISeq<K> = invoke<K, V>(seq.rest())
+
+        override val count: Int = seq.count
+
+        companion object {
+
+            operator fun <K, V> invoke(seq: ISeq<K>): KeySeq<K, V> =
+                KeySeq(seq, null)
+
+            @Suppress("UNCHECKED_CAST")
+            operator
+            fun <K, V> invoke(map: IPersistentMap<K, V>): KeySeq<K, V> =
+                KeySeq(map.seq() as ISeq<K>, map)
+        }
+    }
 }

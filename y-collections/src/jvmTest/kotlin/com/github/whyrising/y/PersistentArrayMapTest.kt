@@ -14,7 +14,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.collections.Map.Entry
 
-private fun <K, V> am(vararg pairs: Pair<K, V>) = PersistentArrayMap(*pairs)
+internal fun <K, V> am(vararg pairs: Pair<K, V>) = PersistentArrayMap(*pairs)
 
 class PersistentArrayMapTest : FreeSpec({
     "ArrayMap" - {

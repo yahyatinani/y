@@ -62,4 +62,8 @@ class MockPersistentMap<K, V> private constructor(
     override fun isEmpty(): Boolean {
         TODO("Not yet implemented")
     }
+
+    override fun iterator(): Iterator<Map.Entry<K, V>> {
+        TODO("Not yet implemented")
+    }
 }
