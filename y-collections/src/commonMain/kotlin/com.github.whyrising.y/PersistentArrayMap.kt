@@ -132,9 +132,8 @@ sealed class PersistentArrayMap<out K, out V>(
         pair.second
     }
 
-    internal object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(
-        emptyArray()
-    ) {
+    internal
+    object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(emptyArray()) {
         override fun toString(): String = "{}"
 
         override fun hashCode(): Int = 0
