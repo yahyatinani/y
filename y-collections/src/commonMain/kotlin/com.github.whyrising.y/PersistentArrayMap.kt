@@ -1,6 +1,12 @@
 package com.github.whyrising.y
 
+import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.atomicfu.AtomicInt
+import kotlinx.atomicfu.atomic
 import kotlin.collections.Map.Entry
+import kotlin.math.max
+
+const val HASHTABLE_THRESHOLD = 16
 
 sealed class PersistentArrayMap<out K, out V>(
     internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
@@ -179,6 +185,39 @@ sealed class PersistentArrayMap<out K, out V>(
                 i < array.size -> Seq(array, i)
                 else -> emptySeq()
             }
+        }
+    }
+
+    internal class TransientArrayMap<out K, out V> private constructor(
+        internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>?>,
+        internal val isMutable: AtomicBoolean,
+        internal val length: AtomicInt
+    ) : ATransientMap<K, V>() {
+
+        override fun assertMutable() {
+            if (!isMutable.value)
+                throw IllegalStateException(
+                    "Transient used after persistent() call.")
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        override fun doPersistent(): ArrayMap<K, V> {
+            assertMutable()
+
+            isMutable.value = false
+            val ar = arrayOfNulls<Pair<K, V>>(length.value)
+            array.copyInto(ar, 0, 0, ar.size)
+
+            return ArrayMap(ar as Array<Pair<K, V>>)
+        }
+
+        companion object {
+            operator fun <K, V> invoke(array: Array<Pair<K, V>>):
+                TransientArrayMap<K, V> = TransientArrayMap(
+                array.copyOf(max(HASHTABLE_THRESHOLD, array.size)),
+                atomic(true),
+                atomic(array.size)
+            )
         }
     }
 

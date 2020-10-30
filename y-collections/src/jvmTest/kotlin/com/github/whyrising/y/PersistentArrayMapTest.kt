@@ -2,8 +2,9 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentArrayMap.ArrayMap
 import com.github.whyrising.y.PersistentArrayMap.EmptyArrayMap
+import com.github.whyrising.y.PersistentArrayMap.TransientArrayMap
 import com.github.whyrising.y.PersistentList.Empty
-import com.github.whyrising.y.mocks.MockPersistentMap
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -12,7 +13,13 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
-import kotlin.collections.Map.Entry
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.pair
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
 
 internal fun <K, V> am(vararg pairs: Pair<K, V>) = PersistentArrayMap(*pairs)
 
@@ -326,6 +333,62 @@ class PersistentArrayMapTest : FreeSpec({
             iter.hasNext().shouldBeFalse()
 
             shouldThrowExactly<NoSuchElementException> { iter.next() }
+        }
+
+        "TransientArrayMap" - {
+            "ctor" {
+                val gen = Arb.list(Arb.pair(Arb.string(), Arb.int()))
+                checkAll(gen) { list: List<Pair<String, Int>> ->
+                    val array = list.toTypedArray()
+
+                    val tam = TransientArrayMap(array)
+
+                    tam.array shouldNotBeSameInstanceAs array
+                    when {
+                        list.size <= HASHTABLE_THRESHOLD -> {
+                            tam.array.size shouldBeExactly HASHTABLE_THRESHOLD
+                        }
+                        else -> {
+                            tam.array.size shouldBeExactly list.size
+                        }
+                    }
+                    tam.length.value shouldBeExactly list.size
+                    tam.isMutable.value.shouldBeTrue()
+                    shouldNotThrow<Exception> { tam.assertMutable() }
+                }
+            }
+
+            "doPersistent()" {
+                val array = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
+                val tam = TransientArrayMap(array)
+
+                val map = tam.doPersistent() as PersistentArrayMap<String, Int>
+
+                tam.isMutable.value.shouldBeFalse()
+                map.count shouldBeExactly array.size
+                map.array shouldNotBeSameInstanceAs array
+                map shouldBe am("a" to 1, "b" to 2, "c" to 3)
+
+                shouldThrowExactly<IllegalStateException> {
+                    tam.doPersistent()
+                }.message shouldBe "Transient used after persistent() call."
+            }
+
+            "persistent()" {
+                val array = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
+                val tam = TransientArrayMap(array)
+
+                val map = tam.persistent() as PersistentArrayMap<String, Int>
+
+                tam.isMutable.value.shouldBeFalse()
+                map.count shouldBeExactly array.size
+                map.array shouldNotBeSameInstanceAs array
+                map shouldBe am("a" to 1, "b" to 2, "c" to 3)
+
+                shouldThrowExactly<IllegalStateException> {
+                    tam.persistent()
+                }.message shouldBe "Transient used after persistent() call."
+            }
         }
     }
 
