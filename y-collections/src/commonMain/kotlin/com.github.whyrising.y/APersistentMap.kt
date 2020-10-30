@@ -209,7 +209,7 @@ abstract class APersistentMap<out K, out V> :
         }
 
     internal class KeySeq<out K, out V> private constructor(
-        private val _seq: ISeq<K>, val map: Iterable<Entry<K, V>>?
+        internal val _seq: ISeq<K>, val map: Iterable<Entry<K, V>>?
     ) : ASeq<K>() {
 
         @Suppress("UNCHECKED_CAST")
@@ -234,7 +234,6 @@ abstract class APersistentMap<out K, out V> :
         }
 
         companion object {
-
             operator fun <K, V> invoke(seq: ISeq<K>): KeySeq<K, V> =
                 KeySeq(seq, null)
 
@@ -242,6 +241,42 @@ abstract class APersistentMap<out K, out V> :
             operator
             fun <K, V> invoke(map: IPersistentMap<K, V>): KeySeq<K, V> =
                 KeySeq(map.seq() as ISeq<K>, map)
+        }
+    }
+
+    internal class ValSeq<out K, out V> private constructor(
+        internal val _seq: ISeq<V>, val map: Iterable<Entry<K, V>>?
+    ) : ASeq<V>() {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun first(): V = (_seq.first() as Entry<K, V>).value
+
+        override fun rest(): ISeq<V> = invoke<K, V>(_seq.rest())
+
+        override val count: Int = _seq.count
+
+        @Suppress("UNCHECKED_CAST")
+        override fun iterator(): Iterator<V> = when (map) {
+            null -> super.iterator()
+            is MapIterable<*, *> -> (map as MapIterable<K, V>).valIterator()
+            else -> map.iterator().let { mapIter ->
+                object : Iterator<V> {
+
+                    override fun hasNext(): Boolean = mapIter.hasNext()
+
+                    override fun next(): V = mapIter.next().value
+                }
+            }
+        }
+
+        companion object {
+            operator fun <K, V> invoke(seq: ISeq<V>): ValSeq<K, V> =
+                ValSeq(seq, null)
+
+            @Suppress("UNCHECKED_CAST")
+            operator
+            fun <K, V> invoke(map: IPersistentMap<K, V>): ValSeq<K, V> =
+                ValSeq(map.seq() as ISeq<V>, map)
         }
     }
 }
