@@ -4,7 +4,7 @@ import kotlin.collections.Map.Entry
 
 sealed class PersistentArrayMap<out K, out V>(
     internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
-) : APersistentMap<K, V>() {
+) : APersistentMap<K, V>(), MapIterable<K, V> {
 
     @Suppress("UNCHECKED_CAST")
     private fun createArrayMap(newPairs: Array<out Pair<K, V>?>) =
@@ -122,6 +122,14 @@ sealed class PersistentArrayMap<out K, out V>(
 
     override fun iterator(): Iterator<Entry<K, V>> = Iter(array) { pair ->
         MapEntry(pair.first, pair.second)
+    }
+
+    override fun keyIterator(): Iterator<K> = Iter(array) { pair ->
+        pair.first
+    }
+
+    override fun valIterator(): Iterator<V> = Iter(array) { pair ->
+        pair.second
     }
 
     internal object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(

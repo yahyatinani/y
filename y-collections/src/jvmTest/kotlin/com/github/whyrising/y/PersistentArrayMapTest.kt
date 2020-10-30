@@ -378,9 +378,7 @@ class PersistentArrayMapTest : FreeSpec({
 
             iter.hasNext().shouldBeFalse()
 
-            shouldThrowExactly<NoSuchElementException> {
-                iter.next()
-            }
+            shouldThrowExactly<NoSuchElementException> { iter.next() }
         }
 
         "toString()" {
@@ -427,6 +425,38 @@ class PersistentArrayMapTest : FreeSpec({
                 map("a") shouldBe 1
                 map("z").shouldBeNull()
             }
+        }
+
+        "keyIterator()" {
+            val map = am("a" to 1, "b" to 2, "c" to 3)
+
+            val iter: Iterator<String> = map.keyIterator()
+
+            iter.hasNext().shouldBeTrue()
+
+            iter.next() shouldBe "a"
+            iter.next() shouldBe "b"
+            iter.next() shouldBe "c"
+
+            iter.hasNext().shouldBeFalse()
+
+            shouldThrowExactly<NoSuchElementException> { iter.next() }
+        }
+
+        "valIterator()" {
+            val map = am("a" to 1, "b" to 2, "c" to 3)
+
+            val iter: Iterator<Int> = map.valIterator()
+
+            iter.hasNext().shouldBeTrue()
+
+            iter.next() shouldBeExactly 1
+            iter.next() shouldBeExactly 2
+            iter.next() shouldBeExactly 3
+
+            iter.hasNext().shouldBeFalse()
+
+            shouldThrowExactly<NoSuchElementException> { iter.next() }
         }
 
         "Map implementation" - {
