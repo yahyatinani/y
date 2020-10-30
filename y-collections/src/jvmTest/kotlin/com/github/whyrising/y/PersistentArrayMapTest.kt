@@ -379,7 +379,7 @@ class PersistentArrayMapTest : FreeSpec({
             iter.hasNext().shouldBeFalse()
 
             shouldThrowExactly<NoSuchElementException> {
-                iter.next() shouldBe MapEntry("c", 3)
+                iter.next()
             }
         }
 

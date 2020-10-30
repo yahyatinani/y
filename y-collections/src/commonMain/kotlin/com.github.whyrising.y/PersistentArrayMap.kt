@@ -120,22 +120,8 @@ sealed class PersistentArrayMap<out K, out V>(
 
     override fun empty(): IPersistentCollection<Any?> = EmptyArrayMap
 
-    override
-    fun iterator(): Iterator<Entry<K, V>> = object : Iterator<Entry<K, V>> {
-
-        var index = 0
-
-        override fun hasNext(): Boolean = index < array.size
-
-        override fun next(): Entry<K, V> = when {
-            index >= array.size -> throw NoSuchElementException()
-            else -> {
-                val pair = array[index]
-                index++
-
-                MapEntry(pair.first, pair.second)
-            }
-        }
+    override fun iterator(): Iterator<Entry<K, V>> = Iter(array) { pair ->
+        MapEntry(pair.first, pair.second)
     }
 
     internal object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(
@@ -149,6 +135,25 @@ sealed class PersistentArrayMap<out K, out V>(
     internal class ArrayMap<out K, out V>(
         internal val pairs: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
     ) : PersistentArrayMap<K, V>(pairs)
+
+    internal class Iter<K, V, R>(
+        private val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>,
+        val f: (Pair<K, V>) -> R
+    ) : Iterator<R> {
+
+        var index = 0
+
+        override fun hasNext(): Boolean = index < array.size
+
+        override fun next(): R = when {
+            index >= array.size -> throw NoSuchElementException()
+            else -> {
+                val cached = index
+                index++
+                f(array[cached])
+            }
+        }
+    }
 
     internal class Seq<out K, out V>(
         private val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>,
