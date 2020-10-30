@@ -1,31 +1,21 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.APersistentMap.KeySeq
 import com.github.whyrising.y.PersistentList.Empty
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.ints.shouldBeExactly
-import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.property.checkAll
+import io.kotest.matchers.shouldBe
 
 class SeqIteratorTest : FreeSpec({
-    "hasNext()" - {
-        "should return false when the list is Empty" {
-            val list: PersistentList<Int> = Empty
-
-            SeqIterator(list).hasNext().shouldBeFalse()
-        }
-
-        "should return true when the list is populated" {
-            val list = PersistentList.Cons(1, Empty)
-
-            SeqIterator(list).hasNext().shouldBeTrue()
-        }
+    "hasNext()" {
+        SeqIterator(Empty).hasNext().shouldBeFalse()
+        SeqIterator(PersistentList(1)).hasNext().shouldBeTrue()
     }
 
     "next()" - {
-        "when the list is empty, it should throw NoSuchElementException" {
+        "when the iterator is empty, it should throw NoSuchElementException" {
             val list: PersistentList<Int> = Empty
 
             shouldThrowExactly<NoSuchElementException> {
@@ -33,20 +23,19 @@ class SeqIteratorTest : FreeSpec({
             }
         }
 
-        "when the list is populated, it should return the next element" {
-            checkAll { ints: List<Int> ->
-                val list = PersistentList(*ints.toTypedArray())
-                val seqIterator = SeqIterator(list)
+        """when the iterator is not empty, it should return current item and
+           move 1 iteration forward""" {
+            val map = am("a" to 1, "b" to 2, "c" to 3)
+            val keySeq: ASeq<String> = KeySeq(map)
+            val iter = keySeq.iterator()
 
-                var index = 0
-                while (seqIterator.hasNext()) {
-                    val next = seqIterator.next()
-                    next.shouldNotBeNull()
-                    next shouldBeExactly ints[index]
+            iter.hasNext().shouldBeTrue()
 
-                    index++
-                }
-            }
+            iter.next() shouldBe "a"
+            iter.next() shouldBe "b"
+            iter.next() shouldBe "c"
+
+            iter.hasNext().shouldBeFalse()
         }
     }
 })

@@ -13,7 +13,7 @@ data class SeqIterator<out E>(
         if (currentSeq === next)
             next = currentSeq.rest()
 
-        return next !is Empty
+        return next.count > 0
     }
 
     override fun next(): E {
