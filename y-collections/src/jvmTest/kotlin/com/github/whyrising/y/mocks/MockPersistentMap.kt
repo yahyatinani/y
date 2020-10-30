@@ -1,6 +1,5 @@
 package com.github.whyrising.y.mocks
 
-import com.github.whyrising.y.APersistentMap
 import com.github.whyrising.y.IMapEntry
 import com.github.whyrising.y.IPersistentCollection
 import com.github.whyrising.y.IPersistentMap
@@ -63,7 +62,5 @@ class MockPersistentMap<K, V> private constructor(
         TODO("Not yet implemented")
     }
 
-    override fun iterator(): Iterator<Map.Entry<K, V>> {
-        TODO("Not yet implemented")
-    }
+    override fun iterator(): Iterator<Map.Entry<K, V>> = map.iterator()
 }

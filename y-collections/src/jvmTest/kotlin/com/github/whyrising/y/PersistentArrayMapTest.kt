@@ -395,7 +395,7 @@ class PersistentArrayMapTest : FreeSpec({
                 ("b".hashCode() xor 2.hashCode())
 
             map.hashCode() shouldBeExactly expHash
-            map.hashCode shouldBeExactly expHash
+            map._hashCode shouldBeExactly expHash
         }
 
         "equals(other)" {
