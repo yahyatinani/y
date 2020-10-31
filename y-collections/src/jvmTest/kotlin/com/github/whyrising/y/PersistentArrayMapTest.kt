@@ -25,7 +25,7 @@ import io.kotest.property.checkAll
 internal fun <K, V> am(vararg pairs: Pair<K, V>) = PersistentArrayMap(*pairs)
 
 class PersistentArrayMapTest : FreeSpec({
-    
+
     "TransientArrayMap" - {
         "ctor" {
             val gen = Arb.list(Arb.pair(Arb.string(), Arb.int()))
@@ -420,8 +420,10 @@ class PersistentArrayMapTest : FreeSpec({
                 val map = am(*array)
 
                 val newMap = map.assoc(key, value) as ArrayMap<Any, String>
+                val pairs = newMap.array
 
                 newMap shouldBeSameInstanceAs map
+                pairs[1].first.shouldBeInstanceOf<Long>()
             }
         }
 
