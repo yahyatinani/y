@@ -352,6 +352,17 @@ class PersistentArrayMapTest : FreeSpec({
 
         @Suppress("UNCHECKED_CAST")
         "dissoc(key)" - {
+            "when called after calling persistent, it should throw" {
+                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
+                val tam = TransientArrayMap(a)
+
+                tam.persistent()
+
+                shouldThrowExactly<IllegalStateException> {
+                    tam.dissoc("a")
+                }.message shouldBe "Transient used after persistent() call."
+            }
+
             "when key doesn't exit, it should return the same instance" {
                 val a = arrayOf(Pair(1, "a"), Pair(2, "b"), Pair(3, "c"))
                 val tam = TransientArrayMap(a)
@@ -384,6 +395,40 @@ class PersistentArrayMapTest : FreeSpec({
                 rTam.length.value shouldBeExactly a.size - 1
                 pairs[0] shouldBe (3 to "3")
                 pairs[1] shouldBe (2L to "2")
+            }
+        }
+
+        "doCount" {
+            val a1: Array<Pair<Number, String>> = arrayOf()
+            val a2: Array<Pair<Number, String>> =
+                arrayOf(1L to "1", 2L to "2", 3 to "3")
+            val tam = TransientArrayMap(a2).dissoc(1) as TransientArrayMap<*, *>
+
+            TransientArrayMap(a1).doCount shouldBeExactly 0
+            TransientArrayMap(a2).doCount shouldBeExactly a2.size
+            tam.doCount shouldBeExactly 2
+        }
+
+        "count" - {
+            "when called after calling persistent, it should throw" {
+                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
+                val tam = TransientArrayMap(a)
+
+                tam.persistent()
+
+                shouldThrowExactly<IllegalStateException> {
+                    tam.count
+                }.message shouldBe "Transient used after persistent() call."
+            }
+
+            "assertions" {
+                val a1: Array<Pair<Number, String>> = arrayOf()
+                val a2: Array<Pair<Number, String>> =
+                    arrayOf(1L to "1", 2L to "2", 3 to "3")
+
+                TransientArrayMap(a1).count shouldBeExactly 0
+                TransientArrayMap(a2).count shouldBeExactly a2.size
+                TransientArrayMap(a2).dissoc(1).count shouldBeExactly 2
             }
         }
     }
@@ -639,7 +684,7 @@ class PersistentArrayMapTest : FreeSpec({
             }
         }
 
-        "count()" {
+        "count" {
             val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
 
             am<String, Int>().count shouldBeExactly 0

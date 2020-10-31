@@ -194,6 +194,9 @@ sealed class PersistentArrayMap<out K, out V>(
         internal val length: AtomicInt
     ) : ATransientMap<K, V>() {
 
+        override val doCount: Int
+            get() = length.value
+
         override fun assertMutable() {
             if (!isMutable.value)
                 throw IllegalStateException(
