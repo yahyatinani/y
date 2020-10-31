@@ -200,8 +200,37 @@ sealed class PersistentArrayMap<out K, out V>(
                     "Transient used after persistent() call.")
         }
 
+        private fun indexOf(key: @UnsafeVariance K): Int {
+            for (i in 0 until length.value)
+                if (equiv(key, array[i]!!.first)) return i
+
+            return -1
+        }
+
+        override fun doAssoc(
+            key: @UnsafeVariance K, value: @UnsafeVariance V
+        ): ITransientMap<K, V> {
+            assertMutable()
+
+            indexOf(key).let { index ->
+                when {
+                    index >= 0 -> {
+                        if (array[index]!!.second != value)
+                            array[index] = Pair(key, value)
+                    }
+                    else -> {
+                        // TODO: if length >= array.length,
+                        //  create a PersistentHashMap
+                        array[length.value++] = Pair(key, value)
+                    }
+                }
+            }
+
+            return this
+        }
+
         @Suppress("UNCHECKED_CAST")
-        override fun doPersistent(): ArrayMap<K, V> {
+        override fun doPersistent(): IPersistentMap<K, V> {
             assertMutable()
 
             isMutable.value = false
