@@ -545,13 +545,6 @@ class PersistentArrayMapTest : FreeSpec({
     }
 
     "ArrayMap" - {
-        "invoke() should return EmptyArrayMap" {
-            val emptyMap = am<String, Int>()
-
-            emptyMap shouldBeSameInstanceAs EmptyArrayMap
-            emptyMap.array.size shouldBeExactly 0
-        }
-
         "invoke(pairs)" - {
             "when pairs is empty, it should return EmptyMap" {
                 val array = arrayOf<Pair<String, Int>>()
