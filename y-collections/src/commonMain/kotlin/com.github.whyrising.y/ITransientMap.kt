@@ -1,7 +1,6 @@
 package com.github.whyrising.y
 
-interface ITransientMap<out K, out V> :
-    ITransientAssociative<K,V>,
+interface ITransientMap<out K, out V> : ITransientAssociative<K, V>,
     ConstantCount {
 
     fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V):

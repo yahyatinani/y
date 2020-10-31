@@ -498,6 +498,50 @@ class PersistentArrayMapTest : FreeSpec({
                 tam.valAt("z").shouldBeNull()
             }
         }
+
+        "containsKey(key)" - {
+            "when called after calling persistent, it should throw" {
+                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
+                val tam = TransientArrayMap(a)
+
+                tam.persistent()
+
+                shouldThrowExactly<IllegalStateException> {
+                    tam.containsKey("a")
+                }.message shouldBe "Transient used after persistent() call."
+            }
+
+            "assertions" {
+                val array: Array<Pair<String, Int>> = arrayOf("a" to 1, "b" to 2, "c" to 3)
+                val tam = TransientArrayMap(array)
+
+                tam.containsKey("a").shouldBeTrue()
+                tam.containsKey("b").shouldBeTrue()
+
+                tam.containsKey("d").shouldBeFalse()
+            }
+        }
+
+        "entryAt(key)" - {
+            "when key doesn't exit, it should return null" {
+                val a: Array<Pair<String?, Int>> =
+                    arrayOf("a" to 1, "b" to 2, "c" to 3)
+                val tam = TransientArrayMap(a)
+
+                tam.entryAt(null).shouldBeNull()
+            }
+
+            "when key does exist, it should return a MapEntry" {
+                val a: Array<Pair<String, Int>> =
+                    arrayOf("a" to 1, "b" to 2, "c" to 3)
+                val tam = TransientArrayMap(a)
+
+                val mapEntry = tam.entryAt("a") as MapEntry<String, Int>
+
+                mapEntry.key shouldBe "a"
+                mapEntry.value shouldBe 1
+            }
+        }
     }
 
     "ArrayMap" - {

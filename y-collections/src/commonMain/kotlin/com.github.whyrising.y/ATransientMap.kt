@@ -1,6 +1,7 @@
 package com.github.whyrising.y
 
-abstract class ATransientMap<out K, out V> : ITransientMap<K, V> {
+abstract class ATransientMap<out K, out V> : ITransientMap<K, V>,
+    ITransientAssociative2<K, V> {
 
     internal abstract fun assertMutable()
 
@@ -82,4 +83,21 @@ abstract class ATransientMap<out K, out V> : ITransientMap<K, V> {
 
         return doValAt(key, default)
     }
+
+    private object TOKEN : Any()
+
+    @Suppress("UNCHECKED_CAST")
+    override fun containsKey(key: @UnsafeVariance K): Boolean {
+        val r = valAt(key, TOKEN as V)
+
+        return r != TOKEN
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? =
+        valAt(key, TOKEN as V).let { valAtKey: V? ->
+            if (valAtKey == TOKEN) return null
+
+            return MapEntry(key, valAtKey) as IMapEntry<K, V>
+        }
 }
