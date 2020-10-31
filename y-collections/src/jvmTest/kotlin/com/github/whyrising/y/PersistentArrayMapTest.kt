@@ -579,6 +579,20 @@ class PersistentArrayMapTest : FreeSpec({
         }
     }
 
+    "asTransient()" {
+        val a = arrayOf("a" to 1, "b" to 2, "c" to 3)
+        val map = am(*a)
+
+        val tr = map.asTransient() as TransientArrayMap<String, Int>
+        val array = tr.array
+
+        tr.length.value shouldBeExactly 3
+        array.size shouldBeExactly 16
+        array[0] shouldBe ("a" to 1)
+        array[1] shouldBe ("b" to 2)
+        array[2] shouldBe ("c" to 3)
+    }
+
     "ArrayMap" - {
         "invoke(pairs)" - {
             "when pairs is empty, it should return EmptyMap" {

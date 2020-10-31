@@ -10,7 +10,7 @@ const val HASHTABLE_THRESHOLD = 16
 
 sealed class PersistentArrayMap<out K, out V>(
     internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
-) : APersistentMap<K, V>(), MapIterable<K, V> {
+) : APersistentMap<K, V>(), MapIterable<K, V>, IMutableCollection<Any?> {
 
     @Suppress("UNCHECKED_CAST")
     private fun createArrayMap(newPairs: Array<out Pair<K, V>?>) =
@@ -137,6 +137,8 @@ sealed class PersistentArrayMap<out K, out V>(
     override fun valIterator(): Iterator<V> = Iter(array) { pair ->
         pair.second
     }
+
+    override fun asTransient(): ITransientMap<K, V> = TransientArrayMap(array)
 
     internal
     object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(emptyArray()) {
