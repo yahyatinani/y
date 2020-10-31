@@ -431,6 +431,73 @@ class PersistentArrayMapTest : FreeSpec({
                 TransientArrayMap(a2).dissoc(1).count shouldBeExactly 2
             }
         }
+
+        "doValAt(key, default)" - {
+            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val tam = TransientArrayMap(array)
+
+            "when key exists, it should return the assoc value" {
+                tam.doValAt("a", -1) shouldBe 1
+            }
+
+            "when key doesn't exist, it should return the default value" {
+                tam.doValAt("z", -1) shouldBe -1
+            }
+        }
+
+        "valAt(key, default)" - {
+            "when called after calling persistent, it should throw" {
+                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
+                val tam = TransientArrayMap(a)
+
+                tam.persistent()
+
+                shouldThrowExactly<IllegalStateException> {
+                    tam.valAt("a", -1)
+                }.message shouldBe "Transient used after persistent() call."
+            }
+
+            "when key exists, it should return the assoc value" {
+                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+                val tam = TransientArrayMap(array)
+
+                tam.valAt("a", -1) shouldBe 1
+            }
+
+            "when key doesn't exist, it should return the default value" {
+                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+                val tam = TransientArrayMap(array)
+
+                tam.valAt("z", -1) shouldBe -1
+            }
+        }
+
+        "valAt(key)" - {
+            "when called after calling persistent, it should throw" {
+                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
+                val tam = TransientArrayMap(a)
+
+                tam.persistent()
+
+                shouldThrowExactly<IllegalStateException> {
+                    tam.valAt("a")
+                }.message shouldBe "Transient used after persistent() call."
+            }
+
+            "when key exists, it should return the assoc value" {
+                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+                val tam = TransientArrayMap(array)
+
+                tam.valAt("a") shouldBe 1
+            }
+
+            "when key doesn't exist, it should return the default value" {
+                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
+                val tam = TransientArrayMap(array)
+
+                tam.valAt("z").shouldBeNull()
+            }
+        }
     }
 
     "ArrayMap" - {

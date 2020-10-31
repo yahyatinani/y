@@ -260,6 +260,15 @@ sealed class PersistentArrayMap<out K, out V>(
             return ArrayMap(ar as Array<Pair<K, V>>)
         }
 
+        override
+        fun doValAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? =
+            indexOf(key).let { index ->
+                when {
+                    index >= 0 -> array[index]!!.second
+                    else -> default
+                }
+            }
+
         companion object {
             operator fun <K, V> invoke(array: Array<Pair<K, V>>):
                 TransientArrayMap<K, V> = TransientArrayMap(

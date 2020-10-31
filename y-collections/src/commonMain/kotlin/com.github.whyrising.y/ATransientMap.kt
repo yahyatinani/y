@@ -11,6 +11,9 @@ abstract class ATransientMap<out K, out V> : ITransientMap<K, V> {
 
     internal abstract fun doPersistent(): IPersistentMap<K, V>
 
+    internal abstract fun doValAt(
+        key: @UnsafeVariance K, default: @UnsafeVariance V?): V?
+
     internal abstract val doCount: Int
 
     override fun assoc(
@@ -67,7 +70,16 @@ abstract class ATransientMap<out K, out V> : ITransientMap<K, V> {
     override val count: Int
         get() {
             assertMutable()
-            
+
             return doCount
         }
+
+    override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
+
+    override
+    fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? {
+        assertMutable()
+
+        return doValAt(key, default)
+    }
 }
