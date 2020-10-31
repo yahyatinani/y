@@ -229,6 +229,23 @@ sealed class PersistentArrayMap<out K, out V>(
             return this
         }
 
+        override fun doDissoc(key: @UnsafeVariance K): ITransientMap<K, V> =
+            indexOf(key).let { index ->
+                when {
+                    index >= 0 -> {
+                        when {
+                            length.value > 1 ->
+                                array[index] = array[length.value - 1]
+                            else -> array[index] = null
+                        }
+
+                        length.value--
+                    }
+                }
+
+                return this
+            }
+
         @Suppress("UNCHECKED_CAST")
         override fun doPersistent(): IPersistentMap<K, V> {
             assertMutable()

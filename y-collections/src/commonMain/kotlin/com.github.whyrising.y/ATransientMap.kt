@@ -7,12 +7,20 @@ abstract class ATransientMap<out K, out V> : ITransientMap<K, V> {
     internal abstract fun doAssoc(
         key: @UnsafeVariance K, value: @UnsafeVariance V): ITransientMap<K, V>
 
+    internal abstract fun doDissoc(key: @UnsafeVariance K): ITransientMap<K, V>
+
     internal abstract fun doPersistent(): IPersistentMap<K, V>
 
     override fun assoc(
         key: @UnsafeVariance K, value: @UnsafeVariance V
     ): ITransientMap<K, V> = assertMutable().let {
         return doAssoc(key, value)
+    }
+
+    override fun dissoc(key: @UnsafeVariance K): ITransientMap<K, V> {
+        assertMutable()
+
+        return doDissoc(key)
     }
 
     override fun persistent(): IPersistentMap<K, V> {

@@ -25,7 +25,6 @@ import io.kotest.property.checkAll
 internal fun <K, V> am(vararg pairs: Pair<K, V>) = PersistentArrayMap(*pairs)
 
 class PersistentArrayMapTest : FreeSpec({
-
     "TransientArrayMap" - {
         "ctor" {
             val gen = Arb.list(Arb.pair(Arb.string(), Arb.int()))
@@ -311,6 +310,80 @@ class PersistentArrayMapTest : FreeSpec({
                     pairs[2]!! shouldBe Pair("x", 42)
                     pairs[3]!! shouldBe Pair("y", 47)
                 }
+            }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        "doDissoc(key)" - {
+            "when key doesn't exit, it should return the same instance" {
+                val a = arrayOf(Pair(1, "a"), Pair(2, "b"), Pair(3, "c"))
+                val tam = TransientArrayMap(a)
+
+                val dissoc = tam.doDissoc(10)
+
+                dissoc shouldBeSameInstanceAs tam
+            }
+
+            "when key exists and size is 1, it returns an empty transient" {
+                val a = arrayOf(2L to "b")
+                val tam = TransientArrayMap(a)
+
+                val rTam = tam.doDissoc(2) as TransientArrayMap<Int, String>
+
+                rTam.length.value shouldBeExactly 0
+                val pairs = rTam.array
+
+                for (i in pairs.indices)
+                    pairs[i].shouldBeNull()
+            }
+
+            "when key exists, it should return a new map without that key" {
+                val a = arrayOf(1L to "1", 2L to "2", 3 to "3")
+                val tam = TransientArrayMap(a)
+
+                val rTam = tam.doDissoc(1) as TransientArrayMap<Any?, String>
+                val pairs = rTam.array
+
+                rTam.length.value shouldBeExactly a.size - 1
+                pairs[0] shouldBe (3 to "3")
+                pairs[1] shouldBe (2L to "2")
+            }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        "dissoc(key)" - {
+            "when key doesn't exit, it should return the same instance" {
+                val a = arrayOf(Pair(1, "a"), Pair(2, "b"), Pair(3, "c"))
+                val tam = TransientArrayMap(a)
+
+                val dissoc = tam.dissoc(10)
+
+                dissoc shouldBeSameInstanceAs tam
+            }
+
+            "when key exists and size is 1, it returns an empty transient" {
+                val a = arrayOf(2L to "b")
+                val tam = TransientArrayMap(a)
+
+                val rTam = tam.dissoc(2) as TransientArrayMap<Int, String>
+
+                rTam.length.value shouldBeExactly 0
+                val pairs = rTam.array
+
+                for (i in pairs.indices)
+                    pairs[i].shouldBeNull()
+            }
+
+            "when key exists, it should return a new map without that key" {
+                val a = arrayOf(1L to "1", 2L to "2", 3 to "3")
+                val tam = TransientArrayMap(a)
+
+                val rTam = tam.dissoc(1) as TransientArrayMap<Any?, String>
+                val pairs = rTam.array
+
+                rTam.length.value shouldBeExactly a.size - 1
+                pairs[0] shouldBe (3 to "3")
+                pairs[1] shouldBe (2L to "2")
             }
         }
     }
