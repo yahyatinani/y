@@ -503,7 +503,6 @@ class PersistentArrayMapTest : FreeSpec({
             "when called after calling persistent, it should throw" {
                 val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
                 val tam = TransientArrayMap(a)
-
                 tam.persistent()
 
                 shouldThrowExactly<IllegalStateException> {
@@ -523,6 +522,16 @@ class PersistentArrayMapTest : FreeSpec({
         }
 
         "entryAt(key)" - {
+            "when called after calling persistent, it should throw" {
+                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
+                val tam = TransientArrayMap(a)
+                tam.persistent()
+
+                shouldThrowExactly<IllegalStateException> {
+                    tam.entryAt("a")
+                }.message shouldBe "Transient used after persistent() call."
+            }
+
             "when key doesn't exit, it should return null" {
                 val a: Array<Pair<String?, Int>> =
                     arrayOf("a" to 1, "b" to 2, "c" to 3)
@@ -540,6 +549,32 @@ class PersistentArrayMapTest : FreeSpec({
 
                 mapEntry.key shouldBe "a"
                 mapEntry.value shouldBe 1
+            }
+        }
+
+        "invoke() operator" - {
+            "when called after calling persistent, it should throw" {
+                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
+                val tam = TransientArrayMap(a)
+
+                tam.persistent()
+
+                shouldThrowExactly<IllegalStateException> {
+                    tam.entryAt("a")
+                }.message shouldBe "Transient used after persistent() call."
+            }
+
+            val a = arrayOf("a" to 1, "b" to 2, "c" to 3)
+            val tam = TransientArrayMap(a)
+
+            "invoke(key, default)" {
+                tam("a", -1) shouldBe 1
+                tam("z", -1) shouldBe -1
+            }
+
+            "invoke(key)" {
+                tam("a") shouldBe 1
+                tam("z").shouldBeNull()
             }
         }
     }

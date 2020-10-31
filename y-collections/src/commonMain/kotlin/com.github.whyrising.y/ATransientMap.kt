@@ -100,4 +100,10 @@ abstract class ATransientMap<out K, out V> : ITransientMap<K, V>,
 
             return MapEntry(key, valAtKey) as IMapEntry<K, V>
         }
+
+    operator fun invoke(
+        key: @UnsafeVariance K, default: @UnsafeVariance V?
+    ): V? = valAt(key, default)
+
+    operator fun invoke(key: @UnsafeVariance K): V? = valAt(key)
 }
