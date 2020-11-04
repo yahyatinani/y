@@ -79,3 +79,28 @@ fun <E> compare(e1: E, e2: E): Int = when {
 }
 
 internal fun <E> emptySeq(): ISeq<E> = PersistentList.Empty
+
+@ExperimentalStdlibApi
+private fun hashNumber(x: Number): Int = when {
+    // TODO: BigInteger
+    x is Long || x is Int || x is Short || x is Byte -> {
+        val lpart: Long = x.toLong()
+        Murmur3.hashLong(lpart)
+    }
+    x is Double -> when (x) {
+        -0.0 -> 0 //match 0.0
+        else -> x.hashCode()
+    }
+    x is Float && x == -0.0f -> 0 //match 0.0f
+    // TODO: BigDecimal
+    else -> x.hashCode()
+}
+
+@ExperimentalStdlibApi
+fun hasheq(x: Any?): Int = when (x) {
+    null -> 0
+    is String -> Murmur3.hashInt(x.hashCode())
+    is Number -> hashNumber(x)
+    is IHashEq -> x.hasheq()
+    else -> x.hashCode()
+}

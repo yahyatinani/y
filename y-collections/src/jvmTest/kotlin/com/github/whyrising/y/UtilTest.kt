@@ -1,5 +1,6 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.mocks.HashEqMock
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -7,6 +8,7 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 
+@ExperimentalStdlibApi
 class UtilTest : FreeSpec({
 
     class UnsupportedNumber : Number() {
@@ -118,5 +120,28 @@ class UtilTest : FreeSpec({
             e.message shouldBe
                 "Don't know how to create ISeq from: ${x::class.simpleName}"
         }
+    }
+
+    "hasheq(object)" {
+        hasheq(null) shouldBeExactly 0
+
+        hasheq("abcd") shouldBeExactly 946207298
+
+        // Numbers
+        // Integers
+        hasheq(126.toByte()) shouldBeExactly -771541190
+        hasheq(30000.toShort()) shouldBeExactly 1314523797
+        hasheq(3123456985) shouldBeExactly 775213884
+        // Decimals
+        hasheq(-0.0) shouldBeExactly 0
+        hasheq(12.6) shouldBeExactly 1931083776
+        hasheq(-0.0f) shouldBeExactly 0
+        hasheq(12.6f) shouldBeExactly 1095342490
+
+        // IHashEq
+        val hasheq: IHashEq = HashEqMock()
+        hasheq(hasheq) shouldBeExactly 111111111
+
+        hasheq(true) shouldBeExactly true.hashCode()
     }
 })
