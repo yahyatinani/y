@@ -1,7 +1,7 @@
 object Libs {
 
     const val kotlinVersion = "1.4.10"
-    const val kotlinApiVersion = "1.3"
+    const val kotlinApiVersion = "1.4"
     const val jvmTargetVersion = "1.8"
 
     object Kotest {
