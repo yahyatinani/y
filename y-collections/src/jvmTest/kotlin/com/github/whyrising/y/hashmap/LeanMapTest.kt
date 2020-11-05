@@ -43,7 +43,8 @@ class LeanMapTest : FreeSpec({
         }
 
         "assoc(isMutable, shift, keyHash, pair, leafFlag)" - {
-            "ok" {
+            """when collision-free, it should add the pair to the first half 
+               of the array""" {
                 val key = "a"
                 val isMutable = atomic(true)
                 val shift = 0
@@ -66,6 +67,10 @@ class LeanMapTest : FreeSpec({
                 newArray.size shouldBeExactly node.array.size + 2
                 newArray[0] shouldBe key
                 newArray[1] shouldBe value
+            }
+
+            "" {
+
             }
         }
     }
