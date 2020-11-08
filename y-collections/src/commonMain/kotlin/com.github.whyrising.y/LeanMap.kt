@@ -106,6 +106,9 @@ class LeanMap {
                 BMIN(isMutable, datamap, nodemap, newArray)
             }
 
+        private fun nodeIndexBy(bitpos: Int) =
+            array.size - 1 - bitmapNodeIndex(nodemap, bitpos)
+
         @Suppress("UNCHECKED_CAST")
         @ExperimentalStdlibApi
         override fun assoc(
@@ -115,54 +118,56 @@ class LeanMap {
             key: @UnsafeVariance K,
             value: @UnsafeVariance V,
             leafFlag: Box
-        ): Node<K, V> {
-            val bitpos = bitpos(keyHash, shift)
+        ): Node<K, V> = bitpos(keyHash, shift).let { bitpos ->
+            when {
+                (datamap and bitpos) != 0 -> {
+                    val index = bitmapNodeIndex(datamap, bitpos)
+                    val keyIdx = 2 * index
+                    val currentKey = array[keyIdx] as K
 
-            if ((datamap and bitpos) != 0) {
-                val index = bitmapNodeIndex(datamap, bitpos)
-                val keyIndex = 2 * index
-                val currentKey = array[keyIndex] as K
+                    if (equiv(currentKey, key))
+                        return updateArrayByIndex(keyIdx + 1, value, isMutable)
 
-                if (equiv(currentKey, key))
-                    return updateArrayByIndex(keyIndex + 1, value, isMutable)
+                    val currentValue = array[keyIdx + 1] as V
 
-                val currentValue = array[keyIndex + 1] as V
+                    val subNode = mergeIntoSubNode(
+                        isMutable,
+                        shift + 5,
+                        hasheq(currentKey),
+                        currentKey,
+                        currentValue,
+                        hasheq(key),
+                        key,
+                        value)
 
-                val subNode = mergeIntoSubNode(
-                    isMutable,
-                    shift + 5,
-                    hasheq(currentKey),
-                    currentKey,
-                    currentValue,
-                    hasheq(key),
-                    key,
-                    value)
+                    leafFlag.value = leafFlag
 
-                leafFlag.value = leafFlag
+                    return putNewNode(isMutable, bitpos, subNode)
+                }
+                (nodemap and bitpos) != 0 -> {
+                    val nodeIdx = nodeIndexBy(bitpos)
+                    val subNode = array[nodeIdx] as BitMapIndexedNode<K, V>
 
-                return putNewNode(isMutable, bitpos, subNode)
-            } else if ((nodemap and bitpos) != 0) {
-                val nodeIdx = array.size - 1 - bitmapNodeIndex(nodemap, bitpos)
-                val subNode = array[nodeIdx] as BitMapIndexedNode<K, V>
+                    val newNode = subNode.assoc(
+                        isMutable, shift + 5, keyHash, key, value, leafFlag)
 
-                val newNode = subNode.assoc(
-                    isMutable, shift + 5, keyHash, key, value, leafFlag)
+                    if (subNode == newNode) return this
 
-                if (subNode == newNode) return this
+                    return updateArrayByIndex(nodeIdx, newNode, isMutable)
+                }
+                else -> {
+                    val arraySize = array.size
+                    val index = (2 * bitmapNodeIndex(datamap, bitpos))
 
-                return updateArrayByIndex(nodeIdx, newNode, isMutable)
-            } else {
-                val arraySize = array.size
-                val index = (2 * bitmapNodeIndex(datamap, bitpos))
+                    val newArr: Array<Any?> = arrayOfNulls(arraySize + 2)
+                    array.copyInto(newArr, 0, 0, index)
+                    newArr[index] = key
+                    newArr[index + 1] = value
+                    array.copyInto(newArr, index + 2, index, arraySize)
+                    leafFlag.value = leafFlag
 
-                val newArray: Array<Any?> = arrayOfNulls(arraySize + 2)
-                array.copyInto(newArray, 0, 0, index)
-                newArray[index] = key
-                newArray[index + 1] = value
-                array.copyInto(newArray, index + 2, index, arraySize)
-                leafFlag.value = leafFlag
-
-                return BMIN(isMutable, (datamap or bitpos), nodemap, newArray)
+                    return BMIN(isMutable, (datamap or bitpos), nodemap, newArr)
+                }
             }
         }
 
