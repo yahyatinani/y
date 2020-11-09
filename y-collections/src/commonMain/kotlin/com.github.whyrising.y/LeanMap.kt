@@ -181,9 +181,7 @@ class LeanMap {
 
         override fun hasData(): Boolean = datamap != 0
 
-        override fun nodeArity(): Int {
-            return nodemap.countOneBits()
-        }
+        override fun nodeArity(): Int = nodemap.countOneBits()
 
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
             atomic(false), 0, 0, emptyArray())

@@ -480,32 +480,29 @@ class LeanMapTest : FreeSpec({
             val shift = 0
             val isMutable = atomic(true)
             val leafFlag = Box(null)
-            val node = BitMapIndexedNode<String, Int>()
+            val m: Node<String, Int> = BitMapIndexedNode()
+            var n = m
 
             var i = 0
-            var newNode = node
             while (i < 36) {
                 val key = "$i"
-                newNode = newNode.assoc(
-                    isMutable, shift, hasheq(key), key, i, leafFlag
-                ) as BitMapIndexedNode<String, Int>
+                n = n.assoc(isMutable, shift, hasheq(key), key, i, leafFlag)
                 i++
             }
 
-            node.hasNodes().shouldBeFalse()
-            newNode.hasNodes().shouldBeTrue()
+            m.hasNodes().shouldBeFalse()
+            n.hasNodes().shouldBeTrue()
         }
 
         "hasData()" {
             val shift = 0
             val isMutable = atomic(true)
             val leafFlag = Box(null)
-            val node = BitMapIndexedNode<String, Int>()
-            val newNode =
-                node.assoc(isMutable, shift, hasheq("a"), "a", 15, leafFlag)
+            val node: Node<String, Int> = BitMapIndexedNode()
+            val n = node.assoc(isMutable, shift, hasheq("a"), "a", 15, leafFlag)
 
             node.hasData().shouldBeFalse()
-            newNode.hasData().shouldBeTrue()
+            n.hasData().shouldBeTrue()
         }
 
         "nodeArity() should return the count of one bits in nodemap" {
