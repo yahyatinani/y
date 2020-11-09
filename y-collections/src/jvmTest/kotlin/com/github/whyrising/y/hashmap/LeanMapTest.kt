@@ -363,15 +363,13 @@ class LeanMapTest : FreeSpec({
                         val shift = 0
                         val isMutable = atomic(true)
                         val leafFlag = Box(null)
-                        val node = BitMapIndexedNode<Number, String>()
-                            .assoc(
+                        val node: Node<Number, String> =
+                            BitMapIndexedNode<Number, String>().assoc(
                                 isMutable, shift, hasheq(4), 4, "4", leafFlag)
-                            as BitMapIndexedNode<Number, String>
 
-                        val newNode = node
-                            .assoc(
+                        val newNode: Node<Number, String> =
+                            node.assoc(
                                 isMutable, shift, hasheq(4L), 4L, "1", leafFlag)
-                            as BitMapIndexedNode<String, Int>
 
                         newNode shouldBeSameInstanceAs node
                         newNode.array.size shouldBeExactly 2
@@ -421,18 +419,16 @@ class LeanMapTest : FreeSpec({
                     val leafFlag = Box(null)
 
                     var i = 0
-                    var node = BitMapIndexedNode<String, Int>()
+                    var node: Node<String, Int> = BitMapIndexedNode()
                     while (i < 36) {
                         val key = "$i"
                         node = node.assoc(
-                            isMutable, shift, hasheq(key), key, i, leafFlag
-                        ) as BitMapIndexedNode<String, Int>
+                            isMutable, shift, hasheq(key), key, i, leafFlag)
                         i += 1
                     }
 
                     val newNode = node.assoc(
                         isMutable, shift, hasheq("36"), "36", 36, leafFlag)
-                        as BitMapIndexedNode<String, Int>
                     val newArray = newNode.array
                     val subNode = newArray[24] as BitMapIndexedNode<String, Int>
 
@@ -449,12 +445,11 @@ class LeanMapTest : FreeSpec({
                     val leafFlag = Box(null)
 
                     var i = 0
-                    var node = BitMapIndexedNode<String, Int>()
+                    var node: Node<String, Int> = BitMapIndexedNode()
                     while (i < 424) {
                         val key = "$i"
                         node = node.assoc(
-                            isMutable, shift, hasheq(key), key, i, leafFlag
-                        ) as BitMapIndexedNode<String, Int>
+                            isMutable, shift, hasheq(key), key, i, leafFlag)
                         i += 2
                     }
                     val array =
@@ -463,7 +458,6 @@ class LeanMapTest : FreeSpec({
 
                     val newNode = node.assoc(
                         isMutable, shift, hasheq("424"), "424", 424, leafFlag)
-                        as BitMapIndexedNode<String, Int>
                     val newArray =
                         ((newNode.array[5] as BitMapIndexedNode<String, Int>)
                             .array[12] as BitMapIndexedNode<String, Int>).array
@@ -547,8 +541,8 @@ class LeanMapTest : FreeSpec({
                 i += 2
             }
 
-            val node1 = n.getNode(1) as BitMapIndexedNode<String, Int>
-            val node2 = n.getNode(2) as BitMapIndexedNode<String, Int>
+            val node1 = n.getNode(1)
+            val node2 = n.getNode(2)
 
             node1.array.size shouldBeExactly 4
             node2.array.size shouldBeExactly 4
