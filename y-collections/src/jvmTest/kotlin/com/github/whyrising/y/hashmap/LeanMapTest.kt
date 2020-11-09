@@ -8,6 +8,7 @@ import com.github.whyrising.y.LeanMap.BitMapIndexedNode.Companion.bitmapNodeInde
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import com.github.whyrising.y.LeanMap.Companion.bitpos
 import com.github.whyrising.y.LeanMap.HashCollisionNode
+import com.github.whyrising.y.LeanMap.Node
 import com.github.whyrising.y.hasheq
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -488,7 +489,7 @@ class LeanMapTest : FreeSpec({
                 newNode = newNode.assoc(
                     isMutable, shift, hasheq(key), key, i, leafFlag
                 ) as BitMapIndexedNode<String, Int>
-                i += 1
+                i++
             }
 
             node.hasNodes().shouldBeFalse()
@@ -505,6 +506,21 @@ class LeanMapTest : FreeSpec({
 
             node.hasData().shouldBeFalse()
             newNode.hasData().shouldBeTrue()
+        }
+
+        "nodeArity() should return the count of one bits in nodemap" {
+            val shift = 0
+            val isMutable = atomic(true)
+            val leafFlag = Box(null)
+            var i = 0
+            var n: Node<String, Int> = BitMapIndexedNode()
+            while (i < 20) {
+                val key = "$i"
+                n = n.assoc(isMutable, shift, hasheq(key), key, i, leafFlag)
+                i += 2
+            }
+
+            n.nodeArity() shouldBeExactly 2
         }
     }
 })

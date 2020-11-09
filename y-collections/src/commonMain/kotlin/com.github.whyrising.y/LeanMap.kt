@@ -18,6 +18,8 @@ class LeanMap {
         fun hasNodes(): Boolean
 
         fun hasData(): Boolean
+
+        fun nodeArity(): Int
     }
 
     sealed class BitMapIndexedNode<out K, out V>(
@@ -179,6 +181,10 @@ class LeanMap {
 
         override fun hasData(): Boolean = datamap != 0
 
+        override fun nodeArity(): Int {
+            return nodemap.countOneBits()
+        }
+
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
             atomic(false), 0, 0, emptyArray())
 
@@ -225,6 +231,10 @@ class LeanMap {
         }
 
         override fun hasData(): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun nodeArity(): Int {
             TODO("Not yet implemented")
         }
     }
