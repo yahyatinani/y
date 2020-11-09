@@ -553,5 +553,26 @@ class LeanMapTest : FreeSpec({
             node1.array.size shouldBeExactly 4
             node2.array.size shouldBeExactly 4
         }
+
+        @Suppress("UNCHECKED_CAST")
+        "array property" {
+            val shift = 0
+            val isMutable = atomic(true)
+            val leafFlag = Box(null)
+            var i = 0
+            var n: Node<String, Int> = BitMapIndexedNode()
+            while (i < 20) {
+                val key = "$i"
+                n = n.assoc(isMutable, shift, hasheq(key), key, i, leafFlag)
+                i += 2
+            }
+
+            n.array.size shouldBeExactly 14
+            n.array[0] shouldBe "14"
+            n.array[1] shouldBe 14
+            n.array[8] shouldBe "16"
+            n.array[9] shouldBe 16
+            n.array[13] as BitMapIndexedNode<String, Int>
+        }
     }
 })

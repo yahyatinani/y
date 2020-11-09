@@ -6,6 +6,8 @@ import kotlinx.atomicfu.atomic
 class LeanMap {
 
     interface Node<out K, out V> {
+        val array: Array<Any?>
+
         fun assoc(
             isMutable: AtomicBoolean,
             shift: Int,
@@ -30,7 +32,7 @@ class LeanMap {
         val isMutable: AtomicBoolean,
         val datamap: Int,
         val nodemap: Int,
-        val array: Array<Any?>
+        override val array: Array<Any?>
     ) : Node<K, V> {
 
         fun mergeIntoSubNode(isMutable: AtomicBoolean,
@@ -220,7 +222,7 @@ class LeanMap {
         val isMutable: AtomicBoolean,
         val hash: Int,
         val count: Int,
-        val array: Array<Any?>
+        override val array: Array<Any?>
     ) : Node<K, V> {
 
         override fun assoc(
