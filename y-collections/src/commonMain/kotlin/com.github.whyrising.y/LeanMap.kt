@@ -14,6 +14,8 @@ class LeanMap {
             value: @UnsafeVariance V,
             leafFlag: Box
         ): Node<K, V>
+
+        fun hasNodes(): Boolean
     }
 
     sealed class BitMapIndexedNode<out K, out V>(
@@ -171,6 +173,8 @@ class LeanMap {
             }
         }
 
+        override fun hasNodes(): Boolean = nodemap != 0
+
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
             atomic(false), 0, 0, emptyArray())
 
@@ -209,6 +213,10 @@ class LeanMap {
             value: @UnsafeVariance V,
             leafFlag: Box
         ): Node<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun hasNodes(): Boolean {
             TODO("Not yet implemented")
         }
     }

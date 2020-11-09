@@ -11,6 +11,7 @@ import com.github.whyrising.y.LeanMap.HashCollisionNode
 import com.github.whyrising.y.hasheq
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -472,6 +473,26 @@ class LeanMapTest : FreeSpec({
                     newArray[5] shouldBe 424
                 }
             }
+        }
+
+        "hasNodes()" {
+            val shift = 0
+            val isMutable = atomic(true)
+            val leafFlag = Box(null)
+            val node = BitMapIndexedNode<String, Int>()
+
+            var i = 0
+            var newNode = node
+            while (i < 36) {
+                val key = "$i"
+                newNode = newNode.assoc(
+                    isMutable, shift, hasheq(key), key, i, leafFlag
+                ) as BitMapIndexedNode<String, Int>
+                i += 1
+            }
+
+            node.hasNodes().shouldBeFalse()
+            newNode.hasNodes().shouldBeTrue()
         }
     }
 })
