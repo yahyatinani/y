@@ -519,5 +519,20 @@ class LeanMapTest : FreeSpec({
 
             n.nodeArity() shouldBeExactly 2
         }
+
+        "dataArity() should return the count of one bits in datamap" {
+            val shift = 0
+            val isMutable = atomic(true)
+            val leafFlag = Box(null)
+            var i = 0
+            var n: Node<String, Int> = BitMapIndexedNode()
+            while (i < 20) {
+                val key = "$i"
+                n = n.assoc(isMutable, shift, hasheq(key), key, i, leafFlag)
+                i += 2
+            }
+
+            n.dataArity() shouldBeExactly 6
+        }
     }
 })
