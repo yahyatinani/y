@@ -16,6 +16,8 @@ class LeanMap {
         ): Node<K, V>
 
         fun hasNodes(): Boolean
+
+        fun hasData(): Boolean
     }
 
     sealed class BitMapIndexedNode<out K, out V>(
@@ -175,6 +177,8 @@ class LeanMap {
 
         override fun hasNodes(): Boolean = nodemap != 0
 
+        override fun hasData(): Boolean = datamap != 0
+
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
             atomic(false), 0, 0, emptyArray())
 
@@ -217,6 +221,10 @@ class LeanMap {
         }
 
         override fun hasNodes(): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun hasData(): Boolean {
             TODO("Not yet implemented")
         }
     }

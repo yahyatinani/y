@@ -494,5 +494,17 @@ class LeanMapTest : FreeSpec({
             node.hasNodes().shouldBeFalse()
             newNode.hasNodes().shouldBeTrue()
         }
+
+        "hasData()" {
+            val shift = 0
+            val isMutable = atomic(true)
+            val leafFlag = Box(null)
+            val node = BitMapIndexedNode<String, Int>()
+            val newNode =
+                node.assoc(isMutable, shift, hasheq("a"), "a", 15, leafFlag)
+
+            node.hasData().shouldBeFalse()
+            newNode.hasData().shouldBeTrue()
+        }
     }
 })
