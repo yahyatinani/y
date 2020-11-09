@@ -22,6 +22,8 @@ class LeanMap {
         fun nodeArity(): Int
 
         fun dataArity(): Int
+
+        fun getNode(nodeIndex: Int): Node<K, V>
     }
 
     sealed class BitMapIndexedNode<out K, out V>(
@@ -187,6 +189,10 @@ class LeanMap {
 
         override fun dataArity(): Int = datamap.countOneBits()
 
+        @Suppress("UNCHECKED_CAST")
+        override fun getNode(nodeIndex: Int): Node<K, V> =
+            array[array.size - nodeIndex] as Node<K, V>
+
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
             atomic(false), 0, 0, emptyArray())
 
@@ -241,6 +247,10 @@ class LeanMap {
         }
 
         override fun dataArity(): Int {
+            TODO("Not yet implemented")
+        }
+
+        override fun getNode(nodeIndex: Int): Node<K, V> {
             TODO("Not yet implemented")
         }
     }

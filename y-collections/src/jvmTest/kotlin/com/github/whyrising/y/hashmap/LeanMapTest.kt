@@ -534,5 +534,24 @@ class LeanMapTest : FreeSpec({
 
             n.dataArity() shouldBeExactly 6
         }
+
+        "getNode(index) should return the nth node from the right of array" {
+            val shift = 0
+            val isMutable = atomic(true)
+            val leafFlag = Box(null)
+            var i = 0
+            var n: Node<String, Int> = BitMapIndexedNode()
+            while (i < 20) {
+                val key = "$i"
+                n = n.assoc(isMutable, shift, hasheq(key), key, i, leafFlag)
+                i += 2
+            }
+
+            val node1 = n.getNode(1) as BitMapIndexedNode<String, Int>
+            val node2 = n.getNode(2) as BitMapIndexedNode<String, Int>
+
+            node1.array.size shouldBeExactly 4
+            node2.array.size shouldBeExactly 4
+        }
     }
 })
