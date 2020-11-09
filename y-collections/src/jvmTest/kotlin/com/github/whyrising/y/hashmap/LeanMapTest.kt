@@ -568,5 +568,19 @@ class LeanMapTest : FreeSpec({
             n.array[9] shouldBe 16
             n.array[13] as BitMapIndexedNode<String, Int>
         }
+
+        "singleKV()" {
+            val shift = 0
+            val isMutable = atomic(true)
+            val leafFlag = Box(null)
+            val n: Node<String, Int> = BitMapIndexedNode()
+            val m = n.assoc(isMutable, shift, hasheq("a"), "a", 12, leafFlag)
+            val o = m.assoc(isMutable, shift, hasheq("b"), "b", 18, leafFlag)
+
+            n.isSingleKV().shouldBeFalse()
+            o.isSingleKV().shouldBeFalse()
+            
+            m.isSingleKV().shouldBeTrue()
+        }
     }
 })

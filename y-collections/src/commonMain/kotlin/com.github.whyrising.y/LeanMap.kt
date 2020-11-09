@@ -26,6 +26,8 @@ class LeanMap {
         fun dataArity(): Int
 
         fun getNode(nodeIndex: Int): Node<K, V>
+
+        fun isSingleKV(): Boolean
     }
 
     sealed class BitMapIndexedNode<out K, out V>(
@@ -191,6 +193,9 @@ class LeanMap {
 
         override fun dataArity(): Int = datamap.countOneBits()
 
+        override fun isSingleKV(): Boolean =
+            (nodemap == 0) && (datamap.countOneBits() == 1)
+
         @Suppress("UNCHECKED_CAST")
         override fun getNode(nodeIndex: Int): Node<K, V> =
             array[array.size - nodeIndex] as Node<K, V>
@@ -253,6 +258,10 @@ class LeanMap {
         }
 
         override fun getNode(nodeIndex: Int): Node<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun isSingleKV(): Boolean {
             TODO("Not yet implemented")
         }
     }
