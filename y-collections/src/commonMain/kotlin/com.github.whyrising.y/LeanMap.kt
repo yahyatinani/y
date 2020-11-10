@@ -4,7 +4,6 @@ import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.atomic
 
 class LeanMap {
-
     interface Node<out K, out V> {
         val array: Array<Any?>
 
@@ -34,7 +33,15 @@ class LeanMap {
         fun dataArity(): Int
 
         fun getNode(nodeIndex: Int): Node<K, V>
+
         fun isSingleKV(): Boolean
+
+        fun find(
+            shift: Int,
+            keyHash: Int,
+            key: @UnsafeVariance K,
+            default: @UnsafeVariance V
+        ): V
     }
 
     sealed class BitMapIndexedNode<out K, out V>(
@@ -295,6 +302,29 @@ class LeanMap {
         override fun getNode(nodeIndex: Int): Node<K, V> =
             array[array.size - nodeIndex] as Node<K, V>
 
+        @Suppress("UNCHECKED_CAST")
+        override fun find(
+            shift: Int,
+            keyHash: Int,
+            key: @UnsafeVariance K,
+            default: @UnsafeVariance V
+        ): V = bitpos(keyHash, shift).let { bitpos ->
+            when {
+                (datamap and bitpos) != 0 -> {
+                    val keyIndex = 2 * bitmapNodeIndex(datamap, bitpos)
+
+                    when (array[keyIndex]) {
+                        key -> array[keyIndex + 1] as V
+                        else -> default
+                    }
+                }
+                (nodemap and bitpos) != 0 ->
+                    (array[nodeIndexBy(bitpos)] as Node<K, V>)
+                        .find(shift + 5, keyHash, key, default)
+                else -> default
+            }
+        }
+
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
             atomic(false), 0, 0, emptyArray())
 
@@ -369,9 +399,20 @@ class LeanMap {
         override fun isSingleKV(): Boolean {
             TODO("Not yet implemented")
         }
+
+        override fun find(
+            shift: Int,
+            keyHash: Int,
+            key: @UnsafeVariance K,
+            default: @UnsafeVariance V
+        ): V {
+            TODO("Not yet implemented")
+        }
     }
 
     companion object {
+//        internal val NOT_FOUND_TOKEN = Any()
+
         fun mask(hash: Int, shift: Int): Int = (hash ushr shift) and 0x01f
 
         fun bitpos(hash: Int, shift: Int): Int = 1 shl mask(hash, shift)

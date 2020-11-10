@@ -824,5 +824,44 @@ class LeanMapTest : FreeSpec({
                 }
             }
         }
+
+        "find(...key, default)" - {
+            "when key doesn't exist return default" {
+                val shift = 0
+                val isMutable = atomic(true)
+                val leafFlag = Box(null)
+                var n = BitMapIndexedNode<String, Int>()
+                var i = 0
+                while (i < 20) {
+                    val k = "$i"
+                    n = n.assoc(
+                        isMutable, shift, hasheq(k), k, i, leafFlag)
+                        as BitMapIndexedNode<String, Int>
+                    i += 2
+                }
+                val def = -1
+
+                n.find(shift, hasheq("80"), "80", def) shouldBeExactly def
+                n.find(shift, hasheq("28"), "28", def) shouldBeExactly def
+            }
+
+            "when exists, it should return the associated value" {
+                val shift = 0
+                val isMutable = atomic(true)
+                val leafFlag = Box(null)
+                var n = BitMapIndexedNode<String, Int>()
+                var i = 0
+                while (i < 20) {
+                    val k = "$i"
+                    n = n.assoc(
+                        isMutable, shift, hasheq(k), k, i, leafFlag)
+                        as BitMapIndexedNode<String, Int>
+                    i += 2
+                }
+
+                n.find(shift, hasheq("6"), "6", -1) shouldBeExactly 6
+                n.find(shift, hasheq("18"), "18", -1) shouldBeExactly 18
+            }
+        }
     }
 })
