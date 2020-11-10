@@ -219,9 +219,13 @@ abstract class APersistentMap<out K, out V> :
         @Suppress("UNCHECKED_CAST")
         override fun first(): K = (_seq.first() as Entry<K, V>).key
 
-        override fun rest(): ISeq<K> = invoke<K, V>(_seq.rest())
+        override fun rest(): ISeq<K> = when {
+            count > 1 -> KeySeq<K, V>(_seq.rest(), null)
+            else -> emptySeq()
+        }
 
-        override val count: Int = _seq.count
+        override val count: Int
+            get() = _seq.count
 
         @Suppress("UNCHECKED_CAST")
         override fun iterator(): Iterator<K> = when (map) {
@@ -238,9 +242,6 @@ abstract class APersistentMap<out K, out V> :
         }
 
         companion object {
-            operator fun <K, V> invoke(seq: ISeq<K>): KeySeq<K, V> =
-                KeySeq(seq, null)
-
             @Suppress("UNCHECKED_CAST")
             operator
             fun <K, V> invoke(map: IPersistentMap<K, V>): KeySeq<K, V> =
@@ -255,7 +256,10 @@ abstract class APersistentMap<out K, out V> :
         @Suppress("UNCHECKED_CAST")
         override fun first(): V = (_seq.first() as Entry<K, V>).value
 
-        override fun rest(): ISeq<V> = invoke<K, V>(_seq.rest())
+        override fun rest(): ISeq<V> = when {
+            count > 1 -> ValSeq<K, V>(_seq.rest(), null)
+            else -> emptySeq()
+        }
 
         override val count: Int = _seq.count
 
@@ -274,9 +278,6 @@ abstract class APersistentMap<out K, out V> :
         }
 
         companion object {
-            operator fun <K, V> invoke(seq: ISeq<V>): ValSeq<K, V> =
-                ValSeq(seq, null)
-
             @Suppress("UNCHECKED_CAST")
             operator
             fun <K, V> invoke(map: IPersistentMap<K, V>): ValSeq<K, V> =
