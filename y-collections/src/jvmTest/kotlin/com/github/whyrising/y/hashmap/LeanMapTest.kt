@@ -9,6 +9,7 @@ import com.github.whyrising.y.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import com.github.whyrising.y.LeanMap.Companion.bitpos
 import com.github.whyrising.y.LeanMap.HashCollisionNode
 import com.github.whyrising.y.LeanMap.Node
+import com.github.whyrising.y.MapEntry
 import com.github.whyrising.y.hasheq
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -825,7 +826,7 @@ class LeanMapTest : FreeSpec({
             }
         }
 
-        "find(...key, default)" - {
+        "find(...key, default) should return value" - {
             "when key doesn't exist return default" {
                 val shift = 0
                 val isMutable = atomic(true)
@@ -861,6 +862,45 @@ class LeanMapTest : FreeSpec({
 
                 n.find(shift, hasheq("6"), "6", -1) shouldBeExactly 6
                 n.find(shift, hasheq("18"), "18", -1) shouldBeExactly 18
+            }
+        }
+
+        "find(...key) should return IMapEntry" - {
+            "when key doesn't exist return null" {
+                val shift = 0
+                val isMutable = atomic(true)
+                val leafFlag = Box(null)
+                var n = BitMapIndexedNode<String, Int>()
+                var i = 0
+                while (i < 20) {
+                    val k = "$i"
+                    n = n.assoc(
+                        isMutable, shift, hasheq(k), k, i, leafFlag)
+                        as BitMapIndexedNode<String, Int>
+                    i += 2
+                }
+                n.find(shift, hasheq("80"), "80").shouldBeNull()
+                n.find(shift, hasheq("28"), "28").shouldBeNull()
+            }
+
+            "when exists, it should return IMapEntry of key/value" {
+                val shift = 0
+                val isMutable = atomic(true)
+                val leafFlag = Box(null)
+                var n = BitMapIndexedNode<String, Int>()
+                var i = 0
+                while (i < 20) {
+                    val k = "$i"
+                    n = n.assoc(
+                        isMutable, shift, hasheq(k), k, i, leafFlag)
+                        as BitMapIndexedNode<String, Int>
+                    i += 2
+                }
+
+                n.find(shift, hasheq("6"), "6") shouldBe
+                    MapEntry("6", 6)
+                n.find(shift, hasheq("18"), "18") shouldBe
+                    MapEntry("18", 18)
             }
         }
     }

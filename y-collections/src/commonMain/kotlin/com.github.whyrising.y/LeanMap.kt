@@ -42,6 +42,12 @@ class LeanMap {
             key: @UnsafeVariance K,
             default: @UnsafeVariance V
         ): V
+
+        fun find(
+            shift: Int,
+            keyHash: Int,
+            key: @UnsafeVariance K,
+        ): IMapEntry<K, V>?
     }
 
     sealed class BitMapIndexedNode<out K, out V>(
@@ -325,6 +331,28 @@ class LeanMap {
             }
         }
 
+        @Suppress("UNCHECKED_CAST")
+        override fun find(
+            shift: Int,
+            keyHash: Int,
+            key: @UnsafeVariance K
+        ): IMapEntry<K, V>? = bitpos(keyHash, shift).let { bitpos ->
+            when {
+                (datamap and bitpos) != 0 -> {
+                    val keyIndex = 2 * bitmapNodeIndex(datamap, bitpos)
+
+                    when (array[keyIndex]) {
+                        key -> MapEntry(key, array[keyIndex + 1] as V)
+                        else -> null
+                    }
+                }
+                (nodemap and bitpos) != 0 ->
+                    (array[nodeIndexBy(bitpos)] as Node<K, V>)
+                        .find(shift + 5, keyHash, key)
+                else -> null
+            }
+        }
+
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
             atomic(false), 0, 0, emptyArray())
 
@@ -406,6 +434,14 @@ class LeanMap {
             key: @UnsafeVariance K,
             default: @UnsafeVariance V
         ): V {
+            TODO("Not yet implemented")
+        }
+
+        override fun find(
+            shift: Int,
+            keyHash: Int,
+            key: @UnsafeVariance K
+        ): IMapEntry<K, V>? {
             TODO("Not yet implemented")
         }
     }
