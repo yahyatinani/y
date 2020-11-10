@@ -17,6 +17,14 @@ class LeanMap {
             leafFlag: Box
         ): Node<K, V>
 
+        fun without(
+            isMutable: AtomicBoolean,
+            shift: Int,
+            keyHash: Int,
+            key: @UnsafeVariance K,
+            removedLeaf: Box
+        ): Node<K, V>
+
         fun hasNodes(): Boolean
 
         fun hasData(): Boolean
@@ -26,7 +34,6 @@ class LeanMap {
         fun dataArity(): Int
 
         fun getNode(nodeIndex: Int): Node<K, V>
-
         fun isSingleKV(): Boolean
     }
 
@@ -185,6 +192,94 @@ class LeanMap {
             }
         }
 
+        private fun copyAndRemove(
+            index: Int, isMutable: AtomicBoolean, bitpos: Int): BMIN<K, V> {
+            val newArray = arrayOfNulls<Any?>(array.size - 2)
+
+            array.copyInto(newArray, 0, 0, index)
+            array.copyInto(newArray, index, index + 2, array.size)
+
+            return BMIN(isMutable, datamap xor bitpos, nodemap, newArray)
+        }
+
+        private fun copyAndInlinePair(
+            isMutable: AtomicBoolean, bitpos: Int, node: Node<K, V>
+        ): Node<K, V> {
+            val oldIndex = array.size - 1 - bitmapNodeIndex(nodemap, bitpos)
+            val newIndex = 2 * bitmapNodeIndex(datamap, bitpos)
+            val newArray = arrayOfNulls<Any?>(array.size + 1)
+
+            array.copyInto(newArray, 0, 0, newIndex)
+            newArray[newIndex] = node.array[0]
+            newArray[newIndex + 1] = node.array[1]
+            array.copyInto(newArray, newIndex + 2, newIndex, oldIndex)
+            array.copyInto(newArray, oldIndex + 2, oldIndex + 1, array.size)
+
+            return BMIN(isMutable, datamap or bitpos, nodemap xor bitpos, newArray)
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        override fun without(
+            isMutable: AtomicBoolean,
+            shift: Int,
+            keyHash: Int,
+            key: @UnsafeVariance K,
+            removedLeaf: Box
+        ): Node<K, V> {
+            val bitpos = bitpos(keyHash, shift)
+
+            if ((datamap and bitpos) != 0) {
+                val bmnIndex = bitmapNodeIndex(datamap, bitpos)
+                val index = 2 * bmnIndex
+                if (equiv(key, array[index])) {
+                    removedLeaf.value = removedLeaf
+                    if ((datamap.countOneBits() == 2) && nodemap == 0) {
+                        val newDatamap = if (shift == 0) (datamap xor bitpos)
+                        else bitpos(keyHash, 0)
+
+                        return if (bmnIndex == 0)
+                            BMIN(isMutable,
+                                newDatamap,
+                                0,
+                                arrayOf(array[2], array[3]))
+                        else
+                            BMIN(isMutable,
+                                newDatamap,
+                                0,
+                                arrayOf(array[0], array[1]))
+                    }
+                    return copyAndRemove(index, isMutable, bitpos)
+                } else return this
+            }
+
+            if ((nodemap and bitpos) != 0) {
+                val nodeIndex = nodeIndexBy(bitpos)
+
+                val subNode = array[nodeIndex] as Node<K, V>
+                val newSubNode = subNode.without(
+                    isMutable,
+                    shift + 5,
+                    keyHash,
+                    key,
+                    removedLeaf)
+
+                when {
+                    subNode != newSubNode -> return when {
+                        newSubNode.isSingleKV() -> when {
+                            (datamap == 0) && nodemap.countOneBits() == 1 ->
+                                newSubNode
+                            else ->
+                                copyAndInlinePair(isMutable, bitpos, newSubNode)
+                        }
+                        else ->
+                            updateArrayByIndex(nodeIndex, newSubNode, isMutable)
+                    }
+                }
+            }
+
+            return this
+        }
+
         override fun hasNodes(): Boolean = nodemap != 0
 
         override fun hasData(): Boolean = datamap != 0
@@ -237,6 +332,16 @@ class LeanMap {
             key: @UnsafeVariance K,
             value: @UnsafeVariance V,
             leafFlag: Box
+        ): Node<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun without(
+            isMutable: AtomicBoolean,
+            shift: Int,
+            keyHash: Int,
+            key: @UnsafeVariance K,
+            removedLeaf: Box
         ): Node<K, V> {
             TODO("Not yet implemented")
         }

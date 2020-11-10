@@ -14,11 +14,12 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import kotlinx.atomicfu.atomic
-
 
 @ExperimentalStdlibApi
 class LeanMapTest : FreeSpec({
@@ -579,8 +580,249 @@ class LeanMapTest : FreeSpec({
 
             n.isSingleKV().shouldBeFalse()
             o.isSingleKV().shouldBeFalse()
-            
+
             m.isSingleKV().shouldBeTrue()
+        }
+
+        "without()" - {
+            "when key doesn't exist, it should return this" {
+                val shift = 0
+                val isMutable = atomic(true)
+                val leafFlag = Box(null)
+                val removedLeaf = Box(null)
+                var i = 0
+                val key = "30"
+                var n: Node<String, Int> = BitMapIndexedNode()
+                while (i < 20) {
+                    val k = "$i"
+                    n = n.assoc(isMutable, shift, hasheq(k), k, i, leafFlag)
+                    i += 2
+                }
+
+                val newNode: Node<String, Int> = n.without(
+                    isMutable, shift, hasheq(key), key, removedLeaf)
+
+                newNode shouldBeSameInstanceAs n
+                removedLeaf.value.shouldBeNull()
+            }
+
+            "when hash exists in the data half of the array" - {
+                "when key isn't equiv with key in the array, return this" {
+                    val shift = 0
+                    val key = "J2RCvlt3yJ"
+                    val delKey = "RwtM1oQGxE"
+                    val isMutable = atomic(true)
+                    val leafFlag = Box(null)
+                    val removedLeaf = Box(null)
+                    val n = BitMapIndexedNode<String, Int>()
+                        .assoc(isMutable, shift, hasheq(key), key, 15, leafFlag)
+
+                    val newNode = n.without(
+                        isMutable, shift, hasheq(delKey), delKey, removedLeaf)
+
+                    newNode shouldBeSameInstanceAs n
+                    removedLeaf.value.shouldBeNull()
+                }
+
+                "when keys are equiv, it should remove key/value form array" - {
+                    "using copyAndRemove()" {
+                        val shift = 0
+                        val isMutable = atomic(true)
+                        val leafFlag = Box(null)
+                        val removedLeaf = Box(null)
+                        val key = "6"
+                        val hash = hasheq(key)
+                        var n = BitMapIndexedNode<String, Int>()
+
+                        var i = 0
+                        while (i < 20) {
+                            val k = "$i"
+                            n = n.assoc(
+                                isMutable, shift, hasheq(k), k, i, leafFlag)
+                                as BitMapIndexedNode<String, Int>
+                            i += 2
+                        }
+
+                        val newNode = n.without(
+                            isMutable, shift, hash, key, removedLeaf)
+                            as BitMapIndexedNode<String, Int>
+
+                        newNode.array.size shouldBeExactly n.array.size - 2
+                        removedLeaf.value shouldBeSameInstanceAs removedLeaf
+                        newNode.datamap shouldBeExactly
+                            (n.datamap xor bitpos(hash, shift))
+                    }
+
+                    "when shift == 0 and array size is 4" {
+                        val shift = 0
+                        val isMutable = atomic(true)
+                        val leafFlag = Box(null)
+                        val removedLeaf1 = Box(null)
+                        val removedLeaf2 = Box(null)
+                        var n = BitMapIndexedNode<String, Int>()
+                        val key1 = "0"
+                        val key2 = "2"
+                        val keyHash1 = hasheq(key1)
+                        val keyHash2 = hasheq(key2)
+
+                        var i = 0
+                        while (i < 4) {
+                            val k = "$i"
+                            n = n.assoc(
+                                isMutable, shift, hasheq(k), k, i, leafFlag)
+                                as BitMapIndexedNode<String, Int>
+                            i += 2
+                        }
+
+                        val newNode1 = n.without(
+                            isMutable, shift, keyHash1, key1, removedLeaf1)
+                            as BitMapIndexedNode<String, Int>
+
+                        val newNode2 = n.without(
+                            isMutable, shift, keyHash2, key2, removedLeaf2)
+                            as BitMapIndexedNode<String, Int>
+
+                        newNode1.array.size shouldBeExactly 2
+                        removedLeaf1.value shouldBeSameInstanceAs removedLeaf1
+                        newNode1.nodemap shouldBeExactly 0
+                        newNode1.datamap shouldBeExactly
+                            (n.datamap xor bitpos(keyHash1, shift))
+                        newNode1.isMutable shouldBeSameInstanceAs isMutable
+
+                        newNode2.array.size shouldBeExactly 2
+                        removedLeaf2.value shouldBeSameInstanceAs removedLeaf2
+                        newNode2.nodemap shouldBeExactly 0
+                        newNode2.datamap shouldBeExactly
+                            bitpos(keyHash1, shift)
+                        newNode2.isMutable shouldBeSameInstanceAs isMutable
+                    }
+                }
+            }
+
+            "when hash exists in nodes half of the array" - {
+                """when key exists and and 1 pair left in subNode after removal,
+                   it should push it up to datamap
+                """ {
+                    val shift = 0
+                    val isMutable = atomic(true)
+                    val leafFlag = Box(null)
+                    val removedLeaf = Box(null)
+                    var n = BitMapIndexedNode<String, Int>()
+                    val key = "18"
+                    val keyHash = hasheq(key)
+                    val bitpos = bitpos(keyHash, shift)
+
+                    var i = 0
+                    while (i < 20) {
+                        val k = "$i"
+                        n = n.assoc(
+                            isMutable, shift, hasheq(k), k, i, leafFlag)
+                            as BitMapIndexedNode<String, Int>
+                        i += 2
+                    }
+
+                    val newNode = n.without(
+                        isMutable, shift, keyHash, key, removedLeaf)
+                        as BitMapIndexedNode<String, Int>
+
+                    newNode.array[2] shouldBe "12"
+                    newNode.array[3] shouldBe 12
+                    newNode.datamap shouldBeExactly (n.datamap or bitpos)
+                    newNode.nodemap shouldBeExactly (n.nodemap xor bitpos)
+                    removedLeaf.value.shouldNotBeNull()
+                }
+
+                @Suppress("UNCHECKED_CAST")
+                """when key exists and and more than 1 pair left in newSubNode
+                   after removal, it should update the array using newSubNode
+                """ {
+                    val shift = 0
+                    val isMutable = atomic(true)
+                    val leafFlag = Box(null)
+                    val removedLeaf = Box(null)
+                    var n = BitMapIndexedNode<String, Int>()
+                    val key = "96"
+                    val keyHash = hasheq(key)
+
+                    var i = 0
+                    while (i < 100) {
+                        val k = "$i"
+                        n = n.assoc(
+                            isMutable, shift, hasheq(k), k, i, leafFlag)
+                            as BitMapIndexedNode<String, Int>
+                        i += 2
+                    }
+                    val subNode = n.array[35] as BitMapIndexedNode<String, Int>
+
+                    val newNode = n.without(
+                        isMutable, shift, keyHash, key, removedLeaf)
+                        as BitMapIndexedNode<String, Int>
+                    val newSubNode = newNode.array[35]
+                        as BitMapIndexedNode<String, Int>
+
+
+                    newNode shouldBeSameInstanceAs n
+                    newNode.datamap shouldBeExactly newNode.datamap
+                    newNode.nodemap shouldBeExactly newNode.nodemap
+                    newSubNode.array.size shouldBeExactly subNode.array.size - 2
+                }
+
+                @Suppress("UNCHECKED_CAST")
+                """when key exists and there is only 1 node in the array and
+                   1 pair left in subNode after removal, return the subNode""" {
+                    val shift = 0
+                    val isMutable = atomic(true)
+                    val leafFlag = Box(null)
+                    val removedLeaf = Box(null)
+                    var n = BitMapIndexedNode<String, Int>()
+                    val key = "1958"
+                    val keyHash = hasheq(key)
+                    val bitpos = bitpos(keyHash, shift)
+                    var i = 0
+                    while (i < 2000) {
+                        val k = "$i"
+                        n = n.assoc(
+                            isMutable, shift, hasheq(k), k, i, leafFlag)
+                            as BitMapIndexedNode<String, Int>
+                        i += 2
+                    }
+
+                    val newNode = n.without(
+                        isMutable, shift, keyHash, key, removedLeaf)
+                        as BitMapIndexedNode<String, Int>
+
+                    val newSubNode = newNode.array[10]
+                        as BitMapIndexedNode<String, Int>
+                    newSubNode.array[2] shouldBe "642"
+                    newSubNode.array[3] shouldBe 642
+                    newNode.nodemap shouldBeExactly -1
+                    newNode.datamap shouldBeExactly 0
+                }
+
+                "when key doesn't exist, return this" {
+                    val shift = 0
+                    val isMutable = atomic(true)
+                    val leafFlag = Box(null)
+                    val removedLeaf = Box(null)
+                    var n = BitMapIndexedNode<String, Int>()
+                    val key = "4000"
+                    val keyHash = hasheq(key)
+                    var i = 0
+                    while (i < 2000) {
+                        val k = "$i"
+                        n = n.assoc(
+                            isMutable, shift, hasheq(k), k, i, leafFlag)
+                            as BitMapIndexedNode<String, Int>
+                        i += 2
+                    }
+
+                    val newNode = n.without(
+                        isMutable, shift, keyHash, key, removedLeaf)
+                        as BitMapIndexedNode<String, Int>
+
+                    newNode shouldBeSameInstanceAs n
+                }
+            }
         }
     }
 })
