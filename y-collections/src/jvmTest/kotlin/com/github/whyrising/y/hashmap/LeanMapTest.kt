@@ -9,7 +9,9 @@ import com.github.whyrising.y.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import com.github.whyrising.y.LeanMap.Companion.bitpos
 import com.github.whyrising.y.LeanMap.HashCollisionNode
 import com.github.whyrising.y.LeanMap.Node
+import com.github.whyrising.y.LeanMap.NodeSeq
 import com.github.whyrising.y.MapEntry
+import com.github.whyrising.y.emptySeq
 import com.github.whyrising.y.hasheq
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -901,6 +903,66 @@ class LeanMapTest : FreeSpec({
                     MapEntry("6", 6)
                 n.find(shift, hasheq("18"), "18") shouldBe
                     MapEntry("18", 18)
+            }
+        }
+
+        "nodeSeq()" - {
+            "when datamap > 0" {
+                val shift = 0
+                val isMutable = atomic(true)
+                val leafFlag = Box(null)
+                var n = BitMapIndexedNode<String, Int>()
+                var i = 0
+                while (i < 20) {
+                    val k = "$i"
+                    n = n.assoc(
+                        isMutable, shift, hasheq(k), k, i, leafFlag)
+                        as BitMapIndexedNode<String, Int>
+                    i += 2
+                }
+
+                val nodeSeq = n.nodeSeq() as NodeSeq<String, Int>
+
+                nodeSeq.array shouldBeSameInstanceAs n.array
+                nodeSeq.lvl shouldBeExactly 0
+                nodeSeq.nodes.size shouldBeExactly 7
+                nodeSeq.nodes[0] shouldBeSameInstanceAs n
+                nodeSeq.cursorLengths.size shouldBeExactly 7
+                nodeSeq.cursorLengths[0] shouldBeExactly n.nodeArity()
+                nodeSeq.dataIndex shouldBeExactly 0
+                nodeSeq.dataLength shouldBeExactly n.dataArity() - 1
+
+                nodeSeq.first() shouldBe MapEntry("14", 14)
+            }
+
+            "when datamap == 0" - {
+                "when node is empty, it should return an empty seq" {
+                    val node = BitMapIndexedNode<String, Int>()
+
+                    node.nodeSeq() shouldBeSameInstanceAs
+                        emptySeq<MapEntry<String, Int>>()
+                }
+
+                "it should return a seq of map entries" {
+                    val shift = 0
+                    val isMutable = atomic(true)
+                    val leafFlag = Box(null)
+                    var n = BitMapIndexedNode<String, Int>()
+                    var i = 0
+                    while (i < 1000) {
+                        val k = "$i"
+                        n = n.assoc(
+                            isMutable, shift, hasheq(k), k, i, leafFlag)
+                            as BitMapIndexedNode<String, Int>
+                        i += 2
+                    }
+
+                    val nodeSeq = n.nodeSeq() as NodeSeq<String, Int>
+
+                    nodeSeq.count shouldBeExactly 500
+                    nodeSeq[0] shouldBe MapEntry("672", 672)
+                    nodeSeq[499] shouldBe MapEntry("784", 784)
+                }
             }
         }
     }

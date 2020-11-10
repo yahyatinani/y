@@ -48,9 +48,11 @@ class LeanMap {
             keyHash: Int,
             key: @UnsafeVariance K,
         ): IMapEntry<K, V>?
+
+        fun nodeSeq(): ISeq<MapEntry<K, V>>
     }
 
-    sealed class BitMapIndexedNode<out K, out V>(
+    internal sealed class BitMapIndexedNode<out K, out V>(
         val isMutable: AtomicBoolean,
         val datamap: Int,
         val nodemap: Int,
@@ -353,6 +355,19 @@ class LeanMap {
             }
         }
 
+        override fun nodeSeq(): ISeq<MapEntry<K, V>> {
+            val nodes = arrayOfNulls<Node<K, V>?>(7)
+            val cursorLengths = arrayOf(0, 0, 0, 0, 0, 0, 0)
+            nodes[0] = this
+            cursorLengths[0] = nodeArity()
+
+            return when (datamap) {
+                0 -> createNodeSeq(array, 0, nodes, cursorLengths, 0, 0)
+                else -> NodeSeq(
+                    array, 0, nodes, cursorLengths, 0, dataArity() - 1)
+            }
+        }
+
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
             atomic(false), 0, 0, emptyArray())
 
@@ -376,7 +391,24 @@ class LeanMap {
         }
     }
 
-    class HashCollisionNode<out K, out V>(
+    internal class NodeSeq<out K, out V>(
+        val array: Array<Any?>,
+        val lvl: Int,
+        val nodes: Array<Node<@UnsafeVariance K, @UnsafeVariance V>?>,
+        val cursorLengths: Array<Int>,
+        val dataIndex: Int,
+        val dataLength: Int,
+    ) : ASeq<MapEntry<K, V>>() {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun first(): MapEntry<K, V> =
+            MapEntry(array[2 * dataIndex] as K, array[2 * dataIndex + 1] as V)
+
+        override fun rest(): ISeq<MapEntry<K, V>> = createNodeSeq(
+            array, lvl, nodes, cursorLengths, dataIndex, dataLength)
+    }
+
+    internal class HashCollisionNode<out K, out V>(
         val isMutable: AtomicBoolean,
         val hash: Int,
         val count: Int,
@@ -444,6 +476,10 @@ class LeanMap {
         ): IMapEntry<K, V>? {
             TODO("Not yet implemented")
         }
+
+        override fun nodeSeq(): ISeq<MapEntry<K, V>> {
+            TODO("Not yet implemented")
+        }
     }
 
     companion object {
@@ -452,5 +488,59 @@ class LeanMap {
         fun mask(hash: Int, shift: Int): Int = (hash ushr shift) and 0x01f
 
         fun bitpos(hash: Int, shift: Int): Int = 1 shl mask(hash, shift)
+
+        private fun <K, V> createNodeSeq(
+            array: Array<Any?>,
+            lvl: Int,
+            nodes: Array<Node<K, V>?>,
+            cursorLengths: Array<Int>,
+            dataIndex: Int,
+            dataLength: Int
+        ): ISeq<MapEntry<K, V>> {
+            var level = lvl
+            when {
+                dataIndex < dataLength -> return NodeSeq(
+                    array,
+                    level,
+                    nodes,
+                    cursorLengths,
+                    dataIndex + 1,
+                    dataLength
+                )
+                else -> {
+                    while (level >= 0) {
+                        when (val nodeIndex = cursorLengths[level]) {
+                            0 -> level--
+                            else -> {
+                                val newCursorLengths = cursorLengths.copyOf()
+                                newCursorLengths[level] = nodeIndex - 1
+
+                                val node = nodes[level]!!.getNode(nodeIndex)
+                                val hasNodes = node.hasNodes()
+                                val newLvl = if (hasNodes) level + 1 else level
+
+                                val newNodes = nodes.copyOf()
+                                if (hasNodes) {
+                                    newNodes[newLvl] = node
+                                    newCursorLengths[newLvl] = node.nodeArity()
+                                }
+
+                                if (node.hasData())
+                                    return NodeSeq(
+                                        node.array,
+                                        newLvl,
+                                        newNodes,
+                                        newCursorLengths,
+                                        0,
+                                        node.dataArity() - 1)
+
+                                level++
+                            }
+                        }
+                    }
+                    return emptySeq()
+                }
+            }
+        }
     }
 }
