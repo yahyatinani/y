@@ -473,12 +473,16 @@ class LeanMap {
             }
         }
 
+        @Suppress("UNCHECKED_CAST")
         override fun find(
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K
-        ): IMapEntry<K, V>? {
-            TODO("Not yet implemented")
+        ): IMapEntry<K, V>? = findIndexBy(key).let { index ->
+            return when {
+                index < 0 -> null
+                else -> MapEntry(key, array[index + 1] as V)
+            }
         }
 
         override fun nodeSeq(): ISeq<MapEntry<K, V>> =
