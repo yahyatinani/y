@@ -54,6 +54,23 @@ class LeanMapTest : FreeSpec({
         map.entryAt("x").shouldBeNull()
         map.entryAt("a") shouldBe MapEntry("a", 1)
         map.entryAt("b") shouldBe MapEntry("b", 2)
+    }
 
+    "valAt(key, default)" {
+        val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+        LeanMap<String, Int>().valAt("x", -1) shouldBe -1
+        map.valAt("x", -1) shouldBe -1
+        map.valAt("a", -1) shouldBe 1
+        map.valAt("c", -1) shouldBe 3
+    }
+
+    "valAt(key)" {
+        val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+        LeanMap<String, Int>().valAt("x").shouldBeNull()
+        map.valAt("x").shouldBeNull()
+        map.valAt("a") shouldBe 1
+        map.valAt("c") shouldBe 3
     }
 })

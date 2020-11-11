@@ -34,13 +34,11 @@ sealed class LeanMap<out K, out V>(
 
         override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? = null
 
-        override fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? {
-            TODO("Not yet implemented")
-        }
+        override
+        fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? =
+            default
 
-        override fun valAt(key: @UnsafeVariance K): V? {
-            TODO("Not yet implemented")
-        }
+        override fun valAt(key: @UnsafeVariance K): V? = null
 
         override fun iterator(): Iterator<Map.Entry<K, V>> {
             TODO("Not yet implemented")
@@ -77,13 +75,13 @@ sealed class LeanMap<out K, out V>(
             return _root.find(0, hasheq(key), key)
         }
 
-        override fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? {
-            TODO("Not yet implemented")
-        }
+        @ExperimentalStdlibApi
+        override
+        fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? =
+            _root.find(0, hasheq(key), key, default)
 
-        override fun valAt(key: @UnsafeVariance K): V? {
-            TODO("Not yet implemented")
-        }
+        @ExperimentalStdlibApi
+        override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
 
         override fun iterator(): Iterator<Map.Entry<K, V>> {
             TODO("Not yet implemented")
