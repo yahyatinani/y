@@ -2,11 +2,14 @@ package com.github.whyrising.y.hashmap
 
 import com.github.whyrising.y.LeanMap
 import com.github.whyrising.y.LeanMap.Companion.bitpos
+import com.github.whyrising.y.LeanMap.EmptyLeanMap
 import com.github.whyrising.y.LeanMap.TransientLeanMap
 import com.github.whyrising.y.hasheq
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 
 @ExperimentalStdlibApi
 class LeanMapTest : FreeSpec({
@@ -35,5 +38,11 @@ class LeanMapTest : FreeSpec({
         LeanMap("a" to 1).count shouldBeExactly 1
         LeanMap("a" to 1, "b" to 2).count shouldBeExactly 2
         LeanMap("a" to 1, "b" to 2, "c" to 3).count shouldBeExactly 3
+    }
+
+    "empty() should return EmptyLeanMap" {
+        val map = LeanMap("a" to 1)
+
+        (map.empty() === EmptyLeanMap).shouldBeTrue()
     }
 })

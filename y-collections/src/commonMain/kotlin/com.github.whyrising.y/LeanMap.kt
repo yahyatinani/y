@@ -13,6 +13,8 @@ sealed class LeanMap<out K, out V>(
     override fun asTransient(): ITransientMap<K, V> =
         TransientLeanMap(this)
 
+    override fun empty(): IPersistentCollection<Any?> = EmptyLeanMap
+
     abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
         override fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
             TODO("Not yet implemented")
@@ -43,10 +45,6 @@ sealed class LeanMap<out K, out V>(
         }
 
         override fun iterator(): Iterator<Map.Entry<K, V>> {
-            TODO("Not yet implemented")
-        }
-
-        override fun empty(): IPersistentCollection<Any?> {
             TODO("Not yet implemented")
         }
 
@@ -88,10 +86,6 @@ sealed class LeanMap<out K, out V>(
         }
 
         override fun iterator(): Iterator<Map.Entry<K, V>> {
-            TODO("Not yet implemented")
-        }
-
-        override fun empty(): IPersistentCollection<Any?> {
             TODO("Not yet implemented")
         }
 
@@ -816,7 +810,7 @@ sealed class LeanMap<out K, out V>(
 
         operator fun <K, V> invoke(vararg pairs: Pair<K, V>): LeanMap<K, V> {
             var ret: ITransientMap<K, V> = EmptyLeanMap.asTransient()
-            
+
             for (pair in pairs) ret = ret.assoc(pair.first, pair.second)
 
             return ret.persistent() as LeanMap<K, V>
