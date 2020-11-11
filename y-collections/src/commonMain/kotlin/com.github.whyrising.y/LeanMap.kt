@@ -44,9 +44,7 @@ sealed class LeanMap<out K, out V>(
             TODO("Not yet implemented")
         }
 
-        override fun seq(): ISeq<Any?> {
-            TODO("Not yet implemented")
-        }
+        override fun seq(): ISeq<Any?> = emptySeq()
     }
 
     object EmptyLeanMap : AEmptyLeanMap<Nothing, Nothing>()
@@ -87,9 +85,7 @@ sealed class LeanMap<out K, out V>(
             TODO("Not yet implemented")
         }
 
-        override fun seq(): ISeq<Any?> {
-            TODO("Not yet implemented")
-        }
+        override fun seq(): ISeq<Any?> = _root.nodeSeq()
     }
 
     interface Node<out K, out V> {

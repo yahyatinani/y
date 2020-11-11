@@ -3,8 +3,11 @@ package com.github.whyrising.y.hashmap
 import com.github.whyrising.y.LeanMap
 import com.github.whyrising.y.LeanMap.Companion.bitpos
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
+import com.github.whyrising.y.LeanMap.NodeSeq
 import com.github.whyrising.y.LeanMap.TransientLeanMap
 import com.github.whyrising.y.MapEntry
+import com.github.whyrising.y.PersistentList
+import com.github.whyrising.y.PersistentList.Empty
 import com.github.whyrising.y.hasheq
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -72,5 +75,15 @@ class LeanMapTest : FreeSpec({
         map.valAt("x").shouldBeNull()
         map.valAt("a") shouldBe 1
         map.valAt("c") shouldBe 3
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    "seq()" {
+        val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+        (LeanMap<String, Int>().seq() === Empty).shouldBeTrue()
+        val seq = map.seq() as NodeSeq<String, Int>
+
+        seq.count shouldBeExactly 3
     }
 })
