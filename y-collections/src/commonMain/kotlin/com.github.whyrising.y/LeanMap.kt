@@ -7,7 +7,11 @@ import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 
 sealed class LeanMap<out K, out V>(
-    override val count: Int, val root: Node<K, V>?) : APersistentMap<K, V>() {
+    override val count: Int, val root: Node<K, V>?
+) : APersistentMap<K, V>(), IMutableCollection<Any?> {
+
+    override fun asTransient(): ITransientMap<K, V> =
+        TransientLeanMap(this)
 
     abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
         override fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
@@ -807,5 +811,7 @@ sealed class LeanMap<out K, out V>(
                 }
             }
         }
+
+        operator fun <K, V> invoke(): LeanMap<K, V> = EmptyLeanMap
     }
 }
