@@ -440,9 +440,7 @@ class LeanMap {
 
         override fun hasData(): Boolean = true
 
-        override fun nodeArity(): Int {
-            TODO("Not yet implemented")
-        }
+        override fun nodeArity(): Int = 0
 
         override fun dataArity(): Int {
             TODO("Not yet implemented")

@@ -5,11 +5,12 @@ import com.github.whyrising.y.hasheq
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.ints.shouldBeExactly
 import kotlinx.atomicfu.atomic
 
 @ExperimentalStdlibApi
 class HashCollisionNodeTest : FreeSpec({
-    "singleKV()" {
+    "singleKV() when 1 pair in array, it should return true, otherwise false" {
         val mutable = atomic(true)
         val a1: Array<Any?> = arrayOf("a", 1)
         val a2: Array<Any?> = arrayOf()
@@ -21,7 +22,7 @@ class HashCollisionNodeTest : FreeSpec({
         hcNode2.isSingleKV().shouldBeFalse()
     }
 
-    "hasNodes" {
+    "hasNodes() should return false" {
         val mutable = atomic(true)
         val a: Array<Any?> = arrayOf("a", 1)
         val hash = hasheq("a")
@@ -30,12 +31,21 @@ class HashCollisionNodeTest : FreeSpec({
         hcNode.hasNodes().shouldBeFalse()
     }
 
-    "hasData" {
+    "hasData() should return true" {
         val mutable = atomic(true)
         val a: Array<Any?> = arrayOf("a", 1)
         val hash = hasheq("a")
         val hcNode = HashCollisionNode<String, Int>(mutable, hash, 1, a)
 
         hcNode.hasData().shouldBeTrue()
+    }
+
+    "nodeArity() should return 0" {
+        val mutable = atomic(true)
+        val a: Array<Any?> = arrayOf("a", 1)
+        val hash = hasheq("a")
+        val hcNode = HashCollisionNode<String, Int>(mutable, hash, 1, a)
+
+        hcNode.nodeArity() shouldBeExactly 0
     }
 })
