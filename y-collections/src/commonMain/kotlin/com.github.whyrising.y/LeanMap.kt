@@ -32,9 +32,7 @@ sealed class LeanMap<out K, out V>(
             TODO("Not yet implemented")
         }
 
-        override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? {
-            TODO("Not yet implemented")
-        }
+        override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? = null
 
         override fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? {
             TODO("Not yet implemented")
@@ -55,8 +53,9 @@ sealed class LeanMap<out K, out V>(
 
     object EmptyLeanMap : AEmptyLeanMap<Nothing, Nothing>()
 
-    internal class LMap<out K, out V>(_count: Int, _root: Node<K, V>?)
-        : LeanMap<K, V>(_count, _root) {
+    internal class LMap<out K, out V>(
+        _count: Int, private val _root: Node<K, V>
+    ) : LeanMap<K, V>(_count, _root) {
         override fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
             TODO("Not yet implemented")
         }
@@ -73,8 +72,9 @@ sealed class LeanMap<out K, out V>(
             TODO("Not yet implemented")
         }
 
+        @ExperimentalStdlibApi
         override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? {
-            TODO("Not yet implemented")
+            return _root.find(0, hasheq(key), key)
         }
 
         override fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? {
@@ -193,7 +193,7 @@ sealed class LeanMap<out K, out V>(
 
             return when (_count.value) {
                 0 -> EmptyLeanMap
-                else -> LMap(_count.value, root.value)
+                else -> LMap(_count.value, root.value as Node<K, V>)
             }
         }
 
