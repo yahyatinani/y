@@ -456,9 +456,7 @@ class LeanMap {
             TODO("Not yet implemented")
         }
 
-        override fun isSingleKV(): Boolean {
-            TODO("Not yet implemented")
-        }
+        override fun isSingleKV(): Boolean = count == 1
 
         override fun find(
             shift: Int,
