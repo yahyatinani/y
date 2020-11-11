@@ -436,9 +436,7 @@ class LeanMap {
             TODO("Not yet implemented")
         }
 
-        override fun hasNodes(): Boolean {
-            TODO("Not yet implemented")
-        }
+        override fun hasNodes(): Boolean = false
 
         override fun hasData(): Boolean {
             TODO("Not yet implemented")

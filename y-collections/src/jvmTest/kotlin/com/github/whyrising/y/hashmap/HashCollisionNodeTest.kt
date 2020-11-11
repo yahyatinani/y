@@ -20,4 +20,13 @@ class HashCollisionNodeTest : FreeSpec({
         hcNode1.isSingleKV().shouldBeTrue()
         hcNode2.isSingleKV().shouldBeFalse()
     }
+
+    "hasNodes" {
+        val mutable = atomic(true)
+        val a: Array<Any?> = arrayOf("a", 1)
+        val hash = hasheq("a")
+        val hcNode = HashCollisionNode<String, Int>(mutable, hash, 1, a)
+
+        hcNode.hasNodes().shouldBeFalse()
+    }
 })
