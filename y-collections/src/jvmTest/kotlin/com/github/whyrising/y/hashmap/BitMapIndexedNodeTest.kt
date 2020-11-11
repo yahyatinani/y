@@ -824,10 +824,10 @@ class BitMapIndexedNodeTest : FreeSpec({
                     as BitMapIndexedNode<String, Int>
                 i += 2
             }
-            val def = -1
+            val default = -1
 
-            n.find(shift, hasheq("80"), "80", def) shouldBeExactly def
-            n.find(shift, hasheq("28"), "28", def) shouldBeExactly def
+            n.find(shift, hasheq("80"), "80", default) shouldBe default
+            n.find(shift, hasheq("28"), "28", default) shouldBe default
         }
 
         "when exists, it should return the associated value" {
@@ -844,8 +844,8 @@ class BitMapIndexedNodeTest : FreeSpec({
                 i += 2
             }
 
-            n.find(shift, hasheq("6"), "6", -1) shouldBeExactly 6
-            n.find(shift, hasheq("18"), "18", -1) shouldBeExactly 18
+            n.find(shift, hasheq("6"), "6", -1) shouldBe 6
+            n.find(shift, hasheq("18"), "18", -1) shouldBe 18
         }
     }
 

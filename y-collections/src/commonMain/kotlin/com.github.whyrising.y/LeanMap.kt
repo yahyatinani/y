@@ -132,8 +132,8 @@ sealed class LeanMap<out K, out V>(
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
-            default: @UnsafeVariance V
-        ): V
+            default: @UnsafeVariance V?
+        ): V?
 
         fun find(
             shift: Int,
@@ -199,10 +199,12 @@ sealed class LeanMap<out K, out V>(
             }
         }
 
+        @ExperimentalStdlibApi
         override fun doValAt(
             key: @UnsafeVariance K, default: @UnsafeVariance V?
-        ): V? {
-            TODO("Not yet implemented")
+        ): V? = when (val value = root.value) {
+            null -> default
+            else -> value.find(0, hasheq(key), key, default)
         }
 
         companion object {
@@ -497,8 +499,8 @@ sealed class LeanMap<out K, out V>(
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
-            default: @UnsafeVariance V
-        ): V = bitpos(keyHash, shift).let { bitpos ->
+            default: @UnsafeVariance V?
+        ): V? = bitpos(keyHash, shift).let { bitpos ->
             when {
                 (datamap and bitpos) != 0 -> {
                     val keyIndex = 2 * bitmapNodeIndex(datamap, bitpos)
@@ -717,8 +719,8 @@ sealed class LeanMap<out K, out V>(
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
-            default: @UnsafeVariance V
-        ): V = findIndexBy(key).let { index ->
+            default: @UnsafeVariance V?
+        ): V? = findIndexBy(key).let { index ->
             return when {
                 index < 0 -> default
                 else -> array[index + 1] as V

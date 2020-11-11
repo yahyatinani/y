@@ -110,7 +110,7 @@ class HashCollisionNodeTest : FreeSpec({
             val hcNode = HashCollisionNode<String, Int>(mutable, hash, 1, a)
             val default = -1
 
-            hcNode.find(0, hash, "b", default) shouldBeExactly default
+            hcNode.find(0, hash, "b", default) shouldBe default
         }
 
         "when exists, it should return the associated value" {
@@ -123,7 +123,7 @@ class HashCollisionNodeTest : FreeSpec({
             val hcNode2 = HashCollisionNode<Int, String>(mutable, hash2, 2, a2)
             val default = -1
 
-            hcNode1.find(0, hash1, "a", default) shouldBeExactly 1
+            hcNode1.find(0, hash1, "a", default) shouldBe 1
             hcNode2.find(0, hash2, 2, "not_found") shouldBe "2L"
         }
     }

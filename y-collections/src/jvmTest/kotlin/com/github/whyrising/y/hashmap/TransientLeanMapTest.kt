@@ -98,4 +98,16 @@ class TransientLeanMapTest : FreeSpec({
         root.array[2] shouldBe "c"
         root.array[3] shouldBe 3
     }
+
+    "doValAt(key, default)" {
+        val default = -1
+        val tm = TransientLeanMap<String, Int>(EmptyLeanMap)
+        val trlm = tm.assoc("a", 1).assoc("b", 2).assoc("c", 3) as
+            TransientLeanMap<String, Int>
+
+        trlm.doValAt("x", default) shouldBe default
+        trlm.doValAt("a", default) shouldBe 1
+        trlm.doValAt("b", default) shouldBe 2
+        trlm.doValAt("c", default) shouldBe 3
+    }
 })
