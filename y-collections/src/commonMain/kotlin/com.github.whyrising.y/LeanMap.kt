@@ -2,9 +2,100 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.atomicfu.AtomicInt
+import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 
-class LeanMap {
+sealed class LeanMap<out K, out V>(
+    override val count: Int, val root: Node<K, V>?) : APersistentMap<K, V>() {
+
+    abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
+        override fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun containsKey(key: @UnsafeVariance K): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? {
+            TODO("Not yet implemented")
+        }
+
+        override fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? {
+            TODO("Not yet implemented")
+        }
+
+        override fun valAt(key: @UnsafeVariance K): V? {
+            TODO("Not yet implemented")
+        }
+
+        override fun iterator(): Iterator<Map.Entry<K, V>> {
+            TODO("Not yet implemented")
+        }
+
+        override fun empty(): IPersistentCollection<Any?> {
+            TODO("Not yet implemented")
+        }
+
+        override fun seq(): ISeq<Any?> {
+            TODO("Not yet implemented")
+        }
+    }
+
+    object EmptyLeanMap : AEmptyLeanMap<Nothing, Nothing>()
+
+    internal class LMap<out K, out V>(_count: Int, _root: Node<K, V>?)
+        : LeanMap<K, V>(_count, _root) {
+        override fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun containsKey(key: @UnsafeVariance K): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? {
+            TODO("Not yet implemented")
+        }
+
+        override fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? {
+            TODO("Not yet implemented")
+        }
+
+        override fun valAt(key: @UnsafeVariance K): V? {
+            TODO("Not yet implemented")
+        }
+
+        override fun iterator(): Iterator<Map.Entry<K, V>> {
+            TODO("Not yet implemented")
+        }
+
+        override fun empty(): IPersistentCollection<Any?> {
+            TODO("Not yet implemented")
+        }
+
+        override fun seq(): ISeq<Any?> {
+            TODO("Not yet implemented")
+        }
+    }
+
     interface Node<out K, out V> {
         val array: Array<Any?>
 
@@ -51,6 +142,83 @@ class LeanMap {
         ): IMapEntry<K, V>?
 
         fun nodeSeq(): ISeq<MapEntry<K, V>>
+    }
+
+    internal class TransientLeanMap<out K, out V> private constructor(
+        val isMutable: AtomicBoolean,
+        val root: AtomicRef<Node<@UnsafeVariance K, @UnsafeVariance V>?>,
+        val _count: AtomicInt,
+        val leafFlag: Box
+    ) : ATransientMap<K, V>() {
+
+        override val doCount: Int
+            get() = _count.value
+
+        override fun assertMutable() {
+            if (!isMutable.value)
+                throw IllegalStateException(
+                    "Transient used after persistent() call.")
+        }
+
+        @ExperimentalStdlibApi
+        override fun doAssoc(
+            key: @UnsafeVariance K, value: @UnsafeVariance V
+        ): ITransientMap<K, V> {
+            leafFlag.value = null
+            var node: Node<K, V> = root.value ?: EmptyBitMapIndexedNode
+
+            node = node.assoc(isMutable, 0, hasheq(key), key, value, leafFlag)
+
+            if (node != root.value) root.value = node
+
+            if (leafFlag.value != null) _count.value = _count.value + 1
+
+            return this
+        }
+
+        override fun doDissoc(key: @UnsafeVariance K): ITransientMap<K, V> {
+            TODO("Not yet implemented")
+        }
+
+        override fun doPersistent(): IPersistentMap<K, V> {
+            // TODO: consider returning EmptyLeanMap when count == 0
+            isMutable.value = false
+            return LMap(_count.value, root.value)
+        }
+
+        override fun doValAt(
+            key: @UnsafeVariance K, default: @UnsafeVariance V?
+        ): V? {
+            TODO("Not yet implemented")
+        }
+
+        companion object {
+            operator
+            fun <K, V> invoke(map: LeanMap<K, V>): TransientLeanMap<K, V> =
+                TransientLeanMap(
+                    atomic(true),
+                    atomic(map.root),
+                    atomic(map.count),
+                    Box(null)
+                )
+        }
+    }
+
+    internal class NodeSeq<out K, out V>(
+        val array: Array<Any?>,
+        val lvl: Int,
+        val nodes: Array<Node<@UnsafeVariance K, @UnsafeVariance V>?>,
+        val cursorLengths: Array<Int>,
+        val dataIndex: Int,
+        val dataLength: Int,
+    ) : ASeq<MapEntry<K, V>>() {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun first(): MapEntry<K, V> =
+            MapEntry(array[2 * dataIndex] as K, array[2 * dataIndex + 1] as V)
+
+        override fun rest(): ISeq<MapEntry<K, V>> = createNodeSeq(
+            array, lvl, nodes, cursorLengths, dataIndex, dataLength)
     }
 
     internal sealed class BitMapIndexedNode<out K, out V>(
@@ -387,23 +555,6 @@ class LeanMap {
             fun bitmapNodeIndex(bitmap: Int, bitpos: Int): Int =
                 (bitmap and (bitpos - 1)).countOneBits()
         }
-    }
-
-    internal class NodeSeq<out K, out V>(
-        val array: Array<Any?>,
-        val lvl: Int,
-        val nodes: Array<Node<@UnsafeVariance K, @UnsafeVariance V>?>,
-        val cursorLengths: Array<Int>,
-        val dataIndex: Int,
-        val dataLength: Int,
-    ) : ASeq<MapEntry<K, V>>() {
-
-        @Suppress("UNCHECKED_CAST")
-        override fun first(): MapEntry<K, V> =
-            MapEntry(array[2 * dataIndex] as K, array[2 * dataIndex + 1] as V)
-
-        override fun rest(): ISeq<MapEntry<K, V>> = createNodeSeq(
-            array, lvl, nodes, cursorLengths, dataIndex, dataLength)
     }
 
     internal class HashCollisionNode<out K, out V>(
