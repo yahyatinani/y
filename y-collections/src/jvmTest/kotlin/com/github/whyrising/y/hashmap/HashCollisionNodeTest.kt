@@ -2,6 +2,7 @@ package com.github.whyrising.y.hashmap
 
 import com.github.whyrising.y.LeanMap.HashCollisionNode
 import com.github.whyrising.y.hasheq
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -59,5 +60,16 @@ class HashCollisionNodeTest : FreeSpec({
 
         hcNode1.dataArity() shouldBeExactly hcNode1.count
         hcNode2.dataArity() shouldBeExactly hcNode2.count
+    }
+
+    "getNode() should throw UnsupportedOperationException" {
+        val mutable = atomic(true)
+        val a: Array<Any?> = arrayOf("a", 1)
+        val hash = hasheq("a")
+        val hcNode = HashCollisionNode<String, Int>(mutable, hash, 1, a)
+
+        shouldThrowExactly<UnsupportedOperationException> {
+            hcNode.getNode(0)
+        }
     }
 })

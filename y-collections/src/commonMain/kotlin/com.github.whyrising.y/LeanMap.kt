@@ -444,9 +444,8 @@ class LeanMap {
 
         override fun dataArity(): Int = count
 
-        override fun getNode(nodeIndex: Int): Node<K, V> {
-            TODO("Not yet implemented")
-        }
+        override fun getNode(nodeIndex: Int): Node<K, V> =
+            throw UnsupportedOperationException()
 
         override fun isSingleKV(): Boolean = count == 1
 
