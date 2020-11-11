@@ -94,4 +94,30 @@ class HashCollisionNodeTest : FreeSpec({
             hcNode.nodeSeq()
         }.message shouldBe "HashCollisionNode has no nodes!"
     }
+
+    "find(...key, default) should return value" - {
+        "when key doesn't exist return default" {
+            val mutable = atomic(true)
+            val a: Array<Any?> = arrayOf("a", 1)
+            val hash = hasheq("a")
+            val hcNode = HashCollisionNode<String, Int>(mutable, hash, 1, a)
+            val default = -1
+
+            hcNode.find(0, hash, "b", default) shouldBeExactly default
+        }
+
+        "when exists, it should return the associated value" {
+            val mutable = atomic(true)
+            val a1: Array<Any?> = arrayOf("a", 1)
+            val a2: Array<Any?> = arrayOf(1, "1", 2L, "2L")
+            val hash1 = hasheq("a")
+            val hash2 = hasheq("2")
+            val hcNode1 = HashCollisionNode<String, Int>(mutable, hash1, 1, a1)
+            val hcNode2 = HashCollisionNode<Int, String>(mutable, hash2, 2, a2)
+            val default = -1
+
+            hcNode1.find(0, hash1, "a", default) shouldBeExactly 1
+            hcNode2.find(0, hash2, 2, "not_found") shouldBe "2L"
+        }
+    }
 })

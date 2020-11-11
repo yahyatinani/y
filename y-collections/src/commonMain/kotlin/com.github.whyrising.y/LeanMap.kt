@@ -450,13 +450,27 @@ class LeanMap {
 
         override fun isSingleKV(): Boolean = count == 1
 
+        private fun findIndexBy(key: @UnsafeVariance K): Int {
+            var i = 0
+            while (i < 2 * count) {
+                if (equiv(key, array[i])) return i
+
+                i += 2
+            }
+            return -1
+        }
+
+        @Suppress("UNCHECKED_CAST")
         override fun find(
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
             default: @UnsafeVariance V
-        ): V {
-            TODO("Not yet implemented")
+        ): V = findIndexBy(key).let { index ->
+            return when {
+                index < 0 -> default
+                else -> array[index + 1] as V
+            }
         }
 
         override fun find(
