@@ -442,9 +442,7 @@ class LeanMap {
 
         override fun nodeArity(): Int = 0
 
-        override fun dataArity(): Int {
-            TODO("Not yet implemented")
-        }
+        override fun dataArity(): Int = count
 
         override fun getNode(nodeIndex: Int): Node<K, V> {
             TODO("Not yet implemented")

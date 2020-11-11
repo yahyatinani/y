@@ -48,4 +48,16 @@ class HashCollisionNodeTest : FreeSpec({
 
         hcNode.nodeArity() shouldBeExactly 0
     }
+
+    "dataArity() should return count" {
+        val mutable = atomic(true)
+        val a1: Array<Any?> = arrayOf("a", 1)
+        val a2: Array<Any?> = arrayOf("a", 1, "b", 2)
+        val hash = hasheq("a")
+        val hcNode1 = HashCollisionNode<String, Int>(mutable, hash, 1, a1)
+        val hcNode2 = HashCollisionNode<String, Int>(mutable, hash, 2, a2)
+
+        hcNode1.dataArity() shouldBeExactly hcNode1.count
+        hcNode2.dataArity() shouldBeExactly hcNode2.count
+    }
 })
