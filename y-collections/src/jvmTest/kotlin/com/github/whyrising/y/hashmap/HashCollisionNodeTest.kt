@@ -7,6 +7,7 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlinx.atomicfu.atomic
 
@@ -71,7 +72,7 @@ class HashCollisionNodeTest : FreeSpec({
 
         shouldThrowExactly<UnsupportedOperationException> {
             hcNode.getNode(0)
-        }
+        }.message shouldBe "HashCollisionNode has no nodes!"
     }
 
     "array property" {
@@ -81,5 +82,16 @@ class HashCollisionNodeTest : FreeSpec({
         val hcNode = HashCollisionNode<String, Int>(mutable, hash, 1, a)
 
         hcNode.array shouldBeSameInstanceAs a
+    }
+
+    "nodeSeq() should throw UnsupportedOperationException" {
+        val mutable = atomic(true)
+        val a: Array<Any?> = arrayOf("a", 1)
+        val hash = hasheq("a")
+        val hcNode = HashCollisionNode<String, Int>(mutable, hash, 1, a)
+
+        shouldThrowExactly<UnsupportedOperationException> {
+            hcNode.nodeSeq()
+        }.message shouldBe "HashCollisionNode has no nodes!"
     }
 })

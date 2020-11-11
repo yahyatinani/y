@@ -445,7 +445,8 @@ class LeanMap {
         override fun dataArity(): Int = count
 
         override fun getNode(nodeIndex: Int): Node<K, V> =
-            throw UnsupportedOperationException()
+            throw UnsupportedOperationException(
+                "HashCollisionNode has no nodes!")
 
         override fun isSingleKV(): Boolean = count == 1
 
@@ -466,9 +467,9 @@ class LeanMap {
             TODO("Not yet implemented")
         }
 
-        override fun nodeSeq(): ISeq<MapEntry<K, V>> {
-            TODO("Not yet implemented")
-        }
+        override fun nodeSeq(): ISeq<MapEntry<K, V>> =
+            throw UnsupportedOperationException(
+                "HashCollisionNode has no nodes!")
     }
 
     companion object {
