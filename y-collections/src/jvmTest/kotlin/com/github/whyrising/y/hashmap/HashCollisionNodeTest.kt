@@ -1,5 +1,6 @@
 package com.github.whyrising.y.hashmap
 
+import com.github.whyrising.y.Box
 import com.github.whyrising.y.LeanMap.HashCollisionNode
 import com.github.whyrising.y.MapEntry
 import com.github.whyrising.y.hasheq
@@ -7,10 +8,13 @@ import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import kotlinx.atomicfu.atomic
 
 @ExperimentalStdlibApi
@@ -144,6 +148,128 @@ class HashCollisionNodeTest : FreeSpec({
 
             hcNode1.find(0, hash1, "a") shouldBe MapEntry("a", 1)
             hcNode2.find(0, hash2, 2) shouldBe MapEntry(2L, "2L")
+        }
+    }
+
+    "assoc()" - {
+        "when it is allowed to mutate this HashCollisionNode" - {
+            """when key doesn't exist, it should add the new pair by mutating
+               this array""" {
+                val mutable = atomic(true)
+                val a: Array<Any?> = arrayOf("a", 1)
+                val leafFlag = Box(null)
+                val hcNode =
+                    HashCollisionNode<String, Int>(mutable, hasheq("a"), 1, a)
+
+                val newHcNode =
+                    hcNode.assoc(mutable, 0, hasheq("b"), "b", 2, leafFlag)
+                        as HashCollisionNode<String, Int>
+
+                newHcNode shouldBeSameInstanceAs hcNode
+                leafFlag.value shouldBeSameInstanceAs leafFlag
+                newHcNode.count shouldBeExactly 2
+                newHcNode.array.size shouldBeExactly 4
+                newHcNode.array shouldContain "b"
+                newHcNode.array shouldContain 2
+            }
+
+            """when key already exist, it should update the value associated
+               with it if they're different""" {
+                val mutable = atomic(true)
+                val a: Array<Any?> = arrayOf("a", 1)
+                val addedLeaf = Box(null)
+                val hcNode =
+                    HashCollisionNode<String, Int>(mutable, hasheq("a"), 1, a)
+
+                val newHcNode =
+                    hcNode.assoc(mutable, 0, hasheq("a"), "a", 7, addedLeaf)
+                        as HashCollisionNode<String, Int>
+
+                newHcNode shouldBeSameInstanceAs hcNode
+                addedLeaf.value.shouldBeNull()
+                newHcNode.count shouldBeExactly hcNode.count
+                newHcNode.array shouldBeSameInstanceAs hcNode.array
+                newHcNode.array.size shouldBeExactly 2
+                newHcNode.array shouldContain "a"
+                newHcNode.array shouldContain 7
+            }
+        }
+
+        "when it is NOT allowed to mutate this HashCollisionNode" - {
+            """when key doesn't exist, it should add the new pair and return a
+                new HashCollisionNode""" {
+                val mutable = atomic(false)
+                val a: Array<Any?> = arrayOf("a", 1)
+                val leafFlag = Box(null)
+                val hcNode =
+                    HashCollisionNode<String, Int>(mutable, hasheq("a"), 1, a)
+
+                val newHcNode =
+                    hcNode.assoc(atomic(true), 0, hasheq("b"), "b", 2, leafFlag)
+                        as HashCollisionNode<String, Int>
+
+                hcNode.count shouldBeExactly 1
+                hcNode.array.size shouldBeExactly 2
+                hcNode.array[0] shouldBe "a"
+                hcNode.array[1] shouldBe 1
+
+                leafFlag.value shouldBeSameInstanceAs leafFlag
+                newHcNode shouldNotBeSameInstanceAs hcNode
+                newHcNode.isMutable shouldBeSameInstanceAs hcNode.isMutable
+                newHcNode.hash shouldBeExactly hcNode.hash
+                newHcNode.count shouldBeExactly 2
+                newHcNode.array.size shouldBeExactly 4
+                newHcNode.array shouldContain "b"
+                newHcNode.array shouldContain 2
+            }
+
+            """when key already exist but values are different, it should 
+               return a new node with updated value""" {
+                val mutable = atomic(false)
+                val a: Array<Any?> = arrayOf("a", 1)
+                val leafFlag = Box(null)
+                val hcNode =
+                    HashCollisionNode<String, Int>(mutable, hasheq("a"), 1, a)
+
+                val newHcNode =
+                    hcNode.assoc(atomic(true), 0, hasheq("a"), "a", 7, leafFlag)
+                        as HashCollisionNode<String, Int>
+
+                hcNode.count shouldBeExactly 1
+                hcNode.array.size shouldBeExactly 2
+                hcNode.array[0] shouldBe "a"
+                hcNode.array[1] shouldBe 1
+
+                leafFlag.value.shouldBeNull()
+                newHcNode shouldNotBeSameInstanceAs hcNode
+                newHcNode.isMutable shouldBeSameInstanceAs hcNode.isMutable
+                newHcNode.hash shouldBeExactly hcNode.hash
+                newHcNode.count shouldBeExactly 1
+                newHcNode.array.size shouldBeExactly 2
+                newHcNode.array shouldContain "a"
+                newHcNode.array shouldContain 7
+            }
+
+            """when key already exist AND values are equal, it should 
+               return this without any updates""" {
+                val mutable = atomic(false)
+                val a: Array<Any?> = arrayOf("a", 1)
+                val leafFlag = Box(null)
+                val hcNode =
+                    HashCollisionNode<String, Int>(mutable, hasheq("a"), 1, a)
+
+                val newHcNode =
+                    hcNode.assoc(atomic(true), 0, hasheq("a"), "a", 1, leafFlag)
+                        as HashCollisionNode<String, Int>
+
+                hcNode.count shouldBeExactly 1
+                hcNode.array.size shouldBeExactly 2
+                hcNode.array[0] shouldBe "a"
+                hcNode.array[1] shouldBe 1
+
+                newHcNode shouldBeSameInstanceAs hcNode
+                leafFlag.value.shouldBeNull()
+            }
         }
     }
 })

@@ -133,7 +133,7 @@ class LeanMap {
             index: Int, value: Any?, isMutable: AtomicBoolean
         ): BitMapIndexedNode<K, V> =
             // TODO: Review : Consider using the thread id instead of isMutable
-            if (assertMutable(this.isMutable, isMutable)) {
+            if (isMutable(this.isMutable, isMutable)) {
                 array[index] = value
                 this
             } else {
@@ -385,9 +385,6 @@ class LeanMap {
 
             fun bitmapNodeIndex(bitmap: Int, bitpos: Int): Int =
                 (bitmap and (bitpos - 1)).countOneBits()
-
-            fun assertMutable(x: AtomicBoolean, y: AtomicBoolean) =
-                x == y && x.value
         }
     }
 
@@ -411,9 +408,62 @@ class LeanMap {
     internal class HashCollisionNode<out K, out V>(
         val isMutable: AtomicBoolean,
         val hash: Int,
-        val count: Int,
-        override val array: Array<Any?>
+        var count: Int,
+        override var array: Array<Any?>
     ) : Node<K, V> {
+
+        private fun mutableAssoc(
+            index: Int,
+            key: @UnsafeVariance K,
+            value: @UnsafeVariance V,
+            leafFlag: Box
+        ): HashCollisionNode<K, V> {
+            when (index) {
+                -1 -> {
+                    val newArray = arrayOfNulls<Any?>(array.size + 2)
+                    array.copyInto(newArray, 0, 0, array.size)
+                    newArray[array.size] = key
+                    newArray[array.size + 1] = value
+                    leafFlag.value = leafFlag
+
+                    array = newArray
+                    count++
+                }
+                else -> if (value != array[index + 1]) array[index + 1] = value
+            }
+
+            return this
+        }
+
+        private fun persistentAssoc(
+            index: Int,
+            key: @UnsafeVariance K,
+            value: @UnsafeVariance V,
+            leafFlag: Box
+        ): Node<K, V> = when (index) {
+            -1 -> {
+                val newArray = arrayOfNulls<Any?>(array.size + 2)
+                array.copyInto(newArray, 0, 0, array.size)
+                newArray[array.size] = key
+                newArray[array.size + 1] = value
+                leafFlag.value = leafFlag
+
+                HashCollisionNode(
+                    this.isMutable, hash, count + 1, newArray)
+            }
+            else -> when (value) {
+                array[index + 1] -> {
+                    this
+                }
+                else -> {
+                    val newArray = array.copyOf()
+                    newArray[index + 1] = value
+
+                    HashCollisionNode(
+                        this.isMutable, hash, count, newArray)
+                }
+            }
+        }
 
         override fun assoc(
             isMutable: AtomicBoolean,
@@ -422,8 +472,12 @@ class LeanMap {
             key: @UnsafeVariance K,
             value: @UnsafeVariance V,
             leafFlag: Box
-        ): Node<K, V> {
-            TODO("Not yet implemented")
+        ): Node<K, V> = findIndexBy(key).let { index ->
+            when {
+                isMutable(this.isMutable, isMutable) ->
+                    mutableAssoc(index, key, value, leafFlag)
+                else -> persistentAssoc(index, key, value, leafFlag)
+            }
         }
 
         override fun without(
@@ -496,6 +550,9 @@ class LeanMap {
         fun mask(hash: Int, shift: Int): Int = (hash ushr shift) and 0x01f
 
         fun bitpos(hash: Int, shift: Int): Int = 1 shl mask(hash, shift)
+
+        fun isMutable(x: AtomicBoolean, y: AtomicBoolean) =
+            x == y && x.value
 
         private fun <K, V> createNodeSeq(
             array: Array<Any?>,
