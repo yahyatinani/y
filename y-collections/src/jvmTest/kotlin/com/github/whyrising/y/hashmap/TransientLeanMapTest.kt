@@ -9,6 +9,7 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
@@ -61,6 +62,7 @@ class TransientLeanMapTest : FreeSpec({
 
 
         r1 shouldBeSameInstanceAs trlm
+        r1.leafFlag.value.shouldNotBeNull()
         r1.count shouldBeExactly 1
         r1.root shouldBeSameInstanceAs trlm.root
         root1.array[0] shouldBe "a"
@@ -68,6 +70,8 @@ class TransientLeanMapTest : FreeSpec({
 
         val r2 = r1.doAssoc("b", 2) as TransientLeanMap<String, Int>
         val root2 = r2.root.value as LeanMap.BitMapIndexedNode<String, Int>
+
+        r2.leafFlag.value.shouldNotBeNull()
         r2 shouldBeSameInstanceAs trlm
         r2.count shouldBeExactly 2
         r2.root shouldBeSameInstanceAs r1.root
@@ -76,5 +80,22 @@ class TransientLeanMapTest : FreeSpec({
         root2.array[1] shouldBe 1
         root2.array[2] shouldBe "b"
         root2.array[3] shouldBe 2
+    }
+
+    "doDissoc(key)" {
+        val tm = TransientLeanMap<String, Int>(EmptyLeanMap)
+        val trlm = tm.assoc("a", 1).assoc("b", 2).assoc("c", 3) as
+            TransientLeanMap<String, Int>
+
+        val result = trlm.doDissoc("b") as TransientLeanMap<String, Int>
+        val root = result.root.value as LeanMap.BitMapIndexedNode<String, Int>
+
+        result.leafFlag.value.shouldNotBeNull()
+        result.count shouldBeExactly 2
+        root.array.size shouldBeExactly 4
+        root.array[0] shouldBe "a"
+        root.array[1] shouldBe 1
+        root.array[2] shouldBe "c"
+        root.array[3] shouldBe 3
     }
 })

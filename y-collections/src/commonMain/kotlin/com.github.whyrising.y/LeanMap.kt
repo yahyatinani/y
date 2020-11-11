@@ -176,14 +176,27 @@ sealed class LeanMap<out K, out V>(
             return this
         }
 
+        @ExperimentalStdlibApi
         override fun doDissoc(key: @UnsafeVariance K): ITransientMap<K, V> {
-            TODO("Not yet implemented")
+            leafFlag.value = null
+            var node: Node<K, V> = root.value ?: EmptyBitMapIndexedNode
+
+            node = node.without(isMutable, 0, hasheq(key), key, leafFlag)
+
+            if (node != root.value) root.value = node
+
+            if (leafFlag.value != null) _count.value = _count.value - 1
+
+            return this
         }
 
         override fun doPersistent(): IPersistentMap<K, V> {
-            // TODO: consider returning EmptyLeanMap when count == 0
             isMutable.value = false
-            return LMap(_count.value, root.value)
+
+            return when (_count.value) {
+                0 -> EmptyLeanMap
+                else -> LMap(_count.value, root.value)
+            }
         }
 
         override fun doValAt(
