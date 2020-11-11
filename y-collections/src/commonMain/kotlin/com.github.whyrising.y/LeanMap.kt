@@ -813,5 +813,13 @@ sealed class LeanMap<out K, out V>(
         }
 
         operator fun <K, V> invoke(): LeanMap<K, V> = EmptyLeanMap
+
+        operator fun <K, V> invoke(vararg pairs: Pair<K, V>): LeanMap<K, V> {
+            var ret: ITransientMap<K, V> = EmptyLeanMap.asTransient()
+            
+            for (pair in pairs) ret = ret.assoc(pair.first, pair.second)
+
+            return ret.persistent() as LeanMap<K, V>
+        }
     }
 }

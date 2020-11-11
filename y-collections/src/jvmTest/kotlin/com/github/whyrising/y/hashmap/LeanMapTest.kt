@@ -30,4 +30,10 @@ class LeanMapTest : FreeSpec({
         t.count shouldBeExactly 0
         t.root.value.shouldBeNull()
     }
+
+    "invoke(...pairs)" {
+        LeanMap("a" to 1).count shouldBeExactly 1
+        LeanMap("a" to 1, "b" to 2).count shouldBeExactly 2
+        LeanMap("a" to 1, "b" to 2, "c" to 3).count shouldBeExactly 3
+    }
 })
