@@ -28,9 +28,7 @@ sealed class LeanMap<out K, out V>(
             TODO("Not yet implemented")
         }
 
-        override fun containsKey(key: @UnsafeVariance K): Boolean {
-            TODO("Not yet implemented")
-        }
+        override fun containsKey(key: @UnsafeVariance K): Boolean = false
 
         override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? = null
 
@@ -64,9 +62,10 @@ sealed class LeanMap<out K, out V>(
             TODO("Not yet implemented")
         }
 
-        override fun containsKey(key: @UnsafeVariance K): Boolean {
-            TODO("Not yet implemented")
-        }
+        @Suppress("UNCHECKED_CAST")
+        @ExperimentalStdlibApi
+        override fun containsKey(key: @UnsafeVariance K): Boolean =
+            _root.find(0, hasheq(key), key, NOT_FOUND as V) != NOT_FOUND
 
         @ExperimentalStdlibApi
         override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? {
@@ -737,7 +736,7 @@ sealed class LeanMap<out K, out V>(
     }
 
     companion object {
-//        internal val NOT_FOUND_TOKEN = Any()
+        internal val NOT_FOUND = Any()
 
         fun mask(hash: Int, shift: Int): Int = (hash ushr shift) and 0x01f
 
