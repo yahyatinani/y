@@ -1,6 +1,8 @@
 package com.github.whyrising.y.hashmap
 
 import com.github.whyrising.y.Box
+import com.github.whyrising.y.LeanMap.BitMapIndexedNode
+import com.github.whyrising.y.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import com.github.whyrising.y.LeanMap.HashCollisionNode
 import com.github.whyrising.y.MapEntry
 import com.github.whyrising.y.hasheq
@@ -12,7 +14,6 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import kotlinx.atomicfu.atomic
@@ -269,6 +270,92 @@ class HashCollisionNodeTest : FreeSpec({
 
                 newHcNode shouldBeSameInstanceAs hcNode
                 leafFlag.value.shouldBeNull()
+            }
+        }
+    }
+
+    "without()" - {
+        "when key doesn't exist, it should return this as it is" {
+            val mutable = atomic(false)
+            val a: Array<Any?> = arrayOf("a", 1)
+            val removedLeaf = Box(null)
+            val hcNode =
+                HashCollisionNode<String, Int>(mutable, hasheq("a"), 1, a)
+
+            val newHcNode =
+                hcNode.without(mutable, 0, hasheq("b"), "b", removedLeaf)
+                    as HashCollisionNode<String, Int>
+
+            newHcNode shouldBeSameInstanceAs hcNode
+        }
+
+        "when key does exist" - {
+            "when count == 1, it should return the EmptyBitmapIndexedNode" {
+                val mutable = atomic(false)
+                val a: Array<Any?> = arrayOf("a", 1)
+                val removedLeaf = Box(null)
+                val key = "a"
+                val keyHash = hasheq(key)
+                val hcNode =
+                    HashCollisionNode<String, Int>(mutable, keyHash, 1, a)
+
+                val newHcNode =
+                    hcNode.without(mutable, 0, keyHash, key, removedLeaf)
+
+                newHcNode shouldBeSameInstanceAs EmptyBitMapIndexedNode
+                removedLeaf.value shouldBeSameInstanceAs removedLeaf
+            }
+
+            "when count == 2, return the one pair left as a BitmapIndexedNode" {
+                val mutable = atomic(false)
+                val a: Array<Any?> = arrayOf("a", 1, "b", 2)
+                val removedLeaf = Box(null)
+                val key = "a"
+                val keyHash = hasheq(key)
+                val hcNode =
+                    HashCollisionNode<String, Int>(mutable, keyHash, 2, a)
+
+                val newHcNode1 =
+                    hcNode.without(mutable, 0, keyHash, key, removedLeaf)
+                        as BitMapIndexedNode<String, Int>
+
+                val newHcNode2 =
+                    hcNode.without(mutable, 0, hasheq("b"), "b", Box(null))
+                        as BitMapIndexedNode<String, Int>
+
+                newHcNode1.isMutable shouldBeSameInstanceAs mutable
+                newHcNode1.nodemap shouldBeExactly 0
+                newHcNode1.datamap shouldBeExactly 131072
+                newHcNode1.array.size shouldBeExactly 2
+                newHcNode1.array[0] shouldBe "b"
+                newHcNode1.array[1] shouldBe 2
+
+                newHcNode2.array[0] shouldBe "a"
+                newHcNode2.array[1] shouldBe 1
+            }
+
+            "when count > 2, return HashCollisionNode without the pair" {
+                val mutable = atomic(false)
+                val a: Array<Any?> = arrayOf("a", 1, "b", 2, "c", 3)
+                val removedLeaf = Box(null)
+                val key = "a"
+                val keyHash = hasheq(key)
+                val hcNode =
+                    HashCollisionNode<String, Int>(mutable, keyHash, 3, a)
+
+                val newHcNode =
+                    hcNode.without(mutable, 0, keyHash, key, removedLeaf)
+                        as HashCollisionNode<String, Int>
+
+                hcNode.count shouldBeExactly 3
+                hcNode.array.size shouldBeExactly 6
+
+                newHcNode.count shouldBeExactly 2
+                newHcNode.array.size shouldBeExactly 4
+                newHcNode.array[0] shouldBe  "b"
+                newHcNode.array[1] shouldBe 2
+                newHcNode.array[2] shouldBe "c"
+                newHcNode.array[3] shouldBe 3
             }
         }
     }

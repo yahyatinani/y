@@ -1,5 +1,6 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.atomic
 
@@ -480,6 +481,17 @@ class LeanMap {
             }
         }
 
+        private fun removePair(keyIndex: Int): Array<Any?> {
+            val newArray = arrayOfNulls<Any?>(array.size - 2)
+
+            array.copyInto(newArray, 0, 0, keyIndex)
+            array.copyInto(newArray, keyIndex, keyIndex + 2, array.size)
+
+            return newArray
+        }
+
+        @ExperimentalStdlibApi
+        @Suppress("UNCHECKED_CAST")
         override fun without(
             isMutable: AtomicBoolean,
             shift: Int,
@@ -487,7 +499,29 @@ class LeanMap {
             key: @UnsafeVariance K,
             removedLeaf: Box
         ): Node<K, V> {
-            TODO("Not yet implemented")
+            val index = findIndexBy(key)
+
+            if (index == -1) return this
+
+            removedLeaf.value = removedLeaf
+
+            return when (count) {
+                1 -> EmptyBitMapIndexedNode
+                2 -> (if (index == 0) 2 else 0).let { remainingIdx ->
+                    BitMapIndexedNode<K, V>()
+                        .assoc(
+                            isMutable,
+                            0,
+                            keyHash,
+                            array[remainingIdx] as K,
+                            array[remainingIdx + 1] as V,
+                            removedLeaf
+                        )
+
+                }
+                else -> HashCollisionNode(
+                    isMutable, keyHash, count - 1, removePair(index))
+            }
         }
 
         override fun hasNodes(): Boolean = false
