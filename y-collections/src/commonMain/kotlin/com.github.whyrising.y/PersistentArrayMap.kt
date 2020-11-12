@@ -54,6 +54,7 @@ sealed class PersistentArrayMap<out K, out V>(
         return createArrayMap(newPairs)
     }
 
+    @ExperimentalStdlibApi
     override fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V):
         IPersistentMap<K, V> {
         val index: Int = indexOf(key)
@@ -62,12 +63,12 @@ sealed class PersistentArrayMap<out K, out V>(
         if (keyIsAlreadyAvailable(index))
             throw RuntimeException("The key $key is already present.")
 
-        // TODO: if pairs.size >= HASHTABLE_THRESHOLD, create a HashMap
+        if (array.size >= HASHTABLE_THRESHOLD)
+            return LeanMap(*array).assocNew(key, value)
 
         newPairs = arrayOfNulls(array.size + 1)
 
-        if (array.isNotEmpty())
-            array.copyInto(newPairs, 0, 0, array.size)
+        if (array.isNotEmpty()) array.copyInto(newPairs, 0, 0, array.size)
 
         newPairs[newPairs.size - 1] = Pair(key, value)
 

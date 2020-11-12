@@ -777,8 +777,26 @@ class PersistentArrayMapTest : FreeSpec({
                 pairs[array.size].second shouldBe value
             }
 
-            "when size >= THRESHOLD, it should return PersistentHashMap" {
-                // TODO : when PersistentHashMap is  implemented
+            @Suppress("UNCHECKED_CAST")
+            "when size >= THRESHOLD, it should return LeanMap" {
+                val size = 16
+                val array: Array<Pair<String, Int>?> = arrayOfNulls(size)
+                var i = 0
+                while (i < size) {
+                    array[i] = Pair("$i", i)
+                    i++
+                }
+                val m = am(*(array as Array<Pair<String, Int>>))
+
+                val map = m.assocNew("a", 863) as LeanMap<String, Int>
+
+                m.containsKey("a").shouldBeFalse()
+
+                map.count shouldBeExactly size + 1
+                map.containsKey("a").shouldBeTrue()
+                shouldThrowExactly<RuntimeException> {
+                    map.assocNew("a", -1)
+                }.message shouldBe "The key a is already present."
             }
         }
 

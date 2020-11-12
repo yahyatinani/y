@@ -14,6 +14,7 @@ class MockPersistentMap<K, V> private constructor(
     override fun assoc(key: K, value: V): IPersistentMap<K, V> =
         map.assoc(key, value)
 
+    @ExperimentalStdlibApi
     override fun assocNew(key: K, value: V): IPersistentMap<K, V> =
         map.assocNew(key, value)
 
