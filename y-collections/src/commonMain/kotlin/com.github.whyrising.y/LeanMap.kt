@@ -10,16 +10,26 @@ sealed class LeanMap<out K, out V>(
     override val count: Int, val root: Node<K, V>?
 ) : APersistentMap<K, V>(), IMutableCollection<Any?> {
 
+    @ExperimentalStdlibApi
+    override fun assoc(
+        key: @UnsafeVariance K,
+        value: @UnsafeVariance V
+    ): IPersistentMap<K, V> {
+        val addedLeaf = Box(null)
+        val newRoot = (root ?: EmptyBitMapIndexedNode)
+            .assoc(atomic(false), 0, hasheq(key), key, value, addedLeaf)
+
+        if (newRoot == this.root) return this
+
+        return LMap(if (addedLeaf.value == null) count else count + 1, newRoot)
+    }
+
     override fun asTransient(): ITransientMap<K, V> =
         TransientLeanMap(this)
 
     override fun empty(): IPersistentCollection<Any?> = EmptyLeanMap
 
     abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
-        override fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
-            TODO("Not yet implemented")
-        }
-
         override fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
             TODO("Not yet implemented")
         }
@@ -50,10 +60,6 @@ sealed class LeanMap<out K, out V>(
     internal class LMap<out K, out V>(
         _count: Int, private val _root: Node<K, V>
     ) : LeanMap<K, V>(_count, _root) {
-        override fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
-            TODO("Not yet implemented")
-        }
-
         override fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
             TODO("Not yet implemented")
         }

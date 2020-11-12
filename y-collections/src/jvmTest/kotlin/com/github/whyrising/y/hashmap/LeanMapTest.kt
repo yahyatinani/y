@@ -2,6 +2,7 @@ package com.github.whyrising.y.hashmap
 
 import com.github.whyrising.y.Associative
 import com.github.whyrising.y.LeanMap
+import com.github.whyrising.y.LeanMap.BitMapIndexedNode
 import com.github.whyrising.y.LeanMap.Companion.bitpos
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
 import com.github.whyrising.y.LeanMap.NodeSeq
@@ -15,6 +16,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 
 @ExperimentalStdlibApi
 class LeanMapTest : FreeSpec({
@@ -96,5 +98,34 @@ class LeanMapTest : FreeSpec({
         map.containsKey("x").shouldBeFalse()
         map.containsKey("a").shouldBeTrue()
         map.containsKey(null).shouldBeTrue()
+    }
+
+    "assoc(key, value)" - {
+        "when key doesn't exist, it should add the new key/value" {
+            val key = "x"
+            val value = 77
+            val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+            val newMap1 = LeanMap<String, Int>().assoc(key, value)
+            val newMap2 = map.assoc(key, value)
+
+            newMap1.count shouldBeExactly 1
+            newMap2.containsKey(key)
+
+            newMap2.count shouldBeExactly map.count + 1
+            newMap2.containsKey(key)
+        }
+
+        "when key already exists, it should update the assoc value" {
+            val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+            val newMap = map.assoc("a", 77) as LeanMap<String, Int>
+
+            newMap shouldNotBeSameInstanceAs map
+            (newMap.root as BitMapIndexedNode<String, Int>)
+                .isMutable.value.shouldBeFalse()
+            newMap.count shouldBeExactly map.count
+            newMap("a") shouldBe 77
+        }
     }
 })
