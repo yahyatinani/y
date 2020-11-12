@@ -103,12 +103,12 @@ sealed class LeanMap<out K, out V>(
         override fun seq(): ISeq<Any?> = _root.nodeSeq()
 
         override fun iterator(): Iterator<Map.Entry<K, V>> =
-            NodeIter(_root) { MapEntry(it.first, it.second) }
+            NodeIter(_root, makeMapEntry)
 
         override fun keyIterator(): Iterator<K> =
-            NodeIter(_root) { it.first }
+            NodeIter(_root, makeKey)
 
-        override fun valIterator(): Iterator<V> = NodeIter(_root) { it.second }
+        override fun valIterator(): Iterator<V> = NodeIter(_root, makeValue)
     }
 
     interface Node<out K, out V> {

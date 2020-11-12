@@ -212,6 +212,19 @@ abstract class APersistentMap<out K, out V> :
                 this@APersistentMap.iterator()
         }
 
+    protected val makeMapEntry: (
+        Pair<@UnsafeVariance K, @UnsafeVariance V>
+    ) -> MapEntry<K, V> = { MapEntry(it.first, it.second) }
+
+    protected val makeKey: (Pair<@UnsafeVariance K, @UnsafeVariance V>) -> K = {
+        it.first
+    }
+
+    protected
+    val makeValue: (Pair<@UnsafeVariance K, @UnsafeVariance V>) -> V = {
+        it.second
+    }
+
     internal class KeySeq<out K, out V> private constructor(
         internal val _seq: ISeq<K>, val map: Iterable<Entry<K, V>>?
     ) : ASeq<K>() {

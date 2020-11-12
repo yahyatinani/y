@@ -126,17 +126,11 @@ sealed class PersistentArrayMap<out K, out V>(
 
     override fun empty(): IPersistentCollection<Any?> = EmptyArrayMap
 
-    override fun iterator(): Iterator<Entry<K, V>> = Iter(array) { pair ->
-        MapEntry(pair.first, pair.second)
-    }
+    override fun iterator(): Iterator<Entry<K, V>> = Iter(array, makeMapEntry)
 
-    override fun keyIterator(): Iterator<K> = Iter(array) { pair ->
-        pair.first
-    }
+    override fun keyIterator(): Iterator<K> = Iter(array, makeKey)
 
-    override fun valIterator(): Iterator<V> = Iter(array) { pair ->
-        pair.second
-    }
+    override fun valIterator(): Iterator<V> = Iter(array, makeValue)
 
     override fun asTransient(): ITransientMap<K, V> = TransientArrayMap(array)
 
