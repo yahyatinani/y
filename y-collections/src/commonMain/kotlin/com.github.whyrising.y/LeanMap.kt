@@ -174,7 +174,7 @@ sealed class LeanMap<out K, out V>(
 
         @Suppress("UNCHECKED_CAST")
         class NodeIter<K, V, R>(
-            private val _node: Node<K, V>,
+            _node: Node<K, V>,
             val _f: (Pair<K, V>) -> R
         ) : NodeIterator<K, V, R>(_node, _f) {
             private val _null = Any()
