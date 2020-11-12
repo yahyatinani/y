@@ -17,15 +17,15 @@ import io.kotest.matchers.types.shouldNotBeInstanceOf
 @Suppress("UNCHECKED_CAST")
 class APersistentMapTest : FreeSpec({
     "toString()" {
-        am<String, Int>().toString() shouldBe "{}"
-        am("a" to 1).toString() shouldBe "{a 1}"
-        am("a" to 1, "b" to 2).toString() shouldBe "{a 1, b 2}"
-        am("a" to 1, "b" to 2, "c" to 3).toString() shouldBe "{a 1, b 2, c 3}"
+        m<String, Int>().toString() shouldBe "{}"
+        m("a" to 1).toString() shouldBe "{a 1}"
+        m("a" to 1, "b" to 2).toString() shouldBe "{a 1, b 2}"
+        m("a" to 1, "b" to 2, "c" to 3).toString() shouldBe "{a 1, b 2, c 3}"
     }
 
     "hashCode()" {
         val array = arrayOf("a" to 1, "b" to 2)
-        val map = am(*array)
+        val map = m(*array)
         val expHash = ("a".hashCode() xor 1.hashCode()) +
             ("b".hashCode() xor 2.hashCode())
 
@@ -34,23 +34,23 @@ class APersistentMapTest : FreeSpec({
     }
 
     "equals(other)" {
-        (am("a" to 1, "b" to 2) == am("a" to 1, "b" to 2)).shouldBeTrue()
+        (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 2)).shouldBeTrue()
 
-        (am("a" to 1, "b" to 2).equals("string")).shouldBeFalse()
+        (m("a" to 1, "b" to 2).equals("string")).shouldBeFalse()
 
-        (am("a" to 1, "b" to 2) == am("a" to 1)).shouldBeFalse()
+        (m("a" to 1, "b" to 2) == m("a" to 1)).shouldBeFalse()
 
-        (am("a" to 1, "b" to 2) == am("a" to 1, "x" to 2)).shouldBeFalse()
+        (m("a" to 1, "b" to 2) == m("a" to 1, "x" to 2)).shouldBeFalse()
 
-        (am("a" to 1, "b" to 2) == am("a" to 1, "b" to 10)).shouldBeFalse()
+        (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 10)).shouldBeFalse()
 
-        (am("a" to 1, "b" to 2) == am("a" to 1, "b" to 2L)).shouldBeFalse()
+        (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 2L)).shouldBeFalse()
     }
 
     @Suppress("UNCHECKED_CAST")
     "conj(entry)" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = am(*array)
+        val map = m(*array)
 
         "when entry is a Map.Entry, it should call assoc() on it" {
             val newMap = map.conj(MapEntry("a", 99))
@@ -106,7 +106,7 @@ class APersistentMapTest : FreeSpec({
 
     "equiv(other)" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = am(*array)
+        val map = m(*array)
 
         "when other is not a Map, it should return false" {
             map.equiv("map").shouldBeFalse()
@@ -134,7 +134,7 @@ class APersistentMapTest : FreeSpec({
 
     "invoke() operator" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = am(*array)
+        val map = m(*array)
 
         "invoke(key, default)" {
             map("a", -1) shouldBe 1
@@ -148,7 +148,7 @@ class APersistentMapTest : FreeSpec({
     }
 
     "KeySeq" - {
-        val map = am("a" to 1, "b" to 2, "c" to 3)
+        val map = m("a" to 1, "b" to 2, "c" to 3)
 
         "KeySeq should be a seq" {
             val keySeq: ISeq<String> = KeySeq(map)
@@ -208,7 +208,7 @@ class APersistentMapTest : FreeSpec({
     }
 
     "ValSeq" - {
-        val map = am("a" to 1, "b" to 2, "c" to 3)
+        val map = m("a" to 1, "b" to 2, "c" to 3)
 
         "ValSeq should be a seq" {
             val valSeq: ISeq<Int> = ValSeq(map)
@@ -269,8 +269,8 @@ class APersistentMapTest : FreeSpec({
 
     "Map implementation" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = am(*array)
-        val emptyMap = am<String, Int>()
+        val map = m(*array)
+        val emptyMap = m<String, Int>()
 
         "size()" {
             map.size shouldBeExactly array.size
@@ -353,7 +353,7 @@ class APersistentMapTest : FreeSpec({
     }
 
     "IPersistentMap.keyz()" {
-        val map = am("a" to 1, "b" to 2, "c" to 3)
+        val map = m("a" to 1, "b" to 2, "c" to 3)
 
         val keys: ISeq<String> = map.keyz()
 
@@ -361,7 +361,7 @@ class APersistentMapTest : FreeSpec({
     }
 
     "IPersistentMap.vals()" {
-        val map = am("a" to 1, "b" to 2, "c" to 3)
+        val map = m("a" to 1, "b" to 2, "c" to 3)
 
         val vals: ISeq<Int> = map.vals()
 
