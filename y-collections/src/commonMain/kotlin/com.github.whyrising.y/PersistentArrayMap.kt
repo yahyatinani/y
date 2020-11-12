@@ -303,3 +303,6 @@ sealed class PersistentArrayMap<out K, out V>(
             }
     }
 }
+
+fun <K, V> m(vararg pairs: Pair<K, V>): PersistentArrayMap<K, V> =
+    PersistentArrayMap(*pairs)

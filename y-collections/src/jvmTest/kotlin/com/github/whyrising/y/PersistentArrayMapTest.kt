@@ -974,4 +974,12 @@ class PersistentArrayMapTest : FreeSpec({
             am<String, Int>().hashCode() shouldBeExactly 0
         }
     }
+
+    "m() should return a PersistentArrayMap" {
+        val map = m<String, Int>("a" to 1, "b" to 2)
+
+        map.count shouldBeExactly 2
+        map("a") shouldBe 1
+        map("b") shouldBe 2
+    }
 })
