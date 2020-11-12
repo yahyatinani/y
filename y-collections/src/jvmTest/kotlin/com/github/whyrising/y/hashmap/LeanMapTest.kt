@@ -17,6 +17,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 
 @ExperimentalStdlibApi
@@ -148,5 +149,36 @@ class LeanMapTest : FreeSpec({
             newMap.count shouldBeExactly map.count + 1
             newMap.containsKey(key).shouldBeTrue()
         }
+    }
+
+    "dissoc(key)" {
+        val emptyMap = LeanMap<String, Int>()
+        val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+        val newMap0 = emptyMap.dissoc("a")
+        val newMap1 = map.dissoc("a") as LeanMap<String, Int>
+        val newMap2 = map.dissoc("x") as LeanMap<String, Int>
+        val newMap3 = map.dissoc("a").dissoc("b").dissoc("c")
+        val root1 = newMap1.root as BitMapIndexedNode<String, Int>
+        val root2 = newMap2.root as BitMapIndexedNode<String, Int>
+
+
+        map.count shouldBeExactly 3
+        map.containsKey("a").shouldBeTrue()
+        map.containsKey("b").shouldBeTrue()
+        map.containsKey("c").shouldBeTrue()
+
+        newMap0 shouldBeSameInstanceAs EmptyLeanMap
+
+        root1.isMutable.value.shouldBeFalse()
+        newMap1.count shouldBeExactly map.count - 1
+        newMap1.containsKey("a").shouldBeFalse()
+
+        root2.isMutable.value.shouldBeFalse()
+        newMap2 shouldBeSameInstanceAs map
+        newMap2.count shouldBeExactly map.count
+
+        newMap3.count shouldBeExactly 0
+        newMap3 shouldBeSameInstanceAs EmptyLeanMap
     }
 })

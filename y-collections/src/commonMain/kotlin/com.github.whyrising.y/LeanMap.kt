@@ -40,9 +40,7 @@ sealed class LeanMap<out K, out V>(
     override fun empty(): IPersistentCollection<Any?> = EmptyLeanMap
 
     abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
-        override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
-            TODO("Not yet implemented")
-        }
+        override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> = this
 
         override fun containsKey(key: @UnsafeVariance K): Boolean = false
 
@@ -64,10 +62,20 @@ sealed class LeanMap<out K, out V>(
     object EmptyLeanMap : AEmptyLeanMap<Nothing, Nothing>()
 
     internal class LMap<out K, out V>(
-        _count: Int, private val _root: Node<K, V>
+        private val _count: Int, private val _root: Node<K, V>
     ) : LeanMap<K, V>(_count, _root) {
+
+        @ExperimentalStdlibApi
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
-            TODO("Not yet implemented")
+            val newRoot =
+                _root.without(atomic(false), 0, hasheq(key), key, Box(null))
+
+            if (newRoot == _root) return this
+
+            return when (val newCount = _count - 1) {
+                0 -> EmptyLeanMap
+                else -> LMap(newCount, newRoot)
+            }
         }
 
         @Suppress("UNCHECKED_CAST")
