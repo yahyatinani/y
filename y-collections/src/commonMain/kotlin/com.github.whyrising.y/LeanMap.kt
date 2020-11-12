@@ -934,7 +934,14 @@ sealed class LeanMap<out K, out V>(
         operator fun <K, V> invoke(vararg pairs: Pair<K, V>): LeanMap<K, V> {
             var ret: ITransientMap<K, V> = EmptyLeanMap.asTransient()
 
-            for (pair in pairs) ret = ret.assoc(pair.first, pair.second)
+            for (i in pairs.indices) {
+                val (key, value) = pairs[i]
+                
+                ret = ret.assoc(key, value)
+
+                if (ret.count != (i + 1))
+                    throw IllegalArgumentException("Duplicate key: $key")
+            }
 
             return ret.persistent() as LeanMap<K, V>
         }

@@ -55,6 +55,10 @@ class LeanMapTest : FreeSpec({
         LeanMap("a" to 1).count shouldBeExactly 1
         LeanMap("a" to 1, "b" to 2).count shouldBeExactly 2
         LeanMap("a" to 1, "b" to 2, "c" to 3).count shouldBeExactly 3
+
+        shouldThrowExactly<IllegalArgumentException> {
+            LeanMap("a" to 1, "b" to 2, "c" to 3, "c" to 4)
+        }.message shouldBe "Duplicate key: c"
     }
 
     "invoke(map)" {
