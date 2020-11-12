@@ -8,7 +8,7 @@ import kotlinx.atomicfu.atomic
 
 sealed class LeanMap<out K, out V>(
     override val count: Int, val root: Node<K, V>?
-) : APersistentMap<K, V>(), IMutableCollection<Any?> {
+) : APersistentMap<K, V>(), IMutableCollection<Any?>, MapIterable<K, V> {
 
     @ExperimentalStdlibApi
     override fun assoc(
@@ -34,10 +34,17 @@ sealed class LeanMap<out K, out V>(
         else -> assoc(key, value)
     }
 
-    override fun asTransient(): ITransientMap<K, V> =
-        TransientLeanMap(this)
+    override fun asTransient(): ITransientMap<K, V> = TransientLeanMap(this)
 
     override fun empty(): IPersistentCollection<Any?> = EmptyLeanMap
+
+    override fun keyIterator(): Iterator<K> {
+        TODO("Not yet implemented")
+    }
+
+    override fun valIterator(): Iterator<V> {
+        TODO("Not yet implemented")
+    }
 
     abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> = this
@@ -52,9 +59,8 @@ sealed class LeanMap<out K, out V>(
 
         override fun valAt(key: @UnsafeVariance K): V? = null
 
-        override fun iterator(): Iterator<Map.Entry<K, V>> {
-            TODO("Not yet implemented")
-        }
+        override fun iterator(): Iterator<Map.Entry<K, V>> =
+            NodeIterator.EmptyNodeIterator
 
         override fun seq(): ISeq<Any?> = emptySeq()
     }
@@ -96,9 +102,8 @@ sealed class LeanMap<out K, out V>(
         @ExperimentalStdlibApi
         override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
 
-        override fun iterator(): Iterator<Map.Entry<K, V>> {
-            TODO("Not yet implemented")
-        }
+        override fun iterator(): Iterator<Map.Entry<K, V>> =
+            NodeIterator.NodeIter(_root) { MapEntry(it.first, it.second) }
 
         override fun seq(): ISeq<Any?> = _root.nodeSeq()
     }
@@ -149,6 +154,112 @@ sealed class LeanMap<out K, out V>(
         ): IMapEntry<K, V>?
 
         fun nodeSeq(): ISeq<MapEntry<K, V>>
+    }
+
+    internal sealed class NodeIterator<K, V, R>(
+        val node: Node<K, V>?,
+        val f: (Pair<K, V>) -> R
+    ) : Iterator<R> {
+
+        object EmptyNodeIterator : NodeIterator<Nothing, Nothing, Nothing>(
+            null, { throw RuntimeException() }
+        ) {
+            override fun hasNext(): Boolean = false
+
+            override fun next(): Nothing = throw NoSuchElementException()
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        class NodeIter<K, V, R>(
+            private val _node: Node<K, V>,
+            val _f: (Pair<K, V>) -> R
+        ) : NodeIterator<K, V, R>(_node, _f) {
+            private val _null = Any()
+            private var nextEntry: R = _null as R
+
+            val nodes = arrayOfNulls<Node<K, V>>(7)
+            val cursorLengths = arrayOfNulls<Int>(7)
+
+            var array: Array<Any?> = _node.array
+            var lvl: Int = 0
+            var dataIndex: Int = 0
+            var dataLength: Int = _node.dataArity()
+
+            init {
+                nodes[0] = _node
+                cursorLengths[0] = _node.nodeArity()
+
+                when (dataLength) {
+                    0 -> advance()
+                    else -> dataLength--
+                }
+
+                val k = 2 * dataIndex
+                nextEntry = _f(Pair(array[k] as K, array[k + 1] as V))
+            }
+
+            private fun advance(): Boolean {
+                if (dataIndex < dataLength) {
+                    dataIndex++
+                    val k = 2 * dataIndex
+                    nextEntry = _f(Pair(array[k] as K, array[k + 1] as V))
+
+                    return true
+                } else {
+                    while (lvl >= 0)
+                        when (val nodeIndex = cursorLengths[lvl]) {
+                            0 -> lvl--
+                            else -> {
+                                cursorLengths[lvl] = nodeIndex!! - 1
+
+                                val n = nodes[lvl]!!.getNode(nodeIndex)
+                                val hasNodes = n.hasNodes()
+                                val newLvl = if (hasNodes) lvl + 1 else lvl
+
+                                if (hasNodes) {
+                                    nodes[newLvl] = n
+                                    cursorLengths[newLvl] = n.nodeArity()
+                                }
+
+                                if (n.hasData()) {
+                                    array = n.array
+                                    lvl = newLvl
+                                    dataIndex = 0
+                                    dataLength = n.dataArity() - 1
+                                    val k = 2 * dataIndex
+                                    val p = Pair(array[k] as K, array[k + 1] as V)
+                                    nextEntry = _f(p)
+
+                                    return true
+                                }
+
+                                lvl++
+                            }
+                        }
+
+                    return false
+                }
+            }
+
+            override fun hasNext(): Boolean = when {
+                nextEntry != _null -> true
+                else -> advance()
+            }
+
+            override fun next(): R {
+                val r = nextEntry
+
+                return when {
+                    r != _null -> {
+                        nextEntry = _null as R
+
+                        r
+                    }
+                    advance() -> next()
+                    else -> throw NoSuchElementException()
+                }
+            }
+        }
     }
 
     internal class TransientLeanMap<out K, out V> private constructor(

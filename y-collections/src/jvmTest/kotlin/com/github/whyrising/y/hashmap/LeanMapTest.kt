@@ -5,6 +5,8 @@ import com.github.whyrising.y.LeanMap
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode
 import com.github.whyrising.y.LeanMap.Companion.bitpos
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
+import com.github.whyrising.y.LeanMap.NodeIterator.EmptyNodeIterator
+import com.github.whyrising.y.LeanMap.NodeIterator.NodeIter
 import com.github.whyrising.y.LeanMap.NodeSeq
 import com.github.whyrising.y.LeanMap.TransientLeanMap
 import com.github.whyrising.y.MapEntry
@@ -19,6 +21,11 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.set
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
+import java.util.*
 
 @ExperimentalStdlibApi
 class LeanMapTest : FreeSpec({
@@ -180,5 +187,48 @@ class LeanMapTest : FreeSpec({
 
         newMap3.count shouldBeExactly 0
         newMap3 shouldBeSameInstanceAs EmptyLeanMap
+    }
+
+    "iterator()" - {
+        "when map is EmptyLeanMap it should return EmptyIterator" {
+            val emptyMap = LeanMap<String, Int>()
+
+            val iter = emptyMap.iterator() as EmptyNodeIterator
+
+            iter.hasNext().shouldBeFalse()
+            shouldThrowExactly<NoSuchElementException> {
+                iter.next()
+            }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        "when map is LMap, it should return NodeIter" {
+            val gen = Arb.set(Arb.string(0, 8), 0..6)
+            checkAll(gen) { set: Set<String> ->
+                val a = set.map { s: String -> Pair(s, Random().nextInt()) }
+                val map = LeanMap(*a.toTypedArray())
+
+                val iter = map.iterator()
+                    as LeanMap.NodeIterator<String, Int, MapEntry<String, Int>>
+
+                var i = 0
+                while (iter.hasNext()) {
+                    map.containsKey(iter.next().key).shouldBeTrue()
+                    i++
+                }
+
+                if (iter is NodeIter<String, Int, MapEntry<String, Int>>) {
+                    iter.node shouldBeSameInstanceAs map.root
+                    iter._f(a[0]) shouldBe MapEntry(a[0].first, a[0].second)
+                }
+
+                shouldThrowExactly<NoSuchElementException> { iter.next() }
+
+                when {
+                    set.isEmpty() -> i shouldBeExactly 0
+                    else -> i shouldBeExactly map.count
+                }
+            }
+        }
     }
 })
