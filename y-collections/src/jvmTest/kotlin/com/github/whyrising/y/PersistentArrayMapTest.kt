@@ -1,5 +1,6 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.LeanMap.TransientLeanMap
 import com.github.whyrising.y.PersistentArrayMap.ArrayMap
 import com.github.whyrising.y.PersistentArrayMap.EmptyArrayMap
 import com.github.whyrising.y.PersistentArrayMap.TransientArrayMap
@@ -109,8 +110,22 @@ class PersistentArrayMapTest : FreeSpec({
                     pairs[3]!!.second shouldBe 4
                 }
 
-                "when length >= array.length, return PersistentHashMap" {
-                    // TODO : when PersistentHashMap is  implemented
+                @Suppress("UNCHECKED_CAST")
+                "when length >= array.length, return TransientLeanMap" {
+                    val size = 16
+                    val a: Array<Pair<String, Int>?> = arrayOfNulls(size)
+                    var i = 0
+                    while (i < size) {
+                        a[i] = Pair("$i", i)
+                        i++
+                    }
+                    val tam = TransientArrayMap(a as Array<Pair<String, Int>>)
+
+                    val newTam = tam.doAssoc("a", 74)
+                        as TransientLeanMap<String, Int>
+
+                    newTam.count shouldBeExactly tam.count + 1
+                    newTam.containsKey("a")
                 }
             }
 
@@ -181,8 +196,22 @@ class PersistentArrayMapTest : FreeSpec({
                     pairs[3]!!.second shouldBe 4
                 }
 
+                @Suppress("UNCHECKED_CAST")
                 "when length >= array.length, return PersistentHashMap" {
-                    // TODO : when PersistentHashMap is  implemented
+                    val size = 16
+                    val a: Array<Pair<String, Int>?> = arrayOfNulls(size)
+                    var i = 0
+                    while (i < size) {
+                        a[i] = Pair("$i", i)
+                        i++
+                    }
+                    val tam = TransientArrayMap(a as Array<Pair<String, Int>>)
+
+                    val newTam = tam.assoc("a", 74)
+                        as TransientLeanMap<String, Int>
+
+                    newTam.count shouldBeExactly tam.count + 1
+                    newTam.containsKey("a")
                 }
             }
 
@@ -670,7 +699,7 @@ class PersistentArrayMapTest : FreeSpec({
                     val map = m.assoc("a", 863) as LeanMap<String, Int>
 
                     m.containsKey("a").shouldBeFalse()
-                    
+
                     map.count shouldBeExactly size + 1
                     map.containsKey("a").shouldBeTrue()
                 }

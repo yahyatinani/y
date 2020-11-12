@@ -208,6 +208,7 @@ sealed class PersistentArrayMap<out K, out V>(
             return -1
         }
 
+        @Suppress("UNCHECKED_CAST")
         override fun doAssoc(
             key: @UnsafeVariance K, value: @UnsafeVariance V
         ): ITransientMap<K, V> {
@@ -215,14 +216,13 @@ sealed class PersistentArrayMap<out K, out V>(
 
             indexOf(key).let { index ->
                 when {
-                    index >= 0 -> {
-                        if (array[index]!!.second != value)
-                            array[index] = Pair(key, value)
-                    }
-                    else -> {
-                        // TODO: if length >= array.length,
-                        //  create a PersistentHashMap
-                        array[length.value++] = Pair(key, value)
+                    index >= 0 -> if (array[index]!!.second != value)
+                        array[index] = Pair(key, value)
+                    else -> when {
+                        length.value >= array.size ->
+                            return LeanMap(*(array as Array<Pair<K, V>>))
+                                .asTransient().assoc(key, value)
+                        else -> array[length.value++] = Pair(key, value)
                     }
                 }
             }
