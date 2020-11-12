@@ -613,17 +613,19 @@ class PersistentArrayMapTest : FreeSpec({
             "when duplicate keys, it should throw an exception" {
                 shouldThrowExactly<IllegalArgumentException> {
                     am("a" to 1, "b" to 2, "b" to 3)
-                }
+                }.message shouldBe "Duplicate key: b"
+
                 shouldThrowExactly<IllegalArgumentException> {
                     am("a" to 1, "a" to 2, "b" to 3)
-                }
+                }.message shouldBe "Duplicate key: a"
+
                 shouldThrowExactly<IllegalArgumentException> {
                     am("a" to 1, "b" to 2, "a" to 3)
-                }
+                }.message shouldBe "Duplicate key: a"
 
                 shouldThrowExactly<IllegalArgumentException> {
                     am(1L to "a", 1 to "b")
-                }
+                }.message shouldBe "Duplicate key: 1"
             }
         }
 

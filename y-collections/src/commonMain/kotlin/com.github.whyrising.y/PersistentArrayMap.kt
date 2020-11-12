@@ -293,7 +293,7 @@ sealed class PersistentArrayMap<out K, out V>(
                         for (j in i + 1 until pairs.size)
                             if (areKeysEqual(pairs[i].first, pairs[j].first))
                                 throw IllegalArgumentException(
-                                    "Duplicate key: $i")
+                                    "Duplicate key: ${pairs[i].first}")
 
                     ArrayMap(pairs as Array<Pair<K, V>>)
                 }
