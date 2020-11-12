@@ -24,16 +24,22 @@ sealed class LeanMap<out K, out V>(
         return LMap(if (addedLeaf.value == null) count else count + 1, newRoot)
     }
 
+    @ExperimentalStdlibApi
+    override fun assocNew(
+        key: @UnsafeVariance K,
+        value: @UnsafeVariance V
+    ): IPersistentMap<K, V> = when {
+        containsKey(key) ->
+            throw  RuntimeException("The key $key is already present.")
+        else -> assoc(key, value)
+    }
+
     override fun asTransient(): ITransientMap<K, V> =
         TransientLeanMap(this)
 
     override fun empty(): IPersistentCollection<Any?> = EmptyLeanMap
 
     abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
-        override fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
-            TODO("Not yet implemented")
-        }
-
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
             TODO("Not yet implemented")
         }
@@ -60,10 +66,6 @@ sealed class LeanMap<out K, out V>(
     internal class LMap<out K, out V>(
         _count: Int, private val _root: Node<K, V>
     ) : LeanMap<K, V>(_count, _root) {
-        override fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V): IPersistentMap<K, V> {
-            TODO("Not yet implemented")
-        }
-
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
             TODO("Not yet implemented")
         }

@@ -10,6 +10,7 @@ import com.github.whyrising.y.LeanMap.TransientLeanMap
 import com.github.whyrising.y.MapEntry
 import com.github.whyrising.y.PersistentList.Empty
 import com.github.whyrising.y.hasheq
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -126,6 +127,26 @@ class LeanMapTest : FreeSpec({
                 .isMutable.value.shouldBeFalse()
             newMap.count shouldBeExactly map.count
             newMap("a") shouldBe 77
+        }
+    }
+
+    "assocNew(key, value)" - {
+        "when key already exists, it should throw an exception" {
+            val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+            shouldThrowExactly<RuntimeException> {
+                map.assocNew("a", 77)
+            }.message shouldBe "The key a is already present."
+        }
+
+        "when key is new, it should add the key/value to the map" {
+            val key = "x"
+            val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+            val newMap = map.assocNew(key, 77)
+
+            newMap.count shouldBeExactly map.count + 1
+            newMap.containsKey(key).shouldBeTrue()
         }
     }
 })
