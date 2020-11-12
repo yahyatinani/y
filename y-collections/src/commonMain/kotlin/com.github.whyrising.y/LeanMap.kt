@@ -929,14 +929,16 @@ sealed class LeanMap<out K, out V>(
             }
         }
 
-        operator fun <K, V> invoke(): LeanMap<K, V> = EmptyLeanMap
+        internal operator fun <K, V> invoke(): LeanMap<K, V> = EmptyLeanMap
 
-        operator fun <K, V> invoke(vararg pairs: Pair<K, V>): LeanMap<K, V> {
+        internal operator fun <K, V> invoke(
+            vararg pairs: Pair<K, V>
+        ): LeanMap<K, V> {
             var ret: ITransientMap<K, V> = EmptyLeanMap.asTransient()
 
             for (i in pairs.indices) {
                 val (key, value) = pairs[i]
-                
+
                 ret = ret.assoc(key, value)
 
                 if (ret.count != (i + 1))
@@ -946,7 +948,7 @@ sealed class LeanMap<out K, out V>(
             return ret.persistent() as LeanMap<K, V>
         }
 
-        operator fun <K, V> invoke(map: Map<K, V>): LeanMap<K, V> {
+        internal operator fun <K, V> invoke(map: Map<K, V>): LeanMap<K, V> {
             var ret: ITransientMap<K, V> = EmptyLeanMap.asTransient()
 
             for (entry in map.entries) ret = ret.assoc(entry.key, entry.value)
@@ -955,3 +957,9 @@ sealed class LeanMap<out K, out V>(
         }
     }
 }
+
+fun <K, V> hashMap(): LeanMap<K, V> =
+    LeanMap()
+
+fun <K, V> hashMap(vararg pairs: Pair<K, V>): LeanMap<K, V> =
+    LeanMap(*pairs)

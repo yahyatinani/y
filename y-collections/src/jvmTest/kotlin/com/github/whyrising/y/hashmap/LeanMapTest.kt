@@ -12,6 +12,7 @@ import com.github.whyrising.y.LeanMap.NodeSeq
 import com.github.whyrising.y.LeanMap.TransientLeanMap
 import com.github.whyrising.y.MapEntry
 import com.github.whyrising.y.PersistentList.Empty
+import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.hasheq
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
@@ -287,5 +288,15 @@ class LeanMapTest : FreeSpec({
 
             keyIter.next() shouldBe 1
         }
+    }
+
+    "hashMap()" {
+        val hashmap = hashMap("a" to 1, "b" to 2, "c" to 3)
+
+        hashMap<String, Int>() shouldBeSameInstanceAs EmptyLeanMap
+        hashmap.count shouldBeExactly 3
+        hashmap("a") shouldBe 1
+        hashmap("b") shouldBe 2
+        hashmap("c") shouldBe 3
     }
 })
