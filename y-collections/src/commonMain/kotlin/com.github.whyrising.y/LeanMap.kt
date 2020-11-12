@@ -1,6 +1,8 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
+import com.github.whyrising.y.LeanMap.NodeIterator.EmptyNodeIterator
+import com.github.whyrising.y.LeanMap.NodeIterator.NodeIter
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
@@ -38,14 +40,6 @@ sealed class LeanMap<out K, out V>(
 
     override fun empty(): IPersistentCollection<Any?> = EmptyLeanMap
 
-    override fun keyIterator(): Iterator<K> {
-        TODO("Not yet implemented")
-    }
-
-    override fun valIterator(): Iterator<V> {
-        TODO("Not yet implemented")
-    }
-
     abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> = this
 
@@ -59,10 +53,14 @@ sealed class LeanMap<out K, out V>(
 
         override fun valAt(key: @UnsafeVariance K): V? = null
 
-        override fun iterator(): Iterator<Map.Entry<K, V>> =
-            NodeIterator.EmptyNodeIterator
-
         override fun seq(): ISeq<Any?> = emptySeq()
+
+        override fun iterator(): Iterator<Map.Entry<K, V>> =
+            EmptyNodeIterator
+
+        override fun keyIterator(): Iterator<K> = EmptyNodeIterator
+
+        override fun valIterator(): Iterator<V> = EmptyNodeIterator
     }
 
     object EmptyLeanMap : AEmptyLeanMap<Nothing, Nothing>()
@@ -102,10 +100,15 @@ sealed class LeanMap<out K, out V>(
         @ExperimentalStdlibApi
         override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
 
-        override fun iterator(): Iterator<Map.Entry<K, V>> =
-            NodeIterator.NodeIter(_root) { MapEntry(it.first, it.second) }
-
         override fun seq(): ISeq<Any?> = _root.nodeSeq()
+
+        override fun iterator(): Iterator<Map.Entry<K, V>> =
+            NodeIter(_root) { MapEntry(it.first, it.second) }
+
+        override fun keyIterator(): Iterator<K> =
+            NodeIter(_root) { it.first }
+
+        override fun valIterator(): Iterator<V> = NodeIter(_root) { it.second }
     }
 
     interface Node<out K, out V> {

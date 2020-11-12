@@ -5,6 +5,7 @@ import com.github.whyrising.y.LeanMap
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode
 import com.github.whyrising.y.LeanMap.Companion.bitpos
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
+import com.github.whyrising.y.LeanMap.NodeIterator
 import com.github.whyrising.y.LeanMap.NodeIterator.EmptyNodeIterator
 import com.github.whyrising.y.LeanMap.NodeIterator.NodeIter
 import com.github.whyrising.y.LeanMap.NodeSeq
@@ -209,7 +210,7 @@ class LeanMapTest : FreeSpec({
                 val map = LeanMap(*a.toTypedArray())
 
                 val iter = map.iterator()
-                    as LeanMap.NodeIterator<String, Int, MapEntry<String, Int>>
+                    as NodeIterator<String, Int, MapEntry<String, Int>>
 
                 var i = 0
                 while (iter.hasNext()) {
@@ -229,6 +230,40 @@ class LeanMapTest : FreeSpec({
                     else -> i shouldBeExactly map.count
                 }
             }
+        }
+    }
+
+    "keyIterator()" - {
+        "when map is EmptyLeanMap it should return EmptyIterator" {
+            val emptyMap = LeanMap<String, Int>()
+
+            emptyMap.keyIterator() shouldBeSameInstanceAs EmptyNodeIterator
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        "when map is LMap, it should return NodeIter" {
+            val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+            val keyIter = map.keyIterator() as NodeIterator<String, Int, String>
+
+            keyIter.next() shouldBe "a"
+        }
+    }
+
+    "valIterator()" - {
+        "when map is EmptyLeanMap it should return EmptyIterator" {
+            val emptyMap = LeanMap<String, Int>()
+
+            emptyMap.valIterator() shouldBeSameInstanceAs EmptyNodeIterator
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        "when map is LMap, it should return NodeIter" {
+            val map = LeanMap("a" to 1, "b" to 2, "c" to 3)
+
+            val keyIter = map.valIterator() as NodeIterator<String, Int, Int>
+
+            keyIter.next() shouldBe 1
         }
     }
 })
