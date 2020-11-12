@@ -57,6 +57,24 @@ class LeanMapTest : FreeSpec({
         LeanMap("a" to 1, "b" to 2, "c" to 3).count shouldBeExactly 3
     }
 
+    "invoke(map)" {
+        val map1 = LeanMap(mapOf("a" to 1))
+        val map2 = LeanMap(mapOf("a" to 1, "b" to 2))
+        val map3 = LeanMap(mapOf("a" to 1, "b" to 2, "c" to 3))
+
+        map1.count shouldBeExactly 1
+        map1.containsKey("a")
+
+        map2.count shouldBeExactly 2
+        map2.containsKey("a")
+        map2.containsKey("b")
+
+        map3.count shouldBeExactly 3
+        map3.containsKey("a")
+        map3.containsKey("b")
+        map3.containsKey("c")
+    }
+
     "empty() should return EmptyLeanMap" {
         val map = LeanMap("a" to 1)
 

@@ -938,5 +938,13 @@ sealed class LeanMap<out K, out V>(
 
             return ret.persistent() as LeanMap<K, V>
         }
+
+        operator fun <K, V> invoke(map: Map<K, V>): LeanMap<K, V> {
+            var ret: ITransientMap<K, V> = EmptyLeanMap.asTransient()
+
+            for (entry in map.entries) ret = ret.assoc(entry.key, entry.value)
+
+            return ret.persistent() as LeanMap<K, V>
+        }
     }
 }
