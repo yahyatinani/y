@@ -24,6 +24,7 @@ import io.kotest.property.checkAll
 
 internal fun <K, V> am(vararg pairs: Pair<K, V>) = PersistentArrayMap(*pairs)
 
+@ExperimentalStdlibApi
 class PersistentArrayMapTest : FreeSpec({
     "TransientArrayMap" - {
         "ctor" {
@@ -655,8 +656,23 @@ class PersistentArrayMapTest : FreeSpec({
                     pairs[3].second shouldBe 4
                 }
 
-                "when size >= THRESHOLD, it should return PersistentHashMap" {
-                    // TODO : when PersistentHashMap is  implemented
+                @Suppress("UNCHECKED_CAST")
+                "when size >= THRESHOLD, it should return LeanMap" {
+                    val size = 16
+                    val array: Array<Pair<String, Int>?> = arrayOfNulls(size)
+                    var i = 0
+                    while (i < size) {
+                        array[i] = Pair("$i", i)
+                        i++
+                    }
+                    val m = am(*(array as Array<Pair<String, Int>>))
+
+                    val map = m.assoc("a", 863) as LeanMap<String, Int>
+
+                    m.containsKey("a").shouldBeFalse()
+                    
+                    map.count shouldBeExactly size + 1
+                    map.containsKey("a").shouldBeTrue()
                 }
             }
 

@@ -10,6 +10,7 @@ class MockPersistentMap<K, V> private constructor(
     private val map: PersistentArrayMap<K, V>
 ) : IPersistentMap<K, V>, Map<K, V> {
 
+    @ExperimentalStdlibApi
     override fun assoc(key: K, value: V): IPersistentMap<K, V> =
         map.assoc(key, value)
 
