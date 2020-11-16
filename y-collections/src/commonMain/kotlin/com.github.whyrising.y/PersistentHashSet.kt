@@ -5,8 +5,8 @@ import com.github.whyrising.y.PersistentHashSet.Companion.createWithCheck
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 
-sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
-    PersistentSet<E>, Set<E>, IMutableCollection<E> {
+sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
+    APersistentSet<E>(map), IMutableCollection<E> {
 
     override fun conj(e: @UnsafeVariance E): PersistentSet<E> = when {
         contains(e) -> this
@@ -15,52 +15,9 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
 
     override fun empty(): IPersistentCollection<E> = EmptyHashSet
 
-    @Suppress("UNCHECKED_CAST")
-    override fun equiv(other: Any?): Boolean {
-        when {
-            this === other -> return true
-            other !is Set<*> -> return false
-            count != other.size -> return false
-            else -> for (e in other) if (!contains(e as E)) return false
-        }
-
-        return true
-    }
-
-    override fun seq(): ISeq<E> = map.keyz()
-
     override fun disjoin(e: @UnsafeVariance E): PersistentSet<E> = when {
         contains(e) -> HashSet(map.dissoc(e))
         else -> this
-    }
-
-    override operator fun get(key: @UnsafeVariance E): E? {
-        return map.valAt(key)
-    }
-
-    // Set Implementation
-    override val size: Int
-        get() = count
-
-    override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
-        for (e in elements)
-            if (!contains(e)) return false
-
-        return true
-    }
-
-    override fun isEmpty(): Boolean = count == 0
-
-    @Suppress("UNCHECKED_CAST")
-    override fun iterator(): Iterator<E> = when (map) {
-        is MapIterable<*, *> -> map.keyIterator() as Iterator<E>
-        else -> object : Iterator<E> {
-            val iter = map.iterator()
-
-            override fun hasNext(): Boolean = iter.hasNext()
-
-            override fun next(): E = (iter.next() as MapEntry<E, E>).key
-        }
     }
 
     override fun asTransient(): ITransientCollection<E> =
@@ -77,13 +34,7 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
     object EmptyHashSet : AEmptyHashSet<Nothing>(LeanMap.EmptyLeanMap)
 
     internal
-    class HashSet<out E>(m: IPersistentMap<E, E>) : PersistentHashSet<E>(m) {
-
-        override val count: Int = map.count
-
-        override fun contains(element: @UnsafeVariance E): Boolean =
-            map.containsKey(element)
-    }
+    class HashSet<out E>(m: IPersistentMap<E, E>) : PersistentHashSet<E>(m)
 
     internal class TransientHashSet<out E>(
         internal
