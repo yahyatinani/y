@@ -82,4 +82,20 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
         override fun persistent(): IPersistentCollection<E> =
             HashSet(tmap.value.persistent())
     }
+
+    companion object {
+        internal
+        fun <E> createWithCheck(vararg e: E): PersistentHashSet<E> {
+            var transient = EmptyHashSet.asTransient() as TransientSet<E>
+
+            for (i in e.indices) {
+                transient = transient.conj(e[i]) as TransientSet<E>
+
+                if (transient.count != i + 1)
+                    throw IllegalArgumentException("Duplicate key: ${e[i]}")
+            }
+
+            return transient.persistent() as PersistentHashSet
+        }
+    }
 }

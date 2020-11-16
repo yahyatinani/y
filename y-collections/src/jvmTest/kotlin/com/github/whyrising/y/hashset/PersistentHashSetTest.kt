@@ -13,9 +13,11 @@ import com.github.whyrising.y.TransientSet
 import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.m
 import com.github.whyrising.y.mocks.MockPersistentMap
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -121,6 +123,18 @@ class PersistentHashSetTest : FreeSpec({
 
         trMap.count shouldBeExactly map.count
         trMap.valAt("a") shouldBe map("a")
+    }
+
+    "createWithCheck(...elements)" {
+        val array = arrayOf(1, 2, 3, 4, 5)
+        val set = PersistentHashSet.createWithCheck(*array)
+
+        set.count shouldBeExactly array.size
+        set.shouldContainAll(*array)
+
+        shouldThrowExactly<IllegalArgumentException> {
+            PersistentHashSet.createWithCheck(1, 1, 2, 3, 4)
+        }.message shouldBe "Duplicate key: 1"
     }
 
     "Set implementation" - {
