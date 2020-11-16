@@ -54,7 +54,7 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
         PersistentHashSet<E>(m) {
         override val count: Int = 0
 
-        override fun contains(e: @UnsafeVariance E): Boolean = false
+        override fun contains(element: @UnsafeVariance E): Boolean = false
     }
 
     internal
@@ -65,8 +65,8 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
 
         override val count: Int = map.count
 
-        override fun contains(e: @UnsafeVariance E): Boolean =
-            map.containsKey(e)
+        override fun contains(element: @UnsafeVariance E): Boolean =
+            map.containsKey(element)
     }
 
     internal class TransientHashSet<out E>(
