@@ -84,8 +84,16 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
     }
 
     companion object {
-        internal
-        fun <E> createWithCheck(vararg e: E): PersistentHashSet<E> {
+        internal fun <E> create(vararg e: E): PersistentHashSet<E> {
+            var transient = EmptyHashSet.asTransient() as TransientSet<E>
+
+            for (i in e.indices)
+                transient = transient.conj(e[i]) as TransientSet<E>
+
+            return transient.persistent() as PersistentHashSet
+        }
+
+        internal fun <E> createWithCheck(vararg e: E): PersistentHashSet<E> {
             var transient = EmptyHashSet.asTransient() as TransientSet<E>
 
             for (i in e.indices) {

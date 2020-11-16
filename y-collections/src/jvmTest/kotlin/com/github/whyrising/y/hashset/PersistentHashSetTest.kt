@@ -137,6 +137,19 @@ class PersistentHashSetTest : FreeSpec({
         }.message shouldBe "Duplicate key: 1"
     }
 
+    "create(...elements)" {
+        val array1 = arrayOf(1, 2, 3, 4, 5)
+        val array2 = arrayOf(1, 1, 2, 3, 3, 4, 5)
+        val set1 = PersistentHashSet.create(*array1)
+        val set2 = PersistentHashSet.create(*array2)
+
+        set1.count shouldBeExactly array1.size
+        set1.shouldContainAll(*array1)
+
+        set2.count shouldBeExactly array2.size - 2
+        set2.shouldContainAll(*array2)
+    }
+
     "Set implementation" - {
         "size()" {
             val map = hashMap("a" to "1", "b" to "2", "c" to "3")
