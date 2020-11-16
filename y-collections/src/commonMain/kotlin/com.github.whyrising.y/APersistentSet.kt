@@ -5,6 +5,19 @@ abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
 
     override val count: Int = map.count
 
+    override fun toString(): String {
+        var seq = seq()
+        var str = "#{"
+        while (seq.count != 0) {
+            str += seq.first()
+            seq = seq.rest()
+
+            if (seq.count != 0) str += " "
+        }
+
+        return "$str}"
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun equiv(other: Any?): Boolean {
         when {

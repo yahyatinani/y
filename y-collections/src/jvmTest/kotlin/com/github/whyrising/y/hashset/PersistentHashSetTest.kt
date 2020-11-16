@@ -211,6 +211,12 @@ class PersistentHashSetTest : FreeSpec({
         }.message shouldBe "Duplicate key: 1"
     }
 
+    "toString()" {
+        val set = hs("a", "b", "c")
+
+        set.toString() shouldBe "#{a b c}"
+    }
+
     "Set implementation" - {
         "size()" {
             val map = hashMap("a" to "1", "b" to "2", "c" to "3")
