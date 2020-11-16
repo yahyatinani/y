@@ -5,17 +5,17 @@ import com.github.whyrising.y.PersistentHashSet
 import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.PersistentHashSet.HashSet
 import com.github.whyrising.y.PersistentHashSet.TransientHashSet
+import com.github.whyrising.y.PersistentSet
 import com.github.whyrising.y.TransientSet
 import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.m
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.set
@@ -29,6 +29,43 @@ class PersistentHashSetTest : FreeSpec({
 
         EmptyHashSet.empty() shouldBeSameInstanceAs EmptyHashSet
         HashSet(map).empty() shouldBeSameInstanceAs EmptyHashSet
+    }
+
+    "contains()" {
+        val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+        val emptySet: PersistentHashSet<String> = EmptyHashSet
+        val set: PersistentHashSet<String> = HashSet(map)
+
+        emptySet.contains("a").shouldBeFalse()
+        set.contains("x").shouldBeFalse()
+
+        set.contains("a").shouldBeTrue()
+        set.contains("b").shouldBeTrue()
+        set.contains("c").shouldBeTrue()
+    }
+
+    "conj(e)" - {
+        "when e already exits, it should return this" {
+            val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+            val set = HashSet(map)
+
+            val newSet = set.conj("a")
+
+            newSet.count shouldBeExactly map.count
+            newSet shouldBeSameInstanceAs set
+        }
+
+        "when e is new, it should return add it in a new set" {
+            val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+            val set = HashSet(map)
+
+            val newSet: PersistentSet<String> = set.conj("x")
+
+            newSet.count shouldBeExactly map.count + 1
+            newSet shouldNotBeSameInstanceAs set
+            (newSet as PersistentHashSet<String>).map.containsKey("x")
+        }
+
     }
 
     "EmptyHashSet" - {
