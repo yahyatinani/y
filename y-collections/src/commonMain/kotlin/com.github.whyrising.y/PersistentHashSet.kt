@@ -1,5 +1,7 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.PersistentHashSet.Companion.create
+import com.github.whyrising.y.PersistentHashSet.Companion.createWithCheck
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 
@@ -122,7 +124,8 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
 
 fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
 
-fun <E> hashSet(vararg e: E) = PersistentHashSet.create(*e)
+fun <E> hashSet(vararg e: E) = create(*e)
 
-fun <E> hashSet(seq: ISeq<E>): PersistentHashSet<E> =
-    PersistentHashSet.create(seq)
+fun <E> hashSet(seq: ISeq<E>): PersistentHashSet<E> = create(seq)
+
+fun <E> hs(vararg e: E): PersistentHashSet<E> = createWithCheck(*e)

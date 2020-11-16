@@ -12,6 +12,7 @@ import com.github.whyrising.y.PersistentSet
 import com.github.whyrising.y.TransientSet
 import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.hashSet
+import com.github.whyrising.y.hs
 import com.github.whyrising.y.l
 import com.github.whyrising.y.m
 import com.github.whyrising.y.mocks.MockPersistentMap
@@ -175,6 +176,18 @@ class PersistentHashSetTest : FreeSpec({
         set.shouldContainAll(seq)
 
         hashSet<Int>() shouldBeSameInstanceAs EmptyHashSet
+    }
+
+    "hs(...elements)" {
+        val array = arrayOf(1, 2, 3, 4, 5)
+        val set = hs(*array)
+
+        set.count shouldBeExactly array.size
+        set.shouldContainAll(*array)
+
+        shouldThrowExactly<IllegalArgumentException> {
+            PersistentHashSet.createWithCheck(1, 1, 2, 3, 4)
+        }.message shouldBe "Duplicate key: 1"
     }
 
     "Set implementation" - {
