@@ -25,6 +25,18 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) {
 
         override
         operator fun get(key: @UnsafeVariance E): E? = tmap.value.valAt(key)
+
+        override fun conj(e: @UnsafeVariance E): TransientSet<E> {
+            val m = tmap.value.assoc(e, e)
+
+            if (m != tmap.value) tmap.value = m
+
+            return this
+        }
+
+        override fun persistent(): IPersistentCollection<E> {
+            TODO("Not yet implemented")
+        }
     }
 
     companion object {

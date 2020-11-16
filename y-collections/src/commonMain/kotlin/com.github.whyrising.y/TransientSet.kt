@@ -1,6 +1,6 @@
 package com.github.whyrising.y
 
-interface TransientSet<out E> : ConstantCount {
+interface TransientSet<out E> : ConstantCount, ITransientCollection<E> {
     fun disjoin(key: @UnsafeVariance E): TransientSet<E>
 
     @Suppress("UNCHECKED_CAST")

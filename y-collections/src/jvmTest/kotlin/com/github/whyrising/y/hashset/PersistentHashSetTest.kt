@@ -3,6 +3,7 @@ package com.github.whyrising.y.hashset
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
 import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.PersistentHashSet.TransientHashSet
+import com.github.whyrising.y.TransientSet
 import com.github.whyrising.y.m
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -10,6 +11,11 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.filter
+import io.kotest.property.arbitrary.set
+import io.kotest.property.arbitrary.string
+import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
 
 class PersistentHashSetTest : FreeSpec({
@@ -64,6 +70,23 @@ class PersistentHashSetTest : FreeSpec({
             tSet["b"] shouldBe "2"
             tSet["c"] shouldBe "3"
             tSet[null] shouldBe null
+        }
+
+        "conj(e)" {
+            val e = "7"
+            val gen = Arb.set(Arb.string().filter { it != e })
+            checkAll(gen) { set: Set<String> ->
+                val l = set.map { s: String -> Pair(s, s) }
+                val map = m(*l.toTypedArray())
+                val tSet = TransientHashSet(atomic(map.asTransient()))
+
+                val newTranSet: TransientSet<String> = tSet.conj(e)
+                val transientHashSet = newTranSet as TransientHashSet<String>
+
+                newTranSet.count shouldBeExactly map.count + 1
+                newTranSet.contains(e)
+                transientHashSet.tmap.value.valAt(e) shouldBe e
+            }
         }
     }
 })
