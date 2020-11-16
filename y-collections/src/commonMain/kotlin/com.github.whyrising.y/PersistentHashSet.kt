@@ -20,6 +20,8 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) {
         fun contains(key: @UnsafeVariance E): Boolean =
             NOT_FOUND != tmap.value.valAt(key, NOT_FOUND as E)
 
+        operator fun get(key: @UnsafeVariance E): E? = tmap.value.valAt(key)
+
         override val count: Int
             get() = tmap.value.count
     }
