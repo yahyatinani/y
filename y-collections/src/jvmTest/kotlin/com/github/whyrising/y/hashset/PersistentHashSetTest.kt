@@ -102,5 +102,24 @@ class PersistentHashSetTest : FreeSpec({
             set.map.count shouldBeExactly map.count
             set.map shouldBe map
         }
+
+        "invoke(key, default)" {
+            val map = m("a" to "1", "b" to "2", "c" to "3")
+            val tSet = TransientHashSet(atomic(map.asTransient()))
+            val default = "notFound"
+
+            tSet("a", default) shouldBe "1"
+            tSet("b", default) shouldBe "2"
+            tSet("x", default) shouldBe default
+        }
+
+        "invoke(key)" {
+            val map = m("a" to "1", "b" to "2", "c" to "3")
+            val tSet = TransientHashSet(atomic(map.asTransient()))
+
+            tSet("a") shouldBe "1"
+            tSet("b") shouldBe "2"
+            tSet("x") shouldBe null
+        }
     }
 })

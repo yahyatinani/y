@@ -30,7 +30,16 @@ abstract class ATransientSet<out E>(
         return this
     }
 
-    companion object {
+    operator
+    fun invoke(key: @UnsafeVariance E, default: @UnsafeVariance E): E? =
+        tranMap.value.valAt(key, default)
+
+    operator
+    fun invoke(key: @UnsafeVariance E): E? = tranMap.value.valAt(key, null)
+
+    companion
+
+    object {
         val NOT_FOUND = Any()
     }
 }
