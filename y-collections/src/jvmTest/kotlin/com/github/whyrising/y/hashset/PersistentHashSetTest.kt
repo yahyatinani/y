@@ -1,6 +1,7 @@
 package com.github.whyrising.y.hashset
 
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
+import com.github.whyrising.y.PersistentHashSet
 import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.PersistentHashSet.TransientHashSet
 import com.github.whyrising.y.TransientSet
@@ -8,6 +9,8 @@ import com.github.whyrising.y.m
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -87,6 +90,17 @@ class PersistentHashSetTest : FreeSpec({
                 newTranSet.contains(e)
                 transientHashSet.tmap.value.valAt(e) shouldBe e
             }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        "persistent() should return a PersistentHashSet" {
+            val map = m("a" to "1", "b" to "2", "c" to "3")
+            val tSet = TransientHashSet(atomic(map.asTransient()))
+
+            val set = tSet.persistent() as PersistentHashSet<String>
+
+            set.map.count shouldBeExactly map.count
+            set.map shouldBe map
         }
     }
 })
