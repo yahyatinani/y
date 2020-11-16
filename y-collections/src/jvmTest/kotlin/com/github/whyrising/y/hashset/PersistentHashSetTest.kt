@@ -5,6 +5,8 @@ import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.PersistentHashSet.TransientHashSet
 import com.github.whyrising.y.m
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlinx.atomicfu.atomic
@@ -26,6 +28,31 @@ class PersistentHashSetTest : FreeSpec({
 
             tSet1.count shouldBeExactly 0
             tSet2.count shouldBeExactly tmap2.value.count
+        }
+
+        "contains(key)" {
+            val map = m("a" to "1", "b" to "2", "c" to "3", null to null)
+            val tSet = TransientHashSet(atomic(map.asTransient()))
+
+            tSet.contains("a").shouldBeTrue()
+            tSet.contains("b").shouldBeTrue()
+            tSet.contains("c").shouldBeTrue()
+            tSet.contains(null).shouldBeTrue()
+            tSet.contains("x").shouldBeFalse()
+        }
+
+        "disjoin(key) should return a transient set without the key" {
+            val map = m("a" to "1", "b" to "2", "c" to "3")
+            val tSet = TransientHashSet(atomic(map.asTransient()))
+
+            val newTranSet1 = tSet.disjoin("a")
+
+            newTranSet1 shouldBeSameInstanceAs tSet
+            newTranSet1.tmap.value shouldBeSameInstanceAs tSet.tmap.value
+            newTranSet1.count shouldBeExactly 2
+            newTranSet1.contains("a").shouldBeFalse()
+            newTranSet1.contains("b").shouldBeTrue()
+            newTranSet1.contains("c").shouldBeTrue()
         }
     }
 })
