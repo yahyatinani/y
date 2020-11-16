@@ -93,6 +93,18 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
             return transient.persistent() as PersistentHashSet
         }
 
+        internal fun <E> create(seq: ISeq<E>): PersistentHashSet<E> {
+            var transient = EmptyHashSet.asTransient() as TransientSet<E>
+            var elements = seq
+
+            while (elements.count != 0) {
+                transient = transient.conj(elements.first()) as TransientSet<E>
+                elements = elements.rest()
+            }
+
+            return transient.persistent() as PersistentHashSet
+        }
+
         internal fun <E> createWithCheck(vararg e: E): PersistentHashSet<E> {
             var transient = EmptyHashSet.asTransient() as TransientSet<E>
 
@@ -107,3 +119,10 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
         }
     }
 }
+
+fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
+
+fun <E> hashSet(vararg e: E) = PersistentHashSet.create(*e)
+
+fun <E> hashSet(seq: ISeq<E>): PersistentHashSet<E> =
+    PersistentHashSet.create(seq)

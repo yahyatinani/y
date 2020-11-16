@@ -11,6 +11,8 @@ import com.github.whyrising.y.PersistentHashSet.TransientHashSet
 import com.github.whyrising.y.PersistentSet
 import com.github.whyrising.y.TransientSet
 import com.github.whyrising.y.hashMap
+import com.github.whyrising.y.hashSet
+import com.github.whyrising.y.l
 import com.github.whyrising.y.m
 import com.github.whyrising.y.mocks.MockPersistentMap
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -148,6 +150,31 @@ class PersistentHashSetTest : FreeSpec({
 
         set2.count shouldBeExactly array2.size - 2
         set2.shouldContainAll(*array2)
+    }
+
+    "hashSet(...elements) should call create(...elements)" {
+        val array1 = arrayOf(1, 2, 3, 4, 5)
+        val array2 = arrayOf(1, 1, 2, 3, 3, 4, 5)
+        val set1 = hashSet(*array1)
+        val set2 = hashSet(*array2)
+
+        set1.count shouldBeExactly array1.size
+        set1.shouldContainAll(*array1)
+
+        set2.count shouldBeExactly array2.size - 2
+        set2.shouldContainAll(*array2)
+
+        hashSet<Int>() shouldBeSameInstanceAs EmptyHashSet
+    }
+
+    "hashSet(seq)" {
+        val seq = l(1, 1, 2, 3, 3, 4, 5)
+        val set = hashSet(seq)
+
+        set.count shouldBeExactly seq.size - 2
+        set.shouldContainAll(seq)
+
+        hashSet<Int>() shouldBeSameInstanceAs EmptyHashSet
     }
 
     "Set implementation" - {
