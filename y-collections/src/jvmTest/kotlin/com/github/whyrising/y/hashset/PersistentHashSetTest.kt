@@ -53,6 +53,19 @@ class PersistentHashSetTest : FreeSpec({
         set.contains("c").shouldBeTrue()
     }
 
+    "disjoin(key)" {
+        val element = "a"
+        val set = hs(element, "b", "c")
+
+        val newSet1: PersistentSet<String> = set.disjoin(element)
+        val newSet2: PersistentSet<String> = set.disjoin("x")
+
+        newSet1.count shouldBeExactly set.count - 1
+        newSet1.contains(element).shouldBeFalse()
+
+        newSet2 shouldBeSameInstanceAs set
+    }
+
     "conj(e)" - {
         "when e already exits, it should return this" {
             val map = hashMap("a" to "1", "b" to "2", "c" to "3")

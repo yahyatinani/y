@@ -29,6 +29,11 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
 
     override fun seq(): ISeq<E> = map.keyz()
 
+    override fun disjoin(e: @UnsafeVariance E): PersistentSet<E> = when {
+        contains(e) -> HashSet(map.dissoc(e))
+        else -> this
+    }
+
     // Set Implementation
     override val size: Int
         get() = count
