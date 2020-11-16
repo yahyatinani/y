@@ -9,9 +9,7 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
         TODO("Not yet implemented")
     }
 
-    override fun empty(): IPersistentCollection<E> {
-        TODO("Not yet implemented")
-    }
+    override fun empty(): IPersistentCollection<E> = EmptyHashSet
 
     override fun equiv(other: Any?): Boolean {
         TODO("Not yet implemented")

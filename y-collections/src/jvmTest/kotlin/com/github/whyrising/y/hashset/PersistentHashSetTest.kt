@@ -24,6 +24,13 @@ import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
 
 class PersistentHashSetTest : FreeSpec({
+    "empty() should return EmptyHashSet" {
+        val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+
+        EmptyHashSet.empty() shouldBeSameInstanceAs EmptyHashSet
+        HashSet(map).empty() shouldBeSameInstanceAs EmptyHashSet
+    }
+
     "EmptyHashSet" - {
         "map property should be set to EmptyLeanMap" {
             EmptyHashSet.map shouldBeSameInstanceAs EmptyLeanMap
