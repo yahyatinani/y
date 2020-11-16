@@ -156,6 +156,14 @@ class PersistentHashSetTest : FreeSpec({
             HashSet(map1).isEmpty().shouldBeFalse()
             HashSet(map2).isEmpty().shouldBeTrue()
         }
+
+        "containsAll(coll)" {
+            val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+            val set = HashSet(map)
+
+            set.containsAll(listOf("a", "c")).shouldBeTrue()
+            set.containsAll(listOf("a", "c", "x")).shouldBeFalse()
+        }
     }
 
     "EmptyHashSet" - {
