@@ -1,6 +1,7 @@
 package com.github.whyrising.y.hashset
 
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
+import com.github.whyrising.y.MapEntry
 import com.github.whyrising.y.PersistentHashSet
 import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.PersistentHashSet.HashSet
@@ -66,6 +67,18 @@ class PersistentHashSetTest : FreeSpec({
             (newSet as PersistentHashSet<String>).map.containsKey("x")
         }
 
+    }
+
+    "seq()" {
+        val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+        val set = HashSet(map)
+
+        val seq = set.seq()
+
+        seq.count shouldBeExactly 3
+        seq.first() shouldBe "a"
+        seq.rest().first() shouldBe "b"
+        seq.rest().rest().first() shouldBe "c"
     }
 
     "EmptyHashSet" - {

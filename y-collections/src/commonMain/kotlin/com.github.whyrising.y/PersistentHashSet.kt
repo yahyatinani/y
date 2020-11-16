@@ -16,9 +16,7 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
         TODO("Not yet implemented")
     }
 
-    override fun seq(): ISeq<E> {
-        TODO("Not yet implemented")
-    }
+    override fun seq(): ISeq<E> = map.keyz()
 
     internal abstract class AEmptyHashSet<out E>(m: IPersistentMap<E, E>) :
         PersistentHashSet<E>(m) {
