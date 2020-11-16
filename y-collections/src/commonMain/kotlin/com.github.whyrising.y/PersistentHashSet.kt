@@ -34,6 +34,10 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
         else -> this
     }
 
+    override operator fun get(key: @UnsafeVariance E): E? {
+        return map.valAt(key)
+    }
+
     // Set Implementation
     override val size: Int
         get() = count

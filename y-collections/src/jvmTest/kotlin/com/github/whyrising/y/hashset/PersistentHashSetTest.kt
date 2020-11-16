@@ -66,6 +66,14 @@ class PersistentHashSetTest : FreeSpec({
         newSet2 shouldBeSameInstanceAs set
     }
 
+    "get(key)" {
+        val set = hs("a", "b", "c")
+
+        set["a"] shouldBe "a"
+        set["b"] shouldBe "b"
+        set["c"] shouldBe "c"
+    }
+
     "conj(e)" - {
         "when e already exits, it should return this" {
             val map = hashMap("a" to "1", "b" to "2", "c" to "3")
