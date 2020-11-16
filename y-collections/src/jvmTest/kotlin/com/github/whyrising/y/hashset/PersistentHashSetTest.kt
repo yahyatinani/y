@@ -3,8 +3,10 @@ package com.github.whyrising.y.hashset
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
 import com.github.whyrising.y.PersistentHashSet
 import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
+import com.github.whyrising.y.PersistentHashSet.HashSet
 import com.github.whyrising.y.PersistentHashSet.TransientHashSet
 import com.github.whyrising.y.TransientSet
+import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.m
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -25,6 +27,20 @@ class PersistentHashSetTest : FreeSpec({
     "EmptyHashSet" - {
         "map property should be set to EmptyLeanMap" {
             EmptyHashSet.map shouldBeSameInstanceAs EmptyLeanMap
+        }
+
+        "count should return 0" {
+            EmptyHashSet.count shouldBeExactly 0
+        }
+    }
+
+    "HashSet" - {
+        "count" {
+            val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+
+            val m = HashSet(map)
+
+            m.count shouldBeExactly map.count
         }
     }
 
