@@ -1,33 +1,36 @@
 package com.github.whyrising.y
 
-abstract class ATransientSet<out K, out V> : ITransientMap<K, V> {
+import kotlinx.atomicfu.AtomicRef
 
-    override fun assoc(
-        key: @UnsafeVariance K, value: @UnsafeVariance V): ITransientMap<K, V> {
-        TODO("Not yet implemented")
+abstract class ATransientSet<out E>(
+    private
+    val tranMap: AtomicRef<ITransientMap<@UnsafeVariance E, @UnsafeVariance E>>
+) : TransientSet<E> {
+    override val count: Int
+        get() = tranMap.value.count
+
+    override fun disjoin(key: @UnsafeVariance E): TransientSet<E> {
+        val m = tranMap.value.dissoc(key)
+        if (tranMap.value != m) tranMap.value = m
+        return this
     }
 
-    override fun dissoc(key: @UnsafeVariance K): ITransientMap<K, V> {
-        TODO("Not yet implemented")
-    }
-
-    override fun persistent(): IPersistentMap<K, V> {
-        TODO("Not yet implemented")
-    }
-
-    override fun conj(e: Any?): ITransientCollection<Any?> {
-        TODO("Not yet implemented")
-    }
+    @Suppress("UNCHECKED_CAST")
+    override fun contains(key: @UnsafeVariance E): Boolean =
+        NOT_FOUND != tranMap.value.valAt(key, NOT_FOUND as E)
 
     override
-    fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? {
-        TODO("Not yet implemented")
+    operator fun get(key: @UnsafeVariance E): E? = tranMap.value.valAt(key)
+
+    override fun conj(e: @UnsafeVariance E): TransientSet<E> {
+        val m = tranMap.value.assoc(e, e)
+
+        if (m != tranMap.value) tranMap.value = m
+
+        return this
     }
 
-    override fun valAt(key: @UnsafeVariance K): V? {
-        TODO("Not yet implemented")
+    companion object {
+        val NOT_FOUND = Any()
     }
-
-    override val count: Int
-        get() = TODO("Not yet implemented")
 }
