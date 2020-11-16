@@ -112,6 +112,17 @@ class PersistentHashSetTest : FreeSpec({
         }
     }
 
+    "asTransient()" {
+        val map = hashMap("a" to "1", "b" to "2", 1L to "3")
+        val set = HashSet(map)
+
+        val tr = set.asTransient() as TransientHashSet<Any>
+        val trMap = tr.tmap.value
+
+        trMap.count shouldBeExactly map.count
+        trMap.valAt("a") shouldBe map("a")
+    }
+
     "Set implementation" - {
         "size()" {
             val map = hashMap("a" to "1", "b" to "2", "c" to "3")

@@ -1,9 +1,10 @@
 package com.github.whyrising.y
 
 import kotlinx.atomicfu.AtomicRef
+import kotlinx.atomicfu.atomic
 
 sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
-    PersistentSet<E>, Set<E> {
+    PersistentSet<E>, Set<E>, IMutableCollection<E> {
 
     override fun conj(e: @UnsafeVariance E): PersistentSet<E> = when {
         contains(e) -> this
@@ -50,6 +51,9 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
             override fun next(): E = (iter.next() as MapEntry<E, E>).key
         }
     }
+
+    override fun asTransient(): ITransientCollection<E> =
+        TransientHashSet(atomic((map as LeanMap<E, E>).asTransient()))
 
     internal abstract class AEmptyHashSet<out E>(m: IPersistentMap<E, E>) :
         PersistentHashSet<E>(m) {
