@@ -46,7 +46,7 @@ class PersistentHashSetTest : FreeSpec({
             val map = m("a" to "1", "b" to "2", "c" to "3")
             val tSet = TransientHashSet(atomic(map.asTransient()))
 
-            val newTranSet1 = tSet.disjoin("a")
+            val newTranSet1 = tSet.disjoin("a") as TransientHashSet<String>
 
             newTranSet1 shouldBeSameInstanceAs tSet
             newTranSet1.tmap.value shouldBeSameInstanceAs tSet.tmap.value

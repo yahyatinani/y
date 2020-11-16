@@ -8,22 +8,23 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) {
     internal class TransientHashSet<out E>(
         internal
         val tmap: AtomicRef<ITransientMap<@UnsafeVariance E, @UnsafeVariance E>>
-    ) : ConstantCount {
+    ) : TransientSet<E> {
 
-        fun disjoin(key: @UnsafeVariance E): TransientHashSet<E> {
+        override val count: Int
+            get() = tmap.value.count
+
+        override fun disjoin(key: @UnsafeVariance E): TransientSet<E> {
             val m = tmap.value.dissoc(key)
             if (tmap.value != m) tmap.value = m
             return this
         }
 
         @Suppress("UNCHECKED_CAST")
-        fun contains(key: @UnsafeVariance E): Boolean =
+        override fun contains(key: @UnsafeVariance E): Boolean =
             NOT_FOUND != tmap.value.valAt(key, NOT_FOUND as E)
 
+        override
         operator fun get(key: @UnsafeVariance E): E? = tmap.value.valAt(key)
-
-        override val count: Int
-            get() = tmap.value.count
     }
 
     companion object {
