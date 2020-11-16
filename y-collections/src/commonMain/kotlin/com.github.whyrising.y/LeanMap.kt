@@ -625,9 +625,8 @@ sealed class LeanMap<out K, out V>(
             when {
                 (datamap and bitpos) != 0 -> {
                     val keyIndex = 2 * bitmapNodeIndex(datamap, bitpos)
-
-                    when (array[keyIndex]) {
-                        key -> array[keyIndex + 1] as V
+                    when {
+                        equiv(array[keyIndex], key) -> array[keyIndex + 1] as V
                         else -> default
                     }
                 }

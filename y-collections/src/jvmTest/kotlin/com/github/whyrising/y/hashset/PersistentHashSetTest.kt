@@ -1,7 +1,8 @@
 package com.github.whyrising.y.hashset
 
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
-import com.github.whyrising.y.MapEntry
+import com.github.whyrising.y.LeanMap.NodeIterator.NodeIter
+import com.github.whyrising.y.MapIterable
 import com.github.whyrising.y.PersistentHashSet
 import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.PersistentHashSet.HashSet
@@ -10,6 +11,7 @@ import com.github.whyrising.y.PersistentSet
 import com.github.whyrising.y.TransientSet
 import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.m
+import com.github.whyrising.y.mocks.MockPersistentMap
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -79,6 +81,72 @@ class PersistentHashSetTest : FreeSpec({
         seq.first() shouldBe "a"
         seq.rest().first() shouldBe "b"
         seq.rest().rest().first() shouldBe "c"
+    }
+
+    "equiv(other)" - {
+        "when other is not a Set, it should return false" {
+            val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+            val set = HashSet(map)
+
+            set.equiv("a").shouldBeFalse()
+        }
+
+        "when other is a Set<*>" - {
+            "when sizes are different, it should return false" {
+                val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+                val set = HashSet(map)
+
+                set.equiv(setOf("a", "b")).shouldBeFalse()
+            }
+
+            "when sizes are equal" {
+                val map = hashMap("a" to "1", "b" to "2", 1L to "3")
+                val set = HashSet(map)
+
+                set.equiv(setOf("a", "b", 2)).shouldBeFalse()
+                set.equiv(setOf("a", "b", 1)).shouldBeTrue()
+                set.equiv(set).shouldBeTrue()
+                set.equiv(HashSet(map)).shouldBeTrue()
+            }
+        }
+    }
+
+    "Set implementation" - {
+        "size()" {
+            val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+            val set = HashSet(map)
+
+            set.size shouldBeExactly map.count
+        }
+
+        "iterator()" - {
+            @Suppress("UNCHECKED_CAST")
+            "when inner map is MapIterable, it should return NodeIter" {
+                val map = hashMap("a" to "1", "b" to "2", "c" to "3")
+                val mapIterable = map as MapIterable<String, String>
+                val keyIterator = mapIterable.keyIterator()
+                val set = HashSet(map)
+
+                val iter = set.iterator() as NodeIter<String, String, String>
+
+                iter.next() shouldBe keyIterator.next()
+                iter.next() shouldBe keyIterator.next()
+                iter.next() shouldBe keyIterator.next()
+            }
+
+            "when inner map is NOT MapIterable, return instance of Iterator" {
+                val map = MockPersistentMap("a" to "1", "b" to "2", "c" to "3")
+                val set = HashSet(map)
+
+                val iter = set.iterator()
+
+                iter.hasNext().shouldBeTrue()
+                iter.next() shouldBe "a"
+                iter.next() shouldBe "b"
+                iter.next() shouldBe "c"
+                iter.hasNext().shouldBeFalse()
+            }
+        }
     }
 
     "EmptyHashSet" - {

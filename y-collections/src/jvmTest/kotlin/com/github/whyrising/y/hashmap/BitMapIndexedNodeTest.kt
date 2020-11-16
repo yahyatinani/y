@@ -847,6 +847,18 @@ class BitMapIndexedNodeTest : FreeSpec({
             n.find(shift, hasheq("6"), "6", -1) shouldBe 6
             n.find(shift, hasheq("18"), "18", -1) shouldBe 18
         }
+
+        "compare keys with equiv()" {
+            val shift = 0
+            val isMutable = atomic(true)
+            val leafFlag = Box(null)
+            val k = 1L
+            val n = BitMapIndexedNode<Any, String>().assoc(
+                isMutable, shift, hasheq(k), k, "1L", leafFlag)
+                as BitMapIndexedNode<Any, String>
+
+            n.find(shift, hasheq(1), 1, "notFound") shouldBe "1L"
+        }
     }
 
     "find(...key) should return IMapEntry" - {
