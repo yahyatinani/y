@@ -34,9 +34,7 @@ sealed class PersistentHashSet<out E>(val map: IPersistentMap<E, E>) :
         TODO("Not yet implemented")
     }
 
-    override fun isEmpty(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isEmpty(): Boolean = count == 0
 
     @Suppress("UNCHECKED_CAST")
     override fun iterator(): Iterator<E> = when (map) {

@@ -1,5 +1,6 @@
 package com.github.whyrising.y.hashset
 
+import com.github.whyrising.y.LeanMap
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
 import com.github.whyrising.y.LeanMap.NodeIterator.NodeIter
 import com.github.whyrising.y.MapIterable
@@ -146,6 +147,14 @@ class PersistentHashSetTest : FreeSpec({
                 iter.next() shouldBe "c"
                 iter.hasNext().shouldBeFalse()
             }
+        }
+
+        "isEmpty()" {
+            val map1 = hashMap("a" to "1", "b" to "2", "c" to "3")
+            val map2 = LeanMap<String, String>()
+
+            HashSet(map1).isEmpty().shouldBeFalse()
+            HashSet(map2).isEmpty().shouldBeTrue()
         }
     }
 
