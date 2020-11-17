@@ -24,6 +24,7 @@ import io.kotest.property.checkAll
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import java.util.*
 
 @ExperimentalStdlibApi
@@ -577,13 +578,20 @@ class PersistentListTest : FreeSpec({
         }
 
         "deserialize" {
-
             val l = listOf(1, 2, 3, 4)
             val str = Json.encodeToString(l)
 
             val list = Json.decodeFromString<PersistentList<Int>>(str)
 
             list shouldBe PersistentList(*l.toTypedArray())
+        }
+
+        "descriptor" {
+            val element = serializer(Int::class.java)
+            val serializer = PersistentListSerializer(element)
+
+            serializer.descriptor shouldBeSameInstanceAs
+                serializer.listSerializer.descriptor
         }
     }
 

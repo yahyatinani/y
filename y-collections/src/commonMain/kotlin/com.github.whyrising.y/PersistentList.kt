@@ -11,9 +11,9 @@ import kotlinx.serialization.encoding.Encoder
 internal class PersistentListSerializer<E>(element: KSerializer<E>) :
     KSerializer<PersistentList<E>> {
 
-    private val listSerializer = ListSerializer(element)
+    internal val listSerializer = ListSerializer(element)
 
-    override val descriptor: SerialDescriptor = element.descriptor
+    override val descriptor: SerialDescriptor = listSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): PersistentList<E> {
         val list = listSerializer.deserialize(decoder)
