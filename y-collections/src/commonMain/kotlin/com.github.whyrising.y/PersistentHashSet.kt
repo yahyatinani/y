@@ -4,7 +4,9 @@ import com.github.whyrising.y.PersistentHashSet.Companion.create
 import com.github.whyrising.y.PersistentHashSet.Companion.createWithCheck
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.Serializable
 
+@Serializable(with = PersistentSetSerializer::class)
 sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
     APersistentSet<E>(map), IMutableCollection<E> {
 
@@ -78,6 +80,14 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
             return transient.persistent() as PersistentHashSet
         }
 
+        internal fun <E> create(set: Set<E>): PersistentHashSet<E> {
+            var transient = EmptyHashSet.asTransient() as TransientSet<E>
+
+            for (e in set) transient = transient.conj(e) as TransientSet<E>
+
+            return transient.persistent() as PersistentHashSet
+        }
+
         internal fun <E> createWithCheck(vararg e: E): PersistentHashSet<E> {
             var transient = EmptyHashSet.asTransient() as TransientSet<E>
 
@@ -102,3 +112,5 @@ fun <E> hashSet(seq: ISeq<E>): PersistentHashSet<E> = create(seq)
 fun <E> hs(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
 
 fun <E> hs(vararg e: E): PersistentHashSet<E> = createWithCheck(*e)
+
+fun <E> Set<E>.toPhashSet(): PersistentHashSet<E> = create(this)

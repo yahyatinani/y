@@ -569,7 +569,6 @@ class PersistentListTest : FreeSpec({
         "serialize" {
             val l = listOf(1, 2, 3, 4)
             val encoded = Json.encodeToString(l)
-
             val list = PersistentList(*l.toTypedArray())
 
             val encodeToString = Json.encodeToString(list)

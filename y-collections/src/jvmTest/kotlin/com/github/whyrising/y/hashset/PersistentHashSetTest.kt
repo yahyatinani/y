@@ -10,6 +10,7 @@ import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.PersistentHashSet.HashSet
 import com.github.whyrising.y.PersistentHashSet.TransientHashSet
 import com.github.whyrising.y.PersistentSet
+import com.github.whyrising.y.PersistentSetSerializer
 import com.github.whyrising.y.TransientSet
 import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.hashSet
@@ -17,6 +18,7 @@ import com.github.whyrising.y.hs
 import com.github.whyrising.y.l
 import com.github.whyrising.y.m
 import com.github.whyrising.y.mocks.MockPersistentMap
+import com.github.whyrising.y.toPhashSet
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -32,7 +34,13 @@ import io.kotest.property.arbitrary.set
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 
+@ExperimentalSerializationApi
 @ExperimentalStdlibApi
 class PersistentHashSetTest : FreeSpec({
     "empty() should return EmptyHashSet" {
@@ -216,6 +224,11 @@ class PersistentHashSetTest : FreeSpec({
         }.message shouldBe "Duplicate key: 1"
 
         hs<String>() shouldBeSameInstanceAs EmptyHashSet
+    }
+
+    "toPersistentHashSet() should convert a kotlin.Set to a PersistentHashSet" {
+        setOf(1, 2, 3).toPhashSet() shouldBe hashSet(1, 2, 3)
+        setOf<Int>().toPhashSet() shouldBe hashSet()
     }
 
     "toString()" {
@@ -456,6 +469,30 @@ class PersistentHashSetTest : FreeSpec({
             tSet("a") shouldBe "1"
             tSet("b") shouldBe "2"
             tSet("x") shouldBe null
+        }
+    }
+
+    "Serialization" - {
+        "serialize" {
+            val hashSet = hs(1, 2, 3, 4)
+
+            val encodeToString = Json.encodeToString(hashSet)
+
+            encodeToString shouldBe "[1,4,3,2]"
+        }
+
+        "deserialize" {
+            val set = Json.decodeFromString<PersistentHashSet<Int>>("[1,4,3,2]")
+
+            set shouldBe hs(1, 2, 3, 4)
+        }
+
+        "descriptor" {
+            val element = serializer(Int::class.java)
+            val serializer = PersistentSetSerializer(element)
+
+            serializer.descriptor shouldBeSameInstanceAs
+                serializer.setSerializer.descriptor
         }
     }
 })
