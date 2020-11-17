@@ -11,9 +11,12 @@ import com.github.whyrising.y.LeanMap.NodeIterator.NodeIter
 import com.github.whyrising.y.LeanMap.NodeSeq
 import com.github.whyrising.y.LeanMap.TransientLeanMap
 import com.github.whyrising.y.MapEntry
+import com.github.whyrising.y.PersistentArrayMap
 import com.github.whyrising.y.PersistentList.Empty
+import com.github.whyrising.y.PersistentMapSerializer
 import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.hasheq
+import com.github.whyrising.y.m
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -27,8 +30,14 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.set
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import java.util.*
 
+@ExperimentalSerializationApi
 @ExperimentalStdlibApi
 class LeanMapTest : FreeSpec({
     "mask(hash, shift)" {
@@ -297,11 +306,45 @@ class LeanMapTest : FreeSpec({
 
     "hashMap()" {
         val hashmap = hashMap("a" to 1, "b" to 2, "c" to 3)
+        val map = mapOf("a" to 1, "b" to 2, "c" to 3)
 
         hashMap<String, Int>() shouldBeSameInstanceAs EmptyLeanMap
         hashmap.count shouldBeExactly 3
         hashmap("a") shouldBe 1
         hashmap("b") shouldBe 2
         hashmap("c") shouldBe 3
+        hashmap shouldBe hashMap(map)
+    }
+
+    "Serialization" - {
+        "serialize" {
+            val m = mapOf("a" to 1, "b" to 2, "c" to 3)
+            val expected = Json.encodeToString(m)
+
+            val hashmap = hashMap("a" to 1, "b" to 2, "c" to 3)
+            val arraymap = m("a" to 1, "b" to 2, "c" to 3)
+
+            Json.encodeToString(hashmap) shouldBe expected
+            Json.encodeToString(arraymap) shouldBe expected
+        }
+
+        "deserialize" {
+            val m = mapOf("a" to 1, "b" to 2, "c" to 3)
+            val expected = hashMap(m)
+            val str = Json.encodeToString(m)
+
+            Json.decodeFromString<LeanMap<String, Int>>(str) shouldBe expected
+            Json.decodeFromString<PersistentArrayMap<String, Int>>(str) shouldBe
+                expected
+        }
+
+        "discriptor" {
+            val keySerial = serializer(String::class.java)
+            val valueSerial = serializer(Int::class.java)
+            val serializer = PersistentMapSerializer(keySerial, valueSerial)
+
+            serializer.descriptor shouldBeSameInstanceAs
+                serializer.mapSerializer.descriptor
+        }
     }
 })

@@ -3,11 +3,13 @@ package com.github.whyrising.y
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.Serializable
 import kotlin.collections.Map.Entry
 import kotlin.math.max
 
 const val HASHTABLE_THRESHOLD = 16
 
+@Serializable(with = PersistentMapSerializer::class)
 sealed class PersistentArrayMap<out K, out V>(
     internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
 ) : APersistentMap<K, V>(), MapIterable<K, V>, IMutableCollection<Any?> {

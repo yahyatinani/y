@@ -7,7 +7,9 @@ import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.Serializable
 
+@Serializable(with = PersistentMapSerializer::class)
 sealed class LeanMap<out K, out V>(
     override val count: Int, val root: Node<K, V>?
 ) : APersistentMap<K, V>(), IMutableCollection<Any?>, MapIterable<K, V> {
@@ -960,8 +962,8 @@ sealed class LeanMap<out K, out V>(
     }
 }
 
-fun <K, V> hashMap(): LeanMap<K, V> =
-    LeanMap()
+fun <K, V> hashMap(): LeanMap<K, V> = LeanMap()
 
-fun <K, V> hashMap(vararg pairs: Pair<K, V>): LeanMap<K, V> =
-    LeanMap(*pairs)
+fun <K, V> hashMap(vararg pairs: Pair<K, V>): LeanMap<K, V> = LeanMap(*pairs)
+
+fun <K, V> hashMap(map: Map<K, V>): LeanMap<K, V> = LeanMap(map)
