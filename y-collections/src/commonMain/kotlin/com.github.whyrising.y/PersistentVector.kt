@@ -23,13 +23,8 @@ internal class PersistentVectorSerializer<E>(element: KSerializer<E>) :
 
     override val descriptor: SerialDescriptor = listSerializer.descriptor
 
-    override fun deserialize(decoder: Decoder): PersistentVector<E> {
-        val list = listSerializer.deserialize(decoder)
-
-        return list.fold(EmptyVector) { vec: PersistentVector<E>, e: E ->
-            vec.conj(e)
-        }
-    }
+    override fun deserialize(decoder: Decoder): PersistentVector<E> =
+        listSerializer.deserialize(decoder).toPvector()
 
     override fun serialize(encoder: Encoder, value: PersistentVector<E>) =
         listSerializer.serialize(encoder, value)
@@ -435,9 +430,28 @@ sealed class PersistentVector<out E>(
 
             return newPath(isMutable, level - SHIFT, path)
         }
+
+
+        internal fun <E> create(list: List<E>): PersistentVector<E> {
+            val size = list.size
+
+            return when {
+                size == 0 -> EmptyVector
+                size <= BF ->
+                    Vector(size, SHIFT, EmptyNode, list.toTypedArray())
+                else -> {
+                    val empty: TransientVector<E> = EmptyVector.asTransient()
+
+                    list.fold(empty) { tVec, e -> tVec.conj(e) }.persistent()
+                }
+            }
+        }
     }
 }
 
 fun <E> v(): PersistentVector<E> = EmptyVector
 
 fun <E> v(vararg elements: E): PersistentVector<E> = PersistentVector(*elements)
+
+fun <E> List<E>.toPvector(): PersistentVector<E> =
+    PersistentVector.create(this)

@@ -1550,6 +1550,11 @@ class PersistentVectorTest : FreeSpec({
         vec.nth(3) shouldBeExactly 4
     }
 
+    "toPvector()" {
+        listOf<Int>() shouldBe EmptyVector
+        listOf(1, 2, "3", 4).toPvector() shouldBe v(1, 2, "3", 4)
+    }
+
     "Serialization" - {
         "serialize" {
             val array = arrayOf(1, 2, 3, 4)
