@@ -123,6 +123,10 @@ class LeanMapTest : FreeSpec({
         seq.count shouldBeExactly 3
     }
 
+    "toString()" {
+        hashMap<String, Int>().toString() shouldBe "{}"
+    }
+
     "containsKey(key)" {
         val map = LeanMap("a" to 1, "b" to 2, "c" to 3, null to 185)
         val empty = LeanMap<String, Int>() as Associative<String, Int>

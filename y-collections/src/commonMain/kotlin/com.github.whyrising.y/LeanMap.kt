@@ -41,6 +41,9 @@ sealed class LeanMap<out K, out V>(
     override fun empty(): IPersistentCollection<Any?> = EmptyLeanMap
 
     abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
+
+        override fun toString(): String = "{}"
+
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> = this
 
         override fun containsKey(key: @UnsafeVariance K): Boolean = false
