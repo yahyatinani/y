@@ -200,6 +200,7 @@ class LeanMapTest : FreeSpec({
         map.containsKey("c").shouldBeTrue()
 
         newMap0 shouldBeSameInstanceAs EmptyLeanMap
+        LeanMap("a" to 1).dissoc("a") shouldBeSameInstanceAs EmptyLeanMap
 
         root1.isMutable.value.shouldBeFalse()
         newMap1.count shouldBeExactly map.count - 1
