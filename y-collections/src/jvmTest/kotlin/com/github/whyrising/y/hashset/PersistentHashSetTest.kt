@@ -59,11 +59,14 @@ class PersistentHashSetTest : FreeSpec({
 
         val newSet1: PersistentSet<String> = set.disjoin(element)
         val newSet2: PersistentSet<String> = set.disjoin("x")
+        val newSet3: PersistentSet<String> = set.disjoin(element)
+            .disjoin("b").disjoin("c")
 
         newSet1.count shouldBeExactly set.count - 1
         newSet1.contains(element).shouldBeFalse()
 
         newSet2 shouldBeSameInstanceAs set
+        newSet3 shouldBeSameInstanceAs EmptyHashSet
     }
 
     "get(key)" {
@@ -231,6 +234,40 @@ class PersistentHashSetTest : FreeSpec({
         hash shouldBeExactly expectedHash
         set.hashCode() shouldBeExactly expectedHash
         hs<String>().hashCode() shouldBeExactly 0
+    }
+
+    "equals(other)" - {
+        "when same instance, it should return true" {
+            val set = hs("a", "b", "c")
+
+            (set == set).shouldBeTrue()
+        }
+
+        "when other is not a Set, it should return false" {
+            val set = hs("a", "b", "c")
+
+            set.equals("a").shouldBeFalse()
+        }
+
+        "when other is a Set<*>" - {
+            "when sizes are different, it should return false" {
+                val set = hs("a", "b", "c")
+
+                (set == setOf("a", "b")).shouldBeFalse()
+            }
+
+            "when sizes are equal, it should check if this contains every e" {
+                val set = hs("a", "b", "c")
+
+                (set == setOf("a", "b", 2)).shouldBeFalse()
+                (set == hs("a", "b", 1)).shouldBeFalse()
+                (set == setOf("a", "b", "c")).shouldBeTrue()
+
+                (EmptyHashSet == EmptyHashSet).shouldBeTrue()
+                (EmptyHashSet == hs("a").disjoin("a")).shouldBeTrue()
+                (EmptyHashSet == set).shouldBeFalse()
+            }
+        }
     }
 
     "Set implementation" - {

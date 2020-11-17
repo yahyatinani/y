@@ -34,6 +34,20 @@ abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
         return hash
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Set<*>) return false
+
+        if (count != other.size) return false
+
+        for (e in other) {
+            if (!contains(e)) return false
+        }
+
+        return true
+
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun equiv(other: Any?): Boolean {
         when {
