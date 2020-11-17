@@ -1,27 +1,6 @@
 package com.github.whyrising.y
 
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import kotlin.collections.Map.Entry
-
-internal class PersistentMapSerializer<K, V>(
-    keySerializer: KSerializer<K>,
-    valueSerializer: KSerializer<V>
-) : KSerializer<Map<K, V>> {
-    internal val mapSerializer = MapSerializer(keySerializer, valueSerializer)
-
-    override val descriptor: SerialDescriptor = mapSerializer.descriptor
-
-    override fun deserialize(decoder: Decoder): Map<K, V> =
-        mapSerializer.deserialize(decoder)
-
-    override fun serialize(encoder: Encoder, value: Map<K, V>) {
-        return mapSerializer.serialize(encoder, value)
-    }
-}
 
 abstract class APersistentMap<out K, out V> :
     IPersistentMap<K, V>,

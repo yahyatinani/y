@@ -3,13 +3,34 @@ package com.github.whyrising.y
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlin.collections.Map.Entry
 import kotlin.math.max
 
 const val HASHTABLE_THRESHOLD = 16
 
-@Serializable(with = PersistentMapSerializer::class)
+internal class PersistentArrayMapSerializer<K, V>(
+    keySerializer: KSerializer<K>,
+    valueSerializer: KSerializer<V>
+) : KSerializer<PersistentArrayMap<K, V>> {
+    internal val mapSerializer = MapSerializer(keySerializer, valueSerializer)
+
+    override val descriptor: SerialDescriptor = mapSerializer.descriptor
+
+    override fun deserialize(decoder: Decoder): PersistentArrayMap<K, V> =
+        mapSerializer.deserialize(decoder).toPArrayMap()
+
+    override fun serialize(encoder: Encoder, value: PersistentArrayMap<K, V>) {
+        return mapSerializer.serialize(encoder, value)
+    }
+}
+
+@Serializable(with = PersistentArrayMapSerializer::class)
 sealed class PersistentArrayMap<out K, out V>(
     internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
 ) : APersistentMap<K, V>(), MapIterable<K, V>, IMutableCollection<Any?> {
@@ -303,8 +324,19 @@ sealed class PersistentArrayMap<out K, out V>(
                     ArrayMap(pairs as Array<Pair<K, V>>)
                 }
             }
+
+        fun <K, V> create(map: Map<K, V>): PersistentArrayMap<K, V> {
+            var ret: ITransientMap<K, V> = EmptyArrayMap.asTransient()
+
+            for (entry in map.entries) ret = ret.assoc(entry.key, entry.value)
+
+            return ret.persistent() as PersistentArrayMap<K, V>
+        }
     }
 }
 
 fun <K, V> m(vararg pairs: Pair<K, V>): PersistentArrayMap<K, V> =
     PersistentArrayMap(*pairs)
+
+fun <K, V> Map<K, V>.toPArrayMap(): PersistentArrayMap<K, V> =
+    PersistentArrayMap.create(this)

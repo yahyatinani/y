@@ -22,7 +22,13 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.pair
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 
+@ExperimentalSerializationApi
 @ExperimentalStdlibApi
 class PersistentArrayMapTest : FreeSpec({
     "TransientArrayMap" - {
@@ -979,5 +985,44 @@ class PersistentArrayMapTest : FreeSpec({
         map.count shouldBeExactly 2
         map("a") shouldBe 1
         map("b") shouldBe 2
+    }
+
+    "toPArrayMap()" {
+        val map = mapOf("a" to 1, "b" to 2)
+
+        val m = map.toPArrayMap()
+
+        m shouldBe mapOf("a" to 1, "b" to 2)
+    }
+
+    "Serialization" - {
+        "serialize" {
+            val m = mapOf("a" to 1, "b" to 2, "c" to 3)
+            val expected = Json.encodeToString(m)
+
+            val arrayMap = m("a" to 1, "b" to 2, "c" to 3)
+
+            Json.encodeToString(arrayMap) shouldBe expected
+        }
+
+        "deserialize" {
+            val m = mapOf("a" to 1, "b" to 2, "c" to 3)
+            val str = Json.encodeToString(m)
+            val expected = m.toPhashMap()
+
+            val arrayMap =
+                Json.decodeFromString<PersistentArrayMap<String, Int>>(str)
+
+            arrayMap shouldBe expected
+        }
+
+        "discriptor" {
+            val keySerial = serializer(String::class.java)
+            val valueSerial = serializer(Int::class.java)
+            val serializer = PersistentArrayMapSerializer(keySerial, valueSerial)
+
+            serializer.descriptor shouldBeSameInstanceAs
+                serializer.mapSerializer.descriptor
+        }
     }
 })

@@ -11,12 +11,10 @@ import com.github.whyrising.y.LeanMap.NodeIterator.NodeIter
 import com.github.whyrising.y.LeanMap.NodeSeq
 import com.github.whyrising.y.LeanMap.TransientLeanMap
 import com.github.whyrising.y.MapEntry
-import com.github.whyrising.y.PersistentArrayMap
+import com.github.whyrising.y.PersistentHashMapSerializer
 import com.github.whyrising.y.PersistentList.Empty
-import com.github.whyrising.y.PersistentMapSerializer
 import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.hasheq
-import com.github.whyrising.y.m
 import com.github.whyrising.y.toPhashMap
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
@@ -329,26 +327,24 @@ class LeanMapTest : FreeSpec({
             val expected = Json.encodeToString(m)
 
             val hashmap = hashMap("a" to 1, "b" to 2, "c" to 3)
-            val arraymap = m("a" to 1, "b" to 2, "c" to 3)
 
             Json.encodeToString(hashmap) shouldBe expected
-            Json.encodeToString(arraymap) shouldBe expected
         }
 
         "deserialize" {
             val m = mapOf("a" to 1, "b" to 2, "c" to 3)
-            val expected = m.toPhashMap()
             val str = Json.encodeToString(m)
+            val expected = m.toPhashMap()
 
-            Json.decodeFromString<LeanMap<String, Int>>(str) shouldBe expected
-            Json.decodeFromString<PersistentArrayMap<String, Int>>(str) shouldBe
-                expected
+            val hashMap = Json.decodeFromString<LeanMap<String, Int>>(str)
+
+            hashMap shouldBe expected
         }
 
         "discriptor" {
             val keySerial = serializer(String::class.java)
             val valueSerial = serializer(Int::class.java)
-            val serializer = PersistentMapSerializer(keySerial, valueSerial)
+            val serializer = PersistentHashMapSerializer(keySerial, valueSerial)
 
             serializer.descriptor shouldBeSameInstanceAs
                 serializer.mapSerializer.descriptor
