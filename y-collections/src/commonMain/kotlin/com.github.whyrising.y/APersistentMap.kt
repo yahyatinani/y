@@ -16,7 +16,7 @@ internal class PersistentMapSerializer<K, V>(
     override val descriptor: SerialDescriptor = mapSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): Map<K, V> =
-        hashMap(mapSerializer.deserialize(decoder))
+        mapSerializer.deserialize(decoder)
 
     override fun serialize(encoder: Encoder, value: Map<K, V>) {
         return mapSerializer.serialize(encoder, value)

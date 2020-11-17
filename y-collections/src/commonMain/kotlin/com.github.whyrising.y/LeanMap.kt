@@ -952,7 +952,7 @@ sealed class LeanMap<out K, out V>(
             return ret.persistent() as LeanMap<K, V>
         }
 
-        internal operator fun <K, V> invoke(map: Map<K, V>): LeanMap<K, V> {
+        internal fun <K, V> create(map: Map<K, V>): LeanMap<K, V> {
             var ret: ITransientMap<K, V> = EmptyLeanMap.asTransient()
 
             for (entry in map.entries) ret = ret.assoc(entry.key, entry.value)
@@ -966,4 +966,5 @@ fun <K, V> hashMap(): LeanMap<K, V> = LeanMap()
 
 fun <K, V> hashMap(vararg pairs: Pair<K, V>): LeanMap<K, V> = LeanMap(*pairs)
 
-fun <K, V> hashMap(map: Map<K, V>): LeanMap<K, V> = LeanMap(map)
+fun <K, V> Map<K, V>.toPhashMap(): LeanMap<K, V> = LeanMap.create(this)
+

@@ -17,6 +17,7 @@ import com.github.whyrising.y.PersistentMapSerializer
 import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.hasheq
 import com.github.whyrising.y.m
+import com.github.whyrising.y.toPhashMap
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -71,10 +72,10 @@ class LeanMapTest : FreeSpec({
         }.message shouldBe "Duplicate key: c"
     }
 
-    "invoke(map)" {
-        val map1 = LeanMap(mapOf("a" to 1))
-        val map2 = LeanMap(mapOf("a" to 1, "b" to 2))
-        val map3 = LeanMap(mapOf("a" to 1, "b" to 2, "c" to 3))
+    "create(map)" {
+        val map1 = LeanMap.create(mapOf("a" to 1))
+        val map2 = LeanMap.create(mapOf("a" to 1, "b" to 2))
+        val map3 = LeanMap.create(mapOf("a" to 1, "b" to 2, "c" to 3))
 
         map1.count shouldBeExactly 1
         map1.containsKey("a")
@@ -306,14 +307,20 @@ class LeanMapTest : FreeSpec({
 
     "hashMap()" {
         val hashmap = hashMap("a" to 1, "b" to 2, "c" to 3)
-        val map = mapOf("a" to 1, "b" to 2, "c" to 3)
 
         hashMap<String, Int>() shouldBeSameInstanceAs EmptyLeanMap
         hashmap.count shouldBeExactly 3
         hashmap("a") shouldBe 1
         hashmap("b") shouldBe 2
         hashmap("c") shouldBe 3
-        hashmap shouldBe hashMap(map)
+    }
+
+    "toHashMap()" {
+        val map = mapOf("a" to 1, "b" to 2, "c" to 3)
+
+        val hashMap = map.toPhashMap()
+
+        hashMap shouldBe hashMap("a" to 1, "b" to 2, "c" to 3)
     }
 
     "Serialization" - {
@@ -330,7 +337,7 @@ class LeanMapTest : FreeSpec({
 
         "deserialize" {
             val m = mapOf("a" to 1, "b" to 2, "c" to 3)
-            val expected = hashMap(m)
+            val expected = m.toPhashMap()
             val str = Json.encodeToString(m)
 
             Json.decodeFromString<LeanMap<String, Int>>(str) shouldBe expected
