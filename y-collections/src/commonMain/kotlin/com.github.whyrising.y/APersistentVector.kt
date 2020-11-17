@@ -77,10 +77,10 @@ abstract class APersistentVector<out E> :
         other: Any?,
         areEqual: (e1: E, e2: Any?) -> Boolean
     ): Boolean {
-        when (other) {
-            null -> return false
-            other.hashCode() != hashCode() -> return false
-            is IPersistentVector<*> -> {
+        when {
+            other == null -> return false
+            this === other -> return true
+            other is IPersistentVector<*> -> {
                 if (count != other.count) return false
 
                 var i = 0
@@ -92,7 +92,7 @@ abstract class APersistentVector<out E> :
 
                 return true
             }
-            is List<*> -> {
+            other is List<*> -> {
                 if (other.size != count)
                     return false
 

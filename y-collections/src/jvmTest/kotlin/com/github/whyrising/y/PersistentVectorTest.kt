@@ -434,6 +434,9 @@ class PersistentVectorTest : FreeSpec({
 
             (v(1, 2, 3) == v(1, 2, 3)).shouldBeTrue()
 
+            val v = v(1, 2, 3)
+            (v == v).shouldBeTrue()
+
             (v(1, 2, 3) == v(1, 2, 5)).shouldBeFalse()
 
             (v(v(1)) == v(v(1))).shouldBeTrue()
