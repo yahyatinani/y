@@ -39,8 +39,6 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
         override fun toString(): String = "#{}"
 
         override fun hashCode(): Int = 0
-
-        override fun equals(other: Any?): Boolean = this === other
     }
 
     internal

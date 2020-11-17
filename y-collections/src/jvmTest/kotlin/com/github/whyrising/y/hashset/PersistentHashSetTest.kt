@@ -266,6 +266,7 @@ class PersistentHashSetTest : FreeSpec({
                 (set == setOf("a", "b", "c")).shouldBeTrue()
 
                 (EmptyHashSet == EmptyHashSet).shouldBeTrue()
+                (EmptyHashSet == setOf<String>()).shouldBeTrue()
                 (EmptyHashSet == hs("a").disjoin("a")).shouldBeTrue()
                 (EmptyHashSet == set).shouldBeFalse()
             }
