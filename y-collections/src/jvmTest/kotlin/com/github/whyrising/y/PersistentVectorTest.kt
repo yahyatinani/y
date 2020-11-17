@@ -32,6 +32,7 @@ import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.merge
 import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -39,6 +40,7 @@ import kotlinx.serialization.serializer
 
 const val SHIFT = 5
 
+@ExperimentalSerializationApi
 @ExperimentalStdlibApi
 class PersistentVectorTest : FreeSpec({
     "Node" - {
@@ -1550,10 +1552,9 @@ class PersistentVectorTest : FreeSpec({
 
     "Serialization" - {
         "serialize" {
-            val l = listOf(1, 2, 3, 4)
-            val encoded = Json.encodeToString(l)
-
-            val vec = v(*l.toTypedArray())
+            val array = arrayOf(1, 2, 3, 4)
+            val encoded = Json.encodeToString(array)
+            val vec = v(*array)
 
             val encodeToString = Json.encodeToString(vec)
 
@@ -1561,12 +1562,12 @@ class PersistentVectorTest : FreeSpec({
         }
 
         "deserialize" {
-            val l = listOf(1, 2, 3, 4)
-            val str = Json.encodeToString(l)
+            val array = arrayOf(1, 2, 3, 4)
+            val str = Json.encodeToString(array)
 
             val vec = Json.decodeFromString<PersistentVector<Int>>(str)
 
-            vec shouldBe PersistentList(*l.toTypedArray())
+            vec shouldBe PersistentList(*array)
         }
 
         "discriptor" {
