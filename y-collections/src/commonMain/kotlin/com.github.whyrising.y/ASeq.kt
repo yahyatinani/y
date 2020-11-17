@@ -3,8 +3,11 @@ package com.github.whyrising.y
 import com.github.whyrising.y.PersistentList.Empty
 
 abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
-    private var _hashCode: Int = INIT_HASH_CODE
-    private var _hasheq: Int = 0
+    internal var hashCode: Int = INIT_HASH_CODE
+        private set
+
+    internal var hasheq: Int = INIT_HASH_CODE
+        private set
 
     override fun toString(): String = "(${
         fold("") { acc, e -> "$acc $e" }.trim()
@@ -15,10 +18,10 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
         areEqual: (e1: E, e2: Any?) -> Boolean
     ): Boolean {
         //TODO : Refactor after implementing the LazySeq
-        when (other) {
-            null -> return false
-            hashCode() != other.hashCode() -> return false
-            is List<*> -> {
+        when {
+            other == null -> return false
+            this === other -> return true
+            other is List<*> -> {
                 if (count != other.size)
                     return false
 
@@ -32,7 +35,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
 
                 return !otherIter.hasNext()
             }
-            is Sequential -> {
+            other is Sequential -> {
                 var seq = seq()
                 var otherSeq = toSeq<E>(other) as ISeq<E>
 
@@ -61,21 +64,27 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
     }
 
     override fun hashCode(): Int {
-        if (_hashCode != INIT_HASH_CODE) return _hashCode
+        var cached = hashCode
+        if (cached == INIT_HASH_CODE) {
+            cached = 1
+            var seq = seq()
+            while (seq.count > 0) {
+                cached = (HASH_PRIME * cached) + seq.first().hashCode()
+                seq = seq.rest()
 
-        _hashCode = fold(Empty.hashCode()) { hashCode: Int, i: E? ->
-            HASH_PRIME * hashCode + i.hashCode()
+            }
+            hashCode = cached
         }
 
-        return _hashCode
+        return cached
     }
 
     @ExperimentalStdlibApi
     override fun hasheq(): Int {
-        if (_hasheq == 0)
-            _hasheq = Murmur3.hashOrdered(this)
+        if (hasheq == 0)
+            hasheq = Murmur3.hashOrdered(this)
 
-        return _hasheq
+        return hasheq
     }
 
     override fun seq(): ISeq<E> = this

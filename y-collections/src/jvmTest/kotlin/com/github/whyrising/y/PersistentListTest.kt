@@ -50,27 +50,31 @@ class PersistentListTest : FreeSpec({
         }
 
         "equals(x)" {
+            val l = l(1, 2, 3)
+
             (l<Int>() == listOf<Int>()).shouldBeTrue()
 
-            l(1, 2, 3).equals(null).shouldBeFalse()
+            l.equals(null).shouldBeFalse()
 
-            (l(1, 2, 3) == mapOf(1 to 2)).shouldBeFalse()
+            (l == mapOf(1 to 2)).shouldBeFalse()
 
-            (l(1, 2, 3) == listOf(1, 2, 3)).shouldBeTrue()
+            (l == listOf(1, 2, 3)).shouldBeTrue()
 
-            (l(1, 2, 3) == listOf(1, 2, 3, 4)).shouldBeFalse()
+            (l == listOf(1, 2, 3, 4)).shouldBeFalse()
 
             (l(User(1)) == listOf(User(2))).shouldBeFalse()
 
-            (l(1, 2, 3) == l(1, 2, 8)).shouldBeFalse()
+            (l == l(1, 2, 8)).shouldBeFalse()
 
-            (l(1, 2, 3) == Empty).shouldBeFalse()
+            (l == Empty).shouldBeFalse()
 
-            (l(1, 2, 3) == MockSeq(v(1, 2, 3))).shouldBeTrue()
+            (l == MockSeq(v(1, 2, 3))).shouldBeTrue()
 
-            (l(1, 2, 3) == MockSeq(v(1, 2, 4))).shouldBeFalse()
+            (l == MockSeq(v(1, 2, 4))).shouldBeFalse()
 
-            (l(1, 2, 3) == MockSeq(v(1, 2, 3, 4))).shouldBeFalse()
+            (l == MockSeq(v(1, 2, 3, 4))).shouldBeFalse()
+
+            (l == l).shouldBeTrue()
         }
 
         "equiv(x)" {
@@ -143,12 +147,31 @@ class PersistentListTest : FreeSpec({
             (r as ISeq<Int>).first() shouldBeExactly 5
         }
 
+        "hashCode()" {
+            val gen = Arb.list(Arb.int().merge(Arb.int().map { null }), 1..20)
+            checkAll(gen) { integers: List<Int?> ->
+                val expectedHash =
+                    integers.fold(Empty.hashCode()) { hashCode: Int, i: Int? ->
+                        HASH_PRIME * hashCode + i.hashCode()
+                    }
+                val l = PersistentList(*integers.toTypedArray())
+
+                l.hashCode shouldBeExactly 0
+                l.hashCode() shouldBeExactly expectedHash
+                l.hashCode shouldBeExactly expectedHash
+            }
+
+            Empty.hashCode() shouldBeExactly 1
+            Empty.hashCode shouldBeExactly 1
+        }
+
         "hasheq()" {
-            val list = l(1, 2, 3, 4, 5)
+            val list = l(1, 2, 3, 4, 5) as ASeq<Int>
             val expectedHash = Murmur3.hashOrdered(list)
 
+            list.hasheq shouldBeExactly INIT_HASH_CODE
             list.hasheq() shouldBeExactly expectedHash
-            list.hasheq() shouldBeExactly expectedHash
+            list.hasheq shouldBeExactly expectedHash
             l<Int>().hasheq() shouldBeExactly -2017569654
         }
     }
@@ -324,20 +347,6 @@ class PersistentListTest : FreeSpec({
                 (newList as IPersistentList<*>).count shouldBeExactly 2
                 newList.first() shouldBeExactly i
                 newList.rest() shouldBeSameInstanceAs oldList
-            }
-        }
-
-        "hashCode()" {
-            val instsUnull = Arb.list(Arb.int().merge(Arb.int().map { null }))
-            checkAll(instsUnull) { integers: List<Int?> ->
-                val prime = 31
-
-                val l = PersistentList(*integers.toTypedArray())
-
-                l.hashCode() shouldBeExactly
-                    integers.fold(Empty.hashCode()) { hashCode: Int, i: Int? ->
-                        prime * hashCode + i.hashCode()
-                    }
             }
         }
 

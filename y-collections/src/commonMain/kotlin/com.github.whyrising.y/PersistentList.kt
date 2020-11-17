@@ -59,8 +59,6 @@ sealed class PersistentList<out E> :
 
         override fun toString(): String = "()"
 
-        override fun hashCode(): Int = 1
-
         @ExperimentalStdlibApi
         override fun hasheq(): Int = HASH_EQ
 
