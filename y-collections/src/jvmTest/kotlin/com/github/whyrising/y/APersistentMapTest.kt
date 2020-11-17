@@ -38,6 +38,8 @@ class APersistentMapTest : FreeSpec({
 
         (m == m).shouldBeTrue()
 
+        (m<String, Int>() == mapOf<String, Int>()).shouldBeTrue()
+
         (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 2)).shouldBeTrue()
 
         (m("a" to 1, "b" to 2).equals("string")).shouldBeFalse()
@@ -111,6 +113,8 @@ class APersistentMapTest : FreeSpec({
     "equiv(other)" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
         val map = m(*array)
+
+        m<String, Int>().equiv(mapOf<String, Int>()).shouldBeTrue()
 
         "when this and other are the same instance, it should return true" {
             map.equiv(map).shouldBeTrue()
