@@ -14,6 +14,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeInstanceOf
 
+@ExperimentalStdlibApi
 @Suppress("UNCHECKED_CAST")
 class APersistentMapTest : FreeSpec({
     "toString()" {
@@ -30,7 +31,22 @@ class APersistentMapTest : FreeSpec({
             ("b".hashCode() xor 2.hashCode())
 
         map.hashCode() shouldBeExactly expHash
-        map._hashCode shouldBeExactly expHash
+        map.hashCode shouldBeExactly expHash
+    }
+
+    "hasheq()" {
+        val map = m("a" to 1, "b" to 2, "c" to 3)
+        val expectedHash = Murmur3.hashUnordered(map)
+
+        map.hasheq shouldBeExactly 0
+
+        val hash = map.hasheq()
+
+        hash shouldBeExactly expectedHash
+        map.hasheq shouldBeExactly expectedHash
+        m<String, Int>().hasheq() shouldBeExactly -15128758
+        m<String, Int>().hasheq() shouldBeExactly
+            hashMap<String, Int>().hasheq()
     }
 
     "equals(other)" {

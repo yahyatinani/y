@@ -6,9 +6,13 @@ abstract class APersistentMap<out K, out V> :
     IPersistentMap<K, V>,
     Map<@UnsafeVariance K, V>,
     Iterable<Entry<K, V>>,
-    MapEquivalence {
+    MapEquivalence,
+    IHashEq {
 
-    var _hashCode = 0
+    internal var hashCode = 0
+        private set
+
+    internal var hasheq = 0
         private set
 
     @Suppress("UNCHECKED_CAST")
@@ -31,7 +35,7 @@ abstract class APersistentMap<out K, out V> :
 
     @Suppress("UNCHECKED_CAST")
     override fun hashCode(): Int {
-        var cashed = _hashCode
+        var cashed = hashCode
 
         if (cashed == 0) {
             var seq = seq() as ISeq<MapEntry<K, V>>
@@ -44,10 +48,21 @@ abstract class APersistentMap<out K, out V> :
                 seq = seq.rest()
             }
 
-            _hashCode = cashed
+            hashCode = cashed
         }
 
         return cashed
+    }
+
+    @ExperimentalStdlibApi
+    override fun hasheq(): Int {
+        var cached = hasheq
+        if (cached == 0) {
+            cached = Murmur3.hashUnordered(this)
+            hasheq = cached
+        }
+
+        return cached
     }
 
     @Suppress("UNCHECKED_CAST")
