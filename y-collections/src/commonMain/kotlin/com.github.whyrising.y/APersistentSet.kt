@@ -1,7 +1,7 @@
 package com.github.whyrising.y
 
 abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
-    PersistentSet<E>, Set<E>, IHashEq {
+    PersistentSet<E>, Set<E>, Collection<E>, IHashEq {
     private var _hash = 0
     private var _hashEq = 0
 
