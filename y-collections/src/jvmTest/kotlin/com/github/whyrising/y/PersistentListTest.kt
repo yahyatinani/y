@@ -390,6 +390,7 @@ class PersistentListTest : FreeSpec({
 
                 list.contains(4).shouldBeTrue()
                 list.contains(10).shouldBeFalse()
+                Empty.contains(0).shouldBeFalse()
             }
 
             "containsAll(Collection)"{
@@ -406,6 +407,7 @@ class PersistentListTest : FreeSpec({
                 list.indexOf(4L) shouldBeExactly 3
                 list.indexOf(1) shouldBeExactly 0
                 list.indexOf(6) shouldBeExactly -1
+                Empty.indexOf(6) shouldBeExactly -1
             }
 
             "isEmpty() should return false" {
@@ -452,6 +454,7 @@ class PersistentListTest : FreeSpec({
 
                 "when the element is not in the list, it should return -1" {
                     list.lastIndexOf(10) shouldBeExactly -1
+                    Empty.lastIndexOf(10) shouldBeExactly -1
                 }
 
                 """|when the element is in the list,

@@ -61,8 +61,6 @@ sealed class PersistentList<out E> :
 
         override fun hashCode(): Int = 1
 
-        //TODO : Implement equals
-
         override fun first(): E =
             throw NoSuchElementException("PersistentList is empty.")
 
@@ -89,10 +87,6 @@ sealed class PersistentList<out E> :
         // List implementation
         override val size: Int = 0
 
-        override fun contains(element: @UnsafeVariance E): Boolean {
-            TODO("Not yet implemented - it doesn't get called")
-        }
-
         override
         fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean =
             elements.isEmpty()
@@ -100,20 +94,12 @@ sealed class PersistentList<out E> :
         override fun get(index: Int): E =
             throw IndexOutOfBoundsException("Can't call get on an empty list")
 
-        override fun indexOf(element: @UnsafeVariance E): Int {
-            TODO("Not yet implemented - it doesn't get called")
-        }
-
         override fun isEmpty(): Boolean = true
 
         override fun iterator(): Iterator<E> = object : Iterator<E> {
             override fun hasNext(): Boolean = false
 
             override fun next(): E = throw NoSuchElementException()
-        }
-
-        override fun lastIndexOf(element: @UnsafeVariance E): Int {
-            TODO("Not yet implemented - it doesn't get called")
         }
 
         override fun listIterator(): ListIterator<E> =
