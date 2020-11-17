@@ -25,9 +25,12 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
 
     internal abstract class AEmptyHashSet<out E>(m: IPersistentMap<E, E>) :
         PersistentHashSet<E>(m) {
+
         override val count: Int = 0
 
         override fun contains(element: @UnsafeVariance E): Boolean = false
+
+        override fun toString(): String = "#{}"
 
         override fun hashCode(): Int = 0
     }

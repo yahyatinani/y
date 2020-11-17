@@ -216,6 +216,7 @@ class PersistentHashSetTest : FreeSpec({
     "toString()" {
         val set = hs("a", "b", "c")
 
+        hs<String>().toString() shouldBe "#{}"
         set.toString() shouldBe "#{a b c}"
     }
 
