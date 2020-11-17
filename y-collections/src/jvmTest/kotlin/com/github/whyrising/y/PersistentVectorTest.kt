@@ -35,6 +35,7 @@ import kotlinx.atomicfu.atomic
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 
 const val SHIFT = 5
 
@@ -409,7 +410,7 @@ class PersistentVectorTest : FreeSpec({
 
             "when called on a populated vector it should calculate the hash" {
                 val gen =
-                    Arb.list(Arb.int().merge(Arb.int().map { null }),1..20)
+                    Arb.list(Arb.int().merge(Arb.int().map { null }), 1..20)
                 checkAll(gen) { list: List<Int?> ->
                     val prime = 31
                     val expectedHash = list.fold(1) { hash, i ->
@@ -1566,6 +1567,14 @@ class PersistentVectorTest : FreeSpec({
             val vec = Json.decodeFromString<PersistentVector<Int>>(str)
 
             vec shouldBe PersistentList(*l.toTypedArray())
+        }
+
+        "discriptor" {
+            val element = serializer(Int::class.java)
+            val serializer = PersistentVectorSerializer(element)
+
+            serializer.descriptor shouldBeSameInstanceAs
+                serializer.listSerializer.descriptor
         }
     }
 }) {
