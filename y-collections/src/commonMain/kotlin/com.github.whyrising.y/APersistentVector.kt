@@ -11,7 +11,8 @@ abstract class APersistentVector<out E> :
     Reversible<E>,
     IHashEq {
 
-    private var _hashCode: Int = INIT_HASH_CODE
+    internal var hashCode: Int = INIT_HASH_CODE
+        private set
 
     internal var hasheq: Int = INIT_HASH_CODE
         private set
@@ -38,18 +39,18 @@ abstract class APersistentVector<out E> :
     }
 
     override fun hashCode(): Int {
-        var hash = _hashCode
+        var hash = hashCode
 
-        if (hash != INIT_HASH_CODE) return hash
+        if (hash == INIT_HASH_CODE) {
+            hash = 1
 
-        var index = 0
-        hash = 1
-        while (index < count) {
-            hash = 31 * hash + nth(index).hashCode()
-
-            index++
+            var index = 0
+            while (index < count) {
+                hash = (31 * hash) + nth(index).hashCode()
+                index++
+            }
+            hashCode = hash
         }
-        _hashCode = hash
 
         return hash
     }

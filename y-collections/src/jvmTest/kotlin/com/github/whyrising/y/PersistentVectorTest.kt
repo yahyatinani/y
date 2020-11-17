@@ -407,20 +407,23 @@ class PersistentVectorTest : FreeSpec({
                 EmptyVector.hashCode() shouldBeExactly 1
             }
 
-            "when called on a populated vectorm it should calculate the hash" {
-
-                val gen = Arb.list(Arb.int().merge(Arb.int().map { null }))
+            "when called on a populated vector it should calculate the hash" {
+                val gen =
+                    Arb.list(Arb.int().merge(Arb.int().map { null }),1..20)
                 checkAll(gen) { list: List<Int?> ->
                     val prime = 31
-                    val emptyVecHash = EmptyVector.hashCode()
-                    val expectedHash = list.fold(emptyVecHash) { hash, i ->
+                    val expectedHash = list.fold(1) { hash, i ->
                         prime * hash + i.hashCode()
                     }
                     val vec = v(*list.toTypedArray())
 
+                    vec.hashCode shouldBeExactly INIT_HASH_CODE
                     vec.hashCode() shouldBeExactly expectedHash
-                    vec.hashCode() shouldBeExactly expectedHash // for coverage
+                    vec.hashCode shouldBeExactly expectedHash
                 }
+
+                EmptyVector.hashCode() shouldBeExactly 1
+                EmptyVector.hashCode shouldBeExactly 1
             }
         }
 
