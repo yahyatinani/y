@@ -108,7 +108,7 @@ abstract class APersistentMap<out K, out V> :
     @Suppress("UNCHECKED_CAST")
     override fun equiv(other: Any?): Boolean {
         when {
-            //TODO : Add === test
+            this === other -> return true
             other !is Map<*, *> -> return false
             other is IPersistentMap<*, *> &&
                 other !is MapEquivalence -> return false

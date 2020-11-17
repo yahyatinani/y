@@ -112,6 +112,10 @@ class APersistentMapTest : FreeSpec({
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
         val map = m(*array)
 
+        "when this and other are the same instance, it should return true" {
+            map.equiv(map).shouldBeTrue()
+        }
+
         "when other is not a Map, it should return false" {
             map.equiv("map").shouldBeFalse()
         }
