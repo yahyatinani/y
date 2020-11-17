@@ -99,8 +99,8 @@ private fun hashNumber(x: Number): Int = when {
 @ExperimentalStdlibApi
 fun hasheq(x: Any?): Int = when (x) {
     null -> 0
+    is IHashEq -> x.hasheq()
     is String -> Murmur3.hashInt(x.hashCode())
     is Number -> hashNumber(x)
-    is IHashEq -> x.hasheq()
     else -> x.hashCode()
 }

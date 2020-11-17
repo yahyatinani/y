@@ -38,6 +38,7 @@ import kotlinx.serialization.json.Json
 
 const val SHIFT = 5
 
+@ExperimentalStdlibApi
 class PersistentVectorTest : FreeSpec({
     "Node" - {
         @Suppress("UNCHECKED_CAST")
@@ -499,6 +500,22 @@ class PersistentVectorTest : FreeSpec({
             v(listOf(1L)).equiv(l(l(1))).shouldBeTrue()
 
             v(1.1).equiv(l(1.1)).shouldBeTrue()
+        }
+
+        "hasheq()" {
+            val vec = v(1, 2, 3, 4)
+
+            vec.hasheq shouldBeExactly 0
+
+            val h = vec.fold(1) { hash: Int, i: Int ->
+                (HASH_PRIME * hash) + hasheq(i)
+            }
+            val expectedHash = Murmur3.mixCollHash(h, vec.count)
+
+            val hash = vec.hasheq()
+
+            hash shouldBeExactly expectedHash
+            vec.hasheq shouldBeExactly expectedHash
         }
 
         "valAt(key, default)" {

@@ -8,9 +8,13 @@ abstract class APersistentVector<out E> :
     List<E>,
     Comparable<IPersistentVector<@UnsafeVariance E>>,
     RandomAccess,
-    Reversible<E> {
+    Reversible<E>,
+    IHashEq {
 
     private var _hashCode: Int = INIT_HASH_CODE
+
+    internal var hasheq: Int = INIT_HASH_CODE
+        private set
 
     override fun toString(): String {
         var i = 0
@@ -48,6 +52,24 @@ abstract class APersistentVector<out E> :
         _hashCode = hash
 
         return hash
+    }
+
+    @ExperimentalStdlibApi
+    override fun hasheq(): Int {
+        var cached = hasheq
+        if (cached == INIT_HASH_CODE) {
+            cached = 1
+            var i = 0
+            while (i < count) {
+                cached = (HASH_PRIME * cached) + hasheq(nth(i))
+                i++
+            }
+
+            cached = Murmur3.mixCollHash(cached, i)
+            hasheq = cached
+        }
+
+        return cached
     }
 
     private fun compareWith(
