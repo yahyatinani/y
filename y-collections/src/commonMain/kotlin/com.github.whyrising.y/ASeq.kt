@@ -2,8 +2,9 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentList.Empty
 
-abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
+abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
     private var _hashCode: Int = INIT_HASH_CODE
+    private var _hasheq: Int = 0
 
     override fun toString(): String = "(${
         fold("") { acc, e -> "$acc $e" }.trim()
@@ -67,6 +68,14 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential {
         }
 
         return _hashCode
+    }
+
+    @ExperimentalStdlibApi
+    override fun hasheq(): Int {
+        if (_hasheq == 0)
+            _hasheq = Murmur3.hashOrdered(this)
+
+        return _hasheq
     }
 
     override fun seq(): ISeq<E> = this

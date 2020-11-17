@@ -26,6 +26,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.*
 
+@ExperimentalStdlibApi
 class PersistentListTest : FreeSpec({
 
     "PersistentList" - {
@@ -140,6 +141,15 @@ class PersistentListTest : FreeSpec({
 
             r.count shouldBeExactly list.count + 1
             (r as ISeq<Int>).first() shouldBeExactly 5
+        }
+
+        "hasheq()" {
+            val list = l(1, 2, 3, 4, 5)
+            val expectedHash = Murmur3.hashOrdered(list)
+
+            list.hasheq() shouldBeExactly expectedHash
+            list.hasheq() shouldBeExactly expectedHash
+            l<Int>().hasheq() shouldBeExactly -2017569654
         }
     }
 

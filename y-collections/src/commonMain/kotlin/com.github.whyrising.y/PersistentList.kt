@@ -61,6 +61,9 @@ sealed class PersistentList<out E> :
 
         override fun hashCode(): Int = 1
 
+        @ExperimentalStdlibApi
+        override fun hasheq(): Int = HASH_EQ
+
         override fun first(): E =
             throw NoSuchElementException("PersistentList is empty.")
 
@@ -110,6 +113,11 @@ sealed class PersistentList<out E> :
 
         override fun subList(fromIndex: Int, toIndex: Int): List<E> =
             listOf<E>().subList(fromIndex, toIndex)
+
+        companion object {
+            @ExperimentalStdlibApi
+            private val HASH_EQ = Murmur3.hashOrdered(emptyList<Nothing>())
+        }
     }
 
     internal object Empty : AEmpty<Nothing>()
