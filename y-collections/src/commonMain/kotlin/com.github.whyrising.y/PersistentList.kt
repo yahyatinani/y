@@ -15,13 +15,8 @@ internal class PersistentListSerializer<E>(element: KSerializer<E>) :
 
     override val descriptor: SerialDescriptor = listSerializer.descriptor
 
-    override fun deserialize(decoder: Decoder): PersistentList<E> {
-        val list = listSerializer.deserialize(decoder)
-
-        return list.foldRight(Empty) { e: E, acc: IPersistentCollection<E> ->
-            acc.conj(e)
-        } as PersistentList<E>
-    }
+    override fun deserialize(decoder: Decoder): PersistentList<E> =
+        listSerializer.deserialize(decoder).toPlist()
 
     override fun serialize(encoder: Encoder, value: PersistentList<E>) =
         listSerializer.serialize(encoder, value)
@@ -127,9 +122,22 @@ sealed class PersistentList<out E> :
             args.foldRight(Empty) { e: E, acc: IPersistentList<E> ->
                 Cons(e, acc)
             }
+
+        internal fun <E> create(list: List<E>): PersistentList<E> {
+            var l: PersistentList<E> = Empty
+
+            val listIterator = list.listIterator(list.size)
+
+            while (listIterator.hasPrevious())
+                l = l.conj(listIterator.previous()) as PersistentList<E>
+
+            return l
+        }
     }
 }
 
 fun <E> l(): PersistentList<E> = Empty
 
 fun <E> l(vararg elements: E): PersistentList<E> = PersistentList(*elements)
+
+fun <E> List<E>.toPlist(): PersistentList<E> = PersistentList.create(this)

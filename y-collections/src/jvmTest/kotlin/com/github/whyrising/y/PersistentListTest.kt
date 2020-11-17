@@ -21,12 +21,14 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.merge
 import io.kotest.property.checkAll
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import java.util.*
 
+@ExperimentalSerializationApi
 @ExperimentalStdlibApi
 class PersistentListTest : FreeSpec({
 
@@ -602,5 +604,10 @@ class PersistentListTest : FreeSpec({
         "l(args) with args should return a PersistentList" {
             l(1, 2, 3, 4) shouldBe PersistentList(1, 2, 3, 4)
         }
+    }
+
+    "toPlist()" {
+        listOf(1, 2, 3).toPlist() shouldBe l(1, 2, 3)
+        listOf<Int>().toPlist() shouldBe l()
     }
 })
