@@ -34,6 +34,10 @@ class APersistentMapTest : FreeSpec({
     }
 
     "equals(other)" {
+        val m = m("a" to 1, "b" to 2)
+
+        (m == m).shouldBeTrue()
+
         (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 2)).shouldBeTrue()
 
         (m("a" to 1, "b" to 2).equals("string")).shouldBeFalse()

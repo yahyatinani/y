@@ -53,6 +53,7 @@ abstract class APersistentMap<out K, out V> :
     @Suppress("UNCHECKED_CAST")
     override fun equals(other: Any?): Boolean {
         when {
+            this === other -> return true
             other !is Map<*, *> -> return false
             count != other.size -> return false
             else -> {
