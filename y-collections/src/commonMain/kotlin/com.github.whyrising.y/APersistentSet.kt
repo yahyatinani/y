@@ -77,6 +77,8 @@ abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
 
     override operator fun get(key: @UnsafeVariance E): E? = map.valAt(key)
 
+    operator fun invoke(e: @UnsafeVariance E): E? = get(e)
+
     override fun contains(element: @UnsafeVariance E): Boolean =
         map.containsKey(element)
 

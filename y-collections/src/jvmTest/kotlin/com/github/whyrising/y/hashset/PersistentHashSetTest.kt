@@ -280,6 +280,15 @@ class PersistentHashSetTest : FreeSpec({
         set.hasheq() shouldBeExactly expected
     }
 
+    "invoke(key)" {
+        val set = hs("a", "b", "c")
+
+        set("a") shouldBe "a"
+        set("b") shouldBe "b"
+        set("c") shouldBe "c"
+        set("x") shouldBe null
+    }
+
     "Set implementation" - {
         "size()" {
             val map = hashMap("a" to "1", "b" to "2", "c" to "3")
