@@ -9,8 +9,8 @@ import com.github.whyrising.y.PersistentHashSet
 import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.PersistentHashSet.HashSet
 import com.github.whyrising.y.PersistentHashSet.TransientHashSet
+import com.github.whyrising.y.PersistentHashSetSerializer
 import com.github.whyrising.y.PersistentSet
-import com.github.whyrising.y.PersistentSetSerializer
 import com.github.whyrising.y.TransientSet
 import com.github.whyrising.y.hashMap
 import com.github.whyrising.y.hashSet
@@ -489,7 +489,7 @@ class PersistentHashSetTest : FreeSpec({
 
         "descriptor" {
             val element = serializer(Int::class.java)
-            val serializer = PersistentSetSerializer(element)
+            val serializer = PersistentHashSetSerializer(element)
 
             serializer.descriptor shouldBeSameInstanceAs
                 serializer.setSerializer.descriptor

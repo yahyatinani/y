@@ -4,9 +4,28 @@ import com.github.whyrising.y.PersistentHashSet.Companion.create
 import com.github.whyrising.y.PersistentHashSet.Companion.createWithCheck
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.SetSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
-@Serializable(with = PersistentSetSerializer::class)
+internal class PersistentHashSetSerializer<E>(element: KSerializer<E>) :
+    KSerializer<PersistentHashSet<E>> {
+
+    internal val setSerializer = SetSerializer(element)
+
+    override val descriptor: SerialDescriptor = setSerializer.descriptor
+
+    override fun deserialize(decoder: Decoder): PersistentHashSet<E> =
+        setSerializer.deserialize(decoder).toPhashSet()
+
+    override fun serialize(encoder: Encoder, value: PersistentHashSet<E>) =
+        setSerializer.serialize(encoder, value)
+}
+
+@Serializable(with = PersistentHashSetSerializer::class)
 sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
     APersistentSet<E>(map), IMutableCollection<E> {
 

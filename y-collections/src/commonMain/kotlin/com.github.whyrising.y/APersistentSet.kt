@@ -1,25 +1,5 @@
 package com.github.whyrising.y
 
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.SetSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-
-internal class PersistentSetSerializer<E>(element: KSerializer<E>) :
-    KSerializer<Set<E>> {
-
-    internal val setSerializer = SetSerializer(element)
-
-    override val descriptor: SerialDescriptor = setSerializer.descriptor
-
-    override fun deserialize(decoder: Decoder): Set<E> =
-        setSerializer.deserialize(decoder).toPhashSet()
-
-    override fun serialize(encoder: Encoder, value: Set<E>) =
-        setSerializer.serialize(encoder, value)
-}
-
 abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
     PersistentSet<E>, Set<E>, Collection<E>, IHashEq {
     private var _hash = 0
