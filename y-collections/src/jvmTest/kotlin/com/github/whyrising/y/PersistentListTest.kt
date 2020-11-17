@@ -49,6 +49,8 @@ class PersistentListTest : FreeSpec({
         }
 
         "equals(x)" {
+            (l<Int>() == listOf<Int>()).shouldBeTrue()
+
             l(1, 2, 3).equals(null).shouldBeFalse()
 
             (l(1, 2, 3) == mapOf(1 to 2)).shouldBeFalse()
@@ -72,6 +74,8 @@ class PersistentListTest : FreeSpec({
 
         "equiv(x)" {
             // assert equals behaviour
+            l<Int>().equiv(listOf<Int>()).shouldBeTrue()
+
             l(1, 2, 3).equiv(null).shouldBeFalse()
 
             l(1, 2, 3).equiv(mapOf(1 to 2)).shouldBeFalse()
