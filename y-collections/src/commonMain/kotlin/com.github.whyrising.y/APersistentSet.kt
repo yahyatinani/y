@@ -1,8 +1,9 @@
 package com.github.whyrising.y
 
 abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
-    PersistentSet<E>, Set<E> {
+    PersistentSet<E>, Set<E>, IHashEq {
     private var _hash = 0
+    private var _hashEq = 0
 
     override val count: Int = map.count
 
@@ -46,6 +47,18 @@ abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
 
         return true
 
+    }
+
+    @ExperimentalStdlibApi
+    override fun hasheq(): Int {
+        var cached = _hashEq
+
+        if (cached == 0) {
+            cached = Murmur3.hashUnordered(this)
+            _hashEq = cached
+        }
+
+        return cached
     }
 
     @Suppress("UNCHECKED_CAST")

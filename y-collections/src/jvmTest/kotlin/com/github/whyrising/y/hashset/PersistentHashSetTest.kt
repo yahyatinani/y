@@ -4,6 +4,7 @@ import com.github.whyrising.y.LeanMap
 import com.github.whyrising.y.LeanMap.EmptyLeanMap
 import com.github.whyrising.y.LeanMap.NodeIterator.NodeIter
 import com.github.whyrising.y.MapIterable
+import com.github.whyrising.y.Murmur3
 import com.github.whyrising.y.PersistentHashSet
 import com.github.whyrising.y.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.PersistentHashSet.HashSet
@@ -32,6 +33,7 @@ import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
 
+@ExperimentalStdlibApi
 class PersistentHashSetTest : FreeSpec({
     "empty() should return EmptyHashSet" {
         val map = hashMap("a" to "1", "b" to "2", "c" to "3")
@@ -268,6 +270,14 @@ class PersistentHashSetTest : FreeSpec({
                 (EmptyHashSet == set).shouldBeFalse()
             }
         }
+    }
+
+    "hasheq()" {
+        val set = hs("a", "b", "c")
+        val expected = Murmur3.hashUnordered(set)
+
+        set.hasheq() shouldBeExactly expected
+        set.hasheq() shouldBeExactly expected
     }
 
     "Set implementation" - {
