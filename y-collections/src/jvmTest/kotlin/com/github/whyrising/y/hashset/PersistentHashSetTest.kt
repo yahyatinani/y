@@ -209,12 +209,27 @@ class PersistentHashSetTest : FreeSpec({
         shouldThrowExactly<IllegalArgumentException> {
             PersistentHashSet.createWithCheck(1, 1, 2, 3, 4)
         }.message shouldBe "Duplicate key: 1"
+
+        hs<String>() shouldBeSameInstanceAs EmptyHashSet
     }
 
     "toString()" {
         val set = hs("a", "b", "c")
 
         set.toString() shouldBe "#{a b c}"
+    }
+
+    "hashcode()" {
+        val set = hs("a", "b", "c")
+        val expectedHash = set.fold(0) { acc: Int, s: String ->
+            acc + s.hashCode()
+        }
+
+        val hash = set.hashCode()
+
+        hash shouldBeExactly expectedHash
+        set.hashCode() shouldBeExactly expectedHash
+        hs<String>().hashCode() shouldBeExactly 0
     }
 
     "Set implementation" - {

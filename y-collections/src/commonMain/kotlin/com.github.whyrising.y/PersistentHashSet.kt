@@ -28,6 +28,8 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
         override val count: Int = 0
 
         override fun contains(element: @UnsafeVariance E): Boolean = false
+
+        override fun hashCode(): Int = 0
     }
 
     internal
@@ -87,5 +89,7 @@ fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
 fun <E> hashSet(vararg e: E) = create(*e)
 
 fun <E> hashSet(seq: ISeq<E>): PersistentHashSet<E> = create(seq)
+
+fun <E> hs(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
 
 fun <E> hs(vararg e: E): PersistentHashSet<E> = createWithCheck(*e)

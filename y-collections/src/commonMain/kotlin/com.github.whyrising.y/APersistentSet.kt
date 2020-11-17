@@ -2,6 +2,7 @@ package com.github.whyrising.y
 
 abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
     PersistentSet<E>, Set<E> {
+    private var _hash = 0
 
     override val count: Int = map.count
 
@@ -16,6 +17,21 @@ abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
         }
 
         return "$str}"
+    }
+
+    override fun hashCode(): Int {
+        var hash = _hash
+
+        if (hash == 0) {
+            var seq = seq()
+            while (seq.count != 0) {
+                hash += seq.first().hashCode()
+                seq = seq.rest()
+            }
+            _hash = hash
+        }
+
+        return hash
     }
 
     @Suppress("UNCHECKED_CAST")
