@@ -278,7 +278,8 @@ sealed class PersistentVector<out E>(
         fun assertMutable() {
             if (!_root.value.isMutable.value)
                 throw IllegalStateException(
-                    "Transient used after persistent() call")
+                    "Transient used after persistent() call"
+                )
         }
 
         override val count: Int
@@ -422,7 +423,10 @@ sealed class PersistentVector<out E>(
         }
 
         private tailrec fun <E> newPath(
-            isMutable: AtomicBoolean, level: Int, node: Node<E>): Node<E> {
+            isMutable: AtomicBoolean,
+            level: Int,
+            node: Node<E>
+        ): Node<E> {
             if (level == 0) return node
 
             val path = Node<E>(isMutable)
@@ -430,7 +434,6 @@ sealed class PersistentVector<out E>(
 
             return newPath(isMutable, level - SHIFT, path)
         }
-
 
         internal fun <E> create(list: List<E>): PersistentVector<E> {
             val size = list.size

@@ -545,7 +545,7 @@ class PersistentArrayMapTest : FreeSpec({
             }
 
             "assertions" {
-                val array: Array<Pair<String, Int>> = arrayOf("a" to 1, "b" to 2, "c" to 3)
+                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
                 val tam = TransientArrayMap(array)
 
                 tam.containsKey("a").shouldBeTrue()
@@ -1017,9 +1017,9 @@ class PersistentArrayMapTest : FreeSpec({
         }
 
         "discriptor" {
-            val keySerial = serializer(String::class.java)
-            val valueSerial = serializer(Int::class.java)
-            val serializer = PersistentArrayMapSerializer(keySerial, valueSerial)
+            val kSerial = serializer(String::class.java)
+            val vSerial = serializer(Int::class.java)
+            val serializer = PersistentArrayMapSerializer(kSerial, vSerial)
 
             serializer.descriptor shouldBeSameInstanceAs
                 serializer.mapSerializer.descriptor

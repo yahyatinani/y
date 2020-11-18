@@ -352,7 +352,7 @@ class HashCollisionNodeTest : FreeSpec({
 
                 newHcNode.count shouldBeExactly 2
                 newHcNode.array.size shouldBeExactly 4
-                newHcNode.array[0] shouldBe  "b"
+                newHcNode.array[0] shouldBe "b"
                 newHcNode.array[1] shouldBe 2
                 newHcNode.array[2] shouldBe "c"
                 newHcNode.array[3] shouldBe 3

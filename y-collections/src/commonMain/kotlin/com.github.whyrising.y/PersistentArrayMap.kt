@@ -49,8 +49,10 @@ sealed class PersistentArrayMap<out K, out V>(
     private fun keyIsAlreadyAvailable(index: Int): Boolean = index >= 0
 
     @ExperimentalStdlibApi
-    override fun assoc(key: @UnsafeVariance K, value: @UnsafeVariance V):
-        IPersistentMap<K, V> {
+    override fun assoc(
+        key: @UnsafeVariance K,
+        value: @UnsafeVariance V
+    ): IPersistentMap<K, V> {
         val index: Int = indexOf(key)
         val newPairs: Array<out Pair<K, V>?>
 
@@ -78,8 +80,10 @@ sealed class PersistentArrayMap<out K, out V>(
     }
 
     @ExperimentalStdlibApi
-    override fun assocNew(key: @UnsafeVariance K, value: @UnsafeVariance V):
-        IPersistentMap<K, V> {
+    override fun assocNew(
+        key: @UnsafeVariance K,
+        value: @UnsafeVariance V
+    ): IPersistentMap<K, V> {
         val index: Int = indexOf(key)
         val newPairs: Array<out Pair<K, V>?>
 
@@ -114,7 +118,6 @@ sealed class PersistentArrayMap<out K, out V>(
                 }
                 else -> return this
             }
-
         }
 
     override fun containsKey(key: @UnsafeVariance K): Boolean =
@@ -133,7 +136,8 @@ sealed class PersistentArrayMap<out K, out V>(
     }
 
     override fun valAt(
-        key: @UnsafeVariance K, default: @UnsafeVariance V?
+        key: @UnsafeVariance K,
+        default: @UnsafeVariance V?
     ): V? = indexOf(key).let { index ->
         when {
             keyIsAlreadyAvailable(index) -> array[index].second
@@ -222,7 +226,8 @@ sealed class PersistentArrayMap<out K, out V>(
         override fun assertMutable() {
             if (!isMutable.value)
                 throw IllegalStateException(
-                    "Transient used after persistent() call.")
+                    "Transient used after persistent() call."
+                )
         }
 
         private fun indexOf(key: @UnsafeVariance K): Int {
@@ -234,14 +239,16 @@ sealed class PersistentArrayMap<out K, out V>(
 
         @Suppress("UNCHECKED_CAST")
         override fun doAssoc(
-            key: @UnsafeVariance K, value: @UnsafeVariance V
+            key: @UnsafeVariance K,
+            value: @UnsafeVariance V
         ): ITransientMap<K, V> {
             assertMutable()
 
             indexOf(key).let { index ->
                 when {
-                    index >= 0 -> if (array[index]!!.second != value)
-                        array[index] = Pair(key, value)
+                    index >= 0 ->
+                        if (array[index]!!.second != value)
+                            array[index] = Pair(key, value)
                     else -> when {
                         length.value >= array.size ->
                             return LeanMap(*(array as Array<Pair<K, V>>))
@@ -283,7 +290,8 @@ sealed class PersistentArrayMap<out K, out V>(
         }
 
         override fun doValAt(
-            key: @UnsafeVariance K, default: @UnsafeVariance V?
+            key: @UnsafeVariance K,
+            default: @UnsafeVariance V?
         ): V? = indexOf(key).let { index ->
             when {
                 index >= 0 -> array[index]!!.second
@@ -292,8 +300,9 @@ sealed class PersistentArrayMap<out K, out V>(
         }
 
         companion object {
-            operator fun <K, V> invoke(array: Array<Pair<K, V>>):
-                TransientArrayMap<K, V> = TransientArrayMap(
+            operator fun <K, V> invoke(
+                array: Array<Pair<K, V>>
+            ): TransientArrayMap<K, V> = TransientArrayMap(
                 array.copyOf(max(HASHTABLE_THRESHOLD, array.size)),
                 atomic(true),
                 atomic(array.size)
@@ -319,7 +328,8 @@ sealed class PersistentArrayMap<out K, out V>(
                         for (j in i + 1 until pairs.size)
                             if (areKeysEqual(pairs[i].first, pairs[j].first))
                                 throw IllegalArgumentException(
-                                    "Duplicate key: ${pairs[i].first}")
+                                    "Duplicate key: ${pairs[i].first}"
+                                )
 
                     ArrayMap(pairs as Array<Pair<K, V>>)
                 }

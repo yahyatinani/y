@@ -60,7 +60,6 @@ class TransientLeanMapTest : FreeSpec({
         val r1 = trlm.doAssoc("a", 1) as TransientLeanMap<String, Int>
         val root1 = r1.root.value as LeanMap.BitMapIndexedNode<String, Int>
 
-
         r1 shouldBeSameInstanceAs trlm
         r1.leafFlag.value.shouldNotBeNull()
         r1.count shouldBeExactly 1

@@ -2,6 +2,7 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.APersistentMap.KeySeq
 import com.github.whyrising.y.APersistentMap.ValSeq
+import com.github.whyrising.y.PersistentArrayMap.ArrayMap
 import com.github.whyrising.y.PersistentArrayMap.Iter
 import com.github.whyrising.y.mocks.MockPersistentMap
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -76,7 +77,7 @@ class APersistentMapTest : FreeSpec({
 
         "when entry is a Map.Entry, it should call assoc() on it" {
             val newMap = map.conj(MapEntry("a", 99))
-                as PersistentArrayMap.ArrayMap<String, Int>
+                as ArrayMap<String, Int>
 
             newMap.count shouldBeExactly array.size
             newMap.array[0].second shouldBeExactly 99
@@ -94,7 +95,7 @@ class APersistentMapTest : FreeSpec({
 
             "when count == 2, it should call assoc() on it" {
                 val newMap = map.conj(v("a", 99))
-                    as PersistentArrayMap.ArrayMap<String, Int>
+                    as ArrayMap<String, Int>
 
                 newMap.count shouldBeExactly array.size
                 newMap.array[0].second shouldBeExactly 99
@@ -119,7 +120,7 @@ class APersistentMapTest : FreeSpec({
             "when all elements are MapEntry, it should assoc() all" {
                 val entries = l(MapEntry("x", 42), MapEntry("y", 47))
 
-                val newMap = map.conj(entries) as PersistentArrayMap.ArrayMap<String, Int>
+                val newMap = map.conj(entries) as ArrayMap<String, Int>
 
                 newMap.count shouldBeExactly array.size + entries.count
             }

@@ -1,24 +1,29 @@
 package com.github.whyrising.y
 
-abstract class ATransientMap<out K, out V> : ITransientMap<K, V>,
-    ITransientAssociative2<K, V> {
+abstract class ATransientMap<out K, out V> :
+    ITransientMap<K, V>, ITransientAssociative2<K, V> {
 
     internal abstract fun assertMutable()
 
     internal abstract fun doAssoc(
-        key: @UnsafeVariance K, value: @UnsafeVariance V): ITransientMap<K, V>
+        key: @UnsafeVariance K,
+        value: @UnsafeVariance V
+    ): ITransientMap<K, V>
 
     internal abstract fun doDissoc(key: @UnsafeVariance K): ITransientMap<K, V>
 
     internal abstract fun doPersistent(): IPersistentMap<K, V>
 
     internal abstract fun doValAt(
-        key: @UnsafeVariance K, default: @UnsafeVariance V?): V?
+        key: @UnsafeVariance K,
+        default: @UnsafeVariance V?
+    ): V?
 
     internal abstract val doCount: Int
 
     override fun assoc(
-        key: @UnsafeVariance K, value: @UnsafeVariance V
+        key: @UnsafeVariance K,
+        value: @UnsafeVariance V
     ): ITransientMap<K, V> = assertMutable().let {
         return doAssoc(key, value)
     }
@@ -37,7 +42,8 @@ abstract class ATransientMap<out K, out V> : ITransientMap<K, V>,
 
     private fun throwAllElementsMustBeEntry(entry: Any?): Unit =
         throw IllegalArgumentException(
-            "All elements of the seq must be of type Map.Entry to conj: $entry")
+            "All elements of the seq must be of type Map.Entry to conj: $entry"
+        )
 
     @Suppress("UNCHECKED_CAST")
     override fun conj(e: Any?): ITransientMap<K, V> = assertMutable().let {
@@ -46,7 +52,8 @@ abstract class ATransientMap<out K, out V> : ITransientMap<K, V>,
             is Map.Entry<*, *> -> return assoc(e.key as K, e.value as V)
             is IPersistentVector<*> -> return when {
                 e.count != 2 -> throw IllegalArgumentException(
-                    "Vector $e count must be 2 to conj in a map.")
+                    "Vector $e count must be 2 to conj in a map."
+                )
                 else -> assoc(e.nth(0) as K, e.nth(1) as V)
             }
             else -> {
@@ -65,7 +72,6 @@ abstract class ATransientMap<out K, out V> : ITransientMap<K, V>,
                 return rtm
             }
         }
-
     }
 
     override val count: Int
@@ -102,7 +108,8 @@ abstract class ATransientMap<out K, out V> : ITransientMap<K, V>,
         }
 
     operator fun invoke(
-        key: @UnsafeVariance K, default: @UnsafeVariance V?
+        key: @UnsafeVariance K,
+        default: @UnsafeVariance V?
     ): V? = valAt(key, default)
 
     operator fun invoke(key: @UnsafeVariance K): V? = valAt(key)

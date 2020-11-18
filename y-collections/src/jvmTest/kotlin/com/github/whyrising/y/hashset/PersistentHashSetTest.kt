@@ -108,7 +108,6 @@ class PersistentHashSetTest : FreeSpec({
             newSet shouldNotBeSameInstanceAs set
             (newSet as PersistentHashSet<String>).map.containsKey("x")
         }
-
     }
 
     "seq()" {

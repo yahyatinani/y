@@ -26,12 +26,10 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import java.util.*
 
 @ExperimentalSerializationApi
 @ExperimentalStdlibApi
 class PersistentListTest : FreeSpec({
-
     "PersistentList" - {
         "invoke() should return Empty list" {
             val emptyList = PersistentList<Int>()
@@ -333,7 +331,6 @@ class PersistentListTest : FreeSpec({
             val list1 = Cons(10, Empty)
             val list2 = Cons(11, list1)
             val list3 = Cons(11, list2)
-
 
             list1.rest() shouldBeSameInstanceAs Empty
             list2.rest() shouldBeSameInstanceAs list1

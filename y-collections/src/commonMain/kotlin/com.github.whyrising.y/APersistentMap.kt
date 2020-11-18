@@ -97,7 +97,8 @@ abstract class APersistentMap<out K, out V> :
         is Entry<*, *> -> assoc(e.key as K, e.value as V)
         is IPersistentVector<*> -> when {
             e.count != 2 -> throw IllegalArgumentException(
-                "Vector $e count should be 2 to conj in a map")
+                "Vector $e count should be 2 to conj in a map"
+            )
             else -> assoc(e.nth(0) as K, e.nth(1) as V)
         }
         else -> {
@@ -110,7 +111,8 @@ abstract class APersistentMap<out K, out V> :
                 if (entry !is Entry<*, *>)
                     throw IllegalArgumentException(
                         "All elements of the seq must be of type Map.Entry " +
-                            "to conj: $entry")
+                            "to conj: $entry"
+                    )
 
                 result = result.assoc(entry.key as K, entry.value as V)
                 seq = seq.rest()
@@ -148,9 +150,8 @@ abstract class APersistentMap<out K, out V> :
         }
     }
 
-    operator fun invoke(
-        key: @UnsafeVariance K, default: @UnsafeVariance V?
-    ): V? = valAt(key, default)
+    operator fun invoke(key: @UnsafeVariance K, default: @UnsafeVariance V?):
+        V? = valAt(key, default)
 
     operator fun invoke(key: @UnsafeVariance K): V? = valAt(key)
 
@@ -243,7 +244,8 @@ abstract class APersistentMap<out K, out V> :
     }
 
     internal class KeySeq<out K, out V> private constructor(
-        internal val _seq: ISeq<K>, val map: Iterable<Entry<K, V>>?
+        internal val _seq: ISeq<K>,
+        val map: Iterable<Entry<K, V>>?
     ) : ASeq<K>() {
 
         @Suppress("UNCHECKED_CAST")
@@ -280,7 +282,8 @@ abstract class APersistentMap<out K, out V> :
     }
 
     internal class ValSeq<out K, out V> private constructor(
-        internal val _seq: ISeq<V>, val map: Iterable<Entry<K, V>>?
+        internal val _seq: ISeq<V>,
+        val map: Iterable<Entry<K, V>>?
     ) : ASeq<V>() {
 
         @Suppress("UNCHECKED_CAST")

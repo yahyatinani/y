@@ -331,7 +331,8 @@ abstract class APersistentVector<out E> :
         override fun nth(index: Int): E = (start + index).let {
             when {
                 index < 0 -> throw IndexOutOfBoundsException(
-                    "The index should be >= 0: $index")
+                    "The index should be >= 0: $index"
+                )
                 it >= end -> throw IndexOutOfBoundsException()
                 else -> return vec.nth(it)
             }
@@ -342,7 +343,8 @@ abstract class APersistentVector<out E> :
             (start + index).let {
                 when {
                     it > end -> throw IndexOutOfBoundsException(
-                        "Index $index is out of bounds.")
+                        "Index $index is out of bounds."
+                    )
                     it == end -> conj(value)
                     else -> SubVector(vec.assocN(it, value), start, end)
                 }
@@ -372,11 +374,14 @@ abstract class APersistentVector<out E> :
                 end: Int
             ): IPersistentVector<E> = when {
                 start > end -> throw IndexOutOfBoundsException(
-                    "Make sure that the start < end: $start < $end!")
+                    "Make sure that the start < end: $start < $end!"
+                )
                 start < 0 -> throw IndexOutOfBoundsException(
-                    "Make sure that the start >= 0: $start >= 0!")
+                    "Make sure that the start >= 0: $start >= 0!"
+                )
                 end > vec.count -> throw IndexOutOfBoundsException(
-                    "Make sure that the end <= count: $end <= ${vec.count}!")
+                    "Make sure that the end <= count: $end <= ${vec.count}!"
+                )
                 start == end -> EmptyVector
                 else -> SubVector(vec, start, end)
             }

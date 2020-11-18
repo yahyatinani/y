@@ -35,7 +35,7 @@ class VectorMock<out E>(val vec: PersistentVector<E>) : IPersistentVector<E> {
     }
 
     override
-    fun assoc(index: Int, value: @UnsafeVariance E): IPersistentVector<E> {
+    fun assoc(key: Int, value: @UnsafeVariance E): IPersistentVector<E> {
         TODO("Not yet implemented")
     }
 

@@ -148,7 +148,6 @@ class PersistentVectorTest : FreeSpec({
                         val vec = tempVec.conj(i)
                         val tail = vec.tail
 
-
                         vec.shift shouldBeExactly SHIFT
                         var index = 31
                         var isMostRightLeafFound = false
@@ -182,8 +181,9 @@ class PersistentVectorTest : FreeSpec({
 
                     val vec = tempVec.conj(e)
                     val root = vec.root
-                    val mostRightLeaf = ((root.array[1] as Node<Int>).array[1]
-                        as Node<Int>).array
+                    val mostRightLeaf = (
+                        (root.array[1] as Node<Int>).array[1] as Node<Int>
+                        ).array
 
                     vec.shift shouldBeExactly SHIFT * 2
                     mostRightLeaf shouldBeSameInstanceAs tempTail
@@ -1424,7 +1424,7 @@ class PersistentVectorTest : FreeSpec({
                 shouldThrowExactly<NoSuchElementException> { iter.next() }
             }
 
-            "iterator of the subvec of a subvec of APersistentVector"  {
+            "iterator of the subvec of a subvec of APersistentVector" {
                 val start = 0
                 val end = 3
                 val vec = v(1, 2, 3, 4, 5)

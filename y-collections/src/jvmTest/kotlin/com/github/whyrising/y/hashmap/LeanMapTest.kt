@@ -34,7 +34,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import java.util.*
+import java.util.Random
 
 @ExperimentalSerializationApi
 @ExperimentalStdlibApi
@@ -204,7 +204,6 @@ class LeanMapTest : FreeSpec({
         val newMap3 = map.dissoc("a").dissoc("b").dissoc("c")
         val root1 = newMap1.root as BitMapIndexedNode<String, Int>
         val root2 = newMap2.root as BitMapIndexedNode<String, Int>
-
 
         map.count shouldBeExactly 3
         map.containsKey("a").shouldBeTrue()

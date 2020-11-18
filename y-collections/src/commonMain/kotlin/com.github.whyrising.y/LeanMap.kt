@@ -32,7 +32,8 @@ internal class PersistentHashMapSerializer<K, V>(
 
 @Serializable(with = PersistentHashMapSerializer::class)
 sealed class LeanMap<out K, out V>(
-    override val count: Int, val root: Node<K, V>?
+    override val count: Int,
+    val root: Node<K, V>?
 ) : APersistentMap<K, V>(), IMutableCollection<Any?>, MapIterable<K, V> {
 
     @ExperimentalStdlibApi
@@ -54,8 +55,9 @@ sealed class LeanMap<out K, out V>(
         key: @UnsafeVariance K,
         value: @UnsafeVariance V
     ): IPersistentMap<K, V> = when {
-        containsKey(key) ->
-            throw  RuntimeException("The key $key is already present.")
+        containsKey(key) -> throw RuntimeException(
+            "The key $key is already present."
+        )
         else -> assoc(key, value)
     }
 
@@ -92,7 +94,8 @@ sealed class LeanMap<out K, out V>(
     object EmptyLeanMap : AEmptyLeanMap<Nothing, Nothing>()
 
     internal class LMap<out K, out V>(
-        private val _count: Int, private val _root: Node<K, V>
+        private val _count: Int,
+        private val _root: Node<K, V>
     ) : LeanMap<K, V>(_count, _root) {
 
         @ExperimentalStdlibApi
@@ -256,7 +259,10 @@ sealed class LeanMap<out K, out V>(
                                     dataIndex = 0
                                     dataLength = n.dataArity() - 1
                                     val k = 2 * dataIndex
-                                    val p = Pair(array[k] as K, array[k + 1] as V)
+                                    val p = Pair(
+                                        array[k] as K,
+                                        array[k + 1] as V
+                                    )
                                     nextEntry = _f(p)
 
                                     return true
@@ -304,12 +310,14 @@ sealed class LeanMap<out K, out V>(
         override fun assertMutable() {
             if (!isMutable.value)
                 throw IllegalStateException(
-                    "Transient used after persistent() call.")
+                    "Transient used after persistent() call."
+                )
         }
 
         @ExperimentalStdlibApi
         override fun doAssoc(
-            key: @UnsafeVariance K, value: @UnsafeVariance V
+            key: @UnsafeVariance K,
+            value: @UnsafeVariance V
         ): ITransientMap<K, V> {
             leafFlag.value = null
             var node: Node<K, V> = root.value ?: EmptyBitMapIndexedNode
@@ -348,7 +356,8 @@ sealed class LeanMap<out K, out V>(
 
         @ExperimentalStdlibApi
         override fun doValAt(
-            key: @UnsafeVariance K, default: @UnsafeVariance V?
+            key: @UnsafeVariance K,
+            default: @UnsafeVariance V?
         ): V? = when (val value = root.value) {
             null -> default
             else -> value.find(0, hasheq(key), key, default)
@@ -380,7 +389,8 @@ sealed class LeanMap<out K, out V>(
             MapEntry(array[2 * dataIndex] as K, array[2 * dataIndex + 1] as V)
 
         override fun rest(): ISeq<MapEntry<K, V>> = createNodeSeq(
-            array, lvl, nodes, cursorLengths, dataIndex, dataLength)
+            array, lvl, nodes, cursorLengths, dataIndex, dataLength
+        )
     }
 
     internal sealed class BitMapIndexedNode<out K, out V>(
@@ -390,41 +400,45 @@ sealed class LeanMap<out K, out V>(
         override val array: Array<Any?>
     ) : Node<K, V> {
 
-        fun mergeIntoSubNode(isMutable: AtomicBoolean,
-                             shift: Int,
-                             currentHash: Int,
-                             currentKey: @UnsafeVariance K,
-                             currentValue: @UnsafeVariance V,
-                             newHash: Int,
-                             key: @UnsafeVariance K,
-                             value: @UnsafeVariance V
+        fun mergeIntoSubNode(
+            isMutable: AtomicBoolean,
+            shift: Int,
+            currentHash: Int,
+            currentKey: @UnsafeVariance K,
+            currentValue: @UnsafeVariance V,
+            newHash: Int,
+            key: @UnsafeVariance K,
+            value: @UnsafeVariance V
         ): Node<K, V> {
             if (shift > 32 && currentHash == newHash)
                 return HashCollisionNode(
                     isMutable,
                     currentHash,
                     2,
-                    arrayOf(currentKey, currentValue, key, value))
+                    arrayOf(currentKey, currentValue, key, value)
+                )
             else {
                 val currentMask = mask(currentHash, shift)
                 val newMask = mask(newHash, shift)
 
                 when (currentMask) {
                     newMask -> {
-                        val subNode = mergeIntoSubNode(isMutable,
+                        val subNode = mergeIntoSubNode(
+                            isMutable,
                             shift + 5,
                             currentHash,
                             currentKey,
                             currentValue,
                             newHash,
                             key,
-                            value)
-
+                            value
+                        )
                         return BMIN(
                             isMutable,
                             0,
                             bitpos(currentHash, shift),
-                            arrayOf(subNode))
+                            arrayOf(subNode)
+                        )
                     }
                     else -> return BMIN(
                         isMutable,
@@ -432,7 +446,8 @@ sealed class LeanMap<out K, out V>(
                         0,
                         if (currentMask < newMask)
                             arrayOf(currentKey, currentValue, key, value)
-                        else arrayOf(key, value, currentKey, currentValue))
+                        else arrayOf(key, value, currentKey, currentValue)
+                    )
                 }
             }
         }
@@ -461,7 +476,9 @@ sealed class LeanMap<out K, out V>(
         }
 
         internal fun updateArrayByIndex(
-            index: Int, value: Any?, isMutable: AtomicBoolean
+            index: Int,
+            value: Any?,
+            isMutable: AtomicBoolean
         ): BitMapIndexedNode<K, V> =
             // TODO: Review : Consider using the thread id instead of isMutable
             if (isMutable(this.isMutable, isMutable)) {
@@ -505,8 +522,8 @@ sealed class LeanMap<out K, out V>(
                         currentValue,
                         hasheq(key),
                         key,
-                        value)
-
+                        value
+                    )
                     leafFlag.value = leafFlag
 
                     return putNewNode(isMutable, bitpos, subNode)
@@ -516,7 +533,8 @@ sealed class LeanMap<out K, out V>(
                     val subNode = array[nodeIdx] as BitMapIndexedNode<K, V>
 
                     val newNode = subNode.assoc(
-                        isMutable, shift + 5, keyHash, key, value, leafFlag)
+                        isMutable, shift + 5, keyHash, key, value, leafFlag
+                    )
 
                     if (subNode == newNode) return this
 
@@ -539,7 +557,10 @@ sealed class LeanMap<out K, out V>(
         }
 
         private fun copyAndRemove(
-            index: Int, isMutable: AtomicBoolean, bitpos: Int): BMIN<K, V> {
+            index: Int,
+            isMutable: AtomicBoolean,
+            bitpos: Int
+        ): BMIN<K, V> {
             val newArray = arrayOfNulls<Any?>(array.size - 2)
 
             array.copyInto(newArray, 0, 0, index)
@@ -549,7 +570,9 @@ sealed class LeanMap<out K, out V>(
         }
 
         private fun copyAndInlinePair(
-            isMutable: AtomicBoolean, bitpos: Int, node: Node<K, V>
+            isMutable: AtomicBoolean,
+            bitpos: Int,
+            node: Node<K, V>
         ): Node<K, V> {
             val oldIndex = array.size - 1 - bitmapNodeIndex(nodemap, bitpos)
             val newIndex = 2 * bitmapNodeIndex(datamap, bitpos)
@@ -561,7 +584,9 @@ sealed class LeanMap<out K, out V>(
             array.copyInto(newArray, newIndex + 2, newIndex, oldIndex)
             array.copyInto(newArray, oldIndex + 2, oldIndex + 1, array.size)
 
-            return BMIN(isMutable, datamap or bitpos, nodemap xor bitpos, newArray)
+            return BMIN(
+                isMutable, datamap or bitpos, nodemap xor bitpos, newArray
+            )
         }
 
         @Suppress("UNCHECKED_CAST")
@@ -580,19 +605,25 @@ sealed class LeanMap<out K, out V>(
                 if (equiv(key, array[index])) {
                     removedLeaf.value = removedLeaf
                     if ((datamap.countOneBits() == 2) && nodemap == 0) {
-                        val newDatamap = if (shift == 0) (datamap xor bitpos)
-                        else bitpos(keyHash, 0)
+                        val newDatamap = when (shift) {
+                            0 -> (datamap xor bitpos)
+                            else -> bitpos(keyHash, 0)
+                        }
 
-                        return if (bmnIndex == 0)
-                            BMIN(isMutable,
+                        return when (bmnIndex) {
+                            0 -> BMIN(
+                                isMutable,
                                 newDatamap,
                                 0,
-                                arrayOf(array[2], array[3]))
-                        else
-                            BMIN(isMutable,
+                                arrayOf(array[2], array[3])
+                            )
+                            else -> BMIN(
+                                isMutable,
                                 newDatamap,
                                 0,
-                                arrayOf(array[0], array[1]))
+                                arrayOf(array[0], array[1])
+                            )
+                        }
                     }
                     return copyAndRemove(index, isMutable, bitpos)
                 } else return this
@@ -607,7 +638,8 @@ sealed class LeanMap<out K, out V>(
                     shift + 5,
                     keyHash,
                     key,
-                    removedLeaf)
+                    removedLeaf
+                )
 
                 when {
                     subNode != newSubNode -> return when {
@@ -694,12 +726,14 @@ sealed class LeanMap<out K, out V>(
             return when (datamap) {
                 0 -> createNodeSeq(array, 0, nodes, cursorLengths, 0, 0)
                 else -> NodeSeq(
-                    array, 0, nodes, cursorLengths, 0, dataArity() - 1)
+                    array, 0, nodes, cursorLengths, 0, dataArity() - 1
+                )
             }
         }
 
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
-            atomic(false), 0, 0, emptyArray())
+            atomic(false), 0, 0, emptyArray()
+        )
 
         internal class BMIN<out K, out V>(
             isMutable: AtomicBoolean,
@@ -761,8 +795,7 @@ sealed class LeanMap<out K, out V>(
                 newArray[array.size + 1] = value
                 leafFlag.value = leafFlag
 
-                HashCollisionNode(
-                    this.isMutable, hash, count + 1, newArray)
+                HashCollisionNode(this.isMutable, hash, count + 1, newArray)
             }
             else -> when (value) {
                 array[index + 1] -> {
@@ -772,8 +805,7 @@ sealed class LeanMap<out K, out V>(
                     val newArray = array.copyOf()
                     newArray[index + 1] = value
 
-                    HashCollisionNode(
-                        this.isMutable, hash, count, newArray)
+                    HashCollisionNode(this.isMutable, hash, count, newArray)
                 }
             }
         }
@@ -829,10 +861,10 @@ sealed class LeanMap<out K, out V>(
                             array[remainingIdx + 1] as V,
                             removedLeaf
                         )
-
                 }
                 else -> HashCollisionNode(
-                    isMutable, keyHash, count - 1, removePair(index))
+                    isMutable, keyHash, count - 1, removePair(index)
+                )
             }
         }
 
@@ -846,7 +878,8 @@ sealed class LeanMap<out K, out V>(
 
         override fun getNode(nodeIndex: Int): Node<K, V> =
             throw UnsupportedOperationException(
-                "HashCollisionNode has no nodes!")
+                "HashCollisionNode has no nodes!"
+            )
 
         override fun isSingleKV(): Boolean = count == 1
 
@@ -887,7 +920,8 @@ sealed class LeanMap<out K, out V>(
 
         override fun nodeSeq(): ISeq<MapEntry<K, V>> =
             throw UnsupportedOperationException(
-                "HashCollisionNode has no nodes!")
+                "HashCollisionNode has no nodes!"
+            )
     }
 
     companion object {
@@ -943,7 +977,8 @@ sealed class LeanMap<out K, out V>(
                                         newNodes,
                                         newCursorLengths,
                                         0,
-                                        node.dataArity() - 1)
+                                        node.dataArity() - 1
+                                    )
 
                                 level++
                             }

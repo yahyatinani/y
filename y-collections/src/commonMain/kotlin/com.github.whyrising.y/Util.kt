@@ -54,7 +54,8 @@ fun <E> toSeq(x: Any?): ISeq<E>? = when (x) {
     is ASeq<*> -> x as ASeq<E>
     is Seqable<*> -> x.seq() as ISeq<E>
     else -> throw IllegalArgumentException(
-        "Don't know how to create ISeq from: ${x::class.simpleName}")
+        "Don't know how to create ISeq from: ${x::class.simpleName}"
+    )
 }
 
 fun compareNumbers(x: Number, y: Number): Int {
@@ -88,10 +89,10 @@ private fun hashNumber(x: Number): Int = when {
         Murmur3.hashLong(lpart)
     }
     x is Double -> when (x) {
-        -0.0 -> 0 //match 0.0
+        -0.0 -> 0 // match 0.0
         else -> x.hashCode()
     }
-    x is Float && x == -0.0f -> 0 //match 0.0f
+    x is Float && x == -0.0f -> 0 // match 0.0f
     // TODO: BigDecimal
     else -> x.hashCode()
 }
