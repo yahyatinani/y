@@ -25,7 +25,7 @@ kotlin {
 
         linuxX64()
 
-//        mingwX64()
+        mingwX64()
 
         macosX64()
         tvos()
