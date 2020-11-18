@@ -1,6 +1,15 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.util.HASH_PRIME
+import com.github.whyrising.y.util.INIT_HASH_CODE
+import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.PersistentList.Empty
+import com.github.whyrising.y.core.ConstantCount
+import com.github.whyrising.y.core.IHashEq
+import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.seq.Sequential
+import com.github.whyrising.y.util.toSeq
 
 abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
     internal var hashCode: Int = INIT_HASH_CODE
@@ -59,7 +68,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
     }
 
     override fun equiv(other: Any?): Boolean = compareWith(other) { e1, e2 ->
-        equiv(e1, e2)
+        com.github.whyrising.y.util.equiv(e1, e2)
     }
 
     override fun hashCode(): Int {
@@ -117,7 +126,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
         val iter = iterator()
 
         while (iter.hasNext())
-            if (equiv(iter.next(), element)) return true
+            if (com.github.whyrising.y.util.equiv(iter.next(), element)) return true
 
         return false
     }
@@ -143,7 +152,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
 
     override fun indexOf(element: @UnsafeVariance E): Int {
         for ((index, n) in this.withIndex())
-            if (equiv(n, element)) return index
+            if (com.github.whyrising.y.util.equiv(n, element)) return index
 
         return -1
     }

@@ -1,5 +1,8 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.util.emptySeq
+
 data class SeqIterator<out E>(
     internal var next: ISeq<@UnsafeVariance E>
 ) : Iterator<E> {

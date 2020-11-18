@@ -1,5 +1,7 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.map.ITransientMap
+import com.github.whyrising.y.set.TransientSet
 import kotlinx.atomicfu.AtomicRef
 
 abstract class ATransientSet<out E>(

@@ -1,5 +1,15 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.core.IHashEq
+import com.github.whyrising.y.map.IPersistentMap
+import com.github.whyrising.y.map.MapEquivalence
+import com.github.whyrising.y.map.MapIterable
+import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.util.Murmur3
+import com.github.whyrising.y.util.emptySeq
+import com.github.whyrising.y.util.toSeq
+import com.github.whyrising.y.vector.IPersistentVector
 import kotlin.collections.Map.Entry
 
 abstract class APersistentMap<out K, out V> :
@@ -139,7 +149,7 @@ abstract class APersistentMap<out K, out V> :
                     val key = entry.key
                     val keyFound = map.containsKey(key)
 
-                    if (!keyFound || !equiv(entry.value, map.getValue(key)))
+                    if (!keyFound || !com.github.whyrising.y.util.equiv(entry.value, map.getValue(key)))
                         return false
 
                     seq = seq.rest()

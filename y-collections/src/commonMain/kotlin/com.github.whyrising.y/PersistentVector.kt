@@ -2,6 +2,11 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentVector.EmptyVector
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
+import com.github.whyrising.y.collection.IMutableCollection
+import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.collection.ITransientCollection
+import com.github.whyrising.y.core.ConstantCount
+import com.github.whyrising.y.vector.IPersistentVector
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef

@@ -1,9 +1,9 @@
 package com.github.whyrising.y.mocks
 
-import com.github.whyrising.y.IMapEntry
-import com.github.whyrising.y.IPersistentCollection
-import com.github.whyrising.y.IPersistentMap
-import com.github.whyrising.y.ISeq
+import com.github.whyrising.y.map.IMapEntry
+import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.map.IPersistentMap
+import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.PersistentArrayMap
 
 class MockPersistentMap<K, V> private constructor(

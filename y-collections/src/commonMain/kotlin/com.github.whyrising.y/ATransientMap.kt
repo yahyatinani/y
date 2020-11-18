@@ -1,5 +1,13 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.map.IMapEntry
+import com.github.whyrising.y.map.IPersistentMap
+import com.github.whyrising.y.map.ITransientAssociative2
+import com.github.whyrising.y.map.ITransientMap
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.util.toSeq
+import com.github.whyrising.y.vector.IPersistentVector
+
 abstract class ATransientMap<out K, out V> :
     ITransientMap<K, V>, ITransientAssociative2<K, V> {
 

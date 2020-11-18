@@ -5,6 +5,8 @@ import com.github.whyrising.y.APersistentMap.ValSeq
 import com.github.whyrising.y.PersistentArrayMap.ArrayMap
 import com.github.whyrising.y.PersistentArrayMap.Iter
 import com.github.whyrising.y.mocks.MockPersistentMap
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.util.Murmur3
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse

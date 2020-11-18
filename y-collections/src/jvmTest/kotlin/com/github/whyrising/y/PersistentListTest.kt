@@ -2,8 +2,14 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentList.Cons
 import com.github.whyrising.y.PersistentList.Empty
+import com.github.whyrising.y.core.ConstantCount
+import com.github.whyrising.y.list.IPersistentList
 import com.github.whyrising.y.mocks.MockSeq
 import com.github.whyrising.y.mocks.User
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.util.HASH_PRIME
+import com.github.whyrising.y.util.INIT_HASH_CODE
+import com.github.whyrising.y.util.Murmur3
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec

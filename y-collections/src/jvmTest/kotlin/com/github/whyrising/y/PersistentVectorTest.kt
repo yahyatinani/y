@@ -8,9 +8,15 @@ import com.github.whyrising.y.PersistentVector.EmptyVector
 import com.github.whyrising.y.PersistentVector.Node
 import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.PersistentVector.TransientVector
+import com.github.whyrising.y.map.IMapEntry
 import com.github.whyrising.y.mocks.MockSeq
 import com.github.whyrising.y.mocks.User
 import com.github.whyrising.y.mocks.VectorMock
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.util.HASH_PRIME
+import com.github.whyrising.y.util.INIT_HASH_CODE
+import com.github.whyrising.y.util.Murmur3
+import com.github.whyrising.y.util.hasheq
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec

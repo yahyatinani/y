@@ -1,11 +1,11 @@
 package com.github.whyrising.y.hashmap
 
-import com.github.whyrising.y.Box
+import com.github.whyrising.y.util.Box
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import com.github.whyrising.y.LeanMap.HashCollisionNode
 import com.github.whyrising.y.MapEntry
-import com.github.whyrising.y.hasheq
+import com.github.whyrising.y.util.hasheq
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse

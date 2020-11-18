@@ -1,6 +1,8 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentList.Empty
+import com.github.whyrising.y.core.ConstantCount
+import com.github.whyrising.y.seq.ISeq
 
 class Cons<out E>(first: E, rest: ISeq<E>) : ASeq<E>() {
 

@@ -1,5 +1,12 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.core.IHashEq
+import com.github.whyrising.y.map.IPersistentMap
+import com.github.whyrising.y.map.MapIterable
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.set.PersistentSet
+import com.github.whyrising.y.util.Murmur3
+
 abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
     PersistentSet<E>, Set<E>, Collection<E>, IHashEq {
     private var _hash = 0

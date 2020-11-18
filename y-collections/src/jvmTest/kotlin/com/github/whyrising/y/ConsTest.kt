@@ -1,6 +1,7 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentList.Empty
+import com.github.whyrising.y.seq.ISeq
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.types.shouldBeSameInstanceAs

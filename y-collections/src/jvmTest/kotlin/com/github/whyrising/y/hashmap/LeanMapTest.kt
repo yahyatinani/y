@@ -1,6 +1,6 @@
 package com.github.whyrising.y.hashmap
 
-import com.github.whyrising.y.Associative
+import com.github.whyrising.y.associative.Associative
 import com.github.whyrising.y.LeanMap
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode
 import com.github.whyrising.y.LeanMap.Companion.bitpos
@@ -14,7 +14,7 @@ import com.github.whyrising.y.MapEntry
 import com.github.whyrising.y.PersistentHashMapSerializer
 import com.github.whyrising.y.PersistentList.Empty
 import com.github.whyrising.y.hashMap
-import com.github.whyrising.y.hasheq
+import com.github.whyrising.y.util.hasheq
 import com.github.whyrising.y.toPhashMap
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec

@@ -1,6 +1,10 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentVector.EmptyVector
+import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.map.IMapEntry
+import com.github.whyrising.y.stack.IPersistentStack
+import com.github.whyrising.y.vector.IPersistentVector
 
 abstract class AMapEntry<out K, out V> :
     APersistentVector<Any?>(), IMapEntry<K, V> {

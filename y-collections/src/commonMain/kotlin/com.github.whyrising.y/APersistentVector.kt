@@ -2,6 +2,20 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.APersistentVector.Seq.Companion.emptySeq
 import com.github.whyrising.y.PersistentVector.EmptyVector
+import com.github.whyrising.y.core.IHashEq
+import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.map.IMapEntry
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.seq.IndexedSeq
+import com.github.whyrising.y.seq.Sequential
+import com.github.whyrising.y.stack.IPersistentStack
+import com.github.whyrising.y.util.HASH_PRIME
+import com.github.whyrising.y.util.INIT_HASH_CODE
+import com.github.whyrising.y.util.Murmur3
+import com.github.whyrising.y.util.compare
+import com.github.whyrising.y.util.toSeq
+import com.github.whyrising.y.vector.IPersistentVector
+import com.github.whyrising.y.vector.Reversible
 
 abstract class APersistentVector<out E> :
     IPersistentVector<E>,
@@ -62,7 +76,7 @@ abstract class APersistentVector<out E> :
             cached = 1
             var i = 0
             while (i < count) {
-                cached = (HASH_PRIME * cached) + hasheq(nth(i))
+                cached = (HASH_PRIME * cached) + com.github.whyrising.y.util.hasheq(nth(i))
                 i++
             }
 
@@ -130,7 +144,7 @@ abstract class APersistentVector<out E> :
     }
 
     override fun equiv(other: Any?): Boolean = compareWith(other) { e1, e2 ->
-        equiv(e1, e2)
+        com.github.whyrising.y.util.equiv(e1, e2)
     }
 
     override fun length(): Int = count
@@ -212,7 +226,7 @@ abstract class APersistentVector<out E> :
         var seq = seq()
         var i = 0
         while (i < count) {
-            if (equiv(element, nth(i)))
+            if (com.github.whyrising.y.util.equiv(element, nth(i)))
                 return true
             seq = seq.rest()
             i++
@@ -234,7 +248,7 @@ abstract class APersistentVector<out E> :
     override fun indexOf(element: @UnsafeVariance E): Int {
         var i = 0
         while (i < count) {
-            if (equiv(nth(i), element))
+            if (com.github.whyrising.y.util.equiv(nth(i), element))
                 return i
             i++
         }
@@ -258,7 +272,7 @@ abstract class APersistentVector<out E> :
     override fun lastIndexOf(element: @UnsafeVariance E): Int {
         var i = count - 1
         while (i >= 0) {
-            if (equiv(nth(i), element))
+            if (com.github.whyrising.y.util.equiv(nth(i), element))
                 return i
             i--
         }

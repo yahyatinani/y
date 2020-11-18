@@ -2,6 +2,14 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentHashSet.Companion.create
 import com.github.whyrising.y.PersistentHashSet.Companion.createWithCheck
+import com.github.whyrising.y.collection.IMutableCollection
+import com.github.whyrising.y.collection.ITransientCollection
+import com.github.whyrising.y.map.IPersistentMap
+import com.github.whyrising.y.map.ITransientMap
+import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.set.PersistentSet
+import com.github.whyrising.y.set.TransientSet
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.serialization.KSerializer
