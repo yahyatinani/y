@@ -1,11 +1,5 @@
-package com.github.whyrising.y.core
+package com.github.whyrising.y
 
-import com.github.whyrising.y.`string?`
-import com.github.whyrising.y.foo1
-import com.github.whyrising.y.foo2
-import com.github.whyrising.y.foo3
-import com.github.whyrising.y.foo4
-import com.github.whyrising.y.foo5
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.ints.shouldBeExactly

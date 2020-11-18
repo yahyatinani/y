@@ -1,6 +1,5 @@
 package com.github.whyrising.y
 
-import com.github.whyrising.y.core.complement
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.property.Arb

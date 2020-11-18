@@ -1,4 +1,4 @@
-package com.github.whyrising.y.core
+package com.github.whyrising.y
 
 import kotlin.jvm.JvmName
 
