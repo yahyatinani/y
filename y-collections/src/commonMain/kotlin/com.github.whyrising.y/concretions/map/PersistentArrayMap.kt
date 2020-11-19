@@ -77,7 +77,7 @@ sealed class PersistentArrayMap<out K, out V>(
             }
             else -> {
                 if (array.size >= HASHTABLE_THRESHOLD)
-                    return LeanMap(*array).assoc(key, value)
+                    return PersistentHashMap(*array).assoc(key, value)
 
                 newPairs = arrayOfNulls(array.size + 1)
 
@@ -103,7 +103,7 @@ sealed class PersistentArrayMap<out K, out V>(
             throw RuntimeException("The key $key is already present.")
 
         if (array.size >= HASHTABLE_THRESHOLD)
-            return LeanMap(*array).assocNew(key, value)
+            return PersistentHashMap(*array).assocNew(key, value)
 
         newPairs = arrayOfNulls(array.size + 1)
 
@@ -256,17 +256,18 @@ sealed class PersistentArrayMap<out K, out V>(
         ): TransientMap<K, V> {
             assertMutable()
 
-            indexOf(key).let { index ->
-                when {
-                    index >= 0 ->
-                        if (array[index]!!.second != value)
-                            array[index] = Pair(key, value)
-                    else -> when {
-                        length.value >= array.size ->
-                            return LeanMap(*(array as Array<Pair<K, V>>))
-                                .asTransient().assoc(key, value)
-                        else -> array[length.value++] = Pair(key, value)
+            val index = indexOf(key)
+
+            when {
+                index >= 0 ->
+                    if (array[index]!!.second != value)
+                        array[index] = Pair(key, value)
+                else -> when {
+                    length.value >= array.size -> {
+                        return PersistentHashMap(*(array as Array<Pair<K, V>>))
+                            .asTransient().assoc(key, value)
                     }
+                    else -> array[length.value++] = Pair(key, value)
                 }
             }
 

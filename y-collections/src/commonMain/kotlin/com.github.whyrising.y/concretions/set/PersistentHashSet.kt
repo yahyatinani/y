@@ -1,6 +1,6 @@
 package com.github.whyrising.y.concretions.set
 
-import com.github.whyrising.y.concretions.map.LeanMap
+import com.github.whyrising.y.concretions.map.PersistentHashMap
 import com.github.whyrising.y.concretions.set.PersistentHashSet.Companion.create
 import com.github.whyrising.y.concretions.set.PersistentHashSet.Companion.createWithCheck
 import com.github.whyrising.y.map.IPersistentMap
@@ -59,7 +59,7 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
     }
 
     override fun asTransient(): ITransientCollection<E> =
-        TransientHashSet(atomic((map as LeanMap<E, E>).asTransient()))
+        TransientHashSet(atomic((map as PersistentHashMap<E, E>).asTransient()))
 
     internal abstract class AEmptyHashSet<out E>(m: IPersistentMap<E, E>) :
         PersistentHashSet<E>(m) {
@@ -74,7 +74,7 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
     }
 
     internal
-    object EmptyHashSet : AEmptyHashSet<Nothing>(LeanMap.EmptyLeanMap)
+    object EmptyHashSet : AEmptyHashSet<Nothing>(PersistentHashMap.EmptyHashMap)
 
     internal
     class HashSet<out E>(m: IPersistentMap<E, E>) : PersistentHashSet<E>(m)

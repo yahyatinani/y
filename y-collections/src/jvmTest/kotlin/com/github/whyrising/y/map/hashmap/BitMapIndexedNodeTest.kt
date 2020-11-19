@@ -1,11 +1,12 @@
 package com.github.whyrising.y.map.hashmap
 
 import com.github.whyrising.y.concretions.list.PersistentList
-import com.github.whyrising.y.concretions.map.LeanMap
-import com.github.whyrising.y.concretions.map.LeanMap.BitMapIndexedNode
-import com.github.whyrising.y.concretions.map.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
-import com.github.whyrising.y.concretions.map.LeanMap.Node
 import com.github.whyrising.y.concretions.map.MapEntry
+import com.github.whyrising.y.concretions.map.PersistentHashMap
+import com.github.whyrising.y.concretions.map.PersistentHashMap.BitMapIndexedNode
+import com.github.whyrising.y.concretions.map.PersistentHashMap.BitMapIndexedNode.EmptyBitMapIndexedNode
+import com.github.whyrising.y.concretions.map.PersistentHashMap.Node
+import com.github.whyrising.y.concretions.map.PersistentHashMap.NodeSeq
 import com.github.whyrising.y.util.Box
 import com.github.whyrising.y.util.hasheq
 import io.kotest.core.spec.style.FreeSpec
@@ -58,8 +59,8 @@ class BitMapIndexedNodeTest : FreeSpec({
             val newKey = "8"
             val newHash = hasheq(newKey)
             val newValue = 8
-            val newDatamap = LeanMap.bitpos(currentHash, shift) or
-                LeanMap.bitpos(newHash, shift)
+            val newDatamap = PersistentHashMap.bitpos(currentHash, shift) or
+                PersistentHashMap.bitpos(newHash, shift)
 
             val subNode = currentNode.mergeIntoSubNode(
                 isMutable,
@@ -105,8 +106,8 @@ class BitMapIndexedNodeTest : FreeSpec({
             val newKey = "18"
             val newHash = hasheq(newKey)
             val newValue = 18
-            val newDatamap = LeanMap.bitpos(currentHash, shift) or
-                LeanMap.bitpos(newHash, shift)
+            val newDatamap = PersistentHashMap.bitpos(currentHash, shift) or
+                PersistentHashMap.bitpos(newHash, shift)
 
             val subNode = currentNode.mergeIntoSubNode(
                 isMutable,
@@ -152,9 +153,9 @@ class BitMapIndexedNodeTest : FreeSpec({
             val newKey = "1140"
             val newHash = hasheq(newKey)
             val newValue = 1140
-            val newDatamap = LeanMap.bitpos(currentHash, newShift) or
-                LeanMap.bitpos(newHash, newShift)
-            val newNodemap = LeanMap.bitpos(currentHash, shift)
+            val newDatamap = PersistentHashMap.bitpos(currentHash, newShift) or
+                PersistentHashMap.bitpos(newHash, newShift)
+            val newNodemap = PersistentHashMap.bitpos(currentHash, shift)
 
             val node = currentNode.mergeIntoSubNode(
                 isMutable,
@@ -217,7 +218,7 @@ class BitMapIndexedNodeTest : FreeSpec({
                 newHash,
                 newKey,
                 newValue
-            ) as LeanMap.HashCollisionNode<String, Int>
+            ) as PersistentHashMap.HashCollisionNode<String, Int>
             val array = collisionNode.array
 
             collisionNode.isMutable shouldBeSameInstanceAs isMutable
@@ -303,7 +304,7 @@ class BitMapIndexedNodeTest : FreeSpec({
 
             newNode.isMutable shouldBeSameInstanceAs isMutable
             newNode.datamap shouldBeExactly
-                (node.datamap or LeanMap.bitpos(keyHash, shift))
+                (node.datamap or PersistentHashMap.bitpos(keyHash, shift))
             newNode.nodemap shouldBeExactly node.nodemap
             leafFlag.value shouldBeSameInstanceAs leafFlag
             newArray.size shouldBeExactly node.array.size + 2
@@ -320,7 +321,7 @@ class BitMapIndexedNodeTest : FreeSpec({
                 val shift = 0
                 val keyHash = hasheq(key)
                 val leafFlag = Box(null)
-                val bitpos = LeanMap.bitpos(keyHash, shift)
+                val bitpos = PersistentHashMap.bitpos(keyHash, shift)
                 val node = BitMapIndexedNode<String, Int>()
                     .assoc(isMutable, shift, hasheq("0"), "0", 0, leafFlag)
                     .assoc(isMutable, shift, hasheq("2"), "2", 2, leafFlag)
@@ -652,7 +653,7 @@ class BitMapIndexedNodeTest : FreeSpec({
                     newNode.array.size shouldBeExactly n.array.size - 2
                     removedLeaf.value shouldBeSameInstanceAs removedLeaf
                     newNode.datamap shouldBeExactly
-                        (n.datamap xor LeanMap.bitpos(hash, shift))
+                        (n.datamap xor PersistentHashMap.bitpos(hash, shift))
                 }
 
                 "when shift == 0 and array size is 4" {
@@ -679,23 +680,23 @@ class BitMapIndexedNodeTest : FreeSpec({
                     val newNode1 = n.without(
                         isMutable, shift, keyHash1, key1, removedLeaf1
                     ) as BitMapIndexedNode<String, Int>
+                    val bitpos1 = PersistentHashMap.bitpos(keyHash1, shift)
 
                     val newNode2 = n.without(
                         isMutable, shift, keyHash2, key2, removedLeaf2
                     ) as BitMapIndexedNode<String, Int>
+                    val bitpos2 = PersistentHashMap.bitpos(keyHash2, shift)
 
                     newNode1.array.size shouldBeExactly 2
                     removedLeaf1.value shouldBeSameInstanceAs removedLeaf1
                     newNode1.nodemap shouldBeExactly 0
-                    newNode1.datamap shouldBeExactly
-                        (n.datamap xor LeanMap.bitpos(keyHash1, shift))
+                    newNode1.datamap shouldBeExactly (n.datamap xor bitpos1)
                     newNode1.isMutable shouldBeSameInstanceAs isMutable
 
                     newNode2.array.size shouldBeExactly 2
                     removedLeaf2.value shouldBeSameInstanceAs removedLeaf2
                     newNode2.nodemap shouldBeExactly 0
-                    newNode2.datamap shouldBeExactly
-                        LeanMap.bitpos(keyHash1, shift)
+                    newNode2.datamap shouldBeExactly (n.datamap xor bitpos2)
                     newNode2.isMutable shouldBeSameInstanceAs isMutable
                 }
             }
@@ -712,7 +713,7 @@ class BitMapIndexedNodeTest : FreeSpec({
                 var n = BitMapIndexedNode<String, Int>()
                 val key = "18"
                 val keyHash = hasheq(key)
-                val bitpos = LeanMap.bitpos(keyHash, shift)
+                val bitpos = PersistentHashMap.bitpos(keyHash, shift)
 
                 var i = 0
                 while (i < 20) {
@@ -930,7 +931,7 @@ class BitMapIndexedNodeTest : FreeSpec({
                 i += 2
             }
 
-            val nodeSeq = n.nodeSeq() as LeanMap.NodeSeq<String, Int>
+            val nodeSeq = n.nodeSeq() as NodeSeq<String, Int>
 
             nodeSeq.array shouldBeSameInstanceAs n.array
             nodeSeq.lvl shouldBeExactly 0
@@ -965,7 +966,7 @@ class BitMapIndexedNodeTest : FreeSpec({
                     i += 2
                 }
 
-                val nodeSeq = n.nodeSeq() as LeanMap.NodeSeq<String, Int>
+                val nodeSeq = n.nodeSeq() as NodeSeq<String, Int>
 
                 nodeSeq.count shouldBeExactly 500
                 nodeSeq[0] shouldBe MapEntry("672", 672)

@@ -2,9 +2,9 @@ package com.github.whyrising.y.concretions.map
 
 import com.github.whyrising.y.concretions.list.ASeq
 import com.github.whyrising.y.concretions.list.PersistentList
-import com.github.whyrising.y.concretions.map.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
-import com.github.whyrising.y.concretions.map.LeanMap.NodeIterator.EmptyNodeIterator
-import com.github.whyrising.y.concretions.map.LeanMap.NodeIterator.NodeIter
+import com.github.whyrising.y.concretions.map.PersistentHashMap.BitMapIndexedNode.EmptyBitMapIndexedNode
+import com.github.whyrising.y.concretions.map.PersistentHashMap.NodeIterator.EmptyNodeIterator
+import com.github.whyrising.y.concretions.map.PersistentHashMap.NodeIterator.NodeIter
 import com.github.whyrising.y.map.APersistentMap
 import com.github.whyrising.y.map.IMapEntry
 import com.github.whyrising.y.map.IPersistentMap
@@ -31,21 +31,21 @@ import kotlinx.serialization.encoding.Encoder
 internal class PersistentHashMapSerializer<K, V>(
     keySerializer: KSerializer<K>,
     valueSerializer: KSerializer<V>
-) : KSerializer<LeanMap<K, V>> {
+) : KSerializer<PersistentHashMap<K, V>> {
     internal val mapSerializer = MapSerializer(keySerializer, valueSerializer)
 
     override val descriptor: SerialDescriptor = mapSerializer.descriptor
 
-    override fun deserialize(decoder: Decoder): LeanMap<K, V> =
+    override fun deserialize(decoder: Decoder): PersistentHashMap<K, V> =
         mapSerializer.deserialize(decoder).toPhashMap()
 
-    override fun serialize(encoder: Encoder, value: LeanMap<K, V>) {
+    override fun serialize(encoder: Encoder, value: PersistentHashMap<K, V>) {
         return mapSerializer.serialize(encoder, value)
     }
 }
 
 @Serializable(with = PersistentHashMapSerializer::class)
-sealed class LeanMap<out K, out V>(
+sealed class PersistentHashMap<out K, out V>(
     override val count: Int,
     val root: Node<K, V>?
 ) : APersistentMap<K, V>(), IMutableCollection<Any?>, MapIterable<K, V> {
@@ -77,9 +77,10 @@ sealed class LeanMap<out K, out V>(
 
     override fun asTransient(): TransientMap<K, V> = TransientLeanMap(this)
 
-    override fun empty(): IPersistentCollection<Any?> = EmptyLeanMap
+    override fun empty(): IPersistentCollection<Any?> = EmptyHashMap
 
-    abstract class AEmptyLeanMap<out K, out V> : LeanMap<K, V>(0, null) {
+    abstract
+    class AEmptyHashMap<out K, out V> : PersistentHashMap<K, V>(0, null) {
 
         override fun toString(): String = "{}"
 
@@ -105,12 +106,12 @@ sealed class LeanMap<out K, out V>(
         override fun valIterator(): Iterator<V> = EmptyNodeIterator
     }
 
-    object EmptyLeanMap : AEmptyLeanMap<Nothing, Nothing>()
+    object EmptyHashMap : AEmptyHashMap<Nothing, Nothing>()
 
     internal class LMap<out K, out V>(
         private val _count: Int,
         private val _root: Node<K, V>
-    ) : LeanMap<K, V>(_count, _root) {
+    ) : PersistentHashMap<K, V>(_count, _root) {
 
         @ExperimentalStdlibApi
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
@@ -120,7 +121,7 @@ sealed class LeanMap<out K, out V>(
             if (newRoot == _root) return this
 
             return when (val newCount = _count - 1) {
-                0 -> EmptyLeanMap
+                0 -> EmptyHashMap
                 else -> LMap(newCount, newRoot)
             }
         }
@@ -224,12 +225,12 @@ sealed class LeanMap<out K, out V>(
             private var nextEntry: R = _null as R
 
             val nodes = arrayOfNulls<Node<K, V>>(7)
-            val cursorLengths = arrayOfNulls<Int>(7)
+            private val cursorLengths = arrayOfNulls<Int>(7)
 
             var array: Array<Any?> = _node.array
-            var lvl: Int = 0
-            var dataIndex: Int = 0
-            var dataLength: Int = _node.dataArity()
+            private var lvl: Int = 0
+            private var dataIndex: Int = 0
+            private var dataLength: Int = _node.dataArity()
 
             init {
                 nodes[0] = _node
@@ -363,7 +364,7 @@ sealed class LeanMap<out K, out V>(
             isMutable.value = false
 
             return when (_count.value) {
-                0 -> EmptyLeanMap
+                0 -> EmptyHashMap
                 else -> LMap(_count.value, root.value as Node<K, V>)
             }
         }
@@ -378,14 +379,14 @@ sealed class LeanMap<out K, out V>(
         }
 
         companion object {
-            operator
-            fun <K, V> invoke(map: LeanMap<K, V>): TransientLeanMap<K, V> =
-                TransientLeanMap(
-                    atomic(true),
-                    atomic(map.root),
-                    atomic(map.count),
-                    Box(null)
-                )
+            operator fun <K, V> invoke(
+                map: PersistentHashMap<K, V>
+            ): TransientLeanMap<K, V> = TransientLeanMap(
+                atomic(true),
+                atomic(map.root),
+                atomic(map.count),
+                Box(null)
+            )
         }
     }
 
@@ -1003,12 +1004,13 @@ sealed class LeanMap<out K, out V>(
             }
         }
 
-        internal operator fun <K, V> invoke(): LeanMap<K, V> = EmptyLeanMap
+        internal
+        operator fun <K, V> invoke(): PersistentHashMap<K, V> = EmptyHashMap
 
         internal operator fun <K, V> invoke(
             vararg pairs: Pair<K, V>
-        ): LeanMap<K, V> {
-            var ret: TransientMap<K, V> = EmptyLeanMap.asTransient()
+        ): PersistentHashMap<K, V> {
+            var ret: TransientMap<K, V> = EmptyHashMap.asTransient()
 
             for (i in pairs.indices) {
                 val (key, value) = pairs[i]
@@ -1019,21 +1021,23 @@ sealed class LeanMap<out K, out V>(
                     throw IllegalArgumentException("Duplicate key: $key")
             }
 
-            return ret.persistent() as LeanMap<K, V>
+            return ret.persistent() as PersistentHashMap<K, V>
         }
 
-        internal fun <K, V> create(map: Map<K, V>): LeanMap<K, V> {
-            var ret: TransientMap<K, V> = EmptyLeanMap.asTransient()
+        internal fun <K, V> create(map: Map<K, V>): PersistentHashMap<K, V> {
+            var ret: TransientMap<K, V> = EmptyHashMap.asTransient()
 
             for (entry in map.entries) ret = ret.assoc(entry.key, entry.value)
 
-            return ret.persistent() as LeanMap<K, V>
+            return ret.persistent() as PersistentHashMap<K, V>
         }
     }
 }
 
-fun <K, V> hashMap(): LeanMap<K, V> = LeanMap()
+fun <K, V> hashMap(): PersistentHashMap<K, V> = PersistentHashMap()
 
-fun <K, V> hashMap(vararg pairs: Pair<K, V>): LeanMap<K, V> = LeanMap(*pairs)
+fun <K, V> hashMap(vararg pairs: Pair<K, V>): PersistentHashMap<K, V> =
+    PersistentHashMap(*pairs)
 
-fun <K, V> Map<K, V>.toPhashMap(): LeanMap<K, V> = LeanMap.create(this)
+fun <K, V> Map<K, V>.toPhashMap(): PersistentHashMap<K, V> =
+    PersistentHashMap.create(this)

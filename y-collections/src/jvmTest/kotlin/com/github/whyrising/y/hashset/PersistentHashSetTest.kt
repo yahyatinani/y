@@ -1,9 +1,9 @@
 package com.github.whyrising.y.hashset
 
 import com.github.whyrising.y.concretions.list.l
-import com.github.whyrising.y.concretions.map.LeanMap
-import com.github.whyrising.y.concretions.map.LeanMap.EmptyLeanMap
-import com.github.whyrising.y.concretions.map.LeanMap.NodeIterator.NodeIter
+import com.github.whyrising.y.concretions.map.PersistentHashMap
+import com.github.whyrising.y.concretions.map.PersistentHashMap.EmptyHashMap
+import com.github.whyrising.y.concretions.map.PersistentHashMap.NodeIterator.NodeIter
 import com.github.whyrising.y.concretions.map.hashMap
 import com.github.whyrising.y.concretions.map.m
 import com.github.whyrising.y.concretions.set.PersistentHashSet
@@ -341,7 +341,7 @@ class PersistentHashSetTest : FreeSpec({
 
         "isEmpty()" {
             val map1 = hashMap("a" to "1", "b" to "2", "c" to "3")
-            val map2 = LeanMap<String, String>()
+            val map2 = PersistentHashMap<String, String>()
 
             HashSet(map1).isEmpty().shouldBeFalse()
             HashSet(map2).isEmpty().shouldBeTrue()
@@ -358,7 +358,7 @@ class PersistentHashSetTest : FreeSpec({
 
     "EmptyHashSet" - {
         "map property should be set to EmptyLeanMap" {
-            EmptyHashSet.map shouldBeSameInstanceAs EmptyLeanMap
+            EmptyHashSet.map shouldBeSameInstanceAs EmptyHashMap
         }
 
         "count should return 0" {

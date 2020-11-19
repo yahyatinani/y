@@ -1,9 +1,9 @@
 package com.github.whyrising.y.map.hashmap
 
-import com.github.whyrising.y.concretions.map.LeanMap.BitMapIndexedNode
-import com.github.whyrising.y.concretions.map.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
-import com.github.whyrising.y.concretions.map.LeanMap.HashCollisionNode
 import com.github.whyrising.y.concretions.map.MapEntry
+import com.github.whyrising.y.concretions.map.PersistentHashMap.BitMapIndexedNode
+import com.github.whyrising.y.concretions.map.PersistentHashMap.BitMapIndexedNode.EmptyBitMapIndexedNode
+import com.github.whyrising.y.concretions.map.PersistentHashMap.HashCollisionNode
 import com.github.whyrising.y.util.Box
 import com.github.whyrising.y.util.hasheq
 import io.kotest.assertions.throwables.shouldThrowExactly

@@ -1,8 +1,9 @@
 package com.github.whyrising.y.map.hashmap
 
-import com.github.whyrising.y.concretions.map.LeanMap
-import com.github.whyrising.y.concretions.map.LeanMap.EmptyLeanMap
-import com.github.whyrising.y.concretions.map.LeanMap.TransientLeanMap
+import com.github.whyrising.y.concretions.map.PersistentHashMap
+import com.github.whyrising.y.concretions.map.PersistentHashMap.BitMapIndexedNode
+import com.github.whyrising.y.concretions.map.PersistentHashMap.EmptyHashMap
+import com.github.whyrising.y.concretions.map.PersistentHashMap.TransientLeanMap
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
@@ -16,7 +17,7 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 @OptIn(ExperimentalStdlibApi::class)
 class TransientLeanMapTest : FreeSpec({
     "ctor" {
-        val trlm = TransientLeanMap<String, Int>(EmptyLeanMap)
+        val trlm = TransientLeanMap<String, Int>(EmptyHashMap)
 
         trlm.isMutable.value.shouldBeTrue()
         trlm.root.value.shouldBeNull()
@@ -27,9 +28,9 @@ class TransientLeanMapTest : FreeSpec({
     "doPersistent()" - {
         @Suppress("UNCHECKED_CAST")
         "when transient is mutable, it should return the LeanMap of it" {
-            val trlm = TransientLeanMap<String, Int>(EmptyLeanMap)
+            val trlm = TransientLeanMap<String, Int>(EmptyHashMap)
 
-            val map = trlm.doPersistent() as LeanMap<String, Int>
+            val map = trlm.doPersistent() as PersistentHashMap<String, Int>
 
             map.count shouldBeExactly 0
             map.root.shouldBeNull()
@@ -38,8 +39,8 @@ class TransientLeanMapTest : FreeSpec({
 
     """assertMutable() when called after the call of persistent(), 
        it should throw ane exception """ {
-        val trlm1 = TransientLeanMap<String, Int>(EmptyLeanMap)
-        val trlm2 = TransientLeanMap<String, Int>(EmptyLeanMap)
+        val trlm1 = TransientLeanMap<String, Int>(EmptyHashMap)
+        val trlm2 = TransientLeanMap<String, Int>(EmptyHashMap)
         trlm2.doPersistent()
 
         shouldNotThrow<Exception> { trlm1.assertMutable() }
@@ -49,16 +50,16 @@ class TransientLeanMapTest : FreeSpec({
     }
 
     "doCount" {
-        val trlm = TransientLeanMap<String, Int>(EmptyLeanMap)
+        val trlm = TransientLeanMap<String, Int>(EmptyHashMap)
 
         trlm.doCount shouldBeExactly 0
     }
 
     "doAssoc(key,val)" {
-        val trlm = TransientLeanMap<String, Int>(EmptyLeanMap)
+        val trlm = TransientLeanMap<String, Int>(EmptyHashMap)
 
         val r1 = trlm.doAssoc("a", 1) as TransientLeanMap<String, Int>
-        val root1 = r1.root.value as LeanMap.BitMapIndexedNode<String, Int>
+        val root1 = r1.root.value as BitMapIndexedNode<String, Int>
 
         r1 shouldBeSameInstanceAs trlm
         r1.leafFlag.value.shouldNotBeNull()
@@ -68,7 +69,7 @@ class TransientLeanMapTest : FreeSpec({
         root1.array[1] shouldBe 1
 
         val r2 = r1.doAssoc("b", 2) as TransientLeanMap<String, Int>
-        val root2 = r2.root.value as LeanMap.BitMapIndexedNode<String, Int>
+        val root2 = r2.root.value as BitMapIndexedNode<String, Int>
 
         r2.leafFlag.value.shouldNotBeNull()
         r2 shouldBeSameInstanceAs trlm
@@ -82,12 +83,13 @@ class TransientLeanMapTest : FreeSpec({
     }
 
     "doDissoc(key)" {
-        val tm = TransientLeanMap<String, Int>(EmptyLeanMap)
+        val tm = TransientLeanMap<String, Int>(EmptyHashMap)
         val trlm = tm.assoc("a", 1).assoc("b", 2).assoc("c", 3) as
             TransientLeanMap<String, Int>
 
         val result = trlm.doDissoc("b") as TransientLeanMap<String, Int>
-        val root = result.root.value as LeanMap.BitMapIndexedNode<String, Int>
+        val root = result.root.value
+            as BitMapIndexedNode<String, Int>
 
         result.leafFlag.value.shouldNotBeNull()
         result.count shouldBeExactly 2
@@ -100,7 +102,7 @@ class TransientLeanMapTest : FreeSpec({
 
     "doValAt(key, default)" {
         val default = -1
-        val tm = TransientLeanMap<String, Int>(EmptyLeanMap)
+        val tm = TransientLeanMap<String, Int>(EmptyHashMap)
         val trlm = tm.assoc("a", 1).assoc("b", 2).assoc("c", 3) as
             TransientLeanMap<String, Int>
 

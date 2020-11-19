@@ -3,14 +3,14 @@ package com.github.whyrising.y.map.arraymap
 import com.github.whyrising.y.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.concretions.list.l
 import com.github.whyrising.y.concretions.map.HASHTABLE_THRESHOLD
-import com.github.whyrising.y.concretions.map.LeanMap
-import com.github.whyrising.y.concretions.map.LeanMap.TransientLeanMap
 import com.github.whyrising.y.concretions.map.MapEntry
 import com.github.whyrising.y.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.concretions.map.PersistentArrayMap.ArrayMap
 import com.github.whyrising.y.concretions.map.PersistentArrayMap.EmptyArrayMap
 import com.github.whyrising.y.concretions.map.PersistentArrayMap.TransientArrayMap
 import com.github.whyrising.y.concretions.map.PersistentArrayMapSerializer
+import com.github.whyrising.y.concretions.map.PersistentHashMap
+import com.github.whyrising.y.concretions.map.PersistentHashMap.TransientLeanMap
 import com.github.whyrising.y.concretions.map.m
 import com.github.whyrising.y.concretions.map.toPArrayMap
 import com.github.whyrising.y.concretions.map.toPhashMap
@@ -710,7 +710,8 @@ class PersistentArrayMapTest : FreeSpec({
                     }
                     val m = m(*(array as Array<Pair<String, Int>>))
 
-                    val map = m.assoc("a", 863) as LeanMap<String, Int>
+                    val map = m.assoc("a", 863)
+                        as PersistentHashMap<String, Int>
 
                     m.containsKey("a").shouldBeFalse()
 
@@ -802,7 +803,7 @@ class PersistentArrayMapTest : FreeSpec({
                 }
                 val m = m(*(array as Array<Pair<String, Int>>))
 
-                val map = m.assocNew("a", 863) as LeanMap<String, Int>
+                val map = m.assocNew("a", 863) as PersistentHashMap<String, Int>
 
                 m.containsKey("a").shouldBeFalse()
 
