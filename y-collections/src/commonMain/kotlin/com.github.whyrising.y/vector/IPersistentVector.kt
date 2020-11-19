@@ -1,9 +1,9 @@
 package com.github.whyrising.y.vector
 
 import com.github.whyrising.y.associative.Associative
-import com.github.whyrising.y.stack.IPersistentStack
 import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.seq.Sequential
+import com.github.whyrising.y.stack.IPersistentStack
 
 interface IPersistentVector<out E> :
     Associative<Int, E>,

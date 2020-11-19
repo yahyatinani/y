@@ -1,11 +1,11 @@
 package com.github.whyrising.y.mocks
 
+import com.github.whyrising.y.concretions.vector.PersistentVector
 import com.github.whyrising.y.map.IMapEntry
 import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.stack.IPersistentStack
 import com.github.whyrising.y.vector.IPersistentVector
-import com.github.whyrising.y.seq.ISeq
-import com.github.whyrising.y.PersistentVector
 
 class VectorMock<out E>(val vec: PersistentVector<E>) : IPersistentVector<E> {
 

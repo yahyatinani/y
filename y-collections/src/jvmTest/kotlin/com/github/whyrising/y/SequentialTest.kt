@@ -1,5 +1,6 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.concretions.list.ASeq
 import com.github.whyrising.y.list.IPersistentList
 import com.github.whyrising.y.seq.IndexedSeq
 import com.github.whyrising.y.seq.Sequential
