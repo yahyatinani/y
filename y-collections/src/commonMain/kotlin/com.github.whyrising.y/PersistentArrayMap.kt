@@ -7,7 +7,6 @@ import com.github.whyrising.y.map.IPersistentMap
 import com.github.whyrising.y.map.ITransientMap
 import com.github.whyrising.y.map.MapIterable
 import com.github.whyrising.y.seq.ISeq
-import com.github.whyrising.y.util.emptySeq
 import com.github.whyrising.y.util.equiv
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
@@ -157,7 +156,7 @@ sealed class PersistentArrayMap<out K, out V>(
     override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
 
     override fun seq(): ISeq<MapEntry<K, V>> = when (count) {
-        0 -> emptySeq()
+        0 -> PersistentList.Empty
         else -> Seq(array, 0)
     }
 
@@ -218,7 +217,7 @@ sealed class PersistentArrayMap<out K, out V>(
         override fun rest(): ISeq<MapEntry<K, V>> = (index + 1).let { i ->
             when {
                 i < array.size -> Seq(array, i)
-                else -> emptySeq()
+                else -> PersistentList.Empty
             }
         }
     }

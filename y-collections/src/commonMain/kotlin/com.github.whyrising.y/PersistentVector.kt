@@ -5,7 +5,7 @@ import com.github.whyrising.y.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.collection.IMutableCollection
 import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.collection.ITransientCollection
-import com.github.whyrising.y.core.ConstantCount
+import com.github.whyrising.y.core.InstaCount
 import com.github.whyrising.y.vector.IPersistentVector
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
@@ -273,7 +273,7 @@ sealed class PersistentVector<out E>(
         shift: Int,
         root: Node<E>,
         tail: Array<Any?>
-    ) : ConstantCount, ITransientCollection<E> {
+    ) : InstaCount, ITransientCollection<E> {
 
         private val _count: AtomicInt = atomic(size)
         private val _shift: AtomicInt = atomic(shift)

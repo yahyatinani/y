@@ -4,7 +4,7 @@ import com.github.whyrising.y.util.HASH_PRIME
 import com.github.whyrising.y.util.INIT_HASH_CODE
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.PersistentList.Empty
-import com.github.whyrising.y.core.ConstantCount
+import com.github.whyrising.y.core.InstaCount
 import com.github.whyrising.y.core.IHashEq
 import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.seq.ISeq
@@ -110,7 +110,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
             var i = 1
             var s = rest()
             while (s !is Empty) {
-                if (s is ConstantCount)
+                if (s is InstaCount)
                     return i + s.count
                 s = s.rest()
                 i++

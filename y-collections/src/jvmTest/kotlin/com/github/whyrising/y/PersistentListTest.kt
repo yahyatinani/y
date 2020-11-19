@@ -2,7 +2,7 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentList.Cons
 import com.github.whyrising.y.PersistentList.Empty
-import com.github.whyrising.y.core.ConstantCount
+import com.github.whyrising.y.core.InstaCount
 import com.github.whyrising.y.list.IPersistentList
 import com.github.whyrising.y.mocks.MockSeq
 import com.github.whyrising.y.mocks.User
@@ -52,6 +52,44 @@ class PersistentListTest : FreeSpec({
                 list.zip(integers) { a, b ->
                     a.shouldNotBeNull()
                     a shouldBeExactly b
+                }
+            }
+        }
+
+        "conj() should return a persistent list of 1 element" {
+            checkAll { l: List<Int>, i: Int ->
+                val list = PersistentList(*l.toTypedArray())
+
+                val r = list.conj(i)
+
+                if (l.isEmpty())
+                    r.rest() shouldBeSameInstanceAs Empty
+                r.count shouldBeExactly l.size + 1
+                r.first() shouldBeExactly i
+            }
+        }
+
+        "cons(x)" - {
+            "cons(x) should return a seq of 1 element x" {
+                checkAll { i: Int ->
+                    val seq: ISeq<Int> = (Empty as ISeq<Int>).cons(i)
+
+                    seq.first() shouldBe i
+                    (seq as Cons<Int>).rest shouldBe Empty
+                    seq.count shouldBe 1
+                }
+            }
+
+            "cons(x) should add x as the first element to this seq" {
+                val oldList = Cons(10, Empty)
+
+                checkAll { i: Int ->
+
+                    val newList = oldList.cons(i)
+
+                    (newList as IPersistentList<*>).count shouldBeExactly 2
+                    newList.first() shouldBeExactly i
+                    newList.rest() shouldBeSameInstanceAs oldList
                 }
             }
         }
@@ -279,18 +317,8 @@ class PersistentListTest : FreeSpec({
             Empty.equiv(Empty) shouldBe true
         }
 
-        "conj() should return a persistent list of 1 element" {
-            val empty: PersistentList.AEmpty<Int> = Empty
-
-            val list = empty.conj(1) as Cons<Int>
-
-            list.first shouldBe 1
-            list._rest shouldBe Empty
-            list.count shouldBeExactly 1
-        }
-
         "should implement a constant-time count" {
-            Empty::class.shouldBeSubtypeOf<ConstantCount>()
+            Empty::class.shouldBeSubtypeOf<InstaCount>()
         }
 
         "first property should throw NoSuchElementException" {
@@ -304,16 +332,6 @@ class PersistentListTest : FreeSpec({
             val rest: ISeq<Int> = Empty.rest()
 
             rest shouldBe Empty
-        }
-
-        "cons(x) should return a seq of 1 element x" {
-            checkAll { i: Int ->
-                val seq: ISeq<Int> = (Empty as ISeq<Int>).cons(i)
-
-                seq.first() shouldBe i
-                (seq as Cons<Int>)._rest shouldBe Empty
-                seq.count shouldBe 1
-            }
         }
 
         "seq() should return Empty" {
@@ -343,19 +361,6 @@ class PersistentListTest : FreeSpec({
             list3.rest() shouldBeSameInstanceAs list2
         }
 
-        "cons(x) should add x as the first element to this seq" {
-            val oldList = Cons(10, Empty)
-
-            checkAll { i: Int ->
-
-                val newList = oldList.cons(i)
-
-                (newList as IPersistentList<*>).count shouldBeExactly 2
-                newList.first() shouldBeExactly i
-                newList.rest() shouldBeSameInstanceAs oldList
-            }
-        }
-
         "toString()" {
             checkAll { args: List<Int> ->
                 val list = PersistentList(*args.toTypedArray())
@@ -379,18 +384,6 @@ class PersistentListTest : FreeSpec({
             val list = PersistentList(1, 2, 3)
 
             list.empty() shouldBe Empty
-        }
-
-        "conj() should return a persistent list of 1 element" {
-
-            checkAll { l: List<Int>, i: Int ->
-                val list = PersistentList(*l.toTypedArray())
-
-                val r = list.conj(i) as PersistentList<Int>
-
-                r.count shouldBeExactly l.size + 1
-                r.first() shouldBeExactly i
-            }
         }
 
         "seq() should return null" {

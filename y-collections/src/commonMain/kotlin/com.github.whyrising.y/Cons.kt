@@ -1,13 +1,13 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentList.Empty
-import com.github.whyrising.y.core.ConstantCount
+import com.github.whyrising.y.core.InstaCount
 import com.github.whyrising.y.seq.ISeq
 
-class Cons<out E>(first: E, rest: ISeq<E>) : ASeq<E>() {
-
-    private var _first: E = first
-    private var _rest: ISeq<E> = rest
+class Cons<out E>(
+    private val _first: E,
+    private val _rest: ISeq<E>
+) : ASeq<E>() {
 
     override fun first(): E = _first
 
@@ -15,20 +15,20 @@ class Cons<out E>(first: E, rest: ISeq<E>) : ASeq<E>() {
 
     // Move to Util when needed
     private fun count(): Int {
-        if (_rest is ConstantCount)
-            return _rest.count
+        when (_rest) {
+            is InstaCount -> return _rest.count
+            else -> {
+                var size = 0
+                var rest = _rest
+                while (rest !is Empty) {
+                    if (rest is InstaCount) return size + rest.count
 
-        var size = 0
-        var rest = _rest
-        while (rest !is Empty) {
-            if (rest is ConstantCount)
-                return size + rest.count
-
-            rest = rest.rest()
-            size++
+                    rest = rest.rest()
+                    size++
+                }
+                return size
+            }
         }
-
-        return size
     }
 
     override val count: Int

@@ -1,5 +1,5 @@
 package com.github.whyrising.y.core
 
-interface ConstantCount {
+interface InstaCount {
     val count: Int
 }

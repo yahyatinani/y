@@ -1,12 +1,12 @@
 package com.github.whyrising.y.hashmap
 
-import com.github.whyrising.y.util.Box
 import com.github.whyrising.y.LeanMap
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode
 import com.github.whyrising.y.LeanMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import com.github.whyrising.y.LeanMap.Node
 import com.github.whyrising.y.MapEntry
-import com.github.whyrising.y.util.emptySeq
+import com.github.whyrising.y.PersistentList
+import com.github.whyrising.y.util.Box
 import com.github.whyrising.y.util.hasheq
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -948,8 +948,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             "when node is empty, it should return an empty seq" {
                 val node = BitMapIndexedNode<String, Int>()
 
-                node.nodeSeq() shouldBeSameInstanceAs
-                    emptySeq<MapEntry<String, Int>>()
+                node.nodeSeq() shouldBeSameInstanceAs PersistentList.Empty
             }
 
             "it should return a seq of map entries" {

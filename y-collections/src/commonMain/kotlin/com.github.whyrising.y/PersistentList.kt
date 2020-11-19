@@ -1,9 +1,9 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.PersistentList.Empty
-import com.github.whyrising.y.core.ConstantCount
-import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.core.InstaCount
 import com.github.whyrising.y.list.IPersistentList
+import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.stack.IPersistentStack
 import com.github.whyrising.y.util.Murmur3
@@ -29,31 +29,30 @@ internal class PersistentListSerializer<E>(element: KSerializer<E>) :
 }
 
 @Serializable(with = PersistentListSerializer::class)
-sealed class PersistentList<out E> :
-    ASeq<E>(), IPersistentList<E>, ConstantCount {
+sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
+
+    override
+    fun conj(e: @UnsafeVariance E): PersistentList<E> = Cons(e, this)
+
+    override fun cons(e: @UnsafeVariance E): ISeq<E> = Cons(e, this)
 
     @Suppress("UNCHECKED_CAST")
     internal class Cons<out E>(
         internal val first: E,
-        internal val _rest: IPersistentList<E>
+        internal val rest: IPersistentList<E>
     ) : PersistentList<E>() {
 
         override fun first(): E = first
 
-        override fun rest(): ISeq<E> = _rest as ISeq<E>
+        override fun rest(): ISeq<E> = rest as ISeq<E>
 
-        override fun cons(e: @UnsafeVariance E): ISeq<E> = Cons(e, this)
-
-        override val count: Int = _rest.count + 1
+        override val count: Int = rest.count + 1
 
         override fun empty(): IPersistentCollection<E> = Empty
 
-        override fun conj(e: @UnsafeVariance E): IPersistentCollection<E> =
-            Cons(e, this)
+        override fun peek(): E = first
 
-        override fun peek(): E? = first
-
-        override fun pop(): IPersistentStack<E> = _rest
+        override fun pop(): IPersistentStack<E> = rest
     }
 
     internal abstract class AEmpty<out E> : PersistentList<E>() {
@@ -68,19 +67,11 @@ sealed class PersistentList<out E> :
 
         override fun rest(): ISeq<E> = this
 
-        override fun cons(e: @UnsafeVariance E): ISeq<E> =
-            Cons(e, this)
-
         override val count: Int = 0
 
         override fun empty(): AEmpty<E> = this
 
         override fun equiv(other: Any?): Boolean = equals(other)
-
-        override fun conj(e: @UnsafeVariance E): PersistentList<E> =
-            Cons(e, Empty)
-
-        override fun seq(): ISeq<E> = this
 
         override fun peek(): E? = null
 
@@ -113,6 +104,19 @@ sealed class PersistentList<out E> :
         override fun subList(fromIndex: Int, toIndex: Int): List<E> =
             listOf<E>().subList(fromIndex, toIndex)
 
+
+        override fun contains(element: @UnsafeVariance E): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun indexOf(element: @UnsafeVariance E): Int {
+            TODO("Not yet implemented")
+        }
+
+        override fun lastIndexOf(element: @UnsafeVariance E): Int {
+            TODO("Not yet implemented")
+        }
+
         companion object {
             @ExperimentalStdlibApi
             private val HASH_EQ = Murmur3.hashOrdered(emptyList<Nothing>())
@@ -130,12 +134,11 @@ sealed class PersistentList<out E> :
             }
 
         internal fun <E> create(list: List<E>): PersistentList<E> {
-            var l: PersistentList<E> = Empty
-
             val listIterator = list.listIterator(list.size)
 
+            var l: PersistentList<E> = Empty
             while (listIterator.hasPrevious())
-                l = l.conj(listIterator.previous()) as PersistentList<E>
+                l = l.conj(listIterator.previous())
 
             return l
         }

@@ -11,7 +11,6 @@ import com.github.whyrising.y.map.ITransientMap
 import com.github.whyrising.y.map.MapIterable
 import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.util.Box
-import com.github.whyrising.y.util.emptySeq
 import com.github.whyrising.y.util.equiv
 import com.github.whyrising.y.util.hasheq
 import kotlinx.atomicfu.AtomicBoolean
@@ -92,7 +91,7 @@ sealed class LeanMap<out K, out V>(
 
         override fun valAt(key: @UnsafeVariance K): V? = null
 
-        override fun seq(): ISeq<Any?> = emptySeq()
+        override fun seq(): ISeq<Any?> = PersistentList.Empty
 
         override fun iterator(): Iterator<Map.Entry<K, V>> =
             EmptyNodeIterator
@@ -995,7 +994,7 @@ sealed class LeanMap<out K, out V>(
                             }
                         }
                     }
-                    return emptySeq()
+                    return PersistentList.Empty
                 }
             }
         }

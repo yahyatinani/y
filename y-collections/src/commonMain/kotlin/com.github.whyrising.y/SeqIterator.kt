@@ -1,20 +1,19 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.seq.ISeq
-import com.github.whyrising.y.util.emptySeq
 
 data class SeqIterator<out E>(
     internal var next: ISeq<@UnsafeVariance E>
 ) : Iterator<E> {
 
-    private var currentSeq: ISeq<@UnsafeVariance E> = emptySeq()
+    private var currentSeq: ISeq<@UnsafeVariance E> = PersistentList.Empty
 
     override fun hasNext(): Boolean {
 
         if (currentSeq === next)
             next = currentSeq.rest()
 
-        return next !is PersistentList.Empty
+        return !(next === PersistentList.Empty)
     }
 
     override fun next(): E {

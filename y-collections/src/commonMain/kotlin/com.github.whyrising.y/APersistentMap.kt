@@ -7,7 +7,7 @@ import com.github.whyrising.y.map.MapIterable
 import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.util.Murmur3
-import com.github.whyrising.y.util.emptySeq
+import com.github.whyrising.y.util.equiv
 import com.github.whyrising.y.util.toSeq
 import com.github.whyrising.y.vector.IPersistentVector
 import kotlin.collections.Map.Entry
@@ -30,12 +30,12 @@ abstract class APersistentMap<out K, out V> :
         var seq = seq() as ISeq<MapEntry<K, V>>
         var s = "{"
 
-        while (seq != emptySeq<MapEntry<K, V>>()) {
+        while (seq != PersistentList.Empty) {
             val entry = seq.first()
             s += "${entry.key} ${entry.value}"
             seq = seq.rest()
 
-            if (seq != emptySeq<MapEntry<K, V>>()) s += ", "
+            if (seq != PersistentList.Empty) s += ", "
         }
 
         s += '}'
@@ -50,7 +50,7 @@ abstract class APersistentMap<out K, out V> :
         if (cashed == 0) {
             var seq = seq() as ISeq<MapEntry<K, V>>
 
-            while (seq != emptySeq<MapEntry<K, V>>()) {
+            while (seq != PersistentList.Empty) {
                 val entry = seq.first()
 
                 cashed += entry.key.hashCode() xor entry.value.hashCode()
@@ -149,7 +149,7 @@ abstract class APersistentMap<out K, out V> :
                     val key = entry.key
                     val keyFound = map.containsKey(key)
 
-                    if (!keyFound || !com.github.whyrising.y.util.equiv(entry.value, map.getValue(key)))
+                    if (!keyFound || !equiv(entry.value, map.getValue(key)))
                         return false
 
                     seq = seq.rest()
@@ -263,7 +263,7 @@ abstract class APersistentMap<out K, out V> :
 
         override fun rest(): ISeq<K> = when {
             count > 1 -> KeySeq<K, V>(_seq.rest(), null)
-            else -> emptySeq()
+            else -> PersistentList.Empty
         }
 
         override val count: Int
@@ -301,7 +301,7 @@ abstract class APersistentMap<out K, out V> :
 
         override fun rest(): ISeq<V> = when {
             count > 1 -> ValSeq<K, V>(_seq.rest(), null)
-            else -> emptySeq()
+            else -> PersistentList.Empty
         }
 
         override val count: Int = _seq.count
