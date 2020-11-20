@@ -10,4 +10,13 @@ class ArrayChunk<E>(
         end -> throw IllegalStateException()
         else -> ArrayChunk(array, start + 1, end)
     }
+
+    override val count: Int = end - start
+
+    override fun nth(index: Int): E = array[start + index]
+
+    override fun nth(index: Int, default: E): E = when (index) {
+        in 0 until count -> nth(index)
+        else -> default
+    }
 }

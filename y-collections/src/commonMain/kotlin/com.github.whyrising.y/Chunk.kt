@@ -1,5 +1,7 @@
 package com.github.whyrising.y
 
-interface Chunk<E> {
+import com.github.whyrising.y.vector.Indexed
+
+interface Chunk<E> : Indexed<E> {
     fun dropFirst(): Chunk<E>
 }
