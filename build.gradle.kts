@@ -13,7 +13,7 @@ plugins {
     `java-library`
     kotlin("multiplatform") version Libs.kotlinVersion
     kotlin("plugin.serialization") version "1.4.10"
-    id(Libs.Ktlint.id) version Libs.Ktlint.version
+    id(Plugins.Ktlint.id) version Plugins.Ktlint.version
     id("maven-publish")
     signing
 }
@@ -61,7 +61,7 @@ subprojects {
         }
     }
 
-    apply(plugin = Libs.Ktlint.id)
+    apply(plugin = Plugins.Ktlint.id)
     apply(plugin = "kotlinx-serialization")
 
     ktlint { debug.set(true) }

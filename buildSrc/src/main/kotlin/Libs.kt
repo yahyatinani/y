@@ -11,11 +11,6 @@ object Libs {
         const val propertyTest = "io.kotest:kotest-property-jvm:$version"
     }
 
-    object Ktlint {
-        const val version = "9.3.0"
-        const val id = "org.jlleitschuh.gradle.ktlint"
-    }
-
     object Kotlinx {
         private const val version = "1.0.0"
 
