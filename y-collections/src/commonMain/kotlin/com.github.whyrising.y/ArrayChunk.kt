@@ -6,6 +6,8 @@ class ArrayChunk<E>(
     val end: Int
 ) : Chunk<E> {
 
+    constructor(array: Array<E>) : this(array, 0, array.size)
+
     override fun dropFirst(): Chunk<E> = when (start) {
         end -> throw IllegalStateException()
         else -> ArrayChunk(array, start + 1, end)
