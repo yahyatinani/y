@@ -23,6 +23,14 @@ class ArrayChunkTest : FreeSpec({
             arrayChunk.start shouldBeExactly 0
             arrayChunk.end shouldBeExactly a.size
         }
+
+        "third ctor" {
+            val arrayChunk = ArrayChunk(a, 0)
+
+            arrayChunk.array shouldBeSameInstanceAs a
+            arrayChunk.start shouldBeExactly 0
+            arrayChunk.end shouldBeExactly a.size
+        }
     }
 
     "dropFirst()" - {
