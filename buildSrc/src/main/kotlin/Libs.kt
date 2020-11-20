@@ -1,5 +1,4 @@
 object Libs {
-
     const val kotlinVersion = "1.4.10"
     const val kotlinApiVersion = "1.4"
     const val jvmTargetVersion = "1.8"
@@ -12,15 +11,14 @@ object Libs {
     }
 
     object Kotlinx {
-        private const val version = "1.0.1"
+        private const val gr = "org.jetbrains.kotlinx"
 
-        const val serialization =
-            "org.jetbrains.kotlinx:kotlinx-serialization-json:$version"
-    }
+        private const val atomicfuVersion = "0.14.4"
+        private const val serialVersion = "1.0.1"
+        private const val coroutinesVersion = "1.4.1"
 
-    object Atomicfu {
-        private const val version = "0.14.4"
-
-        const val atomicfcu = "org.jetbrains.kotlinx:atomicfu:$version"
+        const val atomicfu = "$gr:atomicfu:$atomicfuVersion"
+        const val serialJson = "$gr:kotlinx-serialization-json:$serialVersion"
+        const val coroutines = "$gr:kotlinx-coroutines-core:$coroutinesVersion"
     }
 }

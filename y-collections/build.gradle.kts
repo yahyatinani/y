@@ -47,8 +47,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(Libs.Kotlinx.serialization)
-                implementation(Libs.Atomicfu.atomicfcu)
+                implementation(Libs.Kotlinx.serialJson)
+                implementation(Libs.Kotlinx.atomicfu)
             }
         }
 
@@ -57,7 +57,8 @@ kotlin {
                 implementation(Libs.Kotest.runner)
                 implementation(Libs.Kotest.assertions)
                 implementation(Libs.Kotest.propertyTest)
-                implementation(Libs.Kotlinx.serialization)
+                implementation(Libs.Kotlinx.serialJson)
+                implementation(Libs.Kotlinx.coroutines)
             }
         }
     }
