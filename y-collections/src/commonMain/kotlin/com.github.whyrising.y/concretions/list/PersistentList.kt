@@ -31,8 +31,7 @@ internal class PersistentListSerializer<E>(element: KSerializer<E>) :
 @Serializable(with = PersistentListSerializer::class)
 sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
 
-    override
-    fun conj(e: @UnsafeVariance E): PersistentList<E> = Cons(e, this)
+    override fun conj(e: @UnsafeVariance E): PersistentList<E> = Cons(e, this)
 
     override fun cons(e: @UnsafeVariance E): ISeq<E> = Cons(e, this)
 

@@ -12,7 +12,7 @@ object Libs {
     }
 
     object Kotlinx {
-        private const val version = "1.0.0"
+        private const val version = "1.0.1"
 
         const val serialization =
             "org.jetbrains.kotlinx:kotlinx-serialization-json:$version"
