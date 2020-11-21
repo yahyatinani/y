@@ -1,16 +1,19 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.concretions.list.ChunkedSeq
 import com.github.whyrising.y.concretions.list.Cons
-import com.github.whyrising.y.concretions.list.PersistentList
+import com.github.whyrising.y.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.concretions.vector.v
 import com.github.whyrising.y.core.IHashEq
 import com.github.whyrising.y.mocks.HashEqMock
 import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.seq.LazySeq
 import com.github.whyrising.y.util.Category
 import com.github.whyrising.y.util.DoubleOps
 import com.github.whyrising.y.util.LongOps
 import com.github.whyrising.y.util.category
 import com.github.whyrising.y.util.hasheq
+import com.github.whyrising.y.util.lazyChunkedSeq
 import com.github.whyrising.y.util.ops
 import com.github.whyrising.y.util.toSeq
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -19,6 +22,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 
 @ExperimentalStdlibApi
 class UtilTest : FreeSpec({
@@ -101,13 +105,41 @@ class UtilTest : FreeSpec({
         }
     }
 
+    "lazyChunkedSeq(iterator)" - {
+        "when iterator is empty, it should return Empty" {
+            val iterator = emptyList<Int>().iterator()
+
+            lazyChunkedSeq(iterator) shouldBeSameInstanceAs Empty
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        "when iterator is not empty, it should return a LazySeq of ChunkedSeq" {
+            val chunkSize = 32
+            val l = (0 until 100).toList()
+            val iterator = l.iterator()
+
+            val ls = lazyChunkedSeq(iterator) as LazySeq<Int>
+            val chunkedSeq = ls.f!!() as ChunkedSeq<Int>
+            val restChunks = chunkedSeq.restChunks() as LazySeq<Int>
+            val chunkedSeq2 = restChunks.f!!() as ChunkedSeq<Int>
+
+            chunkedSeq.count shouldBeExactly 68
+            chunkedSeq.firstChunk().count shouldBeExactly chunkSize
+            chunkedSeq.first() shouldBeExactly 0
+
+            chunkedSeq2.count shouldBeExactly 33
+            chunkedSeq2.firstChunk().count shouldBeExactly chunkSize
+            chunkedSeq2.first() shouldBeExactly 32
+        }
+    }
+
     "toSeq(x)" - {
         "when x is null, it should return null" {
             toSeq<Int>(null).shouldBeNull()
         }
 
         "ASeq" {
-            val x: Any = Cons(1, PersistentList.Empty)
+            val x: Any = Cons(1, Empty)
 
             val seq = toSeq<Int>(x) as ISeq<Int>
 
@@ -120,6 +152,15 @@ class UtilTest : FreeSpec({
             val seq = toSeq<Int>(x) as ISeq<Int>
 
             seq.first() shouldBeExactly 1
+        }
+
+        "Iterable<*>" {
+            val x = listOf(1, 2, 3, 5)
+
+            val seq = toSeq<Int>(x) as ISeq<Int>
+
+            seq.first() shouldBeExactly x[0]
+            seq.count shouldBeExactly x.size
         }
 
         "not supported" {

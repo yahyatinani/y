@@ -1,12 +1,18 @@
 package com.github.whyrising.y.util
 
+import com.github.whyrising.y.ArrayChunk
+import com.github.whyrising.y.concretions.list.ChunkedSeq
+import com.github.whyrising.y.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.core.IHashEq
 import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.seq.LazySeq
 import com.github.whyrising.y.seq.Seqable
+import com.github.whyrising.y.seq.Sequential
 
 internal const val INIT_HASH_CODE = 0
 internal const val HASH_PRIME = 31
+internal const val CHUNK_SIZE = 32
 
 enum class Category {
     INTEGER,
@@ -53,11 +59,30 @@ fun <E> equiv(e1: E, e2: Any?): Boolean = when {
     }
 }
 
+fun <E> lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> {
+    if (iterator.hasNext()) {
+        return LazySeq {
+            val array = arrayOfNulls<Any?>(CHUNK_SIZE)
+
+            var i = 0
+            while (iterator.hasNext() && i < CHUNK_SIZE)
+                array[i++] = iterator.next()
+
+            return@LazySeq ChunkedSeq(
+                ArrayChunk(array, 0, i),
+                lazyChunkedSeq(iterator)
+            )
+        }
+    }
+    return Empty
+}
+
 @Suppress("UNCHECKED_CAST")
 fun <E> toSeq(x: Any?): ISeq<E>? = when (x) {
     null -> null
     is ISeq<*> -> x as ISeq<E>
     is Seqable<*> -> x.seq() as ISeq<E>
+    is Iterable<*> -> lazyChunkedSeq(x.iterator() as Iterator<E>)
     else -> throw IllegalArgumentException(
         "Don't know how to create ISeq from: ${x::class.simpleName}"
     )
@@ -107,4 +132,19 @@ fun hasheq(x: Any?): Int = when (x) {
     is String -> Murmur3.hashInt(x.hashCode())
     is Number -> hashNumber(x)
     else -> x.hashCode()
+}
+
+fun <E> nth(seq: Sequential, index: Int): E {
+    val s = toSeq<E>(seq)
+
+    if (index >= s!!.count || index < 0)
+        throw IndexOutOfBoundsException("index = $index")
+
+    tailrec fun get(_index: Int, e: E, rest: ISeq<E>): E {
+        if (_index == index) return e
+
+        return get(_index.inc(), rest.first(), rest.rest())
+    }
+
+    return get(0, s.first(), s.rest())
 }

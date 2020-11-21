@@ -10,6 +10,7 @@ import com.github.whyrising.y.util.HASH_PRIME
 import com.github.whyrising.y.util.INIT_HASH_CODE
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.equiv
+import com.github.whyrising.y.util.nth
 import com.github.whyrising.y.util.toSeq
 
 abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
@@ -138,18 +139,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
             acc && contains(e)
         }
 
-    override fun get(index: Int): E {
-        if (index >= count || index < 0)
-            throw IndexOutOfBoundsException("index = $index")
-
-        tailrec fun get(_index: Int, e: E, rest: ISeq<E>): E {
-            if (_index == index) return e
-
-            return get(_index.inc(), rest.first(), rest.rest())
-        }
-
-        return get(0, first(), rest())
-    }
+    override fun get(index: Int): E = nth(this, index)
 
     override fun indexOf(element: @UnsafeVariance E): Int {
         for ((index, n) in this.withIndex())
