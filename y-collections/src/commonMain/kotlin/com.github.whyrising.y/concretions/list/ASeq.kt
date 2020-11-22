@@ -27,41 +27,23 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
         other: Any?,
         areEqual: (e1: E, e2: Any?) -> Boolean
     ): Boolean {
-        // TODO : Refactor after implementing the LazySeq
         when {
-            other == null -> return false
             this === other -> return true
-            other is List<*> -> {
-                if (count != other.size)
-                    return false
-
-                val otherIter = (other as Iterable<*>).iterator()
-                val thisIter = this.iterator()
-
-                while (thisIter.hasNext() && otherIter.hasNext()) {
-                    if (!areEqual(thisIter.next(), otherIter.next()))
-                        return false
-                }
-
-                return !otherIter.hasNext()
-            }
-            other is Sequential -> {
-                var seq = seq()
+            other !is List<*> && other !is Sequential -> return false
+            else -> {
+                var thisSeq = seq()
                 var otherSeq = toSeq<E>(other) as ISeq<E>
-
-                var i = 0
-                while (i < count) {
-                    if (!areEqual(seq.first(), otherSeq.first()))
+                while (thisSeq !is Empty) {
+                    if (otherSeq is Empty ||
+                        !areEqual(thisSeq.first(), otherSeq.first()))
                         return false
 
-                    i++
-                    seq = seq.rest()
+                    thisSeq = thisSeq.rest()
                     otherSeq = otherSeq.rest()
                 }
 
-                return otherSeq == empty()
+                return otherSeq is Empty
             }
-            else -> return false
         }
     }
 

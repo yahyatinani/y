@@ -103,6 +103,16 @@ class PersistentListTest : FreeSpec({
         "equals(x)" {
             val l = l(1, 2, 3)
 
+            l.equals(null).shouldBeFalse()
+
+            (l == l).shouldBeTrue()
+
+            (l == mapOf(1 to 2)).shouldBeFalse()
+
+            (l == MockSeq(v(1, 2, 3))).shouldBeTrue()
+
+            (l == listOf(1, 2, 3, 4)).shouldBeFalse()
+
             (l<Int>() == listOf<Int>()).shouldBeTrue()
 
             l.equals(null).shouldBeFalse()
