@@ -1,9 +1,11 @@
 package com.github.whyrising.y.vector
 
+import com.github.whyrising.y.ArrayChunk
 import com.github.whyrising.y.concretions.list.PersistentList
 import com.github.whyrising.y.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.concretions.list.l
 import com.github.whyrising.y.concretions.vector.PersistentVector
+import com.github.whyrising.y.concretions.vector.PersistentVector.ChunkedSeq
 import com.github.whyrising.y.concretions.vector.PersistentVector.EmptyVector
 import com.github.whyrising.y.concretions.vector.PersistentVector.Node
 import com.github.whyrising.y.concretions.vector.PersistentVector.Node.EmptyNode
@@ -21,7 +23,6 @@ import com.github.whyrising.y.util.INIT_HASH_CODE
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.hasheq
 import com.github.whyrising.y.vector.APersistentVector.RSeq
-import com.github.whyrising.y.vector.APersistentVector.Seq
 import com.github.whyrising.y.vector.APersistentVector.SubVector
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -399,21 +400,15 @@ class PersistentVectorTest : FreeSpec({
                 emptyVec.seq() shouldBeSameInstanceAs Empty
             }
 
-            "when called on a filled vector, it should return a Seq instance" {
+            "when called on a filled vector, it should return a ChunkedSeq" {
                 val vec = v(1, 2, 3)
 
-                val seq = vec.seq() as Seq<Int>
-                val rest = seq.rest() as Seq<Int>
+                val chunkedSeq = vec.seq() as ChunkedSeq<Int>
 
-                seq.shouldNotBeNull()
-                seq.count shouldBeExactly 3
-                seq.first() shouldBeExactly 1
-                seq.index shouldBeExactly 0
-
-                rest.count shouldBeExactly 2
-                rest.index shouldBeExactly 1
-                rest.rest().first() shouldBeExactly 3
-                rest.rest().rest() shouldBeSameInstanceAs Empty
+                chunkedSeq.vector shouldBeSameInstanceAs vec
+                chunkedSeq.index shouldBeExactly 0
+                chunkedSeq.offset shouldBeExactly 0
+                chunkedSeq.node shouldBeSameInstanceAs vec.leafArrayBy(0)
             }
         }
 
@@ -766,6 +761,86 @@ class PersistentVectorTest : FreeSpec({
 
             r.count shouldBeExactly vec.count + 1
             r.nth(4) shouldBeExactly 5
+        }
+
+        "ChunkedSeq" - {
+            "firstChunk()" {
+                val vec = v(1, 2, 3)
+                val chunkedSeq = ChunkedSeq(vec, 0, 0)
+                val node = vec.leafArrayBy(0)
+
+                val firstChunk = chunkedSeq.firstChunk() as ArrayChunk
+
+                firstChunk.array shouldBeSameInstanceAs node
+                firstChunk.start shouldBeExactly chunkedSeq.offset
+                firstChunk.end shouldBeExactly node.size
+            }
+
+            "restChunks()" {
+                val index = 0
+                val offset = 0
+                val vec = v(*(0..45).toList().toTypedArray())
+                val chunkedSeq = ChunkedSeq(vec, index, offset)
+                val node = vec.leafArrayBy(0)
+
+                val restChunks = chunkedSeq.restChunks() as ChunkedSeq<Int>
+
+                restChunks.vector shouldBeSameInstanceAs vec
+                restChunks.index shouldBeExactly index + node.size
+                restChunks.offset shouldBeExactly offset
+
+                restChunks.restChunks() shouldBeSameInstanceAs Empty
+            }
+
+            "first()" {
+                val vec = v(*(0..45).toList().toTypedArray())
+                val chunkedSeq = ChunkedSeq(vec, 0, 0)
+
+                chunkedSeq.first() shouldBeExactly 0
+                chunkedSeq.restChunks().first() shouldBeExactly 32
+            }
+
+            "rest()" {
+                val vec = v(*(0..45).toList().toTypedArray())
+                val chunkedSeq = ChunkedSeq(vec, 0, 0)
+
+                val rest = chunkedSeq.rest() as ChunkedSeq<Int>
+                var nextChunk = rest
+                var i = 1
+                while (i <= 31) {
+                    nextChunk = nextChunk.rest() as ChunkedSeq<Int>
+                    i++
+                }
+
+                rest.first() shouldBeExactly 1
+                rest.vector shouldBeSameInstanceAs vec
+                rest.node shouldBeSameInstanceAs chunkedSeq.node
+                rest.index shouldBeExactly chunkedSeq.index
+                rest.offset shouldBeExactly chunkedSeq.offset + 1
+
+                nextChunk.first() shouldBeExactly 32
+                nextChunk.vector shouldBeSameInstanceAs vec
+                nextChunk.index shouldBeExactly rest.index + rest.node.size
+                nextChunk.node shouldBeSameInstanceAs vec.leafArrayBy(nextChunk.index)
+                nextChunk.offset shouldBeExactly 0
+            }
+
+            "count" {
+                val vec = v(*(0..45).toList().toTypedArray())
+                val chunkedSeq = ChunkedSeq(vec, 0, 0)
+
+                val rest = chunkedSeq.rest() as ChunkedSeq<Int>
+                var nextChunk = rest
+                var i = 1
+                while (i <= 31) {
+                    nextChunk = nextChunk.rest() as ChunkedSeq<Int>
+                    i++
+                }
+
+                rest.count shouldBeExactly vec.size - 1
+
+                nextChunk.count shouldBeExactly 14
+            }
         }
 
         "List implementation" - {

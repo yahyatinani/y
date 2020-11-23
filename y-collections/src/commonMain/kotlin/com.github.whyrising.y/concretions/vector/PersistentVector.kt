@@ -1,11 +1,17 @@
 package com.github.whyrising.y.concretions.vector
 
+import com.github.whyrising.y.ArrayChunk
+import com.github.whyrising.y.Chunk
+import com.github.whyrising.y.concretions.list.ASeq
+import com.github.whyrising.y.concretions.list.PersistentList
 import com.github.whyrising.y.concretions.vector.PersistentVector.EmptyVector
 import com.github.whyrising.y.concretions.vector.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.core.InstaCount
 import com.github.whyrising.y.mutable.collection.IMutableCollection
 import com.github.whyrising.y.mutable.collection.ITransientCollection
+import com.github.whyrising.y.seq.IChunkedSeq
 import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.vector.APersistentVector
 import com.github.whyrising.y.vector.IPersistentVector
 import kotlinx.atomicfu.AtomicBoolean
@@ -125,9 +131,9 @@ sealed class PersistentVector<out E>(
     override fun empty(): IPersistentCollection<E> = EmptyVector
 
     @Suppress("UNCHECKED_CAST")
-    private fun leafArrayBy(index: Int): Array<E> = when {
+    internal fun leafArrayBy(index: Int): Array<Any?> = when {
         indexOutOfBounds(index) -> throw IndexOutOfBoundsException()
-        index >= tailOffset(count) -> tail as Array<E>
+        index >= tailOffset(count) -> tail
         else -> {
             var level = shift
             var node = root
@@ -137,14 +143,17 @@ sealed class PersistentVector<out E>(
                 level -= SHIFT
             }
 
-            node.array as Array<E>
+            val value = node.array
+
+            value
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun nth(index: Int): E {
         val leaf = leafArrayBy(index)
 
-        return leaf[index and 0x01f]
+        return leaf[index and 0x01f] as E
     }
 
     override fun asTransient(): TransientVector<E> = TransientVector(this)
@@ -199,7 +208,7 @@ sealed class PersistentVector<out E>(
                 newShift -= SHIFT
             }
 
-            Vector(count - 1, newShift, newRoot, newTail as Array<Any?>)
+            Vector(count - 1, newShift, newRoot, newTail)
         }
     }
 
@@ -209,7 +218,7 @@ sealed class PersistentVector<out E>(
             var i = start
             var base = i - (i % BF)
             var array: Array<Any?>? = when {
-                start < count -> leafArrayBy(i) as Array<Any?>
+                start < count -> leafArrayBy(i)
                 else -> null
             }
 
@@ -218,7 +227,7 @@ sealed class PersistentVector<out E>(
             override fun next(): E = when {
                 hasNext() -> {
                     if (i - base == BF) {
-                        array = leafArrayBy(i) as Array<Any?>
+                        array = leafArrayBy(i)
                         base += BF
                     }
 
@@ -229,6 +238,11 @@ sealed class PersistentVector<out E>(
         }
 
     override fun iterator(): Iterator<E> = rangedIterator(0, count)
+
+    override fun seq(): ISeq<E> = when (count) {
+        0 -> Seq.emptySeq()
+        else -> ChunkedSeq(this, 0, 0)
+    }
 
     sealed class Node<out T>(
         val isMutable: AtomicBoolean,
@@ -268,6 +282,43 @@ sealed class PersistentVector<out E>(
         _root: Node<E>,
         _tail: Array<Any?>
     ) : PersistentVector<E>(_count, _shift, _root, _tail)
+
+    internal class ChunkedSeq<out E>(
+        val vector: PersistentVector<E>,
+        val index: Int,
+        val offset: Int,
+        val node: Array<Any?> = vector.leafArrayBy(index)
+    ) : ASeq<E>(), IChunkedSeq<E>, InstaCount {
+        constructor(
+            vector: PersistentVector<E>,
+            node: Array<Any?>,
+            index: Int,
+            offset: Int
+        ) : this(vector, index, offset, node)
+
+        @Suppress("UNCHECKED_CAST")
+        override fun firstChunk(): Chunk<E> =
+            ArrayChunk(node as Array<E>, offset)
+
+        override fun restChunks(): ISeq<E> = when {
+            index + node.size < vector.size ->
+                ChunkedSeq(vector, index + node.size, 0)
+            else -> PersistentList.Empty
+        }
+
+        override val count: Int
+            get() = vector.count - (index + offset)
+
+        @Suppress("UNCHECKED_CAST")
+        override fun first(): E = node[offset] as E
+
+        override fun rest(): ISeq<E> = (offset + 1).let {
+            when {
+                it < node.size -> ChunkedSeq(vector, node, index, it)
+                else -> restChunks()
+            }
+        }
+    }
 
     class TransientVector<out E> private constructor(
         size: Int,
@@ -462,5 +513,4 @@ fun <E> v(): PersistentVector<E> = EmptyVector
 
 fun <E> v(vararg elements: E): PersistentVector<E> = PersistentVector(*elements)
 
-fun <E> List<E>.toPvector(): PersistentVector<E> =
-    PersistentVector.create(this)
+fun <E> List<E>.toPvector(): PersistentVector<E> = PersistentVector.create(this)
