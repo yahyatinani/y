@@ -148,3 +148,6 @@ fun <E> nth(seq: Sequential, index: Int): E {
 
     return get(0, s.first(), s.rest())
 }
+
+fun hashCombine(seed: Int, hash: Int): Int =
+    seed xor hash + -0x61c88647 + (seed shl 6) + (seed shr 2)
