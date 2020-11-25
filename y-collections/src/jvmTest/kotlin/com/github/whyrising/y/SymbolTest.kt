@@ -79,7 +79,7 @@ class SymbolTest : FreeSpec({
     }
 
     "invoke(map, default)" {
-        val map1 = m(Symbol("A") to 1, Symbol("B") to 2)
+        val map1 = m(Symbol("A") to 1, Symbol("B") to 2, "c" to 3)
         val map2 = mapOf(Symbol("A") to 1, Symbol("B") to 2)
 
         Symbol("A")(map1, -1)!! shouldBeExactly 1
@@ -89,6 +89,7 @@ class SymbolTest : FreeSpec({
         Symbol("A")(map2, -1)!! shouldBeExactly 1
         Symbol("B")(map2, -1)!! shouldBeExactly 2
         Symbol("Z")(map2, null).shouldBeNull()
+        Symbol("c")(map2, -1)!! shouldBeExactly -1
     }
 
     "s(name:String)" {
