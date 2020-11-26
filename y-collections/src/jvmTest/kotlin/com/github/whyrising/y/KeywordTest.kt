@@ -12,24 +12,20 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 @ExperimentalStdlibApi
 class KeywordTest : FreeSpec({
     "ctor" {
-        val s = s("a")
+        val key = Keyword("a")
 
-        val key = Keyword(s)
-
-        key.symbol shouldBeSameInstanceAs s
-        key.hasheq shouldBeExactly s.hasheq() + -0x61c88647
+        key.symbol shouldBe Symbol("a")
+        key.hasheq shouldBeExactly Symbol("a").hasheq() + -0x61c88647
     }
 
     "hasheq()" {
-        val s = s("a")
-
-        val key = Keyword(s)
+        val key = Keyword("a")
 
         key.hasheq() shouldBeExactly key.hasheq
     }
 
     "toString()" {
-        val ka = Keyword(s("a"))
+        val ka = Keyword("a")
 
         ka.print shouldBe ""
 
@@ -38,60 +34,63 @@ class KeywordTest : FreeSpec({
     }
 
     "hashCode()" {
-        val s = s("a")
-        val key = Keyword(s)
+        val key = Keyword("a")
 
-        key.hashCode() shouldBeExactly s.hashCode() + -0x61c88647
+        key.hashCode() shouldBeExactly s("a").hashCode() + -0x61c88647
     }
 
     "equals(other)" {
-        val key = Keyword(s("a"))
+        val key = Keyword("a")
         (key == key).shouldBeTrue()
 
         (key.equals("A")).shouldBeFalse()
 
-        (Keyword(s("a")) == Keyword(s("a"))).shouldBeTrue()
+        (Keyword("a") == Keyword("a")).shouldBeTrue()
 
-        (Keyword(s("a")) == Keyword(s("b"))).shouldBeFalse()
+        (Keyword("a") == Keyword("b")).shouldBeFalse()
     }
 
     "compareTo(other)" {
-        val key = Keyword(s("a"))
+        val key = Keyword("a")
 
         key.compareTo(key) shouldBeExactly 0
 
-        (Keyword(s("a")).compareTo(Keyword(s("a")))) shouldBeExactly 0
+        (Keyword("a").compareTo(Keyword("a"))) shouldBeExactly 0
 
-        (Keyword(s("a")).compareTo(Keyword(s("b")))) shouldBeExactly -1
+        (Keyword("a").compareTo(Keyword("b"))) shouldBeExactly -1
 
-        (Keyword(s("b")).compareTo(Keyword(s("a")))) shouldBeExactly 1
+        (Keyword("b").compareTo(Keyword("a"))) shouldBeExactly 1
     }
 
     "name" {
-        val key = Keyword(s("a"))
+        val key = Keyword("a")
 
         key.name shouldBe "a"
     }
 
     "invoke(map)" {
-        val map = m(Keyword(s("a")) to 1, Keyword(s("b")) to 2)
+        val map = m(Keyword("a") to 1, Keyword("b") to 2)
 
-        Keyword(s("a"))(map)!! shouldBeExactly 1
-        Keyword(s("b"))(map)!! shouldBeExactly 2
-        Keyword(s("z"))(map).shouldBeNull()
+        Keyword("a")(map)!! shouldBeExactly 1
+        Keyword("b")(map)!! shouldBeExactly 2
+        Keyword("z")(map).shouldBeNull()
     }
 
     "invoke(map, default)" {
-        val map1 = m(Keyword(s("a")) to 1, Keyword(s("b")) to 2)
-        val map2 = mapOf(Keyword(s("a")) to 1, Keyword(s("b")) to 2)
+        val map1 = m(Keyword("a") to 1, Keyword("b") to 2)
+        val map2 = mapOf(Keyword("a") to 1, Keyword("b") to 2)
 
-        Keyword(s("a"))(map1, -1)!! shouldBeExactly 1
-        Keyword(s("b"))(map1, -1)!! shouldBeExactly 2
-        Keyword(s("z"))(map1, null).shouldBeNull()
+        Keyword("a")(map1, -1)!! shouldBeExactly 1
+        Keyword("b")(map1, -1)!! shouldBeExactly 2
+        Keyword("z")(map1, null).shouldBeNull()
 
-        Keyword(s("a"))(map2, -1)!! shouldBeExactly 1
-        Keyword(s("b"))(map2, -1)!! shouldBeExactly 2
-        Keyword(s("z"))(map2, null).shouldBeNull()
-        Keyword(s("x"))(map2, -1)!! shouldBeExactly -1
+        Keyword("a")(map2, -1)!! shouldBeExactly 1
+        Keyword("b")(map2, -1)!! shouldBeExactly 2
+        Keyword("z")(map2, null).shouldBeNull()
+        Keyword("x")(map2, -1)!! shouldBeExactly -1
+    }
+
+    "assert same key instance" {
+        Keyword("a") shouldBeSameInstanceAs Keyword("a")
     }
 })
