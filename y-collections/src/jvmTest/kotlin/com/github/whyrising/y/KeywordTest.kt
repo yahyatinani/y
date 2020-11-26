@@ -8,9 +8,19 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.system.measureTimeMillis
 
 @ExperimentalStdlibApi
 class KeywordTest : FreeSpec({
+    beforeTest {
+        Keyword.cache.clear()
+    }
+
     "ctor" {
         val key = Keyword("a")
 
@@ -92,5 +102,32 @@ class KeywordTest : FreeSpec({
 
     "assert same key instance" {
         Keyword("a") shouldBeSameInstanceAs Keyword("a")
+    }
+
+    suspend fun massiveRun2(action: suspend () -> Unit) {
+        val n = 100  // number of coroutines to launch
+        val k = 10000 // times an action is repeated by each coroutine
+        val time = measureTimeMillis {
+            coroutineScope { // scope for coroutines
+                repeat(n) {
+                    launch {
+                        repeat(k) { action() }
+                    }
+                }
+            }
+        }
+        println("Completed ${n * k} actions in $time ms")
+    }
+
+    "concurrency" {
+        val counter = atomic(0)
+
+        withContext(Dispatchers.Default) {
+            massiveRun2 {
+                Keyword("${counter.incrementAndGet()}")
+            }
+        }
+
+        Keyword.cache.size shouldBeExactly 1000000
     }
 })

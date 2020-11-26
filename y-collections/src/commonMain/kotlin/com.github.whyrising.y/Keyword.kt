@@ -2,6 +2,8 @@ package com.github.whyrising.y
 
 import com.github.whyrising.y.core.IHashEq
 import com.github.whyrising.y.util.getValue
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.withLock
 
 const val MAGIC = -0x61c88647
 
@@ -39,7 +41,8 @@ class Keyword private constructor(
         getValue(this, map, default)
 
     companion object {
-        private val cache: HashMap<Symbol, Keyword> = hashMapOf()
+        private val lock = reentrantLock()
+        internal val cache = hashMapOf<Symbol, Keyword>()
 
         operator fun invoke(sym: Symbol): Keyword {
             val keyword: Keyword?
@@ -47,12 +50,13 @@ class Keyword private constructor(
 
             if (existingKey == null) {
                 keyword = Keyword(sym)
-                existingKey = cache.put(sym, keyword)
+
+                lock.withLock { existingKey = cache.put(sym, keyword) }
 
                 if (existingKey == null) return keyword
             }
 
-            return existingKey
+            return existingKey!!
         }
 
         operator fun invoke(name: String): Keyword = invoke(Symbol(name))
