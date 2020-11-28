@@ -7,6 +7,11 @@ import kotlinx.atomicfu.locks.withLock
 
 const val MAGIC = -0x61c88647
 
+private val lock = reentrantLock()
+private val cache = hashMapOf<Symbol, Ref<Keyword>>()
+
+internal fun keywordsCache(): Map<Symbol, Ref<Keyword>> = cache
+
 class Keyword private constructor(
     internal val symbol: Symbol
 ) : Named, Comparable<Keyword>, IHashEq {
@@ -15,7 +20,7 @@ class Keyword private constructor(
         private set
 
     @ExperimentalStdlibApi
-    val hasheq: Int = symbol.hasheq() + MAGIC
+    internal val hashEq: Int = symbol.hasheq() + MAGIC
 
     override val name: String = symbol.name
 
@@ -25,7 +30,7 @@ class Keyword private constructor(
     }
 
     @ExperimentalStdlibApi
-    override fun hasheq(): Int = hasheq
+    override fun hasheq(): Int = hashEq
 
     override fun hashCode(): Int = symbol.hashCode() + MAGIC
 
@@ -41,22 +46,30 @@ class Keyword private constructor(
         getValue(this, map, default)
 
     companion object {
-        private val lock = reentrantLock()
-        internal val cache = hashMapOf<Symbol, Keyword>()
-
         operator fun invoke(sym: Symbol): Keyword {
             val keyword: Keyword?
-            var existingKey = cache[sym]
+            var existingRef = cache[sym]
 
-            if (existingKey == null) {
+            if (existingRef == null) {
                 keyword = Keyword(sym)
 
-                lock.withLock { existingKey = cache.put(sym, keyword) }
+                lock.withLock {
+                    existingRef = cache.put(sym, RefFactory.create(keyword))
+                }
 
-                if (existingKey == null) return keyword
+                if (existingRef == null) return keyword
             }
 
-            return existingKey!!
+            val existingKey = existingRef!!.value
+
+            if (existingKey != null) return existingKey
+
+            lock.withLock {
+                // if key got garbage collected, remove from cache
+                cache.remove(sym)
+            }
+
+            return invoke(sym)
         }
 
         operator fun invoke(name: String): Keyword = invoke(Symbol(name))

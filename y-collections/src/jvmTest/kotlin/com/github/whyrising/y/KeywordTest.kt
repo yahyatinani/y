@@ -13,25 +13,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.system.measureTimeMillis
 
 @ExperimentalStdlibApi
 class KeywordTest : FreeSpec({
     beforeTest {
-        Keyword.cache.clear()
+        (keywordsCache() as HashMap<Symbol, Ref<Keyword>>).clear()
     }
 
     "ctor" {
         val key = Keyword("a")
 
         key.symbol shouldBe Symbol("a")
-        key.hasheq shouldBeExactly Symbol("a").hasheq() + -0x61c88647
+        key.hashEq shouldBeExactly Symbol("a").hasheq() + -0x61c88647
     }
 
     "hasheq()" {
         val key = Keyword("a")
 
-        key.hasheq() shouldBeExactly key.hasheq
+        key.hasheq() shouldBeExactly key.hashEq
     }
 
     "toString()" {
@@ -104,21 +103,6 @@ class KeywordTest : FreeSpec({
         Keyword("a") shouldBeSameInstanceAs Keyword("a")
     }
 
-    suspend fun massiveRun2(action: suspend () -> Unit) {
-        val n = 100  // number of coroutines to launch
-        val k = 10000 // times an action is repeated by each coroutine
-        val time = measureTimeMillis {
-            coroutineScope { // scope for coroutines
-                repeat(n) {
-                    launch {
-                        repeat(k) { action() }
-                    }
-                }
-            }
-        }
-        println("Completed ${n * k} actions in $time ms")
-    }
-
     "concurrency" {
         val counter = atomic(0)
 
@@ -128,6 +112,33 @@ class KeywordTest : FreeSpec({
             }
         }
 
-        Keyword.cache.size shouldBeExactly 1000000
+        counter.getAndSet(0)
+        System.gc()
+
+        withContext(Dispatchers.Default) {
+            massiveRun2 {
+                Keyword("${counter.incrementAndGet()}")
+            }
+        }
+
+        keywordsCache().size shouldBeExactly 100000
+    }
+
+    "when gc collected a keyword, it should remove it from the cache" {
+        Keyword("a")
+
+        System.gc()
+
+        Keyword("a")
     }
 })
+
+private suspend fun massiveRun2(action: suspend () -> Unit) {
+    val n = 100  // number of coroutines to launch
+    val times = 1000 // times an action is repeated by each coroutine
+    coroutineScope { // scope for coroutines
+        repeat(n) {
+            launch { repeat(times) { action() } }
+        }
+    }
+}

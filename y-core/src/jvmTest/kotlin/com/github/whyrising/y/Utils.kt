@@ -20,7 +20,7 @@ fun <A> Arb.Companion.nil(): Arb<A?> = arb(
     listOf(null)
 ) { null }
 
-fun Arb.Companion.`string?`(
+fun Arb.Companion.stringUnull(
     minSize: Int = 0,
     maxSize: Int = 100,
     codepoints: Arb<Codepoint> = Arb.ascii()
@@ -35,7 +35,7 @@ class TestUtilsTest : FreeSpec({
     }
 
     "Arb string? generator should generate at least 1 null" {
-        Arb.`string?`().edgecases() shouldContain null
+        Arb.stringUnull().edgecases() shouldContain null
     }
 })
 

@@ -205,7 +205,7 @@ class CoreTest : FreeSpec({
         }
 
         "when passing 1 arg, it returns the string value of the arg" {
-            checkAll(Arb.`string?`()) { a: String? ->
+            checkAll(Arb.stringUnull()) { a: String? ->
                 val expected: String = when (a) {
                     null -> ""
                     else -> a.toString()
@@ -218,7 +218,7 @@ class CoreTest : FreeSpec({
         }
 
         "when passing 2 args, it returns the string concatenation of the two" {
-            checkAll(Arb.`string?`(), Arb.`string?`())
+            checkAll(Arb.stringUnull(), Arb.stringUnull())
             { a: String?, b: String? ->
                 val expected: String = when (a) {
                     null -> ""
@@ -238,9 +238,9 @@ class CoreTest : FreeSpec({
 
         "when passing 3 args, it returns the string concatenation of the args" {
             checkAll(
-                Arb.`string?`(),
-                Arb.`string?`(),
-                Arb.`string?`()
+                Arb.stringUnull(),
+                Arb.stringUnull(),
+                Arb.stringUnull()
             ) { a: String?, b: String?, c: String? ->
                 val expected: String = when (a) {
                     null -> ""
@@ -265,10 +265,10 @@ class CoreTest : FreeSpec({
 
         "when passing vararg it returns the string concatenation of all args" {
             checkAll(
-                Arb.`string?`(),
-                Arb.`string?`(),
-                Arb.`string?`(),
-                Arb.list(Arb.`string?`())
+                Arb.stringUnull(),
+                Arb.stringUnull(),
+                Arb.stringUnull(),
+                Arb.list(Arb.stringUnull())
             ) { a: String?, b: String?, c: String?, list: List<String?> ->
                 val expected: String = when (a) {
                     null -> ""

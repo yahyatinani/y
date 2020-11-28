@@ -21,23 +21,23 @@ class LazySeq<out E>(
     internal var seq: ISeq<@UnsafeVariance E>
         private set
 
-    internal var seqVal: Any?
+    internal var sVal: Any?
         private set
 
     init {
         f = _f
         seq = Empty
-        seqVal = null
+        sVal = null
     }
 
     internal fun seqVal(): Any? {
         synchronized(this) {
             if (f != null) {
-                seqVal = f?.invoke()
+                sVal = f?.invoke()
                 f = null
             }
 
-            if (seqVal != null) return seqVal
+            if (sVal != null) return sVal
 
             return seq
         }
@@ -46,9 +46,9 @@ class LazySeq<out E>(
     override fun seq(): ISeq<E> {
         synchronized(this) {
             seqVal()
-            if (seqVal != null) {
-                var lazySeq = seqVal
-                seqVal = null
+            if (sVal != null) {
+                var lazySeq = sVal
+                sVal = null
 
                 while (lazySeq is LazySeq<*>) lazySeq = lazySeq.seqVal()
 

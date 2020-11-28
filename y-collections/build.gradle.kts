@@ -8,6 +8,8 @@ repositories {
     mavenCentral()
 }
 
+val ideaActive = System.getProperty("idea.active") == "true"
+
 kotlin {
     targets {
         jvm {
@@ -18,21 +20,19 @@ kotlin {
             }
         }
 
-        js {
-            browser()
-            nodejs()
+        if (ideaActive)
+            macosX64("nativeCommon")
+        else {
+            linuxX64()
+            mingwX64()
+
+            macosX64()
+            tvos()
+            watchos()
+            iosX64()
+            iosArm64()
+            iosArm32()
         }
-
-        linuxX64()
-
-        mingwX64()
-
-        macosX64()
-        tvos()
-        watchos()
-        iosX64()
-        iosArm64()
-        iosArm32()
     }
 
     targets.all {
@@ -59,6 +59,46 @@ kotlin {
                 implementation(Libs.Kotest.propertyTest)
                 implementation(Libs.Kotlinx.serialJson)
                 implementation(Libs.Kotlinx.coroutines)
+            }
+        }
+
+        val nativeCommonMain by getting {
+            dependsOn(commonMain)
+        }
+
+        val nativeCommonTest by getting
+
+        if (!ideaActive) {
+            val linuxX64Main by sourceSets.getting
+            val mingwX64Main by sourceSets.getting
+
+            val tvosArm64Main by sourceSets.getting
+            val tvosX64Main by sourceSets.getting
+
+            val watchosArm32Main by sourceSets.getting
+            val watchosArm64Main by sourceSets.getting
+            val watchosX86Main by sourceSets.getting
+
+            val macosX64Main by sourceSets.getting
+
+            val iosArm32Main by sourceSets.getting
+            val iosArm64Main by sourceSets.getting
+            val iosX64Main by sourceSets.getting
+
+            configure(listOf(
+                linuxX64Main,
+                mingwX64Main,
+                tvosArm64Main,
+                tvosX64Main,
+                watchosArm32Main,
+                watchosArm64Main,
+                watchosX86Main,
+                macosX64Main,
+                iosX64Main,
+                iosArm64Main,
+                iosArm32Main
+            )) {
+                dependsOn(nativeCommonMain)
             }
         }
     }

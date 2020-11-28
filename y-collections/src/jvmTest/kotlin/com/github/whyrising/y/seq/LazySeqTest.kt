@@ -47,7 +47,7 @@ class LazySeqTest : FreeSpec({
 
         lazySeq.f shouldBeSameInstanceAs f
         lazySeq.seq shouldBeSameInstanceAs Empty
-        lazySeq.seqVal.shouldBeNull()
+        lazySeq.sVal.shouldBeNull()
     }
 
     "seqVal()" - {
@@ -60,7 +60,7 @@ class LazySeqTest : FreeSpec({
             val seqVal = lazySeq.seqVal()
 
             seqVal shouldBeSameInstanceAs f()
-            lazySeq.seqVal shouldBeSameInstanceAs f()
+            lazySeq.sVal shouldBeSameInstanceAs f()
             lazySeq.f.shouldBeNull()
             lazySeq.seq shouldBeSameInstanceAs Empty
         }
@@ -82,7 +82,7 @@ class LazySeqTest : FreeSpec({
 
             seqVal shouldBeSameInstanceAs chunkedSeq
             lazySeq.seq shouldBeSameInstanceAs chunkedSeq
-            lazySeq.seqVal.shouldBeNull()
+            lazySeq.sVal.shouldBeNull()
             lazySeq.f.shouldBeNull()
         }
     }
@@ -103,7 +103,7 @@ class LazySeqTest : FreeSpec({
 
             seq shouldBeSameInstanceAs chunkedSeq
 
-            lazySeq.seqVal.shouldBeNull()
+            lazySeq.sVal.shouldBeNull()
             lazySeq.f.shouldBeNull()
             lazySeq.seq shouldBeSameInstanceAs chunkedSeq
         }
@@ -124,7 +124,7 @@ class LazySeqTest : FreeSpec({
 
             seq shouldBeSameInstanceAs chunkedSeq
 
-            lazySeq.seqVal.shouldBeNull()
+            lazySeq.sVal.shouldBeNull()
             lazySeq.f.shouldBeNull()
             lazySeq.seq shouldBeSameInstanceAs chunkedSeq
         }
@@ -187,7 +187,7 @@ class LazySeqTest : FreeSpec({
         val first = lazySeq.first()
 
         first shouldBeExactly 45
-        lazySeq.seqVal.shouldBeNull()
+        lazySeq.sVal.shouldBeNull()
         lazySeq.f.shouldBeNull()
         lazySeq.seq shouldBeSameInstanceAs chunkedSeq
     }
@@ -202,7 +202,7 @@ class LazySeqTest : FreeSpec({
 
         rest.count shouldBeExactly 2
         rest.first() shouldBeExactly 89
-        lazySeq.seqVal.shouldBeNull()
+        lazySeq.sVal.shouldBeNull()
         lazySeq.f.shouldBeNull()
         lazySeq.seq shouldBeSameInstanceAs chunkedSeq
 
@@ -219,7 +219,7 @@ class LazySeqTest : FreeSpec({
         LazySeq<Int> { null }.equiv(emptyList<Int>()).shouldBeTrue()
         LazySeq<Int> { null }.equiv(MockSeq<Int>(v())).shouldBeTrue()
 
-        lazySeq.seqVal.shouldBeNull()
+        lazySeq.sVal.shouldBeNull()
         lazySeq.f.shouldBeNull()
         lazySeq.seq shouldBeSameInstanceAs chunkedSeq
     }
@@ -233,7 +233,7 @@ class LazySeqTest : FreeSpec({
         LazySeq<Int> { null }.hashCode() shouldBeExactly Empty.hashCode
         lazySeq.hashCode() shouldBeExactly chunkedSeq.hashCode()
 
-        lazySeq.seqVal.shouldBeNull()
+        lazySeq.sVal.shouldBeNull()
         lazySeq.f.shouldBeNull()
         lazySeq.seq shouldBeSameInstanceAs chunkedSeq
     }
@@ -248,7 +248,7 @@ class LazySeqTest : FreeSpec({
         (LazySeq<Int> { null } == emptyList<Int>()).shouldBeTrue()
         LazySeq<Int> { null }.equals(MockSeq<Int>(v())).shouldBeTrue()
 
-        lazySeq.seqVal.shouldBeNull()
+        lazySeq.sVal.shouldBeNull()
         lazySeq.f.shouldBeNull()
         lazySeq.seq shouldBeSameInstanceAs chunkedSeq
     }
@@ -260,7 +260,7 @@ class LazySeqTest : FreeSpec({
         val lazySeq = LazySeq<Int>(f)
 
         lazySeq.hasheq() shouldBeExactly Murmur3.hashOrdered(lazySeq)
-        lazySeq.seqVal.shouldBeNull()
+        lazySeq.sVal.shouldBeNull()
         lazySeq.f.shouldBeNull()
         lazySeq.seq shouldBeSameInstanceAs chunkedSeq
     }
@@ -317,7 +317,7 @@ class LazySeqTest : FreeSpec({
             lazySeq.isEmpty().shouldBeFalse()
             LazySeq<Int> { null }.isEmpty().shouldBeTrue()
 
-            lazySeq.seqVal.shouldBeNull()
+            lazySeq.sVal.shouldBeNull()
             lazySeq.f.shouldBeNull()
             lazySeq.seq shouldBeSameInstanceAs chunkedSeq
         }
@@ -332,7 +332,7 @@ class LazySeqTest : FreeSpec({
             lazySeq.contains(89).shouldBeTrue()
             lazySeq.contains(100).shouldBeFalse()
 
-            lazySeq.seqVal.shouldBeNull()
+            lazySeq.sVal.shouldBeNull()
             lazySeq.f.shouldBeNull()
             lazySeq.seq shouldBeSameInstanceAs chunkedSeq
         }
@@ -346,7 +346,7 @@ class LazySeqTest : FreeSpec({
             lazySeq.containsAll(listOf(45, 89L)).shouldBeTrue()
             lazySeq.containsAll(listOf(45, 70)).shouldBeFalse()
 
-            lazySeq.seqVal.shouldBeNull()
+            lazySeq.sVal.shouldBeNull()
             lazySeq.f.shouldBeNull()
             lazySeq.seq shouldBeSameInstanceAs chunkedSeq
         }
