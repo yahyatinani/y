@@ -3,12 +3,8 @@ package com.github.whyrising.y
 import kotlin.native.ref.WeakReference
 
 actual object RefFactory {
-    actual fun <T : Any> create(any: T): Ref<T> = RefImpl(any)
-}
+    actual fun <T : Any> create(any: T): Any = WeakReference(any)
 
-class RefImpl<T : Any>(any: T) : Ref<T> {
-    internal val weakReference: WeakReference<T> = WeakReference(any)
-
-    override val value: T?
-        get() = weakReference.value
+    @Suppress("UNCHECKED_CAST")
+    actual fun <T : Any> valueOf(ref: Any): T? = (ref as WeakReference<T>).value
 }

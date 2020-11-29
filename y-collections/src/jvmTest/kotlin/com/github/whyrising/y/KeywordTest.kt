@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
 @ExperimentalStdlibApi
 class KeywordTest : FreeSpec({
     beforeTest {
-        (keywordsCache() as HashMap<Symbol, Ref<Keyword>>).clear()
+        (keywordsCache() as HashMap<Symbol, Any>).clear()
     }
 
     "ctor" {

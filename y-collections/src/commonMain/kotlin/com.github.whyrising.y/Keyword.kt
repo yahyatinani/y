@@ -8,9 +8,9 @@ import kotlinx.atomicfu.locks.withLock
 const val MAGIC = -0x61c88647
 
 private val lock = reentrantLock()
-private val cache = hashMapOf<Symbol, Ref<Keyword>>()
+private val cache = hashMapOf<Symbol, Any>()
 
-internal fun keywordsCache(): Map<Symbol, Ref<Keyword>> = cache
+internal fun keywordsCache(): Map<Symbol, Any> = cache
 
 class Keyword private constructor(
     internal val symbol: Symbol
@@ -47,11 +47,10 @@ class Keyword private constructor(
 
     companion object {
         operator fun invoke(sym: Symbol): Keyword {
-            val keyword: Keyword?
             var existingRef = cache[sym]
 
             if (existingRef == null) {
-                keyword = Keyword(sym)
+                val keyword = Keyword(sym)
 
                 lock.withLock {
                     existingRef = cache.put(sym, RefFactory.create(keyword))
@@ -60,7 +59,7 @@ class Keyword private constructor(
                 if (existingRef == null) return keyword
             }
 
-            val existingKey = existingRef!!.value
+            val existingKey = RefFactory.valueOf<Keyword>(existingRef!!)
 
             if (existingKey != null) return existingKey
 
