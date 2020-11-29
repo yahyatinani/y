@@ -46,7 +46,7 @@ class Keyword private constructor(
         getValue(this, map, default)
 
     companion object {
-        operator fun invoke(sym: Symbol): Keyword {
+        internal operator fun invoke(sym: Symbol): Keyword {
             var existingRef = cache[sym]
 
             if (existingRef == null) {
@@ -71,6 +71,8 @@ class Keyword private constructor(
             return invoke(sym)
         }
 
-        operator fun invoke(name: String): Keyword = invoke(Symbol(name))
+        internal operator fun invoke(name: String) = invoke(Symbol(name))
     }
 }
+
+fun k(name: String): Keyword = Keyword.invoke(name)

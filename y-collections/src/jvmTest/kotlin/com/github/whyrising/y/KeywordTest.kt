@@ -131,6 +131,12 @@ class KeywordTest : FreeSpec({
 
         Keyword("a")
     }
+
+    "k(name)" {
+        val key = k("a")
+
+        key shouldBe Keyword("a")
+    }
 })
 
 private suspend fun massiveRun2(action: suspend () -> Unit) {
