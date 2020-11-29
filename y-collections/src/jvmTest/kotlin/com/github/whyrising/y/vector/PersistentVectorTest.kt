@@ -45,6 +45,10 @@ import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.merge
 import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -1140,7 +1144,7 @@ class PersistentVectorTest : FreeSpec({
 
         "count" - {
             """when called on a mutable transient,
-                        it should return the count of the transient vector""" {
+               it should return the count of the transient vector""" {
                 val v = PersistentVector(*(1..57).toList().toTypedArray())
                 val tv = TransientVector(v)
 
@@ -1350,6 +1354,19 @@ class PersistentVectorTest : FreeSpec({
                     mostRightLeaf.isMutable shouldBeSameInstanceAs tvIsMutable
                 }
             }
+        }
+
+        "concurrency" {
+            val v = v<Int>()
+            val transientVec = TransientVector(v)
+
+            withContext(Dispatchers.Default) {
+                massiveRun {
+                    transientVec.conj(1)
+                }
+            }
+
+            transientVec.count shouldBeExactly 100000
         }
     }
 
@@ -1681,6 +1698,16 @@ class PersistentVectorTest : FreeSpec({
 
                 index + 1
             }
+        }
+    }
+}
+
+private suspend fun massiveRun(action: suspend () -> Unit) {
+    val n = 100
+    val times = 1000
+    coroutineScope {
+        repeat(n) {
+            launch { repeat(times) { action() } }
         }
     }
 }

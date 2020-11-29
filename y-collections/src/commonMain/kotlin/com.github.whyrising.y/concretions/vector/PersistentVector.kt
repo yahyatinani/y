@@ -392,7 +392,7 @@ sealed class PersistentVector<out E>(
             // empty slot available in tail?
             if (oldCount - tailOffset(oldCount) < BF) {
                 tail[oldCount and 0x01f] = e
-                ++_count.value
+                _count.incrementAndGet()
 
                 return this
             }
@@ -415,7 +415,7 @@ sealed class PersistentVector<out E>(
 
             _root.value = newRoot
             _shift.value = newShift
-            ++_count.value
+            _count.incrementAndGet()
 
             return this
         }
@@ -427,7 +427,7 @@ sealed class PersistentVector<out E>(
             val trimmedTail =
                 arrayOfNulls<Any?>(_count.value - tailOffset(_count.value))
 
-            _tail.value.copyInto(trimmedTail, 0, 0, trimmedTail.size)
+            tail.copyInto(trimmedTail, 0, 0, trimmedTail.size)
 
             return Vector(_count.value, _shift.value, _root.value, trimmedTail)
         }
