@@ -821,7 +821,8 @@ class PersistentVectorTest : FreeSpec({
                 nextChunk.first() shouldBeExactly 32
                 nextChunk.vector shouldBeSameInstanceAs vec
                 nextChunk.index shouldBeExactly rest.index + rest.node.size
-                nextChunk.node shouldBeSameInstanceAs vec.leafArrayBy(nextChunk.index)
+                nextChunk.node shouldBeSameInstanceAs
+                    vec.leafArrayBy(nextChunk.index)
                 nextChunk.offset shouldBeExactly 0
             }
 

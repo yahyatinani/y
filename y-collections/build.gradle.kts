@@ -68,8 +68,7 @@ kotlin {
             }
 
             val nativeCommonTest by getting
-        }
-        else {
+        } else {
             val nativeCommonMain by creating {
                 dependsOn(commonMain)
             }
@@ -92,21 +91,21 @@ kotlin {
             val iosArm64Main by sourceSets.getting
             val iosX64Main by sourceSets.getting
 
-            configure(listOf(
-                linuxX64Main,
-                mingwX64Main,
-                tvosArm64Main,
-                tvosX64Main,
-                watchosArm32Main,
-                watchosArm64Main,
-                watchosX86Main,
-                macosX64Main,
-                iosX64Main,
-                iosArm64Main,
-                iosArm32Main
-            )) {
-                dependsOn(nativeCommonMain)
-            }
+            configure(
+                listOf(
+                    linuxX64Main,
+                    mingwX64Main,
+                    tvosArm64Main,
+                    tvosX64Main,
+                    watchosArm32Main,
+                    watchosArm64Main,
+                    watchosX86Main,
+                    macosX64Main,
+                    iosX64Main,
+                    iosArm64Main,
+                    iosArm32Main
+                )
+            ) { dependsOn(nativeCommonMain) }
         }
     }
 }

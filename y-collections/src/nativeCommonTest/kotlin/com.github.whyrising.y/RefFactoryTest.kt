@@ -35,7 +35,7 @@ class RefFactoryTest {
         val symbol = Symbol("a")
 
         val value = RefFactory.valueOf<Symbol>(RefFactory.create(symbol))
-        
+
         assertEquals(symbol, value)
     }
 

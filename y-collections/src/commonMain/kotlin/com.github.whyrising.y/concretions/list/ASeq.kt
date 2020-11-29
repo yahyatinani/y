@@ -35,8 +35,8 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
                 var otherSeq = toSeq<E>(other) as ISeq<E>
                 while (thisSeq !is Empty) {
                     if (otherSeq is Empty ||
-                        !areEqual(thisSeq.first(), otherSeq.first()))
-                        return false
+                        !areEqual(thisSeq.first(), otherSeq.first())
+                    ) return false
 
                     thisSeq = thisSeq.rest()
                     otherSeq = otherSeq.rest()

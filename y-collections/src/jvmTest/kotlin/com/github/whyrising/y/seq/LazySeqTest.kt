@@ -22,10 +22,10 @@ import kotlinx.coroutines.withContext
 import kotlin.system.measureTimeMillis
 
 suspend fun massiveRun(action: suspend () -> Unit) {
-    val n = 100  // number of coroutines to launch
-    val k = 10000 // times an action is repeated by each coroutine
+    val n = 100
+    val k = 10000
     val time = measureTimeMillis {
-        coroutineScope { // scope for coroutines
+        coroutineScope {
             repeat(n) {
                 launch {
                     repeat(k) { action() }
@@ -112,7 +112,9 @@ class LazySeqTest : FreeSpec({
            it finds the inner seq""" {
             val chunk = ArrayChunk(arrayOf(1, 2, 3))
             val chunkedSeq = ChunkedSeq(chunk)
-            val f: () -> ISeq<Int>? = { LazySeq { LazySeq<Int> { chunkedSeq } } }
+            val f: () -> ISeq<Int>? = {
+                LazySeq { LazySeq<Int> { chunkedSeq } }
+            }
             val lazySeq = LazySeq<Int>(f)
             var seq: ISeq<Int>? = null
 

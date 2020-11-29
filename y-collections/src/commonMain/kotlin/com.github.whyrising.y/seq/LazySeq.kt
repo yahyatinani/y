@@ -90,8 +90,9 @@ class LazySeq<out E>(
 
     override fun equiv(other: Any?): Boolean = when (val s = seq()) {
         !is Empty -> s.equiv(other)
-        else -> (other is Sequential || other is List<*>) &&
-            toSeq<E>(other) is Empty
+        else ->
+            (other is Sequential || other is List<*>) &&
+                toSeq<E>(other) is Empty
     }
 
     override fun conj(e: @UnsafeVariance E): ISeq<E> = cons(e)
@@ -100,8 +101,9 @@ class LazySeq<out E>(
 
     override fun equals(other: Any?): Boolean = when (val s = seq()) {
         !is Empty -> s == other
-        else -> (other is Sequential || other is List<*>) &&
-            toSeq<E>(other) is Empty
+        else ->
+            (other is Sequential || other is List<*>) &&
+                toSeq<E>(other) is Empty
     }
 
     @ExperimentalStdlibApi
@@ -110,7 +112,7 @@ class LazySeq<out E>(
     override
     fun toString(): String = "(${fold("") { acc, e -> "$acc $e" }.trim()})"
 
-    //list implementation
+    // list implementation
     override val size: Int
         get() = count
 
