@@ -62,13 +62,20 @@ kotlin {
             }
         }
 
-        val nativeCommonMain by getting {
-            dependsOn(commonMain)
+        if (ideaActive) {
+            val nativeCommonMain by getting {
+                dependsOn(commonMain)
+            }
+
+            val nativeCommonTest by getting
         }
+        else {
+            val nativeCommonMain by creating {
+                dependsOn(commonMain)
+            }
 
-        val nativeCommonTest by getting
+            val nativeCommonTest by creating
 
-        if (!ideaActive) {
             val linuxX64Main by sourceSets.getting
             val mingwX64Main by sourceSets.getting
 
