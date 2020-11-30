@@ -18,6 +18,8 @@ import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -386,36 +388,38 @@ sealed class PersistentVector<out E>(
         }
 
         override fun conj(e: @UnsafeVariance E): TransientVector<E> {
-            assertMutable()
+            lock.withLock {
+                assertMutable()
 
-            val oldCount = count
-            // empty slot available in tail?
-            if (oldCount - tailOffset(oldCount) < BF) {
-                tail[oldCount and 0x01f] = e
-                _count.incrementAndGet()
+                val oldCount = count
+                // empty slot available in tail?
+                if (oldCount - tailOffset(oldCount) < BF) {
+                    tail[oldCount and 0x01f] = e
+                    _count.incrementAndGet()
 
-                return this
-            }
-
-            val tailNode = Node<E>(root.isMutable, tail)
-            tail = arrayOfNulls(BF)
-            tail[0] = e
-
-            var newShift = shift
-            val newRoot: Node<E>
-            when {
-                (count ushr SHIFT) > (1 shl shift) -> {
-                    newRoot = Node(root.isMutable)
-                    newRoot.array[0] = root
-                    newRoot.array[1] = newPath(root.isMutable, shift, tailNode)
-                    newShift += SHIFT
+                    return this
                 }
-                else -> newRoot = pushTail(shift, root, tailNode)
-            }
 
-            _root.value = newRoot
-            _shift.value = newShift
-            _count.incrementAndGet()
+                val tailNode = Node<E>(root.isMutable, tail)
+                tail = arrayOfNulls(BF)
+                tail[0] = e
+
+                var newShift = shift
+                val newRoot: Node<E>
+                when {
+                    (count ushr SHIFT) > (1 shl shift) -> {
+                        newRoot = Node(root.isMutable)
+                        newRoot.array[0] = root
+                        newRoot.array[1] = newPath(root.isMutable, shift, tailNode)
+                        newShift += SHIFT
+                    }
+                    else -> newRoot = pushTail(shift, root, tailNode)
+                }
+
+                _root.value = newRoot
+                _shift.value = newShift
+                _count.incrementAndGet()
+            }
 
             return this
         }
@@ -433,6 +437,8 @@ sealed class PersistentVector<out E>(
         }
 
         companion object {
+            val lock = reentrantLock()
+
             private fun <E> mutableNode(node: Node<E>): Node<E> =
                 Node(atomic(true), node.array.copyOf())
 
