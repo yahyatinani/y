@@ -641,7 +641,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val t1: TransientMap<Int, String> = EmptyArrayMap.asTransient()
 
                 withContext(Dispatchers.Default) {
-                    run(16, 1) {
+                    runAction(16, 1) {
                         val i = keyCounter.incrementAndGet()
                         t1.assoc(i, "$i")
                     }
@@ -653,7 +653,7 @@ class PersistentArrayMapTest : FreeSpec({
 
                 val t2 = m.asTransient()
                 withContext(Dispatchers.Default) {
-                    run(16, 16) {
+                    runAction(16, 16) {
                         t2.dissoc(keyCounter.getAndDecrement())
                     }
                 }
@@ -671,7 +671,7 @@ class PersistentArrayMapTest : FreeSpec({
                 }.asTransient()
 
                 withContext(Dispatchers.Default) {
-                    run(16, 16) {
+                    runAction(16, 16) {
                         transientMap.dissoc(keyCounter.getAndDecrement())
                     }
                 }
@@ -1098,8 +1098,8 @@ class PersistentArrayMapTest : FreeSpec({
     }
 })
 
-private
-suspend fun run(coroutines: Int, times: Int, action: suspend () -> Unit) {
+internal
+suspend fun runAction(coroutines: Int, times: Int, action: suspend () -> Unit) {
     coroutineScope {
         repeat(coroutines) {
             launch { repeat(times) { action() } }

@@ -21,6 +21,8 @@ import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.MapSerializer
@@ -334,28 +336,29 @@ sealed class PersistentHashMap<out K, out V>(
             key: @UnsafeVariance K,
             value: @UnsafeVariance V
         ): TransientMap<K, V> {
-            leafFlag.value = null
-            var node: Node<K, V> = root.value ?: EmptyBitMapIndexedNode
-
-            node = node.assoc(isMutable, 0, hasheq(key), key, value, leafFlag)
-
-            if (node != root.value) root.value = node
-
-            if (leafFlag.value != null) _count.value = _count.value + 1
+            lock.withLock {
+                leafFlag.value = null
+                var n: Node<K, V> = root.value ?: EmptyBitMapIndexedNode
+                n = n.assoc(isMutable, 0, hasheq(key), key, value, leafFlag)
+                if (n != root.value) root.value = n
+                if (leafFlag.value != null) _count.incrementAndGet()
+            }
 
             return this
         }
 
         @ExperimentalStdlibApi
         override fun doDissoc(key: @UnsafeVariance K): TransientMap<K, V> {
-            leafFlag.value = null
-            var node: Node<K, V> = root.value ?: EmptyBitMapIndexedNode
+            lock.withLock {
+                leafFlag.value = null
+                var node: Node<K, V> = root.value ?: EmptyBitMapIndexedNode
 
-            node = node.without(isMutable, 0, hasheq(key), key, leafFlag)
+                node = node.without(isMutable, 0, hasheq(key), key, leafFlag)
 
-            if (node != root.value) root.value = node
+                if (node != root.value) root.value = node
 
-            if (leafFlag.value != null) _count.value = _count.value - 1
+                if (leafFlag.value != null) _count.decrementAndGet()
+            }
 
             return this
         }
@@ -379,6 +382,8 @@ sealed class PersistentHashMap<out K, out V>(
         }
 
         companion object {
+            private val lock = reentrantLock()
+
             operator fun <K, V> invoke(
                 map: PersistentHashMap<K, V>
             ): TransientLeanMap<K, V> = TransientLeanMap(
