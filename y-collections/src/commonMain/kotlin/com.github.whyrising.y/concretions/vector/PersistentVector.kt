@@ -406,15 +406,12 @@ sealed class PersistentVector<out E>(
 
                 var newShift = shift
                 val newRoot: Node<E>
-                when {
-                    (count ushr SHIFT) > (1 shl shift) -> {
-                        newRoot = Node(root.isMutable)
-                        newRoot.array[0] = root
-                        newRoot.array[1] = newPath(root.isMutable, shift, tailNode)
-                        newShift += SHIFT
-                    }
-                    else -> newRoot = pushTail(shift, root, tailNode)
-                }
+                if ((count ushr SHIFT) > (1 shl shift)) {
+                    newRoot = Node(root.isMutable)
+                    newRoot.array[0] = root
+                    newRoot.array[1] = newPath(root.isMutable, shift, tailNode)
+                    newShift += SHIFT
+                } else newRoot = pushTail(shift, root, tailNode)
 
                 _root.value = newRoot
                 _shift.value = newShift
