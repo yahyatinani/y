@@ -15,11 +15,14 @@ import com.github.whyrising.y.concretions.map.m
 import com.github.whyrising.y.concretions.map.toPArrayMap
 import com.github.whyrising.y.concretions.map.toPhashMap
 import com.github.whyrising.y.concretions.vector.v
+import com.github.whyrising.y.mutable.map.TransientMap
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldNotContainAnyOf
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -32,6 +35,11 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.pair
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -621,6 +629,58 @@ class PersistentArrayMapTest : FreeSpec({
                 tam("z").shouldBeNull()
             }
         }
+
+        "concurrency" - {
+            val range16 = 1..16
+            val l = range16.fold(listOf<MapEntry<Int, String>>()) { coll, i ->
+                coll.plus<MapEntry<Int, String>>(MapEntry(i, "$i"))
+            }
+
+            "assoc(key, val) under 16 entries" {
+                val keyCounter = atomic(0)
+                val t1: TransientMap<Int, String> = EmptyArrayMap.asTransient()
+
+                withContext(Dispatchers.Default) {
+                    run(16, 1) {
+                        val i = keyCounter.incrementAndGet()
+                        t1.assoc(i, "$i")
+                    }
+                }
+
+                t1.count shouldBeExactly 16
+                val m = t1.persistent() as PersistentArrayMap<Int, String>
+                m.shouldContainAll(l)
+
+                val t2 = m.asTransient()
+                withContext(Dispatchers.Default) {
+                    run(16, 16) {
+                        t2.dissoc(keyCounter.getAndDecrement())
+                    }
+                }
+
+                val persistent = t2.persistent()
+                persistent.shouldNotContainAnyOf(l)
+                persistent.count shouldBeExactly 0
+            }
+
+            "dissoc(key)" {
+                val keyCounter = atomic(16)
+                val transientMap = l.fold(m<Int, String>()) { map, entry ->
+                    map.assoc(entry.key, entry.value)
+                        as PersistentArrayMap<Int, String>
+                }.asTransient()
+
+                withContext(Dispatchers.Default) {
+                    run(16, 16) {
+                        transientMap.dissoc(keyCounter.getAndDecrement())
+                    }
+                }
+
+                val persistent = transientMap.persistent()
+                persistent.shouldNotContainAnyOf(l)
+                persistent.count shouldBeExactly 0
+            }
+        }
     }
 
     "asTransient()" {
@@ -1037,3 +1097,12 @@ class PersistentArrayMapTest : FreeSpec({
         }
     }
 })
+
+private
+suspend fun run(coroutines: Int, times: Int, action: suspend () -> Unit) {
+    coroutineScope {
+        repeat(coroutines) {
+            launch { repeat(times) { action() } }
+        }
+    }
+}

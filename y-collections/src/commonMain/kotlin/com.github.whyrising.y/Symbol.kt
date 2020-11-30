@@ -5,7 +5,8 @@ import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.getValue
 import com.github.whyrising.y.util.hashCombine
 
-internal class Symbol(override val name: String) : Named, IHashEq, Comparable<Symbol> {
+internal
+class Symbol(override val name: String) : Named, IHashEq, Comparable<Symbol> {
     internal var hasheq: Int = 0
 
     override fun toString(): String = name

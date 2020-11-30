@@ -15,6 +15,8 @@ import com.github.whyrising.y.util.equiv
 import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.MapSerializer
@@ -244,7 +246,7 @@ sealed class PersistentArrayMap<out K, out V>(
 
         private fun indexOf(key: @UnsafeVariance K): Int {
             for (i in 0 until length.value)
-                if (equiv(key, array[i]!!.first)) return i
+                if (equiv(key, array[i]?.first)) return i
 
             return -1
         }
@@ -267,29 +269,28 @@ sealed class PersistentArrayMap<out K, out V>(
                         return PersistentHashMap(*(array as Array<Pair<K, V>>))
                             .asTransient().assoc(key, value)
                     }
-                    else -> array[length.value++] = Pair(key, value)
+                    else -> array[length.getAndIncrement()] = Pair(key, value)
                 }
             }
 
             return this
         }
 
-        override fun doDissoc(key: @UnsafeVariance K): TransientMap<K, V> =
-            indexOf(key).let { index ->
-                when {
-                    index >= 0 -> {
-                        when {
-                            length.value > 1 ->
-                                array[index] = array[length.value - 1]
-                            else -> array[index] = null
-                        }
-
-                        length.value--
+        override fun doDissoc(key: @UnsafeVariance K): TransientMap<K, V> {
+            lock.withLock {
+                val index: Int = indexOf(key)
+                if (index >= 0) {
+                    array[index] = when {
+                        length.value > 1 -> array[length.value - 1]
+                        else -> null
                     }
-                }
 
-                return this
+                    length.value--
+                }
             }
+
+            return this
+        }
 
         @Suppress("UNCHECKED_CAST")
         override fun doPersistent(): IPersistentMap<K, V> {
@@ -313,6 +314,8 @@ sealed class PersistentArrayMap<out K, out V>(
         }
 
         companion object {
+            private val lock = reentrantLock()
+
             operator fun <K, V> invoke(
                 array: Array<Pair<K, V>>
             ): TransientArrayMap<K, V> = TransientArrayMap(
