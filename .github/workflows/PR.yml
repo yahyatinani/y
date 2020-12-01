@@ -10,7 +10,11 @@ jobs:
   build:
     name: Building
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ macOS-latest, windows-latest, ubuntu-latest ]
+
+    runs-on: ${{matrix.os}}
 
     steps:
       - name: Checkout the repo
