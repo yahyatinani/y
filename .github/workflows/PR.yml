@@ -10,11 +10,7 @@ jobs:
   build:
     name: Building
 
-    strategy:
-      matrix:
-        os: [ macOS-latest, windows-latest, ubuntu-latest ]
-
-    runs-on: ${{matrix.os}}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the repo
@@ -44,6 +40,17 @@ jobs:
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck
+
+      - name: Generate Jacoco coverage
+        run: ./gradlew jacocoRootReport
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+          name: codecov-y
+          fail_ci_if_error: true
 
       - name: Bundle the build report (when failure)
         if: failure()
