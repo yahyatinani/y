@@ -20,6 +20,9 @@ fun Project.signing(configure: SigningExtension.() -> Unit): Unit =
 
 val javadoc = tasks.named("javadoc")
 
+val pubExtension = extensions.getByName("publishing") as PublishingExtension
+val pubs: PublicationContainer = pubExtension.publications
+
 val javadocToJar by tasks.creating(Jar::class) {
     group = JavaBasePlugin.DOCUMENTATION_GROUP
     description = "Assembles java doc to jar"
@@ -52,10 +55,9 @@ publishing {
         }
     }
 
-    publications {
-        create<MavenPublication>("y") {
+    pubs.withType<MavenPublication>().forEach {
+        it.apply {
             artifact(javadocToJar)
-            artifact(sourcesJar)
 
             pom {
                 val devUrl = "http://github.com/whyrising/"
@@ -86,14 +88,9 @@ publishing {
                     url.set(libUrl)
                 }
             }
-
-            from(components["java"])
         }
     }
 }
-
-val pubExtension = extensions.getByName("publishing") as PublishingExtension
-val publications: PublicationContainer = pubExtension.publications
 
 signing {
     useGpgCmd()
@@ -103,5 +100,5 @@ signing {
     }
 
     if (Ci.isRelease)
-        sign(publications)
+        sign(pubs)
 }

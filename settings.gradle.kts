@@ -1,3 +1,4 @@
 rootProject.name = "y"
 
-include("y-common")
+include("y-core")
+include("y-collections")

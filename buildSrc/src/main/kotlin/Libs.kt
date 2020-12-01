@@ -1,18 +1,24 @@
 object Libs {
-
-    const val kotlinVersion = "1.4.0"
-    const val kotlinApiVersion = "1.3"
+    const val kotlinVersion = "1.4.20"
+    const val kotlinApiVersion = "1.4"
     const val jvmTargetVersion = "1.8"
 
     object Kotest {
-        private const val version = "4.2.5"
+        private const val version = "4.3.1"
         const val runner = "io.kotest:kotest-runner-junit5-jvm:$version"
         const val assertions = "io.kotest:kotest-assertions-core-jvm:$version"
         const val propertyTest = "io.kotest:kotest-property-jvm:$version"
     }
 
-    object Ktlint {
-        const val version = "9.3.0"
-        const val id = "org.jlleitschuh.gradle.ktlint"
+    object Kotlinx {
+        private const val gr = "org.jetbrains.kotlinx"
+
+        private const val atomicfuVersion = "0.14.4"
+        private const val serialVersion = "1.0.1"
+        private const val coroutinesVersion = "1.4.1"
+
+        const val atomicfu = "$gr:atomicfu:$atomicfuVersion"
+        const val serialJson = "$gr:kotlinx-serialization-json:$serialVersion"
+        const val coroutines = "$gr:kotlinx-coroutines-core:$coroutinesVersion"
     }
 }
