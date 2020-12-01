@@ -2,6 +2,7 @@
 ========
 
 [![Build Status](https://github.com/whyrising/y/workflows/build/badge.svg)](https://github.com/whyrising/y/actions)
-![Sonatype Nexus (Snapshots)](https://img.shields.io/maven-central/v/com.github.whyrising.y/y-common?color=blue&label=latest%20release&server=https%3A%2F%2Foss.sonatype.org)
+[![Sonatype Nexus (Snapshots)](https://img.shields.io/maven-central/v/com.github.whyrising.y/y-common?color=blue&label=latest%20release&server=https%3A%2F%2Foss.sonatype.org)](http://search.maven.org/#search|ga|1|com.github.whyrising.y)
 ![GitHub](https://img.shields.io/github/license/whyrising/y)
-![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.whyrising.y/y-core?label=latest%20snapshot&server=https%3A%2F%2Foss.sonatype.org)
+[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.whyrising.y/y-core?label=latest%20snapshot&server=https%3A%2F%2Foss.sonatype.org)](https://oss.sonatype.org/content/repositories/snapshots/com/github/whyrising/y/)
+
