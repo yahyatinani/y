@@ -26,8 +26,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Run unit tests
-        run: ./gradlew test --stacktrace
+      - name: Run ubuntu tests
+        if: matrix.os == 'ubuntu-latest'
+        run: ./gradlew check
+
+      - name: Run windows tests
+        if: matrix.os == 'windows-latest'
+        run: ./gradlew mingwX64Test
+
+      - name: Run macOS tests
+        if: matrix.os == 'macOS-latest'
+        run: ./gradlew macosX64Test
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck
