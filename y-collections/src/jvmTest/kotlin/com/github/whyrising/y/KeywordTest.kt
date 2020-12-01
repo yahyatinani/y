@@ -13,6 +13,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import com.github.whyrising.y.concretions.map.PersistentArrayMap as PAM
 
 @ExperimentalStdlibApi
 class KeywordTest : FreeSpec({
@@ -136,6 +140,23 @@ class KeywordTest : FreeSpec({
         val key = k("a")
 
         key shouldBe Keyword("a")
+    }
+
+    "Serialization" - {
+        val map = m(k("a") to 1)
+        val mapSerialized = "{\"a\":1}"
+        val aStr = "\"a\""
+
+        "serialize" {
+            Json.encodeToString(k("a")) shouldBe aStr
+
+            Json.encodeToString(map) shouldBe mapSerialized
+        }
+
+        "deserialize" {
+            Json.decodeFromString<Keyword>(aStr) shouldBeSameInstanceAs k("a")
+            Json.decodeFromString<PAM<Keyword, Int>>(mapSerialized) shouldBe map
+        }
     }
 })
 

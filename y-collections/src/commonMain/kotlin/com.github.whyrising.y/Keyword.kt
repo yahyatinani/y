@@ -4,6 +4,13 @@ import com.github.whyrising.y.core.IHashEq
 import com.github.whyrising.y.util.getValue
 import kotlinx.atomicfu.locks.reentrantLock
 import kotlinx.atomicfu.locks.withLock
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 const val MAGIC = -0x61c88647
 
@@ -12,6 +19,18 @@ private val cache = hashMapOf<Symbol, Any>()
 
 internal fun keywordsCache(): Map<Symbol, Any> = cache
 
+internal class KeywordSerializer : KSerializer<Keyword> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("Keyword", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): Keyword =
+        k(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: Keyword) =
+        encoder.encodeString(value.name)
+}
+
+@Serializable(with = KeywordSerializer::class)
 class Keyword private constructor(
     internal val symbol: Symbol
 ) : Named, Comparable<Keyword>, IHashEq {
