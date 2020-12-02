@@ -103,14 +103,14 @@ This module is basically a port of some of [Clojure](https://clojure.org/index) 
         val map2 : PersistentHashMap<String, Int> = mapOf<String, Int>("1" to 1, "2" to 2).toPhashMap() // {"1" 1, "2" 2}
       ```
     
-      - PersistentHashSet<E>:
-    
-        ```kotlin
-        val set1 : PersistentHashSet<Int> = hs<Int>(1, 2, 2, 3, 3) // #{1 2 3}
-        
-        //From Kotlin's Set<E> to PersistentHashSet<E>
-        val set2 : PersistentHashSet<Int> = setOf<Int>(1, 2, 2, 3 ,3).toPhashSet() // #{1 2 3}
-        ```
+    - PersistentHashSet<E>:
+  
+      ```kotlin
+      val set1 : PersistentHashSet<Int> = hs<Int>(1, 2, 2, 3, 3) // #{1 2 3}
+      
+      //From Kotlin's Set<E> to PersistentHashSet<E>
+      val set2 : PersistentHashSet<Int> = setOf<Int>(1, 2, 2, 3 ,3).toPhashSet() // #{1 2 3}
+      ```
   
     - Sequence:
     
