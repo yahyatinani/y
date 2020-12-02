@@ -20,9 +20,6 @@ fun Project.signing(configure: SigningExtension.() -> Unit): Unit =
 
 val javadoc = tasks.named("javadoc")
 
-val pubExtension = extensions.getByName("publishing") as PublishingExtension
-val pubs: PublicationContainer = pubExtension.publications
-
 val javadocToJar by tasks.creating(Jar::class) {
     group = JavaBasePlugin.DOCUMENTATION_GROUP
     description = "Assembles java doc to jar"
@@ -36,6 +33,9 @@ val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
 }
+
+val pubs: PublicationContainer =
+    (extensions.getByName("publishing") as PublishingExtension).publications
 
 publishing {
     repositories {
@@ -99,6 +99,5 @@ signing {
         useInMemoryPgpKeys(signingKey, signingPassword)
     }
 
-    if (Ci.isRelease)
-        sign(pubs)
+    if (Ci.isRelease) sign(pubs)
 }
