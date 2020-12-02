@@ -21,8 +21,35 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.inputs.branch }}
 
-      - name: publish all release
-        run: ./gradlew publishAllPublicationsToDeployRepository
+      - name: publish metadata release
+        run: ./gradlew publishMetadataPublicationToDeployRepository
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+      - name: publish multiplatform release
+        run: ./gradlew publishKotlinMultiplatformPublicationToDeployRepository
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+      - name: publish jvm release
+        run: ./gradlew publishJvmPublicationToDeployRepository
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+      - name: publish linux release
+        run: ./gradlew publishLinuxX64PublicationToDeployRepository
         env:
           RELEASE_VERSION: ${{ github.event.inputs.version }}
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
