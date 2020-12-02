@@ -100,7 +100,7 @@ This module is basically a port of some of [Clojure](https://clojure.org/index) 
       val map1 : PersistentHashMap<String, Int> = hashMap<String, Int>("1" to 1, "2" to 2) // {"1" 1, "2" 2}
       
       //From Kotlin's Map<K,V> to PersistentHashMap<K,V>
-    val map2 : PersistentHashMap<String, Int> = mapOf<String, Int>("1" to 1, "2" to 2).toPhashMap() // {"1" 1, "2" 2}
+      val map2 : PersistentHashMap<String, Int> = mapOf<String, Int>("1" to 1, "2" to 2).toPhashMap() // {"1" 1, "2" 2}
       ```
 
     - PersistentHashSet<E>:
@@ -111,17 +111,18 @@ This module is basically a port of some of [Clojure](https://clojure.org/index) 
       //From Kotlin's Set<E> to PersistentHashSet<E>
       val set2 : PersistentHashSet<Int> = setOf<Int>(1, 2, 2, 3 ,3).toPhashSet() // #{1 2 3}
       ```
-    
+  
     - Sequence:
 
       All collections support a member function `seq()` that return a sequence of type `ISeq<E>` that can walk the entire collection. A sequance provides three key member functions:
   
       - `first()` : return the first element in the sequence.
     - `rest()` : returns all of the rest elements of the sequence that came after first element, as a sequence.
-      - `cons(element)` : always adds to the front of the sequence and returns a sequence.
-
-  - ###### Keywords :
-
+      
+    - `cons(element)` : always adds to the front of the sequence and returns a sequence.
+  
+- ###### Keywords :
+  
     Keywords are identifiers that provide very fast equality tests, and they have a string name. If you call toString() on a keyword it returns the name prefixed by a ':' which is not part of the name.
   
     ```kotlin
