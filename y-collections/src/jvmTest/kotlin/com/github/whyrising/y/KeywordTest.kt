@@ -82,10 +82,11 @@ class KeywordTest : FreeSpec({
     }
 
     "invoke(map)" {
-        val map = m(Keyword("a") to 1, Keyword("b") to 2)
+        val map = m(Keyword("a") to 1, Keyword("b") to 2, "c" to 3)
 
         Keyword("a")(map)!! shouldBeExactly 1
         Keyword("b")(map)!! shouldBeExactly 2
+        Keyword("c")(map).shouldBeNull()
         Keyword("z")(map).shouldBeNull()
     }
 

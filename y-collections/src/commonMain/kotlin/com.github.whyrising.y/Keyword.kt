@@ -61,7 +61,7 @@ class Keyword private constructor(
 
     override fun compareTo(other: Keyword): Int = symbol.compareTo(other.symbol)
 
-    operator fun <V> invoke(map: Map<Keyword, V>, default: V? = null): V? =
+    operator fun <K, V> invoke(map: Map<K, V>, default: V? = null): V? =
         getValue(this, map, default)
 
     companion object {
