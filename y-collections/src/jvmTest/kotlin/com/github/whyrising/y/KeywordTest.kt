@@ -24,13 +24,6 @@ class KeywordTest : FreeSpec({
         (keywordsCache() as HashMap<Symbol, Any>).clear()
     }
 
-    "ctor" {
-        val key = Keyword("a")
-
-        key.symbol shouldBe Symbol("a")
-        key.hashEq shouldBeExactly Symbol("a").hasheq() + -0x61c88647
-    }
-
     "hasheq()" {
         val key = Keyword("a")
 
