@@ -37,15 +37,6 @@ class KeywordTest : FreeSpec({
         key.hasheq() shouldBeExactly key.hashEq
     }
 
-    "toString()" {
-        val ka = Keyword("a")
-
-        ka.print shouldBe ""
-
-        ka.toString() shouldBe ":a"
-        ka.print shouldBe ":a"
-    }
-
     "hashCode()" {
         val key = Keyword("a")
 
