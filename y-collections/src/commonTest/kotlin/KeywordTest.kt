@@ -4,6 +4,7 @@ import com.github.whyrising.y.concretions.map.m
 import com.github.whyrising.y.k
 import com.github.whyrising.y.keywordsCache
 import com.github.whyrising.y.s
+import io.kotest.matchers.ints.shouldBeExactly
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -56,13 +57,9 @@ class KeywordTest {
 
     @Test
     fun `compareTo(other)`() {
-        val key = Keyword("a")
-
-        assertEquals(0, key.compareTo(key))
-
-        assertEquals(0, Keyword("a").compareTo(Keyword("a")))
-        assertEquals(-1, Keyword("a").compareTo(Keyword("b")))
-        assertEquals(1, Keyword("b").compareTo(Keyword("a")))
+        Keyword("a").compareTo(Keyword("a")) shouldBeExactly 0
+        Keyword("a").compareTo(Keyword("b")) shouldBeExactly -1
+        Keyword("b").compareTo(Keyword("a")) shouldBeExactly 1
     }
 
     @Test
