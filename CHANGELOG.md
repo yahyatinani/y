@@ -1,5 +1,10 @@
 Changelog
 ========
+## v0.0.2.1
+
+#### Fixed
+* Calling toString() on a Keyword in Native caused a InvalidMutabilityException
+
 ## v0.0.2
 
 #### Added:
