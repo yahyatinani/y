@@ -4,11 +4,7 @@
 [![Build Status](https://github.com/whyrising/y/workflows/build/badge.svg)](https://github.com/whyrising/y/actions) [![Sonatype Nexus (Snapshots)](https://img.shields.io/maven-central/v/com.github.whyrising.y/y-core?color=blue&label=latest%20release&server=https%3A%2F%2Foss.sonatype.org)](http://search.maven.org/#search|ga|1|com.github.whyrising.y) ![GitHub](https://img.shields.io/github/license/whyrising/y) [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.whyrising.y/y-core?label=latest%20snapshot&server=https%3A%2F%2Foss.sonatype.org)](https://oss.sonatype.org/content/repositories/snapshots/com/github/whyrising/y/)
 
 ***y* is a functional library for Kotlin multiplatform that aims to port
-andprovide effective concepts inspired by other languages, libraries or even
-paradigms**.
-
-***N.B.: This library is heavily inspired
-by [Clojure](https://clojure.org/index)***
+and provide effective concepts inspired by other languages or libraries**.
 
 ## Modules:
 
@@ -18,16 +14,6 @@ This module provides core and utility functions that may or may not collaborate
 with other modules (e.g. y-collections) to fulfill their purpose.
 
 ### y-collections:
-
-This module is basically a port of some of [Clojure](https://clojure.org/index)
-data structures such as collections, symbols and keywords.
-Unlike [Clojure](https://clojure.org/index), collections in *y* do support
-generics so you can specify types while creating a list or a map etc.
-
-***N.B.: PersistentHashMap implementation was ported
-from [bendyworks](https://github.com/bendyworks/lean-map) implementation since
-it is based on the latest research
-of [Michael J. Steindorfer & Jurgen J. Vinju](https://michael.steindorfer.name/publications/oopsla15.pdf)***
 
 - ##### Data structures:
 
@@ -116,7 +102,7 @@ of [Michael J. Steindorfer & Jurgen J. Vinju](https://michael.steindorfer.name/p
             
             //From Kotlin's Map<K,V> to PersistentHashMap<K,V>
             val map2 : PersistentHashMap<String, Int> = mapOf<String, Int>("1" to 1, "2" to 2).toPhashMap() // {"1" 1, "2" 2}
-          ```
+            ```
 
         - PersistentHashSet<E>:
 
