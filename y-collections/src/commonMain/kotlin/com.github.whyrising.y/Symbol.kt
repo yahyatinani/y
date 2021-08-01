@@ -32,8 +32,10 @@ class Symbol(override val name: String) : Named, IHashEq, Comparable<Symbol> {
         else -> name.compareTo(other.name)
     }
 
-    operator fun <K, V> invoke(map: Map<K, V>, default: V? = null): V? =
-        getValue(this, map, default)
+    operator fun <K : Any, V : Any> invoke(
+        map: Map<K, V>,
+        default: V? = null
+    ): V? = getValue(this, map, default)
 }
 
 internal fun s(name: String): Symbol = Symbol(name)

@@ -154,8 +154,8 @@ fun <E> nth(seq: Sequential, index: Int): E {
 fun hashCombine(seed: Int, hash: Int): Int =
     seed xor hash + -0x61c88647 + (seed shl 6) + (seed shr 2)
 
-@Suppress("UNCHECKED_CAST", "TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
-fun <K, V> getValue(key: Named, map: Map<K, V>, default: V): V? = when (map) {
-    is ILookup<*, *> -> map.valAt(key, default) as V
-    else -> map[key] ?: default
-}
+fun <K : Any, V : Any> getValue(key: Named, map: Map<K, V>, default: V?): V? =
+    when (map) {
+        is ILookup<*, *> -> map.valAt(key, default) as V?
+        else -> (map as Map<Any, Any>)[key] as V? ?: default
+    }
