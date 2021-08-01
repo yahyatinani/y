@@ -27,12 +27,12 @@ val javadocToJar by tasks.creating(Jar::class) {
     from(javadoc)
 }
 
-val sourcesJar by tasks.creating(Jar::class) {
-    val sourceSets: SourceSetContainer by project
-
-    archiveClassifier.set("sources")
-    from(sourceSets["main"].allSource)
-}
+//val sourcesJar by tasks.creating(Jar::class) {
+//    val sourceSets: SourceSetContainer by project
+//
+//    archiveClassifier.set("sources")
+//    from(sourceSets["main"].allSource)
+//}
 
 val pubs: PublicationContainer =
     (extensions.getByName("publishing") as PublishingExtension).publications
