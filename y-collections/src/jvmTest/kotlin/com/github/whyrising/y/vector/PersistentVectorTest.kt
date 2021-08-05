@@ -40,8 +40,6 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
-import io.kotest.property.arbitrary.map
-import io.kotest.property.arbitrary.merge
 import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -417,19 +415,16 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "when called on a populated vector it should calculate the hash" {
-                val gen =
-                    Arb.list(Arb.int().merge(Arb.int().map { null }), 1..20)
-                checkAll(gen) { list: List<Int?> ->
-                    val prime = 31
-                    val expectedHash = list.fold(1) { hash, i ->
-                        prime * hash + i.hashCode()
-                    }
-                    val vec = v(*list.toTypedArray())
-
-                    vec.hashCode shouldBeExactly INIT_HASH_CODE
-                    vec.hashCode() shouldBeExactly expectedHash
-                    vec.hashCode shouldBeExactly expectedHash
+                val list = (1..20).toList()
+                val prime = 31
+                val expectedHash = list.fold(1) { hash, i ->
+                    prime * hash + i.hashCode()
                 }
+                val vec = v(*list.toTypedArray())
+
+                vec.hashCode shouldBeExactly INIT_HASH_CODE
+                vec.hashCode() shouldBeExactly expectedHash
+                vec.hashCode shouldBeExactly expectedHash
 
                 EmptyVector.hashCode() shouldBeExactly 1
                 EmptyVector.hashCode shouldBeExactly 1
