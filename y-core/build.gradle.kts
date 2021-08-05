@@ -4,10 +4,6 @@ plugins {
     id("java-library")
 }
 
-repositories {
-    mavenCentral()
-}
-
 val ideaActive = System.getProperty("idea.active") == "true"
 
 kotlin {

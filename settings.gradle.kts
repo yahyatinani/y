@@ -1,4 +1,12 @@
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
 rootProject.name = "y"
 
-include("y-core")
-include("y-collections")
+include(":y-core")
+include(":y-collections")

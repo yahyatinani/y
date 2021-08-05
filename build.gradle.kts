@@ -33,11 +33,6 @@ kotlin {
 }
 
 allprojects {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-
     group = "com.github.whyrising.y"
 
     version = Ci.publishVersion
