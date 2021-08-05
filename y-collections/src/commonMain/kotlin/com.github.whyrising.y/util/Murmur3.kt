@@ -111,7 +111,7 @@ object Murmur3 {
         // step through the CharSequence 2 chars at a time
         var i = 1
         while (i < input.length) {
-            var k1 = input[i - 1].toInt() or (input[i].toInt() shl 16)
+            var k1 = input[i - 1].code or (input[i].code shl 16)
             k1 = mixK1(k1)
             h1 = mixH1(h1, k1)
             i += 2
@@ -119,7 +119,7 @@ object Murmur3 {
 
         // deal with any remaining characters
         if (input.length and 1 == 1) {
-            var k1 = input[input.length - 1].toInt()
+            var k1 = input[input.length - 1].code
             k1 = mixK1(k1)
             h1 = h1 xor k1
         }

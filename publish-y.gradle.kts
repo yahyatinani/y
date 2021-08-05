@@ -12,11 +12,11 @@ val javadocToJar by tasks.creating(Jar::class) {
     from(javadoc)
 }
 
-//val sourcesJar by tasks.creating(Jar::class) {
-//    archiveClassifier.set("sources")
-//    val sourceSets: SourceSetContainer by project
-//    from(sourceSets.getByName("main").allSource)
-//}
+// val sourcesJar by tasks.creating(Jar::class) {
+//     archiveClassifier.set("sources")
+//     val sourceSets: SourceSetContainer by project
+//     from(sourceSets.getByName("main").allSource)
+// }
 
 fun Project.publishing(action: PublishingExtension.() -> Unit) =
     configure(action)

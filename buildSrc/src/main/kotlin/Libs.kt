@@ -4,7 +4,7 @@ object Libs {
     const val jvmTargetVersion = "1.8"
 
     object Kotest {
-        private const val version = "4.3.1"
+        private const val version = "4.6.1"
         const val assertions = "io.kotest:kotest-assertions-core:$version"
         const val runner = "io.kotest:kotest-runner-junit5-jvm:$version"
         const val propertyTest = "io.kotest:kotest-property-jvm:$version"
@@ -13,9 +13,9 @@ object Libs {
     object Kotlinx {
         private const val gr = "org.jetbrains.kotlinx"
 
-        private const val atomicfuVersion = "0.14.4"
-        private const val serialVersion = "1.0.1"
-        private const val coroutinesVersion = "1.4.1"
+        private const val atomicfuVersion = "0.15.2"
+        private const val serialVersion = "1.2.1"
+        private const val coroutinesVersion = "1.5.1"
 
         const val atomicfu = "$gr:atomicfu:$atomicfuVersion"
         const val serialJson = "$gr:kotlinx-serialization-json:$serialVersion"
