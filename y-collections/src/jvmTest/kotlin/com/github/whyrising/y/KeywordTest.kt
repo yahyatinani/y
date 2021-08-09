@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
 import com.github.whyrising.y.concretions.map.PersistentArrayMap as PAM
 
 @ExperimentalStdlibApi
-class KeywordTest : FreeSpec({
+class KeywordTest2 : FreeSpec({
     beforeTest {
         (keywordsCache() as HashMap<Symbol, Any>).clear()
     }
