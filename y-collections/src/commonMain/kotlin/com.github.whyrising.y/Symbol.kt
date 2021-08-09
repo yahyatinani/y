@@ -5,11 +5,17 @@ import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.getValue
 import com.github.whyrising.y.util.hashCombine
 
-internal
-class Symbol(override val name: String) : Named, IHashEq, Comparable<Symbol> {
-    internal var hasheq: Int = 0
+internal class Symbol(
+    override val name: String
+) : Named, IHashEq, Comparable<Symbol> {
+    val str: String by lazy { name }
 
-    override fun toString(): String = name
+    @ExperimentalStdlibApi
+    internal val hasheq: Int by lazy {
+        hashCombine(Murmur3.hashUnencodedChars(name), 0)
+    }
+
+    override fun toString(): String = str
 
     override fun equals(other: Any?): Boolean = when {
         this === other -> true
@@ -20,12 +26,7 @@ class Symbol(override val name: String) : Named, IHashEq, Comparable<Symbol> {
     override fun hashCode(): Int = hashCombine(name.hashCode(), 0)
 
     @ExperimentalStdlibApi
-    override fun hasheq(): Int {
-        if (hasheq == 0)
-            hasheq = hashCombine(Murmur3.hashUnencodedChars(name), 0)
-
-        return hasheq
-    }
+    override fun hasheq(): Int = hasheq
 
     override fun compareTo(other: Symbol): Int = when (other) {
         this -> 0

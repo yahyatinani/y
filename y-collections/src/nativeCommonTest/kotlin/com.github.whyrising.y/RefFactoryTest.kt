@@ -11,7 +11,7 @@ import kotlin.test.assertNull
 class RefFactoryTest {
     @BeforeTest
     fun setUp() {
-        (keywordsCache() as HashMap<Symbol, Any>).clear()
+        keywordsCache.clear()
 
         Keyword("a")
         Keyword("b")
@@ -42,7 +42,7 @@ class RefFactoryTest {
     @Test
     @Suppress("UNCHECKED_CAST")
     fun assertWeakRefIsCollected() {
-        val cache = keywordsCache() as HashMap<Symbol, WeakReference<Keyword>>
+        val cache = keywordsCache as HashMap<Symbol, WeakReference<Keyword>>
 
         GC.collect()
 

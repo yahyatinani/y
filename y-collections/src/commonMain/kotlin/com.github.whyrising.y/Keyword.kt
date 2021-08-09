@@ -6,43 +6,39 @@ import kotlinx.atomicfu.locks.reentrantLock
 import kotlinx.atomicfu.locks.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-const val MAGIC = -0x61c88647
-
-private val lock = reentrantLock()
-private val cache = hashMapOf<Symbol, Any>()
-
-internal fun keywordsCache(): Map<Symbol, Any> = cache
-
-internal class KeywordSerializer : KSerializer<Keyword> {
+object KeywordSerializer : KSerializer<Keyword> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("Keyword", PrimitiveKind.STRING)
 
-    override fun deserialize(decoder: Decoder): Keyword =
-        k(decoder.decodeString())
-
     override fun serialize(encoder: Encoder, value: Keyword) =
         encoder.encodeString(value.name)
+
+    override fun deserialize(decoder: Decoder): Keyword =
+        k(decoder.decodeString())
 }
 
-@Serializable(with = KeywordSerializer::class)
+internal val keywordsCache = hashMapOf<Symbol, Any>()
+
+@Serializable(KeywordSerializer::class)
 class Keyword private constructor(
     internal val symbol: Symbol
 ) : Named, Comparable<Keyword>, IHashEq {
+    val str: String by lazy { ":${symbol.name}" }
 
-    internal val print: String = ":${symbol.name}"
-
+    @Transient
     @ExperimentalStdlibApi
     internal val hashEq: Int = symbol.hasheq() + MAGIC
 
     override val name: String = symbol.name
 
-    override fun toString(): String = print
+    override fun toString(): String = str
 
     @ExperimentalStdlibApi
     override fun hasheq(): Int = hashEq
@@ -63,14 +59,18 @@ class Keyword private constructor(
     ): V? = getValue(this, map, default)
 
     companion object {
+        const val MAGIC = -0x61c88647
+        private val lock = reentrantLock()
+
         internal operator fun invoke(sym: Symbol): Keyword {
-            var existingRef = cache[sym]
+            var existingRef = keywordsCache[sym]
 
             if (existingRef == null) {
                 val keyword = Keyword(sym)
 
                 lock.withLock {
-                    existingRef = cache.put(sym, RefFactory.create(keyword))
+                    existingRef =
+                        keywordsCache.put(sym, RefFactory.create(keyword))
                 }
 
                 if (existingRef == null) return keyword
@@ -82,7 +82,7 @@ class Keyword private constructor(
 
             lock.withLock {
                 // if key got garbage collected, remove from cache
-                cache.remove(sym)
+                keywordsCache.remove(sym)
             }
 
             return invoke(sym)

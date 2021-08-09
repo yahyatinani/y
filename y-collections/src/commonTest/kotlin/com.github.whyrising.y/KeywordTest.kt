@@ -9,13 +9,16 @@ import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class KeywordTest {
     @BeforeTest
     fun setUp() {
-        (keywordsCache() as HashMap<Symbol, Any>).clear()
+        keywordsCache.clear()
     }
 
     @ExperimentalStdlibApi
@@ -110,8 +113,24 @@ class KeywordTest {
         val b = Keyword("b")
 
         a.toString() shouldBe ":a"
-        a.print shouldBe ":a"
+        a.str shouldBe ":a"
         b.toString() shouldBe ":b"
-        b.print shouldBe ":b"
+        b.str shouldBe ":b"
+    }
+
+    @Test
+    fun serialize() {
+        val keyword = k("a")
+
+        Json.encodeToString(keyword) shouldBe "\"a\""
+    }
+
+    @Test
+    fun deserialize() {
+        val stringKey = "\"a\""
+
+        val decodedKey = Json.decodeFromString<Keyword>(stringKey)
+
+        decodedKey shouldBeSameInstanceAs k("a")
     }
 }

@@ -64,7 +64,6 @@ kotlin {
                 implementation(Libs.Kotest.runner)
                 implementation(Libs.Kotest.assertions)
                 implementation(Libs.Kotest.propertyTest)
-                implementation(Libs.Kotlinx.serialJson)
                 implementation(Libs.Kotlinx.coroutines)
             }
         }
