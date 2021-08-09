@@ -12,7 +12,7 @@ plugins {
     java
     `java-library`
     kotlin("multiplatform") version Libs.kotlinVersion
-    kotlin("plugin.serialization") version "1.4.10"
+    kotlin("plugin.serialization") version Libs.kotlinVersion
     id(Plugins.Ktlint.id) version Plugins.Ktlint.version
     id("maven-publish")
     signing
