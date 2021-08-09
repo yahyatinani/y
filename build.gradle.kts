@@ -51,7 +51,6 @@ val testReport = tasks.register<TestReport>("testReport") {
 subprojects {
     buildscript {
         repositories {
-            jcenter()
             mavenCentral()
         }
     }

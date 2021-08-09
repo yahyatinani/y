@@ -5,9 +5,9 @@ object Libs {
 
     object Kotest {
         private const val version = "4.6.1"
+        const val runner = "io.kotest:kotest-runner-junit5:$version"
         const val assertions = "io.kotest:kotest-assertions-core:$version"
-        const val runner = "io.kotest:kotest-runner-junit5-jvm:$version"
-        const val propertyTest = "io.kotest:kotest-property-jvm:$version"
+        const val propertyTest = "io.kotest:kotest-property:$version"
     }
 
     object Kotlinx {

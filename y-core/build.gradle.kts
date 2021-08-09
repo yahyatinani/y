@@ -44,18 +44,19 @@ kotlin {
         val commonMain by getting
         val commonTest by getting {
             dependencies {
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
+                implementation(kotlin("test"))
                 implementation(Libs.Kotest.assertions)
+                implementation(Libs.Kotest.propertyTest)
             }
         }
 
         val jvmTest by getting {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test:1.4.20")
-                implementation("org.jetbrains.kotlin:kotlin-test-junit5:1.4.20")
-                implementation("org.junit.jupiter:junit-jupiter:5.7.0")
+//                implementation("org.jetbrains.kotlin:kotlin-test:1.4.20")
+//                implementation("org.jetbrains.kotlin:kotlin-test-junit5:1.4.20")
+//                implementation("org.junit.jupiter:junit-jupiter:5.7.0")
                 implementation(Libs.Kotest.runner)
+                implementation(Libs.Kotest.assertions)
                 implementation(Libs.Kotest.propertyTest)
             }
         }
@@ -106,10 +107,6 @@ kotlin {
             ) { dependsOn(nativeCommonMain) }
         }
     }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }
 
 apply(from = "../publish-y.gradle.kts")
