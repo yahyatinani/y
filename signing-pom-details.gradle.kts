@@ -22,7 +22,7 @@ signing {
         useInMemoryPgpKeys(signingKey, signingPassword)
     }
 
-    if (Ci.isRelease) sign(publications)
+    if (Ci.isRelease()) sign(publications)
 }
 
 publishing {
@@ -34,7 +34,7 @@ publishing {
 
             name = "deploy"
 
-            url = if (Ci.isRelease) releasesUrl else snapshotsUrl
+            url = if (Ci.isRelease()) releasesUrl else snapshotsUrl
 
             credentials {
                 username = System.getenv("OSSRH_USERNAME") ?: ossrhUsername

@@ -35,7 +35,7 @@ kotlin {
 allprojects {
     group = "com.github.whyrising.y"
 
-    version = Ci.publishVersion
+    version = Ci.publishVersion()
 
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions.jvmTarget = Libs.jvmTargetVersion
@@ -76,5 +76,5 @@ val publications: PublicationContainer = extension.publications
 signing {
     useGpgCmd()
 
-    if (Ci.isRelease) sign(publications)
+    if (Ci.isRelease()) sign(publications)
 }
