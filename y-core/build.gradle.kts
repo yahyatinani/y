@@ -56,8 +56,6 @@ kotlin {
 //                implementation("org.jetbrains.kotlin:kotlin-test-junit5:1.4.20")
 //                implementation("org.junit.jupiter:junit-jupiter:5.7.0")
                 implementation(Libs.Kotest.runner)
-                implementation(Libs.Kotest.assertions)
-                implementation(Libs.Kotest.propertyTest)
             }
         }
 
