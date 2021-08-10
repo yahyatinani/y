@@ -12,7 +12,7 @@ plugins {
     java
     `java-library`
     kotlin("multiplatform") version Libs.kotlinVersion
-    kotlin("plugin.serialization") version "1.4.10"
+    kotlin("plugin.serialization") version Libs.kotlinVersion
     id(Plugins.Ktlint.id) version Plugins.Ktlint.version
     id("maven-publish")
     signing
@@ -33,14 +33,9 @@ kotlin {
 }
 
 allprojects {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-
     group = "com.github.whyrising.y"
 
-    version = Ci.publishVersion
+    version = Ci.publishVersion()
 
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions.jvmTarget = Libs.jvmTargetVersion
@@ -56,7 +51,6 @@ val testReport = tasks.register<TestReport>("testReport") {
 subprojects {
     buildscript {
         repositories {
-            jcenter()
             mavenCentral()
         }
     }
@@ -82,5 +76,5 @@ val publications: PublicationContainer = extension.publications
 signing {
     useGpgCmd()
 
-    if (Ci.isRelease) sign(publications)
+    if (Ci.isRelease()) sign(publications)
 }

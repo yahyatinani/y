@@ -1,15 +1,16 @@
 object Ci {
     private const val snapshotBase = "0.0.2"
 
-    private val githubBuildNumber = System.getenv("GITHUB_RUN_NUMBER")
+    private fun githubBuildNumber() = System.getenv("GITHUB_RUN_NUMBER")
 
-    private val snapshotVersion = when (githubBuildNumber) {
+    private fun snapshotVersion(): String = when (val n = githubBuildNumber()) {
         null -> "$snapshotBase-LOCAL"
-        else -> "$snapshotBase.$githubBuildNumber-SNAPSHOT"
+        else -> "$snapshotBase.$n-SNAPSHOT"
     }
 
-    private val releaseVersion = System.getenv("RELEASE_VERSION")
+    private fun releaseVersion() = System.getenv("RELEASE_VERSION")
 
-    val isRelease = releaseVersion != null
-    val publishVersion = releaseVersion ?: snapshotVersion
+    fun isRelease() = releaseVersion() != null
+
+    fun publishVersion() = releaseVersion() ?: snapshotVersion()
 }

@@ -27,11 +27,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
-import io.kotest.property.Arb
-import io.kotest.property.arbitrary.int
-import io.kotest.property.arbitrary.list
-import io.kotest.property.arbitrary.map
-import io.kotest.property.arbitrary.merge
 import io.kotest.property.checkAll
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
@@ -209,18 +204,16 @@ class PersistentListTest : FreeSpec({
         }
 
         "hashCode()" {
-            val gen = Arb.list(Arb.int().merge(Arb.int().map { null }), 1..20)
-            checkAll(gen) { integers: List<Int?> ->
-                val expectedHash =
-                    integers.fold(Empty.hashCode()) { hashCode: Int, i: Int? ->
-                        HASH_PRIME * hashCode + i.hashCode()
-                    }
-                val l = PersistentList(*integers.toTypedArray())
+            val integers = (1..20).toList()
+            val expectedHash =
+                integers.fold(Empty.hashCode()) { hashCode: Int, i: Int? ->
+                    HASH_PRIME * hashCode + i.hashCode()
+                }
+            val l = PersistentList(*integers.toTypedArray())
 
-                l.hashCode shouldBeExactly 0
-                l.hashCode() shouldBeExactly expectedHash
-                l.hashCode shouldBeExactly expectedHash
-            }
+            l.hashCode shouldBeExactly 0
+            l.hashCode() shouldBeExactly expectedHash
+            l.hashCode shouldBeExactly expectedHash
 
             Empty.hashCode() shouldBeExactly 1
             Empty.hashCode shouldBeExactly 1
@@ -610,7 +603,7 @@ class PersistentListTest : FreeSpec({
 
     "l(args)" - {
         "l() without args should return an empty PersistentList" {
-            l<Int>() shouldBe Empty
+            l<Any>() shouldBe Empty
         }
 
         "l(args) with args should return a PersistentList" {

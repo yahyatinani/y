@@ -367,12 +367,11 @@ class APersistentMapTest : FreeSpec({
         }
 
         "entries should return an instance of AbstractSet" {
-            val entries = map.entries as AbstractSet<Map.Entry<String, Number>>
+            val entries = map.entries as AbstractSet<Any>
             val iterator = entries.iterator()
 
             entries.size shouldBeExactly array.size
 
-            @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
             entries.contains("x").shouldBeFalse()
             entries.contains(MapEntry("x", 1)).shouldBeFalse()
             entries.contains(MapEntry("a", 1)).shouldBeTrue()

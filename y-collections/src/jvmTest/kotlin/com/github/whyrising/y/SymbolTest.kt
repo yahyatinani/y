@@ -50,10 +50,7 @@ class SymbolTest : FreeSpec({
         val symbol = Symbol(a)
         val expected = hashCombine(Murmur3.hashUnencodedChars(a), 0)
 
-        symbol.hasheq shouldBeExactly 0
-
         symbol.hasheq() shouldBeExactly expected
-
         symbol.hasheq shouldBeExactly expected
     }
 

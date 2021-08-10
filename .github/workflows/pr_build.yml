@@ -1,18 +1,18 @@
-name: Pull request build
+name: Pull Request Build
 
 on:
   pull_request:
     paths-ignore:
+      - 'doc/**'
       - 'docs/**'
       - '*.md'
+      - '**/*.yml'
 
 jobs:
   build:
-    name: Building
-
     strategy:
       matrix:
-        os: [ macOS-latest, windows-latest, ubuntu-latest ]
+        os: [ macos-latest, windows-latest, ubuntu-latest ]
 
     runs-on: ${{matrix.os}}
 
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v2
 
-      - name: Cache Gradle dependencies
+      - name: Cache Gradle and wrapper
         uses: actions/cache@v2
         with:
           path: |
@@ -30,20 +30,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Run ubuntu tests
-        if: matrix.os == 'ubuntu-latest'
-        run: ./gradlew check --stacktrace
-
-      - name: Run windows tests
-        if: matrix.os == 'windows-latest'
-        run: ./gradlew mingwX64Test --stacktrace
-
-      - name: Run macOS tests
-        if: matrix.os == 'macOS-latest'
-        run: ./gradlew macosX64Test --stacktrace
+      - name: Grant Permission for Gradlew to Execute
+        run: chmod +x gradlew
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck
+
+      - name: Run ubuntu tests
+        if: matrix.os == 'ubuntu-latest'
+        run: ./gradlew check --scan
+
+      - name: Run windows tests
+        if: matrix.os == 'windows-latest'
+        run: ./gradlew mingwX64Test --scan
+
+      - name: Run macOS tests
+        if: matrix.os == 'macos-latest'
+        run: ./gradlew macosX64Test --scan
+
+      - name: Run watchOS tests
+        if: matrix.os == 'macos-latest'
+        run: ./gradlew watchosArm32TestKlibrary watchosArm64TestKlibrary watchosX86Test watchosX64Test --scan
 
       - name: Bundle the build report (when failure)
         if: failure()
