@@ -16,26 +16,28 @@ kotlin {
             }
         }
 
-        if (ideaActive)
-            macosX64("nativeCommon")
-        else {
+        if (!ideaActive) {
             linuxX64()
             mingwX64()
-
             macosX64()
+
             tvos()
-            watchos()
+
+            watchosArm32()
+            watchosArm64()
+            watchosX86()
+            watchosX64()
+
             iosX64()
             iosArm64()
             iosArm32()
-        }
-    }
-
-    targets.all {
-        compilations.all {
-            kotlinOptions {
-                freeCompilerArgs = freeCompilerArgs +
-                    "-Xopt-in=kotlin.RequiresOptIn"
+        } else {
+            val hostOs = System.getProperty("os.name")
+            val nativeTarget = when {
+                hostOs == "Mac OS X" -> macosX64("native")
+                hostOs == "Linux" -> linuxX64("native")
+                hostOs.startsWith("Windows") -> mingwX64("native")
+                else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
             }
         }
     }
@@ -56,62 +58,76 @@ kotlin {
             }
         }
 
+        val jvmMain by getting
         val jvmTest by getting {
             dependencies {
-//                implementation("org.jetbrains.kotlin:kotlin-test:1.4.20")
-//                implementation("org.jetbrains.kotlin:kotlin-test-junit5:1.4.20")
-//                implementation("org.junit.jupiter:junit-jupiter:5.7.0")
                 implementation(Libs.Kotest.runner)
                 implementation(Libs.Kotlinx.coroutines)
             }
         }
 
-        if (ideaActive) {
-            val nativeCommonMain by getting {
+        if (!ideaActive) {
+            val nativeMain by creating {
                 dependsOn(commonMain)
             }
+            val nativeTest by creating
 
-            val nativeCommonTest by getting
-        } else {
-            val nativeCommonMain by creating {
-                dependsOn(commonMain)
+            val macosX64Main by getting {
+                dependsOn(nativeMain)
             }
 
-            val nativeCommonTest by creating
+            val mingwX64Main by getting {
+                dependsOn(nativeMain)
+            }
 
-            val linuxX64Main by sourceSets.getting
-            val mingwX64Main by sourceSets.getting
+            val linuxX64Main by getting {
+                dependsOn(nativeMain)
+            }
 
-            val tvosArm64Main by sourceSets.getting
-            val tvosX64Main by sourceSets.getting
+            val iosX64Main by getting {
+                dependsOn(nativeMain)
+            }
 
-            val watchosArm32Main by sourceSets.getting
-            val watchosArm64Main by sourceSets.getting
-            val watchosX86Main by sourceSets.getting
+            val iosArm64Main by getting {
+                dependsOn(nativeMain)
+            }
 
-            val macosX64Main by sourceSets.getting
+            val iosArm32Main by getting {
+                dependsOn(nativeMain)
+            }
 
-            val iosArm32Main by sourceSets.getting
-            val iosArm64Main by sourceSets.getting
-            val iosX64Main by sourceSets.getting
+            val watchosX86Main by getting {
+                dependsOn(nativeMain)
+            }
 
-            configure(
-                listOf(
-                    linuxX64Main,
-                    mingwX64Main,
-                    tvosArm64Main,
-                    tvosX64Main,
-                    watchosArm32Main,
-                    watchosArm64Main,
-                    watchosX86Main,
-                    macosX64Main,
-                    iosX64Main,
-                    iosArm64Main,
-                    iosArm32Main
-                )
-            ) { dependsOn(nativeCommonMain) }
+            val watchosArm32Main by getting {
+                dependsOn(nativeMain)
+            }
+
+            val watchosArm64Main by getting {
+                dependsOn(nativeMain)
+            }
+
+            val watchosX64Main by getting {
+                dependsOn(nativeMain)
+            }
+
+            val tvosMain by getting {
+                dependsOn(nativeMain)
+            }
+        }
+
+        all {
+            languageSettings.useExperimentalAnnotation("kotlin.time.ExperimentalTime")
+            languageSettings.useExperimentalAnnotation("kotlin.experimental.ExperimentalTypeInference")
+            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
+            languageSettings.useExperimentalAnnotation("kotlin.reflect.jvm.ExperimentalReflectionOnLambdas")
         }
     }
+}
+
+tasks.named<Test>("jvmTest") {
+    useJUnitPlatform()
 }
 
 apply(from = "../publish-y.gradle.kts")
