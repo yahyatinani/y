@@ -9,7 +9,7 @@ fun <K, V> clearCache(
     rq: ReferenceQueue<Keyword>,
     cache: ConcurrentHashMap<K, Reference<V>>
 ) {
-    //cleanup any dead entries
+    // cleanup any dead entries
     if (rq.poll() != null) {
         while (rq.poll() != null);
 
