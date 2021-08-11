@@ -34,7 +34,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import java.util.Random
+import kotlin.random.Random
 
 @ExperimentalSerializationApi
 @ExperimentalStdlibApi
@@ -57,7 +57,7 @@ class LeanMapTest : FreeSpec({
         val t = leanMap.asTransient() as TransientLeanMap<String, Int>
 
         t.count shouldBeExactly 0
-        t.root.value.shouldBeNull()
+        t._root.value.shouldBeNull()
     }
 
     "invoke(...pairs)" {
@@ -242,7 +242,7 @@ class LeanMapTest : FreeSpec({
         "when map is LMap, it should return NodeIter" {
             val gen = Arb.set(Arb.string(0, 8), 0..6)
             checkAll(gen) { set: Set<String> ->
-                val a = set.map { s: String -> Pair(s, Random().nextInt()) }
+                val a = set.map { s: String -> Pair(s, Random.nextInt()) }
                 val map = PersistentHashMap(*a.toTypedArray())
 
                 val iter = map.iterator()

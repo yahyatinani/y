@@ -1,25 +1,18 @@
 package com.github.whyrising.y.map.hashmap
 
-import com.github.whyrising.y.concretions.map.MapEntry
 import com.github.whyrising.y.concretions.map.PersistentHashMap
 import com.github.whyrising.y.concretions.map.PersistentHashMap.BitMapIndexedNode
 import com.github.whyrising.y.concretions.map.PersistentHashMap.EmptyHashMap
 import com.github.whyrising.y.concretions.map.PersistentHashMap.TransientLeanMap
-import com.github.whyrising.y.utils.runAction
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldContainAll
-import io.kotest.matchers.collections.shouldNotContainAnyOf
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
-import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalStdlibApi::class)
 class TransientLeanMapTest : FreeSpec({
@@ -27,7 +20,7 @@ class TransientLeanMapTest : FreeSpec({
         val trlm = TransientLeanMap<String, Int>(EmptyHashMap)
 
         trlm.isMutable.value.shouldBeTrue()
-        trlm.root.value.shouldBeNull()
+        trlm._root.value.shouldBeNull()
         trlm._count.value shouldBeExactly 0
         trlm.leafFlag.value.shouldBeNull()
     }
@@ -66,22 +59,22 @@ class TransientLeanMapTest : FreeSpec({
         val trlm = TransientLeanMap<String, Int>(EmptyHashMap)
 
         val r1 = trlm.doAssoc("a", 1) as TransientLeanMap<String, Int>
-        val root1 = r1.root.value as BitMapIndexedNode<String, Int>
+        val root1 = r1._root.value as BitMapIndexedNode<String, Int>
 
         r1 shouldBeSameInstanceAs trlm
         r1.leafFlag.value.shouldNotBeNull()
         r1.count shouldBeExactly 1
-        r1.root shouldBeSameInstanceAs trlm.root
+        r1._root shouldBeSameInstanceAs trlm._root
         root1.array[0] shouldBe "a"
         root1.array[1] shouldBe 1
 
         val r2 = r1.doAssoc("b", 2) as TransientLeanMap<String, Int>
-        val root2 = r2.root.value as BitMapIndexedNode<String, Int>
+        val root2 = r2._root.value as BitMapIndexedNode<String, Int>
 
         r2.leafFlag.value.shouldNotBeNull()
         r2 shouldBeSameInstanceAs trlm
         r2.count shouldBeExactly 2
-        r2.root shouldBeSameInstanceAs r1.root
+        r2._root shouldBeSameInstanceAs r1._root
 
         root2.array[0] shouldBe "a"
         root2.array[1] shouldBe 1
@@ -95,7 +88,7 @@ class TransientLeanMapTest : FreeSpec({
             TransientLeanMap<String, Int>
 
         val result = trlm.doDissoc("b") as TransientLeanMap<String, Int>
-        val root = result.root.value
+        val root = result._root.value
             as BitMapIndexedNode<String, Int>
 
         result.leafFlag.value.shouldNotBeNull()
@@ -117,37 +110,5 @@ class TransientLeanMapTest : FreeSpec({
         trlm.doValAt("a", default) shouldBe 1
         trlm.doValAt("b", default) shouldBe 2
         trlm.doValAt("c", default) shouldBe 3
-    }
-
-    "concurrency" {
-        val range16 = 1..16
-        val l = range16.fold(listOf<MapEntry<Int, String>>()) { coll, i ->
-            coll.plus<MapEntry<Int, String>>(MapEntry(i, "$i"))
-        }
-
-        val keyCounter = atomic(0)
-        val t1 = TransientLeanMap<Int, String>(EmptyHashMap)
-
-        withContext(Dispatchers.Default) {
-            runAction(100, 100) {
-                val i = keyCounter.incrementAndGet()
-                t1.assoc(i, "$i")
-            }
-        }
-
-        t1.count shouldBeExactly 10000
-        val m = t1.persistent() as PersistentHashMap<Int, String>
-        m.shouldContainAll(l)
-
-        val t2 = m.asTransient()
-        withContext(Dispatchers.Default) {
-            runAction(100, 100) {
-                t2.dissoc(keyCounter.getAndDecrement())
-            }
-        }
-
-        val persistent = t2.persistent()
-        persistent.shouldNotContainAnyOf(l)
-        persistent.count shouldBeExactly 0
     }
 })
