@@ -1,7 +1,6 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.concretions.map.m
-import com.github.whyrising.y.utils.massiveRun
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -11,9 +10,6 @@ import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
-import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -120,34 +116,5 @@ class KeywordTest : FreeSpec({
         val decodedKey = Json.decodeFromString<Keyword>(stringKey)
 
         decodedKey shouldBeSameInstanceAs k("a")
-    }
-
-    "concurrency" {
-        val counter = atomic(0)
-
-        withContext(Dispatchers.Default) {
-            massiveRun {
-                Keyword("${counter.incrementAndGet()}")
-            }
-        }
-
-        counter.getAndSet(0)
-        System.gc()
-
-        withContext(Dispatchers.Default) {
-            massiveRun {
-                Keyword("${counter.incrementAndGet()}")
-            }
-        }
-
-        Keyword.cache.size shouldBeExactly 100000
-    }
-
-    "when gc collected a keyword, it should remove it from the cache" {
-        Keyword("a")
-
-        System.gc()
-
-        Keyword("a")
     }
 })
