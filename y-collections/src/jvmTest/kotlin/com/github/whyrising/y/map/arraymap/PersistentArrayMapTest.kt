@@ -16,6 +16,7 @@ import com.github.whyrising.y.concretions.map.toPArrayMap
 import com.github.whyrising.y.concretions.map.toPhashMap
 import com.github.whyrising.y.concretions.vector.v
 import com.github.whyrising.y.mutable.map.TransientMap
+import com.github.whyrising.y.utils.runAction
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
@@ -37,8 +38,6 @@ import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
@@ -66,8 +65,8 @@ class PersistentArrayMapTest : FreeSpec({
                         tam.array.size shouldBeExactly list.size
                     }
                 }
-                tam.length.value shouldBeExactly list.size
-                tam.isMutable.value.shouldBeTrue()
+                tam._length.value shouldBeExactly list.size
+                tam._isMutable.value.shouldBeTrue()
                 shouldNotThrow<Exception> { tam.assertMutable() }
             }
         }
@@ -78,7 +77,7 @@ class PersistentArrayMapTest : FreeSpec({
 
             val map = tam.doPersistent() as PersistentArrayMap<String, Int>
 
-            tam.isMutable.value.shouldBeFalse()
+            tam._isMutable.value.shouldBeFalse()
             map.count shouldBeExactly array.size
             map.array shouldNotBeSameInstanceAs array
             map shouldBe m("a" to 1, "b" to 2, "c" to 3)
@@ -94,7 +93,7 @@ class PersistentArrayMapTest : FreeSpec({
 
             val map = tam.persistent() as PersistentArrayMap<String, Int>
 
-            tam.isMutable.value.shouldBeFalse()
+            tam._isMutable.value.shouldBeFalse()
             map.count shouldBeExactly array.size
             map.array shouldNotBeSameInstanceAs array
             map shouldBe m("a" to 1, "b" to 2, "c" to 3)
@@ -162,7 +161,7 @@ class PersistentArrayMapTest : FreeSpec({
                     as TransientArrayMap<Any, String>
                 val pairs = newTam.array
 
-                tam.length.value shouldBeExactly array.size
+                tam._length.value shouldBeExactly array.size
 
                 pairs[0]!!.first shouldBe 1L
                 pairs[0]!!.second shouldBe "1"
@@ -248,7 +247,7 @@ class PersistentArrayMapTest : FreeSpec({
                     as TransientArrayMap<Any, String>
                 val pairs = newTam.array
 
-                tam.length.value shouldBeExactly array.size
+                tam._length.value shouldBeExactly array.size
 
                 pairs[0]!!.first shouldBe 1L
                 pairs[0]!!.second shouldBe "1"
@@ -296,7 +295,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val newTam = tam.conj(MapEntry("a", 99))
                     as TransientArrayMap<String, Int>
 
-                newTam.length.value shouldBeExactly a.size
+                newTam._length.value shouldBeExactly a.size
                 newTam.array[0]!!.second shouldBeExactly 99
                 newTam.array[1]!!.second shouldBeExactly 2
                 newTam.array[2]!!.second shouldBeExactly 3
@@ -320,7 +319,7 @@ class PersistentArrayMapTest : FreeSpec({
                     val newMap = tam.conj(v("a", 99))
                         as TransientArrayMap<String, Int>
 
-                    newMap.length.value shouldBeExactly a.size
+                    newMap._length.value shouldBeExactly a.size
                     newMap.array[0]!!.second shouldBeExactly 99
                     newMap.array[1]!!.second shouldBeExactly 2
                 }
@@ -354,7 +353,7 @@ class PersistentArrayMapTest : FreeSpec({
                         as TransientArrayMap<String, Int>
                     val pairs = newTam.array
 
-                    newTam.length.value shouldBeExactly
+                    newTam._length.value shouldBeExactly
                         a.size + entries.count
 
                     pairs[0]!! shouldBe Pair("a", 1)
@@ -382,7 +381,7 @@ class PersistentArrayMapTest : FreeSpec({
 
                 val rTam = tam.doDissoc(2) as TransientArrayMap<Int, String>
 
-                rTam.length.value shouldBeExactly 0
+                rTam._length.value shouldBeExactly 0
                 val pairs = rTam.array
 
                 for (i in pairs.indices)
@@ -396,7 +395,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val rTam = tam.doDissoc(1) as TransientArrayMap<Any?, String>
                 val pairs = rTam.array
 
-                rTam.length.value shouldBeExactly a.size - 1
+                rTam._length.value shouldBeExactly a.size - 1
                 pairs[0] shouldBe (3 to "3")
                 pairs[1] shouldBe (2L to "2")
             }
@@ -430,7 +429,7 @@ class PersistentArrayMapTest : FreeSpec({
 
                 val rTam = tam.dissoc(2) as TransientArrayMap<Int, String>
 
-                rTam.length.value shouldBeExactly 0
+                rTam._length.value shouldBeExactly 0
                 val pairs = rTam.array
 
                 for (i in pairs.indices)
@@ -444,7 +443,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val rTam = tam.dissoc(1) as TransientArrayMap<Any?, String>
                 val pairs = rTam.array
 
-                rTam.length.value shouldBeExactly a.size - 1
+                rTam._length.value shouldBeExactly a.size - 1
                 pairs[0] shouldBe (3 to "3")
                 pairs[1] shouldBe (2L to "2")
             }
@@ -690,7 +689,7 @@ class PersistentArrayMapTest : FreeSpec({
         val tr = map.asTransient() as TransientArrayMap<String, Int>
         val array = tr.array
 
-        tr.length.value shouldBeExactly 3
+        tr._length.value shouldBeExactly 3
         array.size shouldBeExactly 16
         array[0] shouldBe ("a" to 1)
         array[1] shouldBe ("b" to 2)
@@ -1097,12 +1096,3 @@ class PersistentArrayMapTest : FreeSpec({
         }
     }
 })
-
-internal
-suspend fun runAction(coroutines: Int, times: Int, action: suspend () -> Unit) {
-    coroutineScope {
-        repeat(coroutines) {
-            launch { repeat(times) { action() } }
-        }
-    }
-}

@@ -5,7 +5,7 @@ import com.github.whyrising.y.concretions.map.PersistentHashMap
 import com.github.whyrising.y.concretions.map.PersistentHashMap.BitMapIndexedNode
 import com.github.whyrising.y.concretions.map.PersistentHashMap.EmptyHashMap
 import com.github.whyrising.y.concretions.map.PersistentHashMap.TransientLeanMap
-import com.github.whyrising.y.map.arraymap.runAction
+import com.github.whyrising.y.utils.runAction
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec

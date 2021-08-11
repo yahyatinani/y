@@ -3,7 +3,7 @@ package com.github.whyrising.y.utils
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-suspend fun massiveRun(
+suspend fun runAction(
     n: Int = 100,
     times: Int = 1000,
     action: suspend () -> Unit

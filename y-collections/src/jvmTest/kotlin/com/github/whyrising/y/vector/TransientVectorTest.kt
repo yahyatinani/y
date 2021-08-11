@@ -2,7 +2,7 @@ package com.github.whyrising.y.vector
 
 import com.github.whyrising.y.concretions.vector.PersistentVector
 import com.github.whyrising.y.concretions.vector.v
-import com.github.whyrising.y.map.arraymap.runAction
+import com.github.whyrising.y.utils.runAction
 import com.github.whyrising.y.vector.PersistentVectorTest.Companion.assertArraysAreEquiv
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
