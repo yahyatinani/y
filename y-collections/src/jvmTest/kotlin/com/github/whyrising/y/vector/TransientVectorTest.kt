@@ -1,15 +1,12 @@
 package com.github.whyrising.y.vector
 
 import com.github.whyrising.y.concretions.vector.PersistentVector
-import com.github.whyrising.y.concretions.vector.v
-import com.github.whyrising.y.utils.runAction
 import com.github.whyrising.y.vector.PersistentVectorTest.Companion.assertArraysAreEquiv
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -19,9 +16,6 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.checkAll
-import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @ExperimentalSerializationApi
@@ -305,26 +299,5 @@ class TransientVectorTest : FreeSpec({
                 mostRightLeaf.isMutable shouldBeSameInstanceAs tvIsMutable
             }
         }
-    }
-
-    "concurrency" {
-        val v = v<Int>()
-        val counter = atomic(0)
-        val transientVec = PersistentVector.TransientVector(v)
-        val coroutines = 100
-        val times = 10
-        val count = coroutines * times
-
-        withContext(Dispatchers.Default) {
-            runAction(coroutines, times) {
-                transientVec.conj(counter.incrementAndGet())
-            }
-        }
-
-        transientVec.count shouldBeExactly count
-
-        val vec = transientVec.persistent()
-
-        vec shouldContainAll (1..count).toList()
     }
 })

@@ -14,8 +14,9 @@ abstract class ATransientSet<out E>(
         get() = _transientMap.value.count
 
     override fun disjoin(key: @UnsafeVariance E): TransientSet<E> {
+        val transientMap = _transientMap.value.dissoc(key)
+
         _transientMap.update {
-            val transientMap = it.dissoc(key)
             when {
                 transientMap != it -> transientMap
                 else -> it
@@ -34,8 +35,9 @@ abstract class ATransientSet<out E>(
         _transientMap.value.valAt(key)
 
     override fun conj(e: @UnsafeVariance E): TransientSet<E> {
+        val transientMap = _transientMap.value.assoc(e, e)
+
         _transientMap.update {
-            val transientMap = it.assoc(e, e)
             when {
                 transientMap != it -> transientMap
                 else -> it
