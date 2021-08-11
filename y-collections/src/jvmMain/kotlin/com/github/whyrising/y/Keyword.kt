@@ -1,9 +1,8 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.core.IHashEq
+import com.github.whyrising.y.utils.clearCache
 import com.github.whyrising.y.util.getValue
-import kotlinx.atomicfu.locks.reentrantLock
-import kotlinx.atomicfu.locks.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -12,6 +11,10 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import java.lang.ref.Reference
+import java.lang.ref.ReferenceQueue
+import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 
 object KeywordSerializer : KSerializer<Keyword> {
     override val descriptor: SerialDescriptor =
@@ -23,8 +26,6 @@ object KeywordSerializer : KSerializer<Keyword> {
     override fun deserialize(decoder: Decoder): Keyword =
         k(decoder.decodeString())
 }
-
-internal val keywordsCache = hashMapOf<Symbol, Any>()
 
 @Serializable(KeywordSerializer::class)
 class Keyword private constructor(
@@ -60,31 +61,31 @@ class Keyword private constructor(
 
     companion object {
         const val MAGIC = -0x61c88647
-        private val lock = reentrantLock()
+
+        internal val cache: ConcurrentHashMap<Symbol, Reference<Keyword>> =
+            ConcurrentHashMap<Symbol, Reference<Keyword>>()
+
+        private val rq = ReferenceQueue<Keyword>()
 
         internal operator fun invoke(sym: Symbol): Keyword {
-            var existingRef = keywordsCache[sym]
+            var previousRef: Reference<Keyword>? = cache[sym]
 
-            if (existingRef == null) {
+            if (previousRef == null) {
+                clearCache(rq, cache)
                 val keyword = Keyword(sym)
+                previousRef = cache.putIfAbsent(sym, WeakReference(keyword, rq))
 
-                lock.withLock {
-                    existingRef =
-                        keywordsCache.put(sym, RefFactory.create(keyword))
-                }
-
-                if (existingRef == null) return keyword
+                if (previousRef == null)
+                    return keyword
             }
 
-            val existingKey = RefFactory.valueOf<Keyword>(existingRef!!)
+            val previousKey: Keyword? = previousRef.get()
 
-            if (existingKey != null) return existingKey
+            if (previousKey != null)
+                return previousKey
 
-            lock.withLock {
-                // if key got garbage collected, remove from cache
-                keywordsCache.remove(sym)
-            }
-
+            // if key got garbage collected, remove from cache, do over
+            cache.remove(sym, previousRef)
             return invoke(sym)
         }
 

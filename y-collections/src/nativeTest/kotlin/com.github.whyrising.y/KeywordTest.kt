@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class RefFactoryTest {
+class KeywordNativeTest {
     @BeforeTest
     fun setUp() {
         keywordsCache.clear()
@@ -16,27 +16,6 @@ class RefFactoryTest {
         Keyword("a")
         Keyword("b")
         Keyword("c")
-    }
-
-    @Test
-    @Suppress("UNCHECKED_CAST")
-    fun create() {
-        val symbol = Symbol("a")
-
-        val weakReference = RefFactory.create(symbol) as WeakReference<Symbol>
-
-        assertNotNull(weakReference)
-        assertEquals(symbol, weakReference.value)
-    }
-
-    @Test
-    @Suppress("UNCHECKED_CAST")
-    fun valueOf() {
-        val symbol = Symbol("a")
-
-        val value = RefFactory.valueOf<Symbol>(RefFactory.create(symbol))
-
-        assertEquals(symbol, value)
     }
 
     @Test
