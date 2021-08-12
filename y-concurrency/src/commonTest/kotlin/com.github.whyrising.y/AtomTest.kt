@@ -379,4 +379,28 @@ class AtomTest {
         pair.second shouldBeExactly newV
         isWatchCalled.shouldBeTrue()
     }
+
+    @Test
+    fun `resetVals(newValue)`() {
+        var isWatchCalled = false
+        val atom = Atom(10)
+        val k = ":watch"
+        val watch: (Any, IRef<Int>, Int, Int) -> Any =
+            { key, ref, oldVal, newVal ->
+                isWatchCalled = true
+
+                key shouldBeSameInstanceAs k
+                ref shouldBeSameInstanceAs atom
+                oldVal shouldBeExactly 10
+                newVal shouldBeExactly 15
+            }
+        atom.addWatch(k, watch)
+
+        val pair = atom.resetVals(15)
+
+        atom.deref() shouldBeExactly 15
+        pair.first shouldBeExactly 10
+        pair.second shouldBeExactly 15
+        isWatchCalled.shouldBeTrue()
+    }
 }

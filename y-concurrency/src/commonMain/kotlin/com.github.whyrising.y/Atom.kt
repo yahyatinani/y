@@ -112,4 +112,11 @@ class Atom<T>(state: T) : ARef<T>(), IAtom2<T> {
 
         return b
     }
+
+    override fun resetVals(newValue: T): Pair<T, T> {
+        validate(newValue)
+        val oldValue = state.getAndSet(newValue)
+        notifyWatches(oldValue, newValue)
+        return oldValue to newValue
+    }
 }

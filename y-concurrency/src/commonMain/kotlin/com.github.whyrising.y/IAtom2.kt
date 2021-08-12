@@ -10,4 +10,6 @@ interface IAtom2<T> : IAtom<T> {
         arg2: A2,
         f: (currentVal: T, arg1: A1, arg2: A2) -> T
     ): Pair<T, T>
+
+    fun resetVals(newValue: T): Pair<T, T>
 }
