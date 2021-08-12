@@ -268,4 +268,31 @@ class AtomTest {
         newVal shouldBeExactly newV
         isWatchCalled.shouldBeTrue()
     }
+
+    @Test
+    fun `swap(f, arg1, arg2)`() {
+        var isWatchCalled = false
+        val oldV = 10
+        val newV = 18
+        val atom = Atom(oldV)
+        val k = ":watch"
+        val watch: (Any, IRef<Int>, Int, Int) -> Any =
+            { key, ref, oldVal, newVal ->
+                isWatchCalled = true
+
+                key shouldBeSameInstanceAs k
+                ref shouldBeSameInstanceAs atom
+                oldVal shouldBeExactly oldV
+                newVal shouldBeExactly newV
+            }
+        atom.addWatch(k, watch)
+
+        val newVal = atom.swap(3, 5) { currentVal, arg1, arg2 ->
+            currentVal + arg1 + arg2
+        }
+
+        atom.deref() shouldBeExactly newV
+        newVal shouldBeExactly newV
+        isWatchCalled.shouldBeTrue()
+    }
 }
