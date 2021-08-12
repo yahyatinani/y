@@ -75,7 +75,7 @@ abstract class ARef<T> : IRef<T> {
                 val e = s.first()
                 val f = e.value
                 f(e.key, this, oldVal, newVal)
-                
+
                 s = s.rest()
             }
         }
