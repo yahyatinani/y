@@ -47,6 +47,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation(Libs.Kotlinx.atomicfu)
+                api(project(":y-collections"))
             }
         }
         val commonTest by getting {
@@ -61,8 +62,6 @@ kotlin {
             dependencies {
                 implementation(Libs.Kotest.runner)
                 implementation(Libs.Kotlinx.coroutinesTest)
-                implementation(Libs.Kotest.assertions)
-                implementation(Libs.Kotest.propertyTest)
             }
         }
     }

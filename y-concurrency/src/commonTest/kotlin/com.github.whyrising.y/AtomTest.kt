@@ -1,6 +1,7 @@
 package com.github.whyrising.y
 
 import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -43,16 +44,14 @@ class AtomTest {
 
     @Test
     fun `validator property should be null after atom creation`() {
-        val n = 10
-        val ref: IRef<Int> = Atom(n)
+        val ref: IRef<Int> = Atom(10)
 
         ref.validator.shouldBeNull()
     }
 
     @Test
     fun `set validator`() {
-        val n = 10
-        val ref: IRef<Int> = Atom(n)
+        val ref: IRef<Int> = Atom(10)
         val vf: (Int) -> Boolean = { it > 5 }
 
         ref.validator = vf
@@ -62,8 +61,7 @@ class AtomTest {
 
     @Test
     fun `when atom value doesn't pas validator fun, set should throw`() {
-        val n = 10
-        val ref: IRef<Int> = Atom(n)
+        val ref: IRef<Int> = Atom(10)
         val vf: (Int) -> Boolean = { it > 15 }
 
         val e = shouldThrowExactly<IllegalStateException> {
@@ -76,8 +74,7 @@ class AtomTest {
 
     @Test
     fun `when validator fun throws, encapsulate into IllegalStateException`() {
-        val n = 10
-        val ref: IRef<Int> = Atom(n)
+        val ref: IRef<Int> = Atom(10)
         val vf: (Int) -> Boolean = { throw Exception("mock") }
 
         val e = shouldThrowExactly<IllegalStateException> {
@@ -90,8 +87,7 @@ class AtomTest {
 
     @Test
     fun `swap(state) should throw when new value doesn't pass validation`() {
-        val n = 10
-        val atom = Atom(n)
+        val atom = Atom(10)
         val vf: (Int) -> Boolean = { it > 5 }
         atom.validator = vf
 
@@ -100,5 +96,101 @@ class AtomTest {
         }
 
         e.message shouldBe "Invalid reference state"
+    }
+
+    @Test
+    fun `watches should be empty after creation of atom`() {
+        val atom = Atom(10)
+        val f: (Any, IRef<Int>, Int, Int) -> Any = { a, b, c, d -> }
+
+        val watches = atom.watches
+
+        watches.count shouldBeExactly 0
+    }
+
+    @Test
+    fun `addWatch(key, callback) should add a watch function to watches`() {
+        val atom: IRef<Int> = Atom(10)
+        val callback: (Any, IRef<Int>, Int, Int) -> Any = { a, b, c, d -> }
+        val key = ":key"
+
+        val ref = atom.addWatch(key, callback)
+
+        ref shouldBeSameInstanceAs atom
+        ref.watches.count shouldBeExactly 1
+        ref.watches.valAt(key) shouldBeSameInstanceAs callback
+    }
+
+    @Test
+    fun `removeWatch(key, callback) should remove a watch from watches`() {
+        val atom: IRef<Int> = Atom(10)
+        val callback: (Any, IRef<Int>, Int, Int) -> Any = { a, b, c, d -> }
+        val key = ":key"
+        atom.addWatch(key, callback)
+
+        val ref = atom.removeWatch(key)
+
+        ref shouldBeSameInstanceAs atom
+        ref.watches.count shouldBeExactly 0
+    }
+
+    @Test
+    fun `notifyWatches(oldV, newV) should call every watchFn in watches`() {
+        var isWatch1Called = false
+        var isWatch2Called = false
+        val oldV = 10
+        val newV = 20
+        val k1 = ":watch1"
+        val k2 = ":watch2"
+        val atom: IRef<Int> = Atom(oldV)
+        val watch1: (Any, IRef<Int>, Int, Int) -> Any =
+            { key, ref, oldVal, newVal ->
+                isWatch1Called = true
+
+                key shouldBeSameInstanceAs k1
+                ref shouldBeSameInstanceAs atom
+                oldVal shouldBeExactly oldV
+                newVal shouldBeExactly newV
+            }
+        val watch2: (Any, IRef<Int>, Int, Int) -> Any =
+            { key, ref, oldVal, newVal ->
+                isWatch2Called = true
+
+                key shouldBeSameInstanceAs k2
+                ref shouldBeSameInstanceAs atom
+                oldVal shouldBeExactly oldV
+                newVal shouldBeExactly newV
+            }
+        atom.addWatch(k1, watch1)
+        atom.addWatch(k2, watch2)
+
+        (atom as ARef<Int>).notifyWatches(oldV, newV)
+
+        isWatch1Called.shouldBeTrue()
+        isWatch2Called.shouldBeTrue()
+    }
+
+    @Test
+    fun `swap(state) should notify watchers`() {
+        var isWatchCalled = false
+        val atom = Atom(10)
+        val k = ":watch"
+        val watch: (Any, IRef<Int>, Int, Int) -> Any =
+            { key, ref, oldVal, newVal ->
+                isWatchCalled = true
+
+                key shouldBeSameInstanceAs k
+                ref shouldBeSameInstanceAs atom
+                oldVal shouldBeExactly 10
+                newVal shouldBeExactly 11
+            }
+        atom.addWatch(k, watch)
+
+        val newVal = atom.swap { currentVal ->
+            currentVal + 1
+        }
+
+        newVal shouldBeExactly 11
+        isWatchCalled.shouldBeTrue()
     }
 }

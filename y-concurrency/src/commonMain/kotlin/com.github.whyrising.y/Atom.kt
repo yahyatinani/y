@@ -15,7 +15,7 @@ class Atom<T>(state: T) : ARef<T>(), IAtom<T> {
             validate(newVal)
 
             if (state.compareAndSet(currentV, newVal)) {
-                // TODO: notify
+                notifyWatches(currentV, newVal)
                 return newVal
             }
         }
