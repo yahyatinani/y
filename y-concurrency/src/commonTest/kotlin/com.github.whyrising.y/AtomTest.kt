@@ -403,4 +403,22 @@ class AtomTest {
         pair.second shouldBeExactly 15
         isWatchCalled.shouldBeTrue()
     }
+
+    @Test
+    fun `atom()`() {
+        val atom: Atom<Int> = atom(15)
+
+        atom.swap { it * 2 }
+
+        atom.deref() shouldBeExactly 30
+    }
+
+    @Test
+    fun `invoke() should call deref()`() {
+        val atm: Atom<Int> = atom(15)
+
+        atm.swap { it * 2 }
+
+        atm() shouldBeExactly 30
+    }
 }

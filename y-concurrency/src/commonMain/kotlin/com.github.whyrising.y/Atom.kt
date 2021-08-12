@@ -119,4 +119,8 @@ class Atom<T>(state: T) : ARef<T>(), IAtom2<T> {
         notifyWatches(oldValue, newValue)
         return oldValue to newValue
     }
+
+    operator fun invoke(): T = deref()
 }
+
+fun <T> atom(state: T): Atom<T> = Atom(state)
