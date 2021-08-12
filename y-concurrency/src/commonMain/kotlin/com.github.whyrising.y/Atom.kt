@@ -20,4 +20,11 @@ class Atom<T>(state: T) : ARef<T>(), IAtom<T> {
             }
         }
     }
+
+    override fun reset(newValue: T): T {
+        validate(newValue)
+        val oldValue = state.getAndSet(newValue)
+        notifyWatches(oldValue, newValue)
+        return newValue
+    }
 }
