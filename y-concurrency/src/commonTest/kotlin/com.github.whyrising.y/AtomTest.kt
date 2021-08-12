@@ -13,4 +13,15 @@ class AtomTest {
 
         state.value shouldBeExactly n
     }
+
+    @Test
+    fun `deref() should return the value of internal state of the atom`() {
+        val n = 10
+        val atom = Atom(n)
+
+        val value = atom.deref()
+
+        value shouldBeExactly n
+        value shouldBeExactly atom.state.value
+    }
 }
