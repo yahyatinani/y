@@ -295,4 +295,88 @@ class AtomTest {
         newVal shouldBeExactly newV
         isWatchCalled.shouldBeTrue()
     }
+
+    @Test
+    fun `swapVals(f) should mutate atom and return old and new value pair`() {
+        var isWatchCalled = false
+        val oldV = 10
+        val newV = 15
+        val atom = Atom(oldV)
+        val k = ":watch"
+        val watch: (Any, IRef<Int>, Int, Int) -> Any =
+            { key, ref, oldVal, newVal ->
+                isWatchCalled = true
+
+                key shouldBeSameInstanceAs k
+                ref shouldBeSameInstanceAs atom
+                oldVal shouldBeExactly oldV
+                newVal shouldBeExactly newV
+            }
+        atom.addWatch(k, watch)
+
+        val pair = atom.swapVals { currentVal ->
+            currentVal + 5
+        }
+
+        atom.deref() shouldBeExactly newV
+        pair.first shouldBeExactly oldV
+        pair.second shouldBeExactly newV
+        isWatchCalled.shouldBeTrue()
+    }
+
+    @Test
+    fun `swapVals(arg, f)`() {
+        var isWatchCalled = false
+        val oldV = 10
+        val newV = 13
+        val atom = Atom(oldV)
+        val k = ":watch"
+        val watch: (Any, IRef<Int>, Int, Int) -> Any =
+            { key, ref, oldVal, newVal ->
+                isWatchCalled = true
+
+                key shouldBeSameInstanceAs k
+                ref shouldBeSameInstanceAs atom
+                oldVal shouldBeExactly oldV
+                newVal shouldBeExactly newV
+            }
+        atom.addWatch(k, watch)
+
+        val pair = atom.swapVals(3) { arg, currentVal ->
+            currentVal + arg
+        }
+
+        atom.deref() shouldBeExactly newV
+        pair.first shouldBeExactly oldV
+        pair.second shouldBeExactly newV
+        isWatchCalled.shouldBeTrue()
+    }
+
+    @Test
+    fun `swapVals(arg1, arg2, f)`() {
+        var isWatchCalled = false
+        val oldV = 10
+        val newV = 17
+        val atom = Atom(oldV)
+        val k = ":watch"
+        val watch: (Any, IRef<Int>, Int, Int) -> Any =
+            { key, ref, oldVal, newVal ->
+                isWatchCalled = true
+
+                key shouldBeSameInstanceAs k
+                ref shouldBeSameInstanceAs atom
+                oldVal shouldBeExactly oldV
+                newVal shouldBeExactly newV
+            }
+        atom.addWatch(k, watch)
+
+        val pair = atom.swapVals(3, 4) { arg1, arg2, currentVal ->
+            currentVal + arg1 + arg2
+        }
+
+        atom.deref() shouldBeExactly newV
+        pair.first shouldBeExactly oldV
+        pair.second shouldBeExactly newV
+        isWatchCalled.shouldBeTrue()
+    }
 }
