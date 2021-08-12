@@ -27,4 +27,13 @@ class Atom<T>(state: T) : ARef<T>(), IAtom<T> {
         notifyWatches(oldValue, newValue)
         return newValue
     }
+
+    fun compareAndSet(oldValue: T, newValue: T): Boolean {
+        validate(newValue)
+        val b = state.compareAndSet(oldValue, newValue)
+        if (b)
+            notifyWatches(oldValue, newValue)
+
+        return b
+    }
 }
