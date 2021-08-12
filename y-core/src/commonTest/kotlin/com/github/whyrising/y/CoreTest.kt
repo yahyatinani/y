@@ -2,12 +2,34 @@ package com.github.whyrising.y
 
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.doubles.shouldBeExactly
+import io.kotest.matchers.floats.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.longs.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
 
 class CoreTest {
+    @Test
+    fun `inc(x)`() {
+        inc(1.toByte()) shouldBe 2.toByte()
+        inc(1.toShort()) shouldBe 2.toShort()
+        inc(1) shouldBeExactly 2
+        inc(1L) shouldBeExactly 2L
+        inc(1.2f) shouldBeExactly 2.2f
+        inc(1.2) shouldBeExactly 2.2
+    }
+
+    @Test
+    fun `dec(x)`() {
+        dec(1.toByte()) shouldBe 0.toByte()
+        dec(1.toShort()) shouldBe 0.toShort()
+        dec(1) shouldBeExactly 0
+        dec(1L) shouldBeExactly 0L
+        dec(1.2f) shouldBeExactly 1.2f.dec()
+        dec(1.2) shouldBeExactly 1.2.dec()
+    }
+
     @Test
     fun `identity(x) should return x`() {
         identity(10) shouldBeExactly 10

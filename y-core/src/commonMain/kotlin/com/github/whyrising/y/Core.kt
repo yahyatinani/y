@@ -8,18 +8,20 @@ class NotANumberError(x: Any) : RuntimeException(
     "Either `$x` is not a number or this type is not supported."
 )
 
-inline fun <reified T> inc(x: Any): T = when (x) {
+@Suppress("UNCHECKED_CAST")
+fun <T : Number> inc(x: T): T = when (x) {
     is Byte -> x.inc() as T
     is Short -> x.inc() as T
     is Int -> x.inc() as T
     is Long -> x.inc() as T
     is Float -> x.inc() as T
     is Double -> x.inc() as T
-// TODO is BigInteger -> x.inc() as T
+    // TODO is BigInteger -> x.inc() as T
     else -> throw NotANumberError(x)
 }
 
-inline fun <reified T> dec(x: Any): T = when (x) {
+@Suppress("UNCHECKED_CAST")
+fun <T : Number> dec(x: T): T = when (x) {
     is Byte -> x.dec() as T
     is Short -> x.dec() as T
     is Int -> x.dec() as T
