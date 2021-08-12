@@ -21,6 +21,19 @@ class Atom<T>(state: T) : ARef<T>(), IAtom<T> {
         }
     }
 
+    fun <A> swap(arg: A, f: (currentVal: T, arg: A) -> T): T {
+        while (true) {
+            val currentV = deref()
+            val newVal = f(currentV, arg)
+            validate(newVal)
+
+            if (state.compareAndSet(currentV, newVal)) {
+                notifyWatches(currentV, newVal)
+                return newVal
+            }
+        }
+    }
+
     override fun reset(newValue: T): T {
         validate(newValue)
         val oldValue = state.getAndSet(newValue)
