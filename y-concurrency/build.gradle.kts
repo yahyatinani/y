@@ -56,6 +56,15 @@ kotlin {
                 implementation(Libs.Kotest.propertyTest)
             }
         }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(Libs.Kotest.runner)
+                implementation(Libs.Kotlinx.coroutinesTest)
+                implementation(Libs.Kotest.assertions)
+                implementation(Libs.Kotest.propertyTest)
+            }
+        }
     }
 }
 
