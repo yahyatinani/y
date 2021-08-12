@@ -8,6 +8,7 @@ import com.github.whyrising.y.concretions.list.l
 import com.github.whyrising.y.concretions.vector.v
 import com.github.whyrising.y.mocks.MockSeq
 import com.github.whyrising.y.util.Murmur3
+import com.github.whyrising.y.utils.runAction
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -16,25 +17,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.system.measureTimeMillis
-
-suspend fun massiveRun(action: suspend () -> Unit) {
-    val n = 100
-    val k = 10000
-    val time = measureTimeMillis {
-        coroutineScope {
-            repeat(n) {
-                launch {
-                    repeat(k) { action() }
-                }
-            }
-        }
-    }
-    println("Completed ${n * k} actions in $time ms")
-}
 
 @ExperimentalStdlibApi
 class LazySeqTest : FreeSpec({
@@ -75,7 +58,7 @@ class LazySeqTest : FreeSpec({
             var seqVal: Any? = null
 
             withContext(Dispatchers.Default) {
-                massiveRun {
+                runAction {
                     seqVal = lazySeq.seqVal()
                 }
             }
@@ -96,7 +79,7 @@ class LazySeqTest : FreeSpec({
             var seq: ISeq<Int>? = null
 
             withContext(Dispatchers.Default) {
-                massiveRun {
+                runAction {
                     seq = lazySeq.seq()
                 }
             }
@@ -119,7 +102,7 @@ class LazySeqTest : FreeSpec({
             var seq: ISeq<Int>? = null
 
             withContext(Dispatchers.Default) {
-                massiveRun {
+                runAction {
                     seq = lazySeq.seq()
                 }
             }

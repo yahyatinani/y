@@ -18,11 +18,8 @@ import com.github.whyrising.y.util.Box
 import com.github.whyrising.y.util.equiv
 import com.github.whyrising.y.util.hasheq
 import kotlinx.atomicfu.AtomicBoolean
-import kotlinx.atomicfu.AtomicInt
-import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.locks.reentrantLock
-import kotlinx.atomicfu.locks.withLock
+import kotlinx.atomicfu.update
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.MapSerializer
@@ -117,10 +114,12 @@ sealed class PersistentHashMap<out K, out V>(
 
         @ExperimentalStdlibApi
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
-            val newRoot =
-                _root.without(atomic(false), 0, hasheq(key), key, Box(null))
+            val newRoot = _root.without(
+                atomic(false), 0, hasheq(key), key, Box(null)
+            )
 
-            if (newRoot == _root) return this
+            if (newRoot == _root)
+                return this
 
             return when (val newCount = _count - 1) {
                 0 -> EmptyHashMap
@@ -314,15 +313,19 @@ sealed class PersistentHashMap<out K, out V>(
         }
     }
 
+    /* Transients are not thread safe */
     internal class TransientLeanMap<out K, out V> private constructor(
-        val isMutable: AtomicBoolean,
-        val root: AtomicRef<Node<@UnsafeVariance K, @UnsafeVariance V>?>,
-        val _count: AtomicInt,
+        internal val isMutable: AtomicBoolean,
+        root: Node<K, V>?,
+        count: Int,
         val leafFlag: Box
     ) : ATransientMap<K, V>() {
+        internal
+        val _root = atomic<Node<@UnsafeVariance K, @UnsafeVariance V>?>(root)
+        internal val _count = atomic(count)
 
         override val doCount: Int
-            get() = _count.value
+            by _count
 
         override fun assertMutable() {
             if (!isMutable.value)
@@ -336,29 +339,50 @@ sealed class PersistentHashMap<out K, out V>(
             key: @UnsafeVariance K,
             value: @UnsafeVariance V
         ): TransientMap<K, V> {
-            lock.withLock {
-                leafFlag.value = null
-                var n: Node<K, V> = root.value ?: EmptyBitMapIndexedNode
-                n = n.assoc(isMutable, 0, hasheq(key), key, value, leafFlag)
-                if (n != root.value) root.value = n
-                if (leafFlag.value != null) _count.incrementAndGet()
+            leafFlag.value = null
+            val node = (_root.value ?: EmptyBitMapIndexedNode).assoc(
+                isMutable,
+                0,
+                hasheq(key),
+                key,
+                value,
+                leafFlag
+            )
+
+            _root.update {
+                when {
+                    it != node -> node
+                    else -> it
+                }
             }
+
+            if (leafFlag.value != null)
+                _count.incrementAndGet()
 
             return this
         }
 
         @ExperimentalStdlibApi
         override fun doDissoc(key: @UnsafeVariance K): TransientMap<K, V> {
-            lock.withLock {
-                leafFlag.value = null
-                var node: Node<K, V> = root.value ?: EmptyBitMapIndexedNode
+            leafFlag.value = null
 
-                node = node.without(isMutable, 0, hasheq(key), key, leafFlag)
+            val node = (_root.value ?: EmptyBitMapIndexedNode).without(
+                isMutable,
+                0,
+                hasheq(key),
+                key,
+                leafFlag
+            )
 
-                if (node != root.value) root.value = node
-
-                if (leafFlag.value != null) _count.decrementAndGet()
+            _root.update {
+                when {
+                    it != node -> node
+                    else -> it
+                }
             }
+
+            if (leafFlag.value != null)
+                _count.decrementAndGet()
 
             return this
         }
@@ -368,7 +392,7 @@ sealed class PersistentHashMap<out K, out V>(
 
             return when (_count.value) {
                 0 -> EmptyHashMap
-                else -> LMap(_count.value, root.value as Node<K, V>)
+                else -> LMap(_count.value, _root.value as Node<K, V>)
             }
         }
 
@@ -376,20 +400,18 @@ sealed class PersistentHashMap<out K, out V>(
         override fun doValAt(
             key: @UnsafeVariance K,
             default: @UnsafeVariance V?
-        ): V? = when (val value = root.value) {
+        ): V? = when (val value = _root.value) {
             null -> default
             else -> value.find(0, hasheq(key), key, default)
         }
 
         companion object {
-            private val lock = reentrantLock()
-
             operator fun <K, V> invoke(
                 map: PersistentHashMap<K, V>
             ): TransientLeanMap<K, V> = TransientLeanMap(
                 atomic(true),
-                atomic(map.root),
-                atomic(map.count),
+                map.root,
+                map.count,
                 Box(null)
             )
         }
@@ -419,7 +441,6 @@ sealed class PersistentHashMap<out K, out V>(
         val nodemap: Int,
         override val array: Array<Any?>
     ) : Node<K, V> {
-
         fun mergeIntoSubNode(
             isMutable: AtomicBoolean,
             shift: Int,
@@ -501,7 +522,7 @@ sealed class PersistentHashMap<out K, out V>(
             isMutable: AtomicBoolean
         ): BitMapIndexedNode<K, V> =
             // TODO: Review : Consider using the thread id instead of isMutable
-            if (isMutable(this.isMutable, isMutable)) {
+            if (isAllowedToEdit(this.isMutable, isMutable)) {
                 array[index] = value
                 this
             } else {
@@ -779,7 +800,7 @@ sealed class PersistentHashMap<out K, out V>(
         override var array: Array<Any?>
     ) : Node<K, V> {
 
-        private fun mutableAssoc(
+        internal fun mutableAssoc(
             index: Int,
             key: @UnsafeVariance K,
             value: @UnsafeVariance V,
@@ -839,8 +860,18 @@ sealed class PersistentHashMap<out K, out V>(
             leafFlag: Box
         ): Node<K, V> = findIndexBy(key).let { index ->
             when {
-                isMutable(this.isMutable, isMutable) ->
-                    mutableAssoc(index, key, value, leafFlag)
+                isAllowedToEdit(this.isMutable, isMutable) -> {
+                    val newNode = when (this.isMutable) {
+                        isMutable -> this
+                        else -> HashCollisionNode(
+                            isMutable,
+                            this.hash,
+                            this.count,
+                            this.array.copyOf()
+                        )
+                    }
+                    newNode.mutableAssoc(index, key, value, leafFlag)
+                }
                 else -> persistentAssoc(index, key, value, leafFlag)
             }
         }
@@ -951,7 +982,9 @@ sealed class PersistentHashMap<out K, out V>(
 
         fun bitpos(hash: Int, shift: Int): Int = 1 shl mask(hash, shift)
 
-        fun isMutable(x: AtomicBoolean, y: AtomicBoolean) =
+        // TODO: Use a threadID to allow different refs that hold the same
+        //  threadID to edit
+        fun isAllowedToEdit(x: AtomicBoolean, y: AtomicBoolean) =
             x == y && x.value
 
         private fun <K, V> createNodeSeq(

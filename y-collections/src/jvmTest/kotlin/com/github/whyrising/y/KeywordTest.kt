@@ -1,55 +1,120 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.concretions.map.m
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
-import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.ints.shouldBeLessThan
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @ExperimentalStdlibApi
-class KeywordJvmTest : FreeSpec({
+class KeywordTest : FreeSpec({
     beforeTest {
-        keywordsCache.clear()
+        Keyword.cache.clear()
     }
 
-    "concurrency" {
-        val counter = atomic(0)
+    "ctor" {
+        val key = Keyword("a")
 
-        withContext(Dispatchers.Default) {
-            massiveRun2 {
-                Keyword("${counter.incrementAndGet()}")
-            }
-        }
-
-        counter.getAndSet(0)
-        System.gc()
-
-        withContext(Dispatchers.Default) {
-            massiveRun2 {
-                Keyword("${counter.incrementAndGet()}")
-            }
-        }
-
-        keywordsCache.size shouldBeExactly 100000
+        key.symbol shouldBe Symbol("a")
+        key.hashEq shouldBeExactly Symbol("a").hasheq() + -0x61c88647
     }
 
-    "when gc collected a keyword, it should remove it from the cache" {
-        Keyword("a")
+    "hasheq" {
+        val key = Keyword("a")
 
-        System.gc()
+        key.hashEq shouldBeExactly key.hasheq()
+    }
 
-        Keyword("a")
+    "assertHashCode" {
+        val key = Keyword("a")
+
+        key.hashCode() shouldBeExactly s("a").hashCode() + -0x61c88647
+    }
+
+    "equals(other)"{
+        val key = Keyword("a")
+
+        (key == key).shouldBeTrue()
+        (Keyword("a") == Keyword("a")).shouldBeTrue()
+
+        key.equals("A").shouldBeFalse()
+        (Keyword("a") == Keyword("b")).shouldBeFalse()
+    }
+
+    "compareTo(other)"{
+        Keyword("a").compareTo(Keyword("a")) shouldBeExactly 0
+        Keyword("a").compareTo(Keyword("b")) shouldBeLessThan 0
+        Keyword("b").compareTo(Keyword("a")) shouldBeGreaterThan 0
+    }
+
+    "name property" {
+        val key = Keyword("a")
+
+        key.name shouldBe "a"
+    }
+
+    "invoke(map)" {
+        val map = m(Keyword("a") to 1, Keyword("b") to 2, "c" to 3)
+
+        Keyword("a")(map)!! shouldBe 1
+        Keyword("b")(map)!! shouldBe 2
+        Keyword("c")(map).shouldBeNull()
+        Keyword("z")(map).shouldBeNull()
+    }
+
+    "invoke(map, default)" {
+        val map1 = m(Keyword("a") to 1, Keyword("b") to 2)
+        val map2 = mapOf(Keyword("a") to 1, Keyword("b") to 2)
+
+        Keyword("a")(map1, -1)!! shouldBe 1
+        Keyword("b")(map1, -1)!! shouldBe 2
+        Keyword("z")(map1, null).shouldBeNull()
+
+        Keyword("a")(map2, -1)!! shouldBe 1
+        Keyword("b")(map2, -1)!! shouldBe 2
+        Keyword("z")(map2, null).shouldBeNull()
+        Keyword("x")(map2, -1)!! shouldBe -1
+    }
+
+    "assert same key instance" {
+        Keyword("a") shouldBeSameInstanceAs Keyword("a")
+    }
+
+    "k(a)" {
+        val key = k("a")
+
+        Keyword("a") shouldBe key
+    }
+
+    "toString() should return print property"{
+        val a = Keyword("a")
+        val b = Keyword("b")
+
+        a.toString() shouldBe ":a"
+        a.str shouldBe ":a"
+        b.toString() shouldBe ":b"
+        b.str shouldBe ":b"
+    }
+
+    "serialize" {
+        val keyword = k("a")
+
+        Json.encodeToString(keyword) shouldBe "\"a\""
+    }
+
+    "deserialize" {
+        val stringKey = "\"a\""
+
+        val decodedKey = Json.decodeFromString<Keyword>(stringKey)
+
+        decodedKey shouldBeSameInstanceAs k("a")
     }
 })
-
-private suspend fun massiveRun2(action: suspend () -> Unit) {
-    val n = 100
-    val times = 1000
-    coroutineScope {
-        repeat(n) {
-            launch { repeat(times) { action() } }
-        }
-    }
-}

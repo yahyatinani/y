@@ -13,8 +13,6 @@ import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.set.APersistentSet
 import com.github.whyrising.y.set.PersistentSet
-import kotlinx.atomicfu.AtomicRef
-import kotlinx.atomicfu.atomic
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.SetSerializer
@@ -59,7 +57,7 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
     }
 
     override fun asTransient(): ITransientCollection<E> =
-        TransientHashSet(atomic((map as PersistentHashMap<E, E>).asTransient()))
+        TransientHashSet((map as PersistentHashMap<E, E>).asTransient())
 
     internal abstract class AEmptyHashSet<out E>(m: IPersistentMap<E, E>) :
         PersistentHashSet<E>(m) {
@@ -79,13 +77,11 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
     internal
     class HashSet<out E>(m: IPersistentMap<E, E>) : PersistentHashSet<E>(m)
 
-    internal class TransientHashSet<out E>(
-        internal
-        val tmap: AtomicRef<TransientMap<@UnsafeVariance E, @UnsafeVariance E>>
-    ) : ATransientSet<E>(tmap) {
+    internal class TransientHashSet<out E>(tmap: TransientMap<E, E>) :
+        ATransientSet<E>(tmap) {
 
         override fun persistent(): IPersistentCollection<E> =
-            HashSet(tmap.value.persistent())
+            HashSet(_transientMap.value.persistent())
     }
 
     companion object {
