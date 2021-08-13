@@ -3,8 +3,8 @@ package com.github.whyrising.y
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 
-class Atom<T>(state: T) : ARef<T>(), IAtom2<T> {
-    internal val state: AtomicRef<T> = atomic(state)
+class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
+    internal val state: AtomicRef<T> = atomic(x)
 
     override fun deref(): T = state.value
 
@@ -120,7 +120,12 @@ class Atom<T>(state: T) : ARef<T>(), IAtom2<T> {
         return oldValue to newValue
     }
 
+    /** @return the value of the atom by calling deref() */
     operator fun invoke(): T = deref()
 }
 
-fun <T> atom(state: T): Atom<T> = Atom(state)
+/**
+ * @param x an initial value to be hold by the atom.
+ * @return an `Atom<T>` with an initial value x.
+ */
+fun <T> atom(x: T): Atom<T> = Atom(x)
