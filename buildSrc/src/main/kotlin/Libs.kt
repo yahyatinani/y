@@ -15,10 +15,11 @@ object Libs {
 
         private const val atomicfuVersion = "0.16.1"
         private const val serialVersion = "1.2.1"
-        private const val coroutinesVersion = "1.5.0"
+        private const val coroutinesV = "1.5.0"
 
         const val atomicfu = "$gr:atomicfu:$atomicfuVersion"
         const val serialJson = "$gr:kotlinx-serialization-json:$serialVersion"
-        const val coroutines = "$gr:kotlinx-coroutines-core:$coroutinesVersion"
+        const val coroutines = "$gr:kotlinx-coroutines-core:$coroutinesV"
+        const val coroutinesTest = "$gr:kotlinx-coroutines-test:$coroutinesV"
     }
 }

@@ -11,7 +11,7 @@ kotlin {
         jvm {
             compilations.all {
                 kotlinOptions {
-                    jvmTarget = Libs.jvmTargetVersion
+                    jvmTarget = "1.8"
                 }
             }
         }
@@ -43,7 +43,13 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+                implementation(kotlin("stdlib-common"))
+                implementation(Libs.Kotlinx.atomicfu)
+                api(project(":y-collections"))
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
@@ -52,12 +58,17 @@ kotlin {
             }
         }
 
-        all {
-            languageSettings.useExperimentalAnnotation("kotlin.time.ExperimentalTime")
-            languageSettings.useExperimentalAnnotation("kotlin.experimental.ExperimentalTypeInference")
-            languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
+        val jvmTest by getting {
+            dependencies {
+                implementation(Libs.Kotest.runner)
+                implementation(Libs.Kotlinx.coroutinesTest)
+            }
         }
     }
+}
+
+tasks.named<Test>("jvmTest") {
+    useJUnitPlatform()
 }
 
 apply(from = "../publish-y.gradle.kts")
