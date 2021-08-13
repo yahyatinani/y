@@ -101,7 +101,6 @@ class AtomTest {
     @Test
     fun `watches should be empty after creation of atom`() {
         val atom = Atom(10)
-        val f: (Any, IRef<Int>, Int, Int) -> Any = { a, b, c, d -> }
 
         val watches = atom.watches
 
@@ -111,7 +110,7 @@ class AtomTest {
     @Test
     fun `addWatch(key, callback) should add a watch function to watches`() {
         val atom: IRef<Int> = Atom(10)
-        val callback: (Any, IRef<Int>, Int, Int) -> Any = { a, b, c, d -> }
+        val callback: (Any, IRef<Int>, Int, Int) -> Any = { _, _, _, _ -> }
         val key = ":key"
 
         val ref = atom.addWatch(key, callback)
@@ -124,7 +123,7 @@ class AtomTest {
     @Test
     fun `removeWatch(key, callback) should remove a watch from watches`() {
         val atom: IRef<Int> = Atom(10)
-        val callback: (Any, IRef<Int>, Int, Int) -> Any = { a, b, c, d -> }
+        val callback: (Any, IRef<Int>, Int, Int) -> Any = { _, _, _, _ -> }
         val key = ":key"
         atom.addWatch(key, callback)
 

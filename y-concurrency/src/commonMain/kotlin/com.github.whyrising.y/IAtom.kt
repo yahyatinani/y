@@ -4,7 +4,9 @@ interface IAtom<T> {
     fun swap(f: (currentVal: T) -> T): T
 
     fun reset(newValue: T): T
+
     fun <A> swap(arg: A, f: (currentVal: T, arg: A) -> T): T
+
     fun <A1, A2> swap(
         arg1: A1,
         arg2: A2,
