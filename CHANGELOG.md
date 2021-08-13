@@ -1,5 +1,23 @@
 Changelog
 ========
+
+## v0.0.3
+
+#### Added:
+
+* **y-concurrency** module:
+    * Atom<T>
+    * Functions:
+      * atom(x:T): Atom<T>
+
+#### Updated
+
+* Moved Keyword to JVM only (for now).
+
+#### Fixed
+
+* Serialization exceptions in collections
+
 ## v0.0.2.1
 
 #### Fixed
