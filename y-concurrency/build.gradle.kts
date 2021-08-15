@@ -45,7 +45,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(kotlin("stdlib-common"))
                 implementation(Libs.Kotlinx.atomicfu)
                 api(project(":y-collections"))
             }
