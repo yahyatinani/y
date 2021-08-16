@@ -6,7 +6,6 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
-import kotlinx.atomicfu.AtomicRef
 import kotlin.test.Test
 
 class AtomTest {
@@ -14,9 +13,8 @@ class AtomTest {
     fun `state atomic ref should be initialized while object constructing`() {
         val n = 10
         val atom = Atom(n)
-        val state: AtomicRef<Int> = atom.state
 
-        state.value shouldBeExactly n
+        atom.state shouldBeExactly n
     }
 
     @Test
@@ -27,7 +25,7 @@ class AtomTest {
         val value = atom.deref()
 
         value shouldBeExactly n
-        value shouldBeExactly atom.state.value
+        value shouldBeExactly atom.state
     }
 
     @Test

@@ -4,9 +4,11 @@ import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 
 class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
-    internal val state: AtomicRef<T> = atomic(x)
+    private val _state: AtomicRef<T> = atomic(x)
 
-    override fun deref(): T = state.value
+    internal val state by _state
+
+    override fun deref(): T = state
 
     override fun swap(f: (currentVal: T) -> T): T {
         while (true) {
@@ -14,7 +16,7 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
             val newVal = f(currentV)
             validate(newVal)
 
-            if (state.compareAndSet(currentV, newVal)) {
+            if (_state.compareAndSet(currentV, newVal)) {
                 notifyWatches(currentV, newVal)
                 return newVal
             }
@@ -27,7 +29,7 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
             val newVal = f(currentV, arg)
             validate(newVal)
 
-            if (state.compareAndSet(currentV, newVal)) {
+            if (_state.compareAndSet(currentV, newVal)) {
                 notifyWatches(currentV, newVal)
                 return newVal
             }
@@ -44,7 +46,7 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
             val newVal = f(currentV, arg1, arg2)
             validate(newVal)
 
-            if (state.compareAndSet(currentV, newVal)) {
+            if (_state.compareAndSet(currentV, newVal)) {
                 notifyWatches(currentV, newVal)
                 return newVal
             }
@@ -57,7 +59,7 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
             val newVal = f(oldValue)
             validate(newVal)
 
-            if (state.compareAndSet(oldValue, newVal)) {
+            if (_state.compareAndSet(oldValue, newVal)) {
                 notifyWatches(oldValue, newVal)
                 return oldValue to newVal
             }
@@ -73,7 +75,7 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
             val newVal = f(oldValue, arg)
             validate(newVal)
 
-            if (state.compareAndSet(oldValue, newVal)) {
+            if (_state.compareAndSet(oldValue, newVal)) {
                 notifyWatches(oldValue, newVal)
                 return oldValue to newVal
             }
@@ -90,7 +92,7 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
             val newVal = f(oldValue, arg1, arg2)
             validate(newVal)
 
-            if (state.compareAndSet(oldValue, newVal)) {
+            if (_state.compareAndSet(oldValue, newVal)) {
                 notifyWatches(oldValue, newVal)
                 return oldValue to newVal
             }
@@ -99,14 +101,14 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
 
     override fun reset(newValue: T): T {
         validate(newValue)
-        val oldValue = state.getAndSet(newValue)
+        val oldValue = _state.getAndSet(newValue)
         notifyWatches(oldValue, newValue)
         return newValue
     }
 
     fun compareAndSet(oldValue: T, newValue: T): Boolean {
         validate(newValue)
-        val b = state.compareAndSet(oldValue, newValue)
+        val b = _state.compareAndSet(oldValue, newValue)
         if (b)
             notifyWatches(oldValue, newValue)
 
@@ -115,7 +117,7 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
 
     override fun resetVals(newValue: T): Pair<T, T> {
         validate(newValue)
-        val oldValue = state.getAndSet(newValue)
+        val oldValue = _state.getAndSet(newValue)
         notifyWatches(oldValue, newValue)
         return oldValue to newValue
     }
