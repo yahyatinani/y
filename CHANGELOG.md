@@ -1,6 +1,17 @@
 Changelog
 ========
 
+## v0.0.4
+
+#### Updated:
+
+* Update to Kotlin 1.5.21
+
+#### Fixed:
+
+* Missing Atomicfu dependency in artifacts by using Atomicfu Gradle plugin.
+* Transients locks in multi-threaded environement.
+
 ## v0.0.3
 
 #### Added:
@@ -10,17 +21,17 @@ Changelog
     * Functions:
       * atom(x:T): Atom<T>
 
-#### Updated
+#### Updated:
 
 * Moved Keyword to JVM only (for now).
 
-#### Fixed
+#### Fixed:
 
 * Serialization exceptions in collections
 
 ## v0.0.2.1
 
-#### Fixed
+#### Fixed:
 * Calling toString() on a Keyword in Native caused a InvalidMutabilityException
 
 ## v0.0.2
