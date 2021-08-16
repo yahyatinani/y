@@ -658,7 +658,7 @@ class PersistentArrayMapTest : FreeSpec({
             }
 
             "dissoc(key)" {
-                continually(Duration.seconds(60)) {
+                continually(Duration.seconds(10)) {
                     val transientMap = l.fold(m<Int, String>()) { map, entry ->
                         map.assoc(
                             entry.key,
