@@ -7,7 +7,6 @@ import com.github.whyrising.y.concretions.map.PersistentHashMap.TransientLeanMap
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
-import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -19,9 +18,9 @@ class TransientLeanMapTest : FreeSpec({
     "ctor" {
         val trlm = TransientLeanMap<String, Int>(EmptyHashMap)
 
-        trlm.isMutable.value.shouldBeTrue()
-        trlm._root.value.shouldBeNull()
-        trlm._count.value shouldBeExactly 0
+        trlm.edit.shouldNotBeNull()
+        trlm.root.shouldBeNull()
+        trlm.countValue shouldBeExactly 0
         trlm.leafFlag.value.shouldBeNull()
     }
 
@@ -43,9 +42,9 @@ class TransientLeanMapTest : FreeSpec({
         val trlm2 = TransientLeanMap<String, Int>(EmptyHashMap)
         trlm2.doPersistent()
 
-        shouldNotThrow<Exception> { trlm1.assertMutable() }
+        shouldNotThrow<Exception> { trlm1.ensureEditable() }
         shouldThrowExactly<IllegalStateException> {
-            trlm2.assertMutable()
+            trlm2.ensureEditable()
         }.message shouldBe "Transient used after persistent() call."
     }
 
@@ -59,22 +58,22 @@ class TransientLeanMapTest : FreeSpec({
         val trlm = TransientLeanMap<String, Int>(EmptyHashMap)
 
         val r1 = trlm.doAssoc("a", 1) as TransientLeanMap<String, Int>
-        val root1 = r1._root.value as BitMapIndexedNode<String, Int>
+        val root1 = r1.root as BitMapIndexedNode<String, Int>
 
         r1 shouldBeSameInstanceAs trlm
         r1.leafFlag.value.shouldNotBeNull()
         r1.count shouldBeExactly 1
-        r1._root shouldBeSameInstanceAs trlm._root
+        r1.root shouldBeSameInstanceAs trlm.root
         root1.array[0] shouldBe "a"
         root1.array[1] shouldBe 1
 
         val r2 = r1.doAssoc("b", 2) as TransientLeanMap<String, Int>
-        val root2 = r2._root.value as BitMapIndexedNode<String, Int>
+        val root2 = r2.root as BitMapIndexedNode<String, Int>
 
         r2.leafFlag.value.shouldNotBeNull()
         r2 shouldBeSameInstanceAs trlm
         r2.count shouldBeExactly 2
-        r2._root shouldBeSameInstanceAs r1._root
+        r2.root shouldBeSameInstanceAs r1.root
 
         root2.array[0] shouldBe "a"
         root2.array[1] shouldBe 1
@@ -88,7 +87,7 @@ class TransientLeanMapTest : FreeSpec({
             TransientLeanMap<String, Int>
 
         val result = trlm.doDissoc("b") as TransientLeanMap<String, Int>
-        val root = result._root.value
+        val root = result.root
             as BitMapIndexedNode<String, Int>
 
         result.leafFlag.value.shouldNotBeNull()

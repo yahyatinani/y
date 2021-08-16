@@ -155,7 +155,7 @@ class PersistentHashSetTest : FreeSpec({
         val set = HashSet(map)
 
         val tr = set.asTransient() as TransientHashSet<Any>
-        val trMap = tr._transientMap.value
+        val trMap = tr.transientMap
 
         trMap.count shouldBeExactly map.count
         trMap.valAt("a") shouldBe map("a")
@@ -409,7 +409,7 @@ class PersistentHashSetTest : FreeSpec({
 
                 ths.count shouldBeExactly map.count - 1
                 ths.contains(n).shouldBeFalse()
-                ths._transientMap.value.valAt(n).shouldBeNull()
+                ths.transientMap.valAt(n).shouldBeNull()
             }
         }
 
@@ -433,7 +433,7 @@ class PersistentHashSetTest : FreeSpec({
 
                 ths.count shouldBeExactly map.count + 1
                 ths.contains(n).shouldBeTrue()
-                ths._transientMap.value.valAt(n) shouldBe n
+                ths.transientMap.valAt(n) shouldBe n
             }
         }
 

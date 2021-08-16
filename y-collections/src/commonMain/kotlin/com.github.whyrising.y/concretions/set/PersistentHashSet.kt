@@ -81,7 +81,7 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
         ATransientSet<E>(tmap) {
 
         override fun persistent(): IPersistentCollection<E> =
-            HashSet(_transientMap.value.persistent())
+            HashSet(transientMap.persistent())
     }
 
     companion object {

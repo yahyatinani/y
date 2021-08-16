@@ -57,7 +57,7 @@ class LeanMapTest : FreeSpec({
         val t = leanMap.asTransient() as TransientLeanMap<String, Int>
 
         t.count shouldBeExactly 0
-        t._root.value.shouldBeNull()
+        t.root.shouldBeNull()
     }
 
     "invoke(...pairs)" {
@@ -168,7 +168,7 @@ class LeanMapTest : FreeSpec({
 
             newMap shouldNotBeSameInstanceAs map
             (newMap.root as BitMapIndexedNode<String, Int>)
-                .isMutable.value.shouldBeFalse()
+                .edit.value.shouldBeNull()
             newMap.count shouldBeExactly map.count
             newMap("a") shouldBe 77
         }
@@ -214,11 +214,11 @@ class LeanMapTest : FreeSpec({
         PersistentHashMap("a" to 1).dissoc("a") shouldBeSameInstanceAs
             EmptyHashMap
 
-        root1.isMutable.value.shouldBeFalse()
+        root1.edit.value.shouldBeNull()
         newMap1.count shouldBeExactly map.count - 1
         newMap1.containsKey("a").shouldBeFalse()
 
-        root2.isMutable.value.shouldBeFalse()
+        root2.edit.value.shouldBeNull()
         newMap2 shouldBeSameInstanceAs map
         newMap2.count shouldBeExactly map.count
 

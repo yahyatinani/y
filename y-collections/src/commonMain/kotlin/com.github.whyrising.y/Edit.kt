@@ -1,20 +1,10 @@
 package com.github.whyrising.y
 
-import kotlinx.atomicfu.locks.reentrantLock
-import kotlinx.atomicfu.locks.withLock
+import kotlinx.atomicfu.AtomicRef
+import kotlinx.atomicfu.atomic
 
 class Edit(value: Any?) {
-    private val lock = reentrantLock()
+    private val _value: AtomicRef<Any?> = atomic(value)
 
-    var value: Any? = value
-        get() {
-            lock.withLock {
-                return field
-            }
-        }
-        internal set(value) {
-            lock.withLock {
-                field = value
-            }
-        }
+    var value by _value
 }

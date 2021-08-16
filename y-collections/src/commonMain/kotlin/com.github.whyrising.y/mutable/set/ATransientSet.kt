@@ -7,8 +7,10 @@ import kotlinx.atomicfu.update
 abstract class ATransientSet<out E>(
     transientMap: TransientMap<E, E>
 ) : TransientSet<E> {
-    internal val _transientMap =
+    private val _transientMap =
         atomic<TransientMap<@UnsafeVariance E, @UnsafeVariance E>>(transientMap)
+
+    val transientMap by _transientMap
 
     override val count: Int
         get() = _transientMap.value.count

@@ -1,5 +1,6 @@
 package com.github.whyrising.y.concretions.map
 
+import com.github.whyrising.y.Edit
 import com.github.whyrising.y.concretions.list.ASeq
 import com.github.whyrising.y.concretions.list.PersistentList
 import com.github.whyrising.y.concretions.map.PersistentHashMap.BitMapIndexedNode.EmptyBitMapIndexedNode
@@ -17,7 +18,6 @@ import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.util.Box
 import com.github.whyrising.y.util.equiv
 import com.github.whyrising.y.util.hasheq
-import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.serialization.KSerializer
@@ -56,7 +56,7 @@ sealed class PersistentHashMap<out K, out V>(
     ): IPersistentMap<K, V> {
         val addedLeaf = Box(null)
         val newRoot = (root ?: EmptyBitMapIndexedNode)
-            .assoc(atomic(false), 0, hasheq(key), key, value, addedLeaf)
+            .assoc(Edit(null), 0, hasheq(key), key, value, addedLeaf)
 
         if (newRoot == this.root) return this
 
@@ -115,7 +115,7 @@ sealed class PersistentHashMap<out K, out V>(
         @ExperimentalStdlibApi
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
             val newRoot = _root.without(
-                atomic(false), 0, hasheq(key), key, Box(null)
+                Edit(null), 0, hasheq(key), key, Box(null)
             )
 
             if (newRoot == _root)
@@ -160,7 +160,7 @@ sealed class PersistentHashMap<out K, out V>(
         val array: Array<Any?>
 
         fun assoc(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
@@ -169,7 +169,7 @@ sealed class PersistentHashMap<out K, out V>(
         ): Node<K, V>
 
         fun without(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
@@ -315,20 +315,31 @@ sealed class PersistentHashMap<out K, out V>(
 
     /* Transients are not thread safe */
     internal class TransientLeanMap<out K, out V> private constructor(
-        internal val isMutable: AtomicBoolean,
+        val edit: Edit,
         root: Node<K, V>?,
         count: Int,
         val leafFlag: Box
     ) : ATransientMap<K, V>() {
-        internal
+
+        internal constructor(map: PersistentHashMap<K, V>) : this(
+            Edit(Any()),
+            map.root,
+            map.count,
+            Box(null)
+        )
+
+        private
         val _root = atomic<Node<@UnsafeVariance K, @UnsafeVariance V>?>(root)
-        internal val _count = atomic(count)
+        private val _count = atomic(count)
+
+        internal val root by _root
+        internal val countValue by _count
 
         override val doCount: Int
             by _count
 
-        override fun assertMutable() {
-            if (!isMutable.value)
+        override fun ensureEditable() {
+            if (edit.value == null)
                 throw IllegalStateException(
                     "Transient used after persistent() call."
                 )
@@ -341,7 +352,7 @@ sealed class PersistentHashMap<out K, out V>(
         ): TransientMap<K, V> {
             leafFlag.value = null
             val node = (_root.value ?: EmptyBitMapIndexedNode).assoc(
-                isMutable,
+                edit,
                 0,
                 hasheq(key),
                 key,
@@ -367,7 +378,7 @@ sealed class PersistentHashMap<out K, out V>(
             leafFlag.value = null
 
             val node = (_root.value ?: EmptyBitMapIndexedNode).without(
-                isMutable,
+                edit,
                 0,
                 hasheq(key),
                 key,
@@ -388,11 +399,11 @@ sealed class PersistentHashMap<out K, out V>(
         }
 
         override fun doPersistent(): IPersistentMap<K, V> {
-            isMutable.value = false
+            edit.value = null
 
-            return when (_count.value) {
+            return when (val count = _count.value) {
                 0 -> EmptyHashMap
-                else -> LMap(_count.value, _root.value as Node<K, V>)
+                else -> LMap(count, _root.value as Node<K, V>)
             }
         }
 
@@ -403,17 +414,6 @@ sealed class PersistentHashMap<out K, out V>(
         ): V? = when (val value = _root.value) {
             null -> default
             else -> value.find(0, hasheq(key), key, default)
-        }
-
-        companion object {
-            operator fun <K, V> invoke(
-                map: PersistentHashMap<K, V>
-            ): TransientLeanMap<K, V> = TransientLeanMap(
-                atomic(true),
-                map.root,
-                map.count,
-                Box(null)
-            )
         }
     }
 
@@ -436,13 +436,13 @@ sealed class PersistentHashMap<out K, out V>(
     }
 
     internal sealed class BitMapIndexedNode<out K, out V>(
-        val isMutable: AtomicBoolean,
+        val edit: Edit,
         val datamap: Int,
         val nodemap: Int,
         override val array: Array<Any?>
     ) : Node<K, V> {
         fun mergeIntoSubNode(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             shift: Int,
             currentHash: Int,
             currentKey: @UnsafeVariance K,
@@ -453,7 +453,7 @@ sealed class PersistentHashMap<out K, out V>(
         ): Node<K, V> {
             if (shift > 32 && currentHash == newHash)
                 return HashCollisionNode(
-                    isMutable,
+                    edit,
                     currentHash,
                     2,
                     arrayOf(currentKey, currentValue, key, value)
@@ -465,7 +465,7 @@ sealed class PersistentHashMap<out K, out V>(
                 when (currentMask) {
                     newMask -> {
                         val subNode = mergeIntoSubNode(
-                            isMutable,
+                            edit,
                             shift + 5,
                             currentHash,
                             currentKey,
@@ -475,14 +475,14 @@ sealed class PersistentHashMap<out K, out V>(
                             value
                         )
                         return BMIN(
-                            isMutable,
+                            edit,
                             0,
                             bitpos(currentHash, shift),
                             arrayOf(subNode)
                         )
                     }
                     else -> return BMIN(
-                        isMutable,
+                        edit,
                         bitpos(currentHash, shift) or bitpos(newHash, shift),
                         0,
                         if (currentMask < newMask)
@@ -494,7 +494,7 @@ sealed class PersistentHashMap<out K, out V>(
         }
 
         private fun putNewNode(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             bitpos: Int,
             subNode: Node<K, V>
         ): Node<K, V> {
@@ -509,7 +509,7 @@ sealed class PersistentHashMap<out K, out V>(
             array.copyInto(newArray, newIdx + 1, endIndex, array.size)
 
             return BMIN(
-                isMutable,
+                edit,
                 datamap xor bitpos,
                 nodemap or bitpos,
                 newArray
@@ -519,16 +519,16 @@ sealed class PersistentHashMap<out K, out V>(
         internal fun updateArrayByIndex(
             index: Int,
             value: Any?,
-            isMutable: AtomicBoolean
+            edit: Edit
         ): BitMapIndexedNode<K, V> =
             // TODO: Review : Consider using the thread id instead of isMutable
-            if (isAllowedToEdit(this.isMutable, isMutable)) {
+            if (isAllowedToEdit(this.edit, edit)) {
                 array[index] = value
                 this
             } else {
                 val newArray = array.copyOf()
                 newArray[index] = value
-                BMIN(isMutable, datamap, nodemap, newArray)
+                BMIN(edit, datamap, nodemap, newArray)
             }
 
         private fun nodeIndexBy(bitpos: Int) =
@@ -537,7 +537,7 @@ sealed class PersistentHashMap<out K, out V>(
         @Suppress("UNCHECKED_CAST")
         @ExperimentalStdlibApi
         override fun assoc(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
@@ -551,12 +551,12 @@ sealed class PersistentHashMap<out K, out V>(
                     val currentKey = array[keyIdx] as K
 
                     if (equiv(currentKey, key))
-                        return updateArrayByIndex(keyIdx + 1, value, isMutable)
+                        return updateArrayByIndex(keyIdx + 1, value, edit)
 
                     val currentValue = array[keyIdx + 1] as V
 
                     val subNode = mergeIntoSubNode(
-                        isMutable,
+                        edit,
                         shift + 5,
                         hasheq(currentKey),
                         currentKey,
@@ -567,19 +567,19 @@ sealed class PersistentHashMap<out K, out V>(
                     )
                     leafFlag.value = leafFlag
 
-                    return putNewNode(isMutable, bitpos, subNode)
+                    return putNewNode(edit, bitpos, subNode)
                 }
                 (nodemap and bitpos) != 0 -> {
                     val nodeIdx = nodeIndexBy(bitpos)
                     val subNode = array[nodeIdx] as BitMapIndexedNode<K, V>
 
                     val newNode = subNode.assoc(
-                        isMutable, shift + 5, keyHash, key, value, leafFlag
+                        edit, shift + 5, keyHash, key, value, leafFlag
                     )
 
                     if (subNode == newNode) return this
 
-                    return updateArrayByIndex(nodeIdx, newNode, isMutable)
+                    return updateArrayByIndex(nodeIdx, newNode, edit)
                 }
                 else -> {
                     val arraySize = array.size
@@ -592,14 +592,14 @@ sealed class PersistentHashMap<out K, out V>(
                     array.copyInto(newArr, index + 2, index, arraySize)
                     leafFlag.value = leafFlag
 
-                    return BMIN(isMutable, (datamap or bitpos), nodemap, newArr)
+                    return BMIN(edit, (datamap or bitpos), nodemap, newArr)
                 }
             }
         }
 
         private fun copyAndRemove(
             index: Int,
-            isMutable: AtomicBoolean,
+            edit: Edit,
             bitpos: Int
         ): BMIN<K, V> {
             val newArray = arrayOfNulls<Any?>(array.size - 2)
@@ -607,11 +607,11 @@ sealed class PersistentHashMap<out K, out V>(
             array.copyInto(newArray, 0, 0, index)
             array.copyInto(newArray, index, index + 2, array.size)
 
-            return BMIN(isMutable, datamap xor bitpos, nodemap, newArray)
+            return BMIN(edit, datamap xor bitpos, nodemap, newArray)
         }
 
         private fun copyAndInlinePair(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             bitpos: Int,
             node: Node<K, V>
         ): Node<K, V> {
@@ -626,13 +626,13 @@ sealed class PersistentHashMap<out K, out V>(
             array.copyInto(newArray, oldIndex + 2, oldIndex + 1, array.size)
 
             return BMIN(
-                isMutable, datamap or bitpos, nodemap xor bitpos, newArray
+                edit, datamap or bitpos, nodemap xor bitpos, newArray
             )
         }
 
         @Suppress("UNCHECKED_CAST")
         override fun without(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
@@ -653,20 +653,20 @@ sealed class PersistentHashMap<out K, out V>(
 
                         return when (bmnIndex) {
                             0 -> BMIN(
-                                isMutable,
+                                edit,
                                 newDatamap,
                                 0,
                                 arrayOf(array[2], array[3])
                             )
                             else -> BMIN(
-                                isMutable,
+                                edit,
                                 newDatamap,
                                 0,
                                 arrayOf(array[0], array[1])
                             )
                         }
                     }
-                    return copyAndRemove(index, isMutable, bitpos)
+                    return copyAndRemove(index, edit, bitpos)
                 } else return this
             }
 
@@ -675,7 +675,7 @@ sealed class PersistentHashMap<out K, out V>(
 
                 val subNode = array[nodeIndex] as Node<K, V>
                 val newSubNode = subNode.without(
-                    isMutable,
+                    edit,
                     shift + 5,
                     keyHash,
                     key,
@@ -688,10 +688,10 @@ sealed class PersistentHashMap<out K, out V>(
                             (datamap == 0) && nodemap.countOneBits() == 1 ->
                                 newSubNode
                             else ->
-                                copyAndInlinePair(isMutable, bitpos, newSubNode)
+                                copyAndInlinePair(edit, bitpos, newSubNode)
                         }
                         else ->
-                            updateArrayByIndex(nodeIndex, newSubNode, isMutable)
+                            updateArrayByIndex(nodeIndex, newSubNode, edit)
                     }
                 }
             }
@@ -773,15 +773,15 @@ sealed class PersistentHashMap<out K, out V>(
         }
 
         object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
-            atomic(false), 0, 0, emptyArray()
+            Edit(null), 0, 0, emptyArray()
         )
 
         internal class BMIN<out K, out V>(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             datamap: Int,
             nodemap: Int,
             array: Array<Any?>
-        ) : BitMapIndexedNode<K, V>(isMutable, datamap, nodemap, array)
+        ) : BitMapIndexedNode<K, V>(edit, datamap, nodemap, array)
 
         companion object {
 
@@ -794,7 +794,7 @@ sealed class PersistentHashMap<out K, out V>(
     }
 
     internal class HashCollisionNode<out K, out V>(
-        val isMutable: AtomicBoolean,
+        val edit: Edit,
         val hash: Int,
         var count: Int,
         override var array: Array<Any?>
@@ -836,7 +836,7 @@ sealed class PersistentHashMap<out K, out V>(
                 newArray[array.size + 1] = value
                 leafFlag.value = leafFlag
 
-                HashCollisionNode(this.isMutable, hash, count + 1, newArray)
+                HashCollisionNode(this.edit, hash, count + 1, newArray)
             }
             else -> when (value) {
                 array[index + 1] -> {
@@ -846,13 +846,13 @@ sealed class PersistentHashMap<out K, out V>(
                     val newArray = array.copyOf()
                     newArray[index + 1] = value
 
-                    HashCollisionNode(this.isMutable, hash, count, newArray)
+                    HashCollisionNode(this.edit, hash, count, newArray)
                 }
             }
         }
 
         override fun assoc(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
@@ -860,11 +860,11 @@ sealed class PersistentHashMap<out K, out V>(
             leafFlag: Box
         ): Node<K, V> = findIndexBy(key).let { index ->
             when {
-                isAllowedToEdit(this.isMutable, isMutable) -> {
-                    val newNode = when (this.isMutable) {
-                        isMutable -> this
+                isAllowedToEdit(this.edit, edit) -> {
+                    val newNode = when (this.edit) {
+                        edit -> this
                         else -> HashCollisionNode(
-                            isMutable,
+                            edit,
                             this.hash,
                             this.count,
                             this.array.copyOf()
@@ -888,7 +888,7 @@ sealed class PersistentHashMap<out K, out V>(
         @ExperimentalStdlibApi
         @Suppress("UNCHECKED_CAST")
         override fun without(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             shift: Int,
             keyHash: Int,
             key: @UnsafeVariance K,
@@ -905,7 +905,7 @@ sealed class PersistentHashMap<out K, out V>(
                 2 -> (if (index == 0) 2 else 0).let { remainingIdx ->
                     BitMapIndexedNode<K, V>()
                         .assoc(
-                            isMutable,
+                            edit,
                             0,
                             keyHash,
                             array[remainingIdx] as K,
@@ -914,7 +914,7 @@ sealed class PersistentHashMap<out K, out V>(
                         )
                 }
                 else -> HashCollisionNode(
-                    isMutable, keyHash, count - 1, removePair(index)
+                    edit, keyHash, count - 1, removePair(index)
                 )
             }
         }
@@ -984,8 +984,9 @@ sealed class PersistentHashMap<out K, out V>(
 
         // TODO: Use a threadID to allow different refs that hold the same
         //  threadID to edit
-        fun isAllowedToEdit(x: AtomicBoolean, y: AtomicBoolean) =
-            x == y && x.value
+        fun isAllowedToEdit(x: Edit, y: Edit): Boolean {
+            return x.value != null && y.value != null && x === y
+        }
 
         private fun <K, V> createNodeSeq(
             array: Array<Any?>,
