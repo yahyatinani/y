@@ -10,7 +10,7 @@ import com.github.whyrising.y.vector.IPersistentVector
 abstract class ATransientMap<out K, out V> :
     TransientMap<K, V>, TransientAssociative2<K, V> {
 
-    internal abstract fun assertMutable()
+    internal abstract fun ensureEditable()
 
     internal abstract fun doAssoc(
         key: @UnsafeVariance K,
@@ -31,18 +31,18 @@ abstract class ATransientMap<out K, out V> :
     override fun assoc(
         key: @UnsafeVariance K,
         value: @UnsafeVariance V
-    ): TransientMap<K, V> = assertMutable().let {
+    ): TransientMap<K, V> = ensureEditable().let {
         return doAssoc(key, value)
     }
 
     override fun dissoc(key: @UnsafeVariance K): TransientMap<K, V> {
-        assertMutable()
+        ensureEditable()
 
         return doDissoc(key)
     }
 
     override fun persistent(): IPersistentMap<K, V> {
-        assertMutable()
+        ensureEditable()
 
         return doPersistent()
     }
@@ -53,7 +53,7 @@ abstract class ATransientMap<out K, out V> :
         )
 
     @Suppress("UNCHECKED_CAST")
-    override fun conj(e: Any?): TransientMap<K, V> = assertMutable().let {
+    override fun conj(e: Any?): TransientMap<K, V> = ensureEditable().let {
         when (e) {
             null -> return this
             is Map.Entry<*, *> -> return assoc(e.key as K, e.value as V)
@@ -83,7 +83,7 @@ abstract class ATransientMap<out K, out V> :
 
     override val count: Int
         get() {
-            assertMutable()
+            ensureEditable()
 
             return doCount
         }
@@ -92,7 +92,7 @@ abstract class ATransientMap<out K, out V> :
 
     override
     fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? {
-        assertMutable()
+        ensureEditable()
 
         return doValAt(key, default)
     }

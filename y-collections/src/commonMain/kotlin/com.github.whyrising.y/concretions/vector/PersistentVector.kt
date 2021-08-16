@@ -2,6 +2,7 @@ package com.github.whyrising.y.concretions.vector
 
 import com.github.whyrising.y.ArrayChunk
 import com.github.whyrising.y.Chunk
+import com.github.whyrising.y.Edit
 import com.github.whyrising.y.concretions.list.ASeq
 import com.github.whyrising.y.concretions.list.PersistentList
 import com.github.whyrising.y.concretions.vector.PersistentVector.EmptyVector
@@ -17,8 +18,6 @@ import com.github.whyrising.y.vector.IPersistentVector
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.locks.reentrantLock
-import kotlinx.atomicfu.locks.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -243,22 +242,6 @@ sealed class PersistentVector<out E>(
     override fun seq(): ISeq<E> = when (count) {
         0 -> Seq.emptySeq()
         else -> ChunkedSeq(this, 0, 0)
-    }
-
-    class Edit(value: Any?) {
-        private val lock = reentrantLock()
-
-        var value: Any? = value
-            get() {
-                lock.withLock {
-                    return field
-                }
-            }
-            internal set(value) {
-                lock.withLock {
-                    field = value
-                }
-            }
     }
 
     open class Node<out T>(

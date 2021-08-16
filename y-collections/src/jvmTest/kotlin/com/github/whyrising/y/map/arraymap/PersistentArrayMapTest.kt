@@ -19,13 +19,16 @@ import com.github.whyrising.y.mutable.map.TransientMap
 import com.github.whyrising.y.utils.runAction
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.framework.concurrency.continually
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldNotContainAnyOf
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -36,7 +39,6 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.pair
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -44,7 +46,9 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import kotlin.time.Duration
 
+@ExperimentalKotest
 @ExperimentalSerializationApi
 @ExperimentalStdlibApi
 class PersistentArrayMapTest : FreeSpec({
@@ -65,9 +69,9 @@ class PersistentArrayMapTest : FreeSpec({
                         tam.array.size shouldBeExactly list.size
                     }
                 }
-                tam._length.value shouldBeExactly list.size
-                tam._isMutable.value.shouldBeTrue()
-                shouldNotThrow<Exception> { tam.assertMutable() }
+                tam.length shouldBeExactly list.size
+                tam.edit.shouldNotBeNull()
+                shouldNotThrow<Exception> { tam.ensureEditable() }
             }
         }
 
@@ -77,7 +81,7 @@ class PersistentArrayMapTest : FreeSpec({
 
             val map = tam.doPersistent() as PersistentArrayMap<String, Int>
 
-            tam._isMutable.value.shouldBeFalse()
+            tam.edit.shouldBeNull()
             map.count shouldBeExactly array.size
             map.array shouldNotBeSameInstanceAs array
             map shouldBe m("a" to 1, "b" to 2, "c" to 3)
@@ -93,7 +97,7 @@ class PersistentArrayMapTest : FreeSpec({
 
             val map = tam.persistent() as PersistentArrayMap<String, Int>
 
-            tam._isMutable.value.shouldBeFalse()
+            tam.edit.shouldBeNull()
             map.count shouldBeExactly array.size
             map.array shouldNotBeSameInstanceAs array
             map shouldBe m("a" to 1, "b" to 2, "c" to 3)
@@ -161,7 +165,7 @@ class PersistentArrayMapTest : FreeSpec({
                     as TransientArrayMap<Any, String>
                 val pairs = newTam.array
 
-                tam._length.value shouldBeExactly array.size
+                tam.length shouldBeExactly array.size
 
                 pairs[0]!!.first shouldBe 1L
                 pairs[0]!!.second shouldBe "1"
@@ -247,7 +251,7 @@ class PersistentArrayMapTest : FreeSpec({
                     as TransientArrayMap<Any, String>
                 val pairs = newTam.array
 
-                tam._length.value shouldBeExactly array.size
+                tam.length shouldBeExactly array.size
 
                 pairs[0]!!.first shouldBe 1L
                 pairs[0]!!.second shouldBe "1"
@@ -295,7 +299,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val newTam = tam.conj(MapEntry("a", 99))
                     as TransientArrayMap<String, Int>
 
-                newTam._length.value shouldBeExactly a.size
+                newTam.length shouldBeExactly a.size
                 newTam.array[0]!!.second shouldBeExactly 99
                 newTam.array[1]!!.second shouldBeExactly 2
                 newTam.array[2]!!.second shouldBeExactly 3
@@ -319,7 +323,7 @@ class PersistentArrayMapTest : FreeSpec({
                     val newMap = tam.conj(v("a", 99))
                         as TransientArrayMap<String, Int>
 
-                    newMap._length.value shouldBeExactly a.size
+                    newMap.length shouldBeExactly a.size
                     newMap.array[0]!!.second shouldBeExactly 99
                     newMap.array[1]!!.second shouldBeExactly 2
                 }
@@ -353,7 +357,7 @@ class PersistentArrayMapTest : FreeSpec({
                         as TransientArrayMap<String, Int>
                     val pairs = newTam.array
 
-                    newTam._length.value shouldBeExactly
+                    newTam.length shouldBeExactly
                         a.size + entries.count
 
                     pairs[0]!! shouldBe Pair("a", 1)
@@ -381,7 +385,7 @@ class PersistentArrayMapTest : FreeSpec({
 
                 val rTam = tam.doDissoc(2) as TransientArrayMap<Int, String>
 
-                rTam._length.value shouldBeExactly 0
+                rTam.length shouldBeExactly 0
                 val pairs = rTam.array
 
                 for (i in pairs.indices)
@@ -395,7 +399,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val rTam = tam.doDissoc(1) as TransientArrayMap<Any?, String>
                 val pairs = rTam.array
 
-                rTam._length.value shouldBeExactly a.size - 1
+                rTam.length shouldBeExactly a.size - 1
                 pairs[0] shouldBe (3 to "3")
                 pairs[1] shouldBe (2L to "2")
             }
@@ -429,7 +433,7 @@ class PersistentArrayMapTest : FreeSpec({
 
                 val rTam = tam.dissoc(2) as TransientArrayMap<Int, String>
 
-                rTam._length.value shouldBeExactly 0
+                rTam.length shouldBeExactly 0
                 val pairs = rTam.array
 
                 for (i in pairs.indices)
@@ -443,7 +447,7 @@ class PersistentArrayMapTest : FreeSpec({
                 val rTam = tam.dissoc(1) as TransientArrayMap<Any?, String>
                 val pairs = rTam.array
 
-                rTam._length.value shouldBeExactly a.size - 1
+                rTam.length shouldBeExactly a.size - 1
                 pairs[0] shouldBe (3 to "3")
                 pairs[1] shouldBe (2L to "2")
             }
@@ -635,49 +639,44 @@ class PersistentArrayMapTest : FreeSpec({
                 coll.plus<MapEntry<Int, String>>(MapEntry(i, "$i"))
             }
 
-            "assoc(key, val) under 16 entries" {
-                val keyCounter = atomic(0)
-                val t1: TransientMap<Int, String> = EmptyArrayMap.asTransient()
+            "assoc(key, val) under 16 entries-" {
+                continually(Duration.seconds(10)) {
+                    val t1: TransientMap<Int, String> =
+                        EmptyArrayMap.asTransient()
 
-                withContext(Dispatchers.Default) {
-                    runAction(16, 1) {
-                        val i = keyCounter.incrementAndGet()
-                        t1.assoc(i, "$i")
+                    withContext(Dispatchers.Default) {
+                        runAction(16, 3) {
+                            for (entry in l)
+                                t1.assoc(entry.key, entry.value)
+                        }
                     }
+
+                    t1.count shouldBeExactly 16
+                    val m = t1.persistent() as PersistentArrayMap<Int, String>
+                    m.shouldContainAll(l)
                 }
-
-                t1.count shouldBeExactly 16
-                val m = t1.persistent() as PersistentArrayMap<Int, String>
-                m.shouldContainAll(l)
-
-                val t2 = m.asTransient()
-                withContext(Dispatchers.Default) {
-                    runAction(16, 16) {
-                        t2.dissoc(keyCounter.getAndDecrement())
-                    }
-                }
-
-                val persistent = t2.persistent()
-                persistent.shouldNotContainAnyOf(l)
-                persistent.count shouldBeExactly 0
             }
 
             "dissoc(key)" {
-                val keyCounter = atomic(16)
-                val transientMap = l.fold(m<Int, String>()) { map, entry ->
-                    map.assoc(entry.key, entry.value)
-                        as PersistentArrayMap<Int, String>
-                }.asTransient()
+                continually(Duration.seconds(60)) {
+                    val transientMap = l.fold(m<Int, String>()) { map, entry ->
+                        map.assoc(
+                            entry.key,
+                            entry.value
+                        ) as PersistentArrayMap<Int, String>
+                    }.asTransient()
 
-                withContext(Dispatchers.Default) {
-                    runAction(16, 16) {
-                        transientMap.dissoc(keyCounter.getAndDecrement())
+                    withContext(Dispatchers.Default) {
+                        runAction(16, 3) {
+                            for (entry in l)
+                                transientMap.dissoc(entry.key)
+                        }
                     }
-                }
+                    val persistent = transientMap.persistent()
 
-                val persistent = transientMap.persistent()
-                persistent.shouldNotContainAnyOf(l)
-                persistent.count shouldBeExactly 0
+                    persistent.count shouldBeExactly 0
+                    persistent.shouldNotContainAnyOf(l)
+                }
             }
         }
     }
@@ -689,7 +688,7 @@ class PersistentArrayMapTest : FreeSpec({
         val tr = map.asTransient() as TransientArrayMap<String, Int>
         val array = tr.array
 
-        tr._length.value shouldBeExactly 3
+        tr.length shouldBeExactly 3
         array.size shouldBeExactly 16
         array[0] shouldBe ("a" to 1)
         array[1] shouldBe ("b" to 2)

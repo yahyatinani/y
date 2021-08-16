@@ -1,12 +1,12 @@
 package com.github.whyrising.y.vector
 
 import com.github.whyrising.y.ArrayChunk
+import com.github.whyrising.y.Edit
 import com.github.whyrising.y.concretions.list.PersistentList
 import com.github.whyrising.y.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.concretions.list.l
 import com.github.whyrising.y.concretions.vector.PersistentVector
 import com.github.whyrising.y.concretions.vector.PersistentVector.ChunkedSeq
-import com.github.whyrising.y.concretions.vector.PersistentVector.Edit
 import com.github.whyrising.y.concretions.vector.PersistentVector.EmptyVector
 import com.github.whyrising.y.concretions.vector.PersistentVector.Node
 import com.github.whyrising.y.concretions.vector.PersistentVector.Node.EmptyNode

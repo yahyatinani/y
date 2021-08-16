@@ -13,8 +13,7 @@ import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.util.equiv
 import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.locks.reentrantLock
-import kotlinx.atomicfu.locks.withLock
+import kotlinx.atomicfu.update
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.MapSerializer
@@ -228,17 +227,20 @@ sealed class PersistentArrayMap<out K, out V>(
 
     internal class TransientArrayMap<out K, out V> private constructor(
         internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>?>,
-        isMutable: Boolean,
+        edit: Any?,
         length: Int
     ) : ATransientMap<K, V>() {
-        internal val _isMutable = atomic(isMutable)
-        internal val _length = atomic(length)
+        private val _edit = atomic(edit)
+        private val _length = atomic(length)
+
+        val edit by _edit
+        val length by _length
 
         override val doCount: Int
             by _length
 
-        override fun assertMutable() {
-            if (!_isMutable.value)
+        override fun ensureEditable() {
+            if (_edit.value == null)
                 throw IllegalStateException(
                     "Transient used after persistent() call."
                 )
@@ -256,7 +258,7 @@ sealed class PersistentArrayMap<out K, out V>(
             key: @UnsafeVariance K,
             value: @UnsafeVariance V
         ): TransientMap<K, V> {
-            assertMutable()
+            ensureEditable()
 
             val index = indexOf(key)
 
@@ -277,15 +279,16 @@ sealed class PersistentArrayMap<out K, out V>(
         }
 
         override fun doDissoc(key: @UnsafeVariance K): TransientMap<K, V> {
-            lock.withLock {
-                val index: Int = indexOf(key)
-                if (index >= 0) {
+            val index: Int = indexOf(key)
+
+            if (index >= 0) {
+                _length.update { currentLength: Int ->
                     array[index] = when {
-                        _length.value > 1 -> array[_length.value - 1]
+                        currentLength > 1 -> array[currentLength - 1]
                         else -> null
                     }
 
-                    _length.value--
+                    currentLength - 1
                 }
             }
 
@@ -294,9 +297,9 @@ sealed class PersistentArrayMap<out K, out V>(
 
         @Suppress("UNCHECKED_CAST")
         override fun doPersistent(): IPersistentMap<K, V> {
-            assertMutable()
+            ensureEditable()
 
-            _isMutable.value = false
+            _edit.value = null
             val ar = arrayOfNulls<Pair<K, V>>(_length.value)
             array.copyInto(ar, 0, 0, ar.size)
 
@@ -314,13 +317,11 @@ sealed class PersistentArrayMap<out K, out V>(
         }
 
         companion object {
-            private val lock = reentrantLock()
-
             operator fun <K, V> invoke(
                 array: Array<Pair<K, V>>
             ): TransientArrayMap<K, V> = TransientArrayMap(
                 array.copyOf(max(HASHTABLE_THRESHOLD, array.size)),
-                true,
+                Any(),
                 array.size
             )
         }
