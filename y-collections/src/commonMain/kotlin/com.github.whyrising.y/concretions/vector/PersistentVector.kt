@@ -18,6 +18,8 @@ import com.github.whyrising.y.vector.IPersistentVector
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -373,36 +375,40 @@ sealed class PersistentVector<out E>(
             return rootNode
         }
 
-        override fun conj(e: @UnsafeVariance E): TransientVector<E> {
-            ensureEditable()
+        private val lock = reentrantLock()
 
-            val oldCount = count
-            // empty slot available in tail?
-            if (oldCount - tailOffset(oldCount) < BF) {
-                tail[oldCount and 0x01f] = e
+        override fun conj(e: @UnsafeVariance E): TransientVector<E> {
+            lock.withLock {
+                ensureEditable()
+
+                val oldCount = count
+                // empty slot available in tail?
+                if (oldCount - tailOffset(oldCount) < BF) {
+                    tail[oldCount and 0x01f] = e
+                    _count.incrementAndGet()
+
+                    return this
+                }
+
+                val tailNode = Node<E>(root.edit, tail)
+                tail = arrayOfNulls(BF)
+                tail[0] = e
+
+                var newShift = shift
+                val newRoot: Node<E>
+                if ((count ushr SHIFT) > (1 shl shift)) {
+                    newRoot = Node(root.edit)
+                    newRoot.array[0] = root
+                    newRoot.array[1] = newPath(root.edit, shift, tailNode)
+                    newShift += SHIFT
+                } else newRoot = pushTail(shift, root, tailNode)
+
+                _root.value = newRoot
+                _shift.value = newShift
                 _count.incrementAndGet()
 
                 return this
             }
-
-            val tailNode = Node<E>(root.edit, tail)
-            tail = arrayOfNulls(BF)
-            tail[0] = e
-
-            var newShift = shift
-            val newRoot: Node<E>
-            if ((count ushr SHIFT) > (1 shl shift)) {
-                newRoot = Node(root.edit)
-                newRoot.array[0] = root
-                newRoot.array[1] = newPath(root.edit, shift, tailNode)
-                newShift += SHIFT
-            } else newRoot = pushTail(shift, root, tailNode)
-
-            _root.value = newRoot
-            _shift.value = newShift
-            _count.incrementAndGet()
-
-            return this
         }
 
         override fun persistent(): PersistentVector<E> {

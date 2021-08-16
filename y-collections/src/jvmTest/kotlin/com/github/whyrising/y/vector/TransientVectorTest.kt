@@ -1,11 +1,16 @@
 package com.github.whyrising.y.vector
 
 import com.github.whyrising.y.concretions.vector.PersistentVector
+import com.github.whyrising.y.concretions.vector.v
+import com.github.whyrising.y.utils.runAction
 import com.github.whyrising.y.vector.PersistentVectorTest.Companion.assertArraysAreEquiv
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.framework.concurrency.continually
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -17,8 +22,12 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.checkAll
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlin.time.Duration
 
+@ExperimentalKotest
 @ExperimentalSerializationApi
 @ExperimentalStdlibApi
 class TransientVectorTest : FreeSpec({
@@ -295,6 +304,27 @@ class TransientVectorTest : FreeSpec({
                 subRoot2.edit shouldBeSameInstanceAs tvIsMutable
                 mostRightLeaf.edit shouldBeSameInstanceAs tvIsMutable
             }
+        }
+    }
+
+    "concurrency" {
+        val i = 45
+        val v = v<Int>()
+
+        continually(Duration.seconds(10)) {
+            val transientVec = PersistentVector.TransientVector(v)
+
+            withContext(Dispatchers.Default) {
+                runAction(100, 10) {
+                    transientVec.conj(i)
+                }
+            }
+
+            transientVec.count shouldBeExactly 1000
+
+            val vec = transientVec.persistent()
+
+            vec shouldContain 45
         }
     }
 })
