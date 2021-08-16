@@ -14,10 +14,11 @@ import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.vector.APersistentVector
 import com.github.whyrising.y.vector.IPersistentVector
-import kotlinx.atomicfu.AtomicBoolean
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -54,7 +55,7 @@ sealed class PersistentVector<out E>(
     fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E> {
         @Suppress("UNCHECKED_CAST")
         fun assoc(level: Int, node: Node<E>): Node<E> {
-            val copy: Node<E> = Node(node.isMutable, node.array.copyOf())
+            val copy: Node<E> = Node(node.edit, node.array.copyOf())
 
             when (level) {
                 0 -> copy.array[index and 0x01f] = value
@@ -87,12 +88,12 @@ sealed class PersistentVector<out E>(
 
     @Suppress("UNCHECKED_CAST")
     private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
-        val rootNode = Node<E>(parent.isMutable, parent.array.copyOf())
+        val rootNode = Node<E>(parent.edit, parent.array.copyOf())
         val subIndex = ((count - 1) ushr level) and 0x01f
 
         val nodeToInsert: Node<E> = if (level == SHIFT) tail
         else when (val child = parent.array[subIndex]) {
-            null -> newPath(root.isMutable, level - 5, tail)
+            null -> newPath(root.edit, level - 5, tail)
             else -> pushTail(level - SHIFT, child as Node<E>, tail)
         }
 
@@ -110,16 +111,16 @@ sealed class PersistentVector<out E>(
             return Vector(count + 1, shift, root, newTail)
         }
 
-        val tailNode = Node<E>(root.isMutable, tail)
+        val tailNode = Node<E>(root.edit, tail)
         var newShift = shift
         val newRoot: Node<E>
 
         when {
             // root overflow?
             (count ushr SHIFT) > (1 shl shift) -> {
-                newRoot = Node(root.isMutable)
+                newRoot = Node(root.edit)
                 newRoot.array[0] = root
-                newRoot.array[1] = newPath(root.isMutable, shift, tailNode)
+                newRoot.array[1] = newPath(root.edit, shift, tailNode)
                 newShift += SHIFT
             }
             else -> newRoot = pushTail(shift, root, tailNode)
@@ -169,7 +170,7 @@ sealed class PersistentVector<out E>(
                     when {
                         newChild == null && subIndex == 0 -> null
                         else -> {
-                            val n = Node<E>(node.isMutable, node.array.copyOf())
+                            val n = Node<E>(node.edit, node.array.copyOf())
                             n.array[subIndex] = newChild
 
                             n
@@ -178,7 +179,7 @@ sealed class PersistentVector<out E>(
                 }
                 subIndex == 0 -> null
                 else -> {
-                    val n = Node<E>(node.isMutable, node.array.copyOf())
+                    val n = Node<E>(node.edit, node.array.copyOf())
                     n.array[subIndex] = null
 
                     n
@@ -244,27 +245,30 @@ sealed class PersistentVector<out E>(
         else -> ChunkedSeq(this, 0, 0)
     }
 
-    sealed class Node<out T>(
-        val isMutable: AtomicBoolean,
+    class Edit(value: Any?) {
+        private val lock = reentrantLock()
+
+        var value: Any? = value
+            get() {
+                lock.withLock {
+                    return field
+                }
+            }
+            internal set(value) {
+                lock.withLock {
+                    field = value
+                }
+            }
+    }
+
+    open class Node<out T>(
+        val edit: Edit,
         val array: Array<Any?>
     ) {
-        internal class Node2<out T>(
-            isMutable: AtomicBoolean,
-            _array: Array<Any?>
-        ) : Node<T>(isMutable, _array)
+        constructor(edit: Edit) : this(edit, arrayOfNulls(BF))
 
         internal object EmptyNode :
-            Node<Nothing>(atomic(false), arrayOfNulls(BF))
-
-        companion object {
-            operator fun <T> invoke(isMutable: AtomicBoolean): Node<T> =
-                Node2(isMutable, arrayOfNulls(BF))
-
-            operator fun <T> invoke(
-                isMutable: AtomicBoolean,
-                nodes: Array<Any?>
-            ): Node<T> = Node2(isMutable, nodes)
-        }
+            Node<Nothing>(Edit(null), arrayOfNulls(BF))
     }
 
     internal object EmptyVector : PersistentVector<Nothing>(
@@ -329,11 +333,11 @@ sealed class PersistentVector<out E>(
 
         private val _count: AtomicInt = atomic(size)
         private val _shift: AtomicInt = atomic(shift)
-        private val _root: AtomicRef<Node<E>> = atomic(mutableNode(root))
+        private val _root: AtomicRef<Node<E>> = atomic(root)
         private val _tail: AtomicRef<Array<Any?>> = atomic(tail)
 
-        fun assertMutable() {
-            if (!_root.value.isMutable.value)
+        fun ensureEditable() {
+            if (root.edit.value == null)
                 throw IllegalStateException(
                     "Transient used after persistent() call"
                 )
@@ -341,7 +345,7 @@ sealed class PersistentVector<out E>(
 
         override val count: Int
             get() {
-                assertMutable()
+                ensureEditable()
                 return _count.value
             }
 
@@ -358,25 +362,26 @@ sealed class PersistentVector<out E>(
             }
 
         internal fun invalidate() {
-            _root.value.isMutable.value = false
+            root.edit.value = null
         }
 
-        private fun assertNodeCreatedByThisVector(node: Node<E>): Node<E> =
-            when (node.isMutable) {
-                root.isMutable -> node
-                else -> Node(root.isMutable, node.array.copyOf())
+        private fun ensureEditable(node: Node<E>): Node<E> = root.edit.let {
+            when {
+                node.edit === it -> node
+                else -> Node(it, node.array.copyOf())
             }
+        }
 
         @Suppress("UNCHECKED_CAST")
         private
         fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
             val subIndex = ((count - 1) ushr level) and 0x01f
 
-            val rootNode = assertNodeCreatedByThisVector(parent)
+            val rootNode = ensureEditable(parent)
 
             val nodeToInsert: Node<E> = if (level == SHIFT) tail
             else when (val child = rootNode.array[subIndex]) {
-                null -> newPath(root.isMutable, level - 5, tail)
+                null -> newPath(root.edit, level - 5, tail)
                 else -> pushTail(level - SHIFT, child as Node<E>, tail)
             }
 
@@ -386,7 +391,7 @@ sealed class PersistentVector<out E>(
         }
 
         override fun conj(e: @UnsafeVariance E): TransientVector<E> {
-            assertMutable()
+            ensureEditable()
 
             val oldCount = count
             // empty slot available in tail?
@@ -397,16 +402,16 @@ sealed class PersistentVector<out E>(
                 return this
             }
 
-            val tailNode = Node<E>(root.isMutable, tail)
+            val tailNode = Node<E>(root.edit, tail)
             tail = arrayOfNulls(BF)
             tail[0] = e
 
             var newShift = shift
             val newRoot: Node<E>
             if ((count ushr SHIFT) > (1 shl shift)) {
-                newRoot = Node(root.isMutable)
+                newRoot = Node(root.edit)
                 newRoot.array[0] = root
-                newRoot.array[1] = newPath(root.isMutable, shift, tailNode)
+                newRoot.array[1] = newPath(root.edit, shift, tailNode)
                 newShift += SHIFT
             } else newRoot = pushTail(shift, root, tailNode)
 
@@ -418,20 +423,20 @@ sealed class PersistentVector<out E>(
         }
 
         override fun persistent(): PersistentVector<E> {
-            assertMutable()
+            ensureEditable()
             invalidate()
 
-            val trimmedTail =
-                arrayOfNulls<Any?>(_count.value - tailOffset(_count.value))
+            val count = _count.value
+            val trimmedTail = arrayOfNulls<Any?>(count - tailOffset(count))
 
             tail.copyInto(trimmedTail, 0, 0, trimmedTail.size)
 
-            return Vector(_count.value, _shift.value, _root.value, trimmedTail)
+            return Vector(count, _shift.value, _root.value, trimmedTail)
         }
 
         companion object {
-            private fun <E> mutableNode(node: Node<E>): Node<E> =
-                Node(atomic(true), node.array.copyOf())
+            private fun <E> editableRoot(node: Node<E>): Node<E> =
+                Node(Edit(Any()), node.array.copyOf())
 
             private fun maximizeTail(tail: Array<Any?>): Array<Any?> {
                 val maxTail = arrayOfNulls<Any?>(BF)
@@ -444,7 +449,7 @@ sealed class PersistentVector<out E>(
                 TransientVector(
                     vec.count,
                     vec.shift,
-                    vec.root,
+                    editableRoot(vec.root),
                     maximizeTail(vec.tail)
                 )
         }
@@ -477,16 +482,16 @@ sealed class PersistentVector<out E>(
         }
 
         private tailrec fun <E> newPath(
-            isMutable: AtomicBoolean,
+            edit: Edit,
             level: Int,
             node: Node<E>
         ): Node<E> {
             if (level == 0) return node
 
-            val path = Node<E>(isMutable)
+            val path = Node<E>(edit)
             path.array[0] = node
 
-            return newPath(isMutable, level - SHIFT, path)
+            return newPath(edit, level - SHIFT, path)
         }
 
         internal fun <E> create(list: List<E>): PersistentVector<E> {

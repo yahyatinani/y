@@ -5,9 +5,10 @@ import com.github.whyrising.y.vector.PersistentVectorTest.Companion.assertArrays
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
-import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
@@ -24,42 +25,38 @@ class TransientVectorTest : FreeSpec({
     @Suppress("UNCHECKED_CAST")
     "constructor" {
         val v = PersistentVector(*(1..57).toList().toTypedArray())
-        val vRoot = v.root
+        val root = v.root
 
-        val tv = PersistentVector.TransientVector(v)
-        val tvRoot = tv.root
+        val transientVector = PersistentVector.TransientVector(v)
+        val tvRoot = transientVector.root
 
-        tv.count shouldBeExactly v.count
-        tv.shift shouldBeExactly v.shift
-        tv.tail.size shouldBeExactly 32
-        assertArraysAreEquiv(tv.tail, v.tail)
-        tvRoot shouldNotBeSameInstanceAs vRoot
-        tvRoot.array.size shouldBeExactly vRoot.array.size
-        tvRoot.array shouldNotBeSameInstanceAs vRoot.array
-        tvRoot.isMutable shouldNotBeSameInstanceAs vRoot.isMutable
-        tvRoot.isMutable.value.shouldBeTrue()
-        vRoot.array.fold(0) { index: Int, e: Any? ->
+        transientVector.count shouldBeExactly v.count
+        transientVector.shift shouldBeExactly v.shift
+        transientVector.tail.size shouldBeExactly 32
+        assertArraysAreEquiv(transientVector.tail, v.tail)
+        tvRoot shouldNotBeSameInstanceAs root
+        tvRoot.array.size shouldBeExactly root.array.size
+        tvRoot.array shouldNotBeSameInstanceAs root.array
+        tvRoot.edit.shouldNotBeNull()
+        root.edit.value.shouldBeNull()
+        val vNode = root.array[0] as PersistentVector.Node<Int>
+        val tvNode = tvRoot.array[0] as PersistentVector.Node<Int>
 
-            if (e != null) {
-                val tvNode = tvRoot.array[index] as PersistentVector.Node<Int>
-                val vNode = e as PersistentVector.Node<Int>
+        tvNode shouldBeSameInstanceAs vNode
 
-                tvNode shouldBe vNode
-                tvNode.isMutable shouldBeSameInstanceAs vRoot.isMutable
-            }
-            index + 1
-        }
+        tvNode.edit shouldBeSameInstanceAs vNode.edit
+        tvNode.edit.value.shouldBeNull()
     }
 
     "invalidate() should set isMutable to false" {
         val v = PersistentVector(*(1..57).toList().toTypedArray())
         val tv = PersistentVector.TransientVector(v)
-        val isMutable = tv.root.isMutable
+        val isMutable = tv.root.edit
 
         tv.invalidate()
 
-        tv.root.isMutable shouldBeSameInstanceAs isMutable
-        tv.root.isMutable.value.shouldBeFalse()
+        tv.root.edit shouldBeSameInstanceAs isMutable
+        tv.root.edit.value.shouldBeNull()
     }
 
     "assertMutable()" - {
@@ -67,7 +64,7 @@ class TransientVectorTest : FreeSpec({
             val v = PersistentVector(*(1..57).toList().toTypedArray())
             val tv = PersistentVector.TransientVector(v)
 
-            shouldNotThrow<Exception> { tv.assertMutable() }
+            shouldNotThrow<Exception> { tv.ensureEditable() }
         }
 
         "when called on an invalidated transient, it should throw" {
@@ -76,7 +73,7 @@ class TransientVectorTest : FreeSpec({
             tv.invalidate()
 
             val e = shouldThrowExactly<IllegalStateException> {
-                tv.assertMutable()
+                tv.ensureEditable()
             }
 
             e.message shouldBe "Transient used after persistent() call"
@@ -89,7 +86,7 @@ class TransientVectorTest : FreeSpec({
             val v = PersistentVector(*(1..57).toList().toTypedArray())
             val tv = PersistentVector.TransientVector(v)
 
-            tv.root.isMutable.value.shouldBeTrue()
+            tv.root.edit.shouldNotBeNull()
             tv.count shouldBeExactly v.count
         }
 
@@ -128,9 +125,9 @@ class TransientVectorTest : FreeSpec({
             val vec = tv.persistent()
             val root = vec.root
 
-            root.isMutable.value.shouldBeFalse()
+            root.edit.value.shouldBeNull()
             root shouldBeSameInstanceAs tv.root
-            tv.root.isMutable.value.shouldBeFalse()
+            tv.root.edit.value.shouldBeNull()
             vec.count shouldBeExactly v.count
             vec.shift shouldBeExactly v.shift
             vec.tail.size shouldBeExactly 25
@@ -165,7 +162,7 @@ class TransientVectorTest : FreeSpec({
 
                 tv.shift shouldBeExactly SHIFT
                 tv.count shouldBeExactly list.size + 1
-                tvRoot.isMutable.value.shouldBeTrue()
+                tvRoot.edit.shouldNotBeNull()
                 tvRoot.array.size shouldBeExactly 32
                 tvTail.size shouldBeExactly 32
                 assertArraysAreEquiv(tvTail, tempVec.tail)
@@ -199,17 +196,17 @@ class TransientVectorTest : FreeSpec({
                                 node as PersistentVector.Node<Int>
                             val array = mostRightLeaf.array
 
-                            mostRightLeaf.isMutable shouldBeSameInstanceAs
-                                tempTv.root.isMutable
+                            mostRightLeaf.edit shouldBeSameInstanceAs
+                                tempTv.root.edit
                             array shouldBe tempVec.tail
-                            mostRightLeaf.isMutable shouldBeSameInstanceAs
-                                tempTv.root.isMutable
+                            mostRightLeaf.edit shouldBeSameInstanceAs
+                                tempTv.root.edit
                             isMostRightLeafFound = true
                         }
                         index--
                     }
 
-                    tvRoot.isMutable.value.shouldBeTrue()
+                    tvRoot.edit.shouldNotBeNull()
                     isMostRightLeafFound.shouldBeTrue()
                     tv.count shouldBeExactly l.size + 1
                     tvTail.size shouldBeExactly 32
@@ -239,13 +236,13 @@ class TransientVectorTest : FreeSpec({
                 assertArraysAreEquiv(mostRightLeaf.array, tempVec.tail)
                 tv.count shouldBeExactly list.size + 1
 
-                tvRoot.isMutable shouldNotBeSameInstanceAs root.isMutable
-                tvRoot.isMutable.value.shouldBeTrue()
-                tvSubRoot.isMutable shouldBeSameInstanceAs tvRoot.isMutable
+                tvRoot.edit shouldNotBeSameInstanceAs root.edit
+                tvRoot.edit.shouldNotBeNull()
+                tvSubRoot.edit shouldBeSameInstanceAs tvRoot.edit
 
-                firstLeft.isMutable shouldBeSameInstanceAs root.isMutable
-                mostRightLeaf.isMutable shouldBeSameInstanceAs
-                    tvRoot.isMutable
+                firstLeft.edit shouldBeSameInstanceAs root.edit
+                mostRightLeaf.edit shouldBeSameInstanceAs
+                    tvRoot.edit
             }
 
             @Suppress("UNCHECKED_CAST")
@@ -267,10 +264,10 @@ class TransientVectorTest : FreeSpec({
                 assertArraysAreEquiv(mostRightLeaf.array, tempVec.tail)
                 tvTail[0] shouldBe e
                 tv.count shouldBeExactly list.size + 1
-                tvRoot.isMutable.value.shouldBeTrue()
-                tvSubRoot.isMutable shouldBeSameInstanceAs tvRoot.isMutable
-                mostRightLeaf.isMutable shouldBeSameInstanceAs
-                    tvRoot.isMutable
+                tvRoot.edit.shouldNotBeNull()
+                tvSubRoot.edit shouldBeSameInstanceAs tvRoot.edit
+                mostRightLeaf.edit shouldBeSameInstanceAs
+                    tvRoot.edit
             }
 
             @Suppress("UNCHECKED_CAST")
@@ -282,7 +279,7 @@ class TransientVectorTest : FreeSpec({
 
                 val tv = tempTv.conj(e)
                 val tvRoot = tv.root
-                val tvIsMutable = tvRoot.isMutable
+                val tvIsMutable = tvRoot.edit
                 val subRoot1 = tvRoot.array[0] as PersistentVector.Node<Int>
                 val subRoot2 = tvRoot.array[1] as PersistentVector.Node<Int>
                 val mostRightLeaf =
@@ -293,10 +290,10 @@ class TransientVectorTest : FreeSpec({
                 tv.tail[0] as Int shouldBeExactly e
                 assertArraysAreEquiv(mostRightLeaf.array, tempVec.tail)
 
-                tvIsMutable shouldBeSameInstanceAs tempTv.root.isMutable
-                subRoot1.isMutable shouldBeSameInstanceAs tvIsMutable
-                subRoot2.isMutable shouldBeSameInstanceAs tvIsMutable
-                mostRightLeaf.isMutable shouldBeSameInstanceAs tvIsMutable
+                tvIsMutable shouldBeSameInstanceAs tempTv.root.edit
+                subRoot1.edit shouldBeSameInstanceAs tvIsMutable
+                subRoot2.edit shouldBeSameInstanceAs tvIsMutable
+                mostRightLeaf.edit shouldBeSameInstanceAs tvIsMutable
             }
         }
     }

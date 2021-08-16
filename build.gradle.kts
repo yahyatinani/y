@@ -6,6 +6,10 @@ buildscript {
         mavenLocal()
         gradlePluginPortal()
     }
+
+    dependencies {
+        classpath("org.jetbrains.kotlinx:atomicfu-gradle-plugin:0.16.2")
+    }
 }
 
 plugins {
@@ -14,6 +18,7 @@ plugins {
     kotlin("multiplatform") version Libs.kotlinVersion
     kotlin("plugin.serialization") version Libs.kotlinVersion
     id(Plugins.Ktlint.id) version Plugins.Ktlint.version
+
     id("maven-publish")
     signing
 }
@@ -57,6 +62,7 @@ subprojects {
 
     apply(plugin = Plugins.Ktlint.id)
     apply(plugin = "kotlinx-serialization")
+    apply(plugin = "kotlinx-atomicfu")
 
     ktlint { debug.set(true) }
 
