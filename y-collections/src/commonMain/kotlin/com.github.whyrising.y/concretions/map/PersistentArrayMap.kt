@@ -12,7 +12,10 @@ import com.github.whyrising.y.mutable.map.TransientMap
 import com.github.whyrising.y.seq.IPersistentCollection
 import com.github.whyrising.y.seq.ISeq
 import com.github.whyrising.y.util.equiv
+import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.reentrantLock
+import kotlinx.atomicfu.locks.withLock
 import kotlinx.atomicfu.update
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -230,8 +233,14 @@ sealed class PersistentArrayMap<out K, out V>(
         edit: Any?,
         length: Int
     ) : ATransientMap<K, V>() {
-        private val _edit = atomic(edit)
+        private val _edit: AtomicRef<Any?> = atomic(edit)
         private val _length = atomic(length)
+
+        constructor(array: Array<Pair<K, V>>) : this(
+            array.copyOf(max(HASHTABLE_THRESHOLD, array.size)),
+            Any(),
+            array.size
+        )
 
         val edit by _edit
         val length by _length
@@ -247,52 +256,50 @@ sealed class PersistentArrayMap<out K, out V>(
         }
 
         private fun indexOf(key: @UnsafeVariance K): Int {
-            for (i in 0 until _length.value)
+            for (i in 0 until length)
                 if (equiv(key, array[i]?.first)) return i
 
             return -1
         }
+
+        private val lock = reentrantLock()
 
         @Suppress("UNCHECKED_CAST")
         override fun doAssoc(
             key: @UnsafeVariance K,
             value: @UnsafeVariance V
         ): TransientMap<K, V> {
-            ensureEditable()
+            lock.withLock {
+                ensureEditable()
 
-            val index = indexOf(key)
-
-            when {
-                index >= 0 ->
+                val index = indexOf(key)
+                if (index >= 0) {
                     if (array[index]!!.second != value)
                         array[index] = Pair(key, value)
-                else -> when {
-                    _length.value >= array.size -> {
-                        return PersistentHashMap(*(array as Array<Pair<K, V>>))
-                            .asTransient().assoc(key, value)
-                    }
-                    else -> array[_length.getAndIncrement()] = Pair(key, value)
-                }
+                } else if (_length.value >= array.size) {
+                    return PersistentHashMap(*(array as Array<Pair<K, V>>))
+                        .asTransient().assoc(key, value)
+                } else array[_length.getAndIncrement()] =
+                    Pair(key, value)
+                return this
             }
-
-            return this
         }
 
         override fun doDissoc(key: @UnsafeVariance K): TransientMap<K, V> {
-            val index: Int = indexOf(key)
+            lock.withLock {
+                val index: Int = indexOf(key)
 
-            if (index >= 0) {
-                _length.update { currentLength: Int ->
-                    array[index] = when {
-                        currentLength > 1 -> array[currentLength - 1]
-                        else -> null
+                if (index >= 0) {
+                    _length.update { currentLength: Int ->
+                        array[index] = when {
+                            currentLength > 1 -> array[currentLength - 1]
+                            else -> null
+                        }
+                        currentLength - 1
                     }
-
-                    currentLength - 1
                 }
+                return this
             }
-
-            return this
         }
 
         @Suppress("UNCHECKED_CAST")
@@ -314,16 +321,6 @@ sealed class PersistentArrayMap<out K, out V>(
                 index >= 0 -> array[index]!!.second
                 else -> default
             }
-        }
-
-        companion object {
-            operator fun <K, V> invoke(
-                array: Array<Pair<K, V>>
-            ): TransientArrayMap<K, V> = TransientArrayMap(
-                array.copyOf(max(HASHTABLE_THRESHOLD, array.size)),
-                Any(),
-                array.size
-            )
         }
     }
 
