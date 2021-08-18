@@ -151,16 +151,6 @@ fun <E> nth(seq: Sequential, index: Int): E {
 fun hashCombine(seed: Int, hash: Int): Int =
     seed xor hash + -0x61c88647 + (seed shl 6) + (seed shr 2)
 
-@Suppress("UNCHECKED_CAST")
-internal fun <V> getValue(
-    map: Any,
-    key: Any,
-    default: V? = null
-): V? = when (map) {
-    is ILookup<*, *> -> map.valAt(key, default) as V?
-    else -> (map as Map<Any, Any>)[key] as V? ?: default
-}
-
 fun <K, V> get(map: ILookup<K, V>, key: K, default: V? = null): V? =
     getFrom<K, V>(map, key, default)
 
@@ -183,7 +173,7 @@ fun <K, V> getFrom(map: Any, key: K, default: V? = null): V? = when (map) {
         map.contains(key) -> map[key] as V?
         else -> default
     }
-    is TransientSet<*> ->  when {
+    is TransientSet<*> -> when {
         map.contains(key) -> map[key] as V?
         else -> default
     }
