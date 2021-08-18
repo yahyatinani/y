@@ -2,18 +2,10 @@ package com.github.whyrising.y.map.arraymap
 
 import com.github.whyrising.y.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.concretions.list.l
-import com.github.whyrising.y.concretions.map.HASHTABLE_THRESHOLD
-import com.github.whyrising.y.concretions.map.MapEntry
-import com.github.whyrising.y.concretions.map.PersistentArrayMap
-import com.github.whyrising.y.concretions.map.PersistentArrayMap.ArrayMap
-import com.github.whyrising.y.concretions.map.PersistentArrayMap.EmptyArrayMap
+import com.github.whyrising.y.concretions.map.*
+import com.github.whyrising.y.concretions.map.PersistentArrayMap.Companion.EmptyArrayMap
 import com.github.whyrising.y.concretions.map.PersistentArrayMap.TransientArrayMap
-import com.github.whyrising.y.concretions.map.PersistentArrayMapSerializer
-import com.github.whyrising.y.concretions.map.PersistentHashMap
 import com.github.whyrising.y.concretions.map.PersistentHashMap.TransientLeanMap
-import com.github.whyrising.y.concretions.map.m
-import com.github.whyrising.y.concretions.map.toPArrayMap
-import com.github.whyrising.y.concretions.map.toPhashMap
 import com.github.whyrising.y.concretions.vector.v
 import com.github.whyrising.y.mutable.map.TransientMap
 import com.github.whyrising.y.utils.runAction
@@ -659,7 +651,8 @@ class PersistentArrayMapTest : FreeSpec({
 
             "dissoc(key)" {
                 continually(Duration.seconds(10)) {
-                    val transientMap = l.fold(m<Int, String>()) { map, entry ->
+                    val initial = PersistentArrayMap<Int, String>()
+                    val transientMap = l.fold(initial) { map, entry ->
                         map.assoc(
                             entry.key,
                             entry.value
@@ -683,7 +676,7 @@ class PersistentArrayMapTest : FreeSpec({
 
     "asTransient()" {
         val a = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = m(*a)
+        val map = PersistentArrayMap(*a)
 
         val tr = map.asTransient() as TransientArrayMap<String, Int>
         val array = tr.array
@@ -706,7 +699,7 @@ class PersistentArrayMapTest : FreeSpec({
             "it should return an ArrayMap" {
                 val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
 
-                val map = m(*array)
+                val map = PersistentArrayMap(*array)
                 val pairs = map.array
 
                 pairs shouldBe array
@@ -735,8 +728,9 @@ class PersistentArrayMapTest : FreeSpec({
             "when map is empty, it should add the new entry" {
                 val map = m<String, Int>()
 
-                val newMap = map.assoc("a", 1) as ArrayMap<String, Int>
-                val pairs = newMap.pairs
+                val newMap =
+                    map.assoc("a", 1) as PersistentArrayMap<String, Int>
+                val pairs = newMap.array
 
                 pairs[0].first shouldBe "a"
                 pairs[0].second shouldBe 1
@@ -747,8 +741,9 @@ class PersistentArrayMapTest : FreeSpec({
                     val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
                     val map = m(*array)
 
-                    val newMap = map.assoc("d", 4) as ArrayMap<String, Int>
-                    val pairs = newMap.pairs
+                    val newMap =
+                        map.assoc("d", 4) as PersistentArrayMap<String, Int>
+                    val pairs = newMap.array
 
                     pairs[0].first shouldBe "a"
                     pairs[0].second shouldBe 1
@@ -785,8 +780,9 @@ class PersistentArrayMapTest : FreeSpec({
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
                 val map = m(*array)
 
-                val newMap = map.assoc(key, value) as ArrayMap<Any, String>
-                val pairs = newMap.pairs
+                val newMap =
+                    map.assoc(key, value) as PersistentArrayMap<String, Int>
+                val pairs = newMap.array
 
                 pairs.size shouldBeExactly array.size
 
@@ -810,7 +806,8 @@ class PersistentArrayMapTest : FreeSpec({
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
                 val map = m(*array)
 
-                val newMap = map.assoc(key, value) as ArrayMap<Any, String>
+                val newMap =
+                    map.assoc(key, value) as PersistentArrayMap<String, Int>
                 val pairs = newMap.array
 
                 newMap shouldBeSameInstanceAs map
@@ -835,8 +832,9 @@ class PersistentArrayMapTest : FreeSpec({
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
                 val map = m(*array)
 
-                val newMap = map.assocNew(key, value) as ArrayMap<Any, String>
-                val pairs = newMap.pairs
+                val newMap =
+                    map.assocNew(key, value) as PersistentArrayMap<String, Int>
+                val pairs = newMap.array
 
                 pairs.size shouldBeExactly array.size + 1
 
@@ -960,7 +958,7 @@ class PersistentArrayMapTest : FreeSpec({
 
             "when map is populated, it should return a seq of entries" {
                 val array = arrayOf("a" to 1)
-                val map = m(*array)
+                val map = PersistentArrayMap(*array)
 
                 val seq = map.seq()
                 val rest = seq.rest()
@@ -1006,7 +1004,7 @@ class PersistentArrayMapTest : FreeSpec({
         }
 
         "keyIterator()" {
-            val map = m("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap("a" to 1, "b" to 2, "c" to 3)
 
             val iter: Iterator<String> = map.keyIterator()
 
@@ -1022,7 +1020,7 @@ class PersistentArrayMapTest : FreeSpec({
         }
 
         "valIterator()" {
-            val map = m("a" to 1, "b" to 2, "c" to 3)
+            val map = PersistentArrayMap("a" to 1, "b" to 2, "c" to 3)
 
             val iter: Iterator<Int> = map.valIterator()
 
@@ -1049,7 +1047,7 @@ class PersistentArrayMapTest : FreeSpec({
     }
 
     "m() should return a PersistentArrayMap" {
-        val map = m("a" to 1, "b" to 2)
+        val map = PersistentArrayMap("a" to 1, "b" to 2)
 
         map.count shouldBeExactly 2
         map("a") shouldBe 1
@@ -1065,13 +1063,35 @@ class PersistentArrayMapTest : FreeSpec({
     }
 
     "Serialization" - {
+//        val serialModule = SerializersModule {
+//            polymorphic(IPersistentMap::class) {
+//                val serializer = PersistentArrayMapSerializer(
+//                    PolymorphicSerializer(Any::class),
+//                    Int.serializer(),
+//                ) as KSerializer<PersistentArrayMap<*, *>>
+//
+//                val serializer1 = PersistentArrayMap.serializer(
+//                    PolymorphicSerializer(String::class),
+//                    PolymorphicSerializer(Int::class)
+//                ) as KSerializer<PersistentArrayMap<*, *>>
+//
+//
+//                subclass(PersistentArrayMap::class, serializer1)
+////        val clazz: KClass<PersistentArrayMap<*, *>> =
+//// PersistentArrayMap::class
+////        subclass(clazz)
+//            }
+//        }
+
+//        val format = Json { serializersModule = serialModule }
         "serialize" {
             val m = mapOf("a" to 1, "b" to 2, "c" to 3)
             val expected = Json.encodeToString(m)
 
-            val arrayMap = m("a" to 1, "b" to 2, "c" to 3)
+            val map = m("a" to 1, "b" to 2, "c" to 3)
+                as PersistentArrayMap<String, Int>
 
-            Json.encodeToString(arrayMap) shouldBe expected
+            Json.encodeToString(map) shouldBe expected
         }
 
         "deserialize" {
@@ -1079,10 +1099,10 @@ class PersistentArrayMapTest : FreeSpec({
             val str = Json.encodeToString(m)
             val expected = m.toPhashMap()
 
-            val arrayMap =
+            val map =
                 Json.decodeFromString<PersistentArrayMap<String, Int>>(str)
 
-            arrayMap shouldBe expected
+            map shouldBe expected
         }
 
         "discriptor" {

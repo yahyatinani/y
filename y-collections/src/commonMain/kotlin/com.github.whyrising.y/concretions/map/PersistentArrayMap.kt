@@ -44,14 +44,14 @@ internal class PersistentArrayMapSerializer<K, V>(
     }
 }
 
-@Serializable(with = PersistentArrayMapSerializer::class)
-sealed class PersistentArrayMap<out K, out V>(
+@Serializable(PersistentArrayMapSerializer::class)
+class PersistentArrayMap<out K, out V>(
     internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
 ) : APersistentMap<K, V>(), MapIterable<K, V>, IMutableCollection<Any?> {
 
     @Suppress("UNCHECKED_CAST")
     private fun createArrayMap(newPairs: Array<out Pair<K, V>?>) =
-        ArrayMap(newPairs as Array<Pair<K, V>>)
+        PersistentArrayMap(newPairs as Array<Pair<K, V>>)
 
     private fun indexOf(key: @UnsafeVariance K): Int {
         for (i in array.indices)
@@ -178,17 +178,6 @@ sealed class PersistentArrayMap<out K, out V>(
 
     override fun asTransient(): TransientMap<K, V> = TransientArrayMap(array)
 
-    internal
-    object EmptyArrayMap : PersistentArrayMap<Nothing, Nothing>(emptyArray()) {
-        override fun toString(): String = "{}"
-
-        override fun hashCode(): Int = 0
-    }
-
-    internal class ArrayMap<out K, out V>(
-        internal val pairs: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
-    ) : PersistentArrayMap<K, V>(pairs)
-
     internal class Iter<K, V, R>(
         private val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>,
         val f: (Pair<K, V>) -> R
@@ -310,7 +299,7 @@ sealed class PersistentArrayMap<out K, out V>(
             val ar = arrayOfNulls<Pair<K, V>>(_length.value)
             array.copyInto(ar, 0, 0, ar.size)
 
-            return ArrayMap(ar as Array<Pair<K, V>>)
+            return PersistentArrayMap(ar as Array<Pair<K, V>>)
         }
 
         override fun doValAt(
@@ -325,6 +314,9 @@ sealed class PersistentArrayMap<out K, out V>(
     }
 
     companion object {
+        internal val EmptyArrayMap =
+            PersistentArrayMap<Nothing, Nothing>(emptyArray())
+
         operator fun <K, V> invoke(): PersistentArrayMap<K, V> = EmptyArrayMap
 
         private fun <K> areKeysEqual(key1: K, key2: K): Boolean = when (key1) {
@@ -345,7 +337,7 @@ sealed class PersistentArrayMap<out K, out V>(
                                     "Duplicate key: ${pairs[i].first}"
                                 )
 
-                    ArrayMap(pairs as Array<Pair<K, V>>)
+                    PersistentArrayMap(pairs as Array<Pair<K, V>>)
                 }
             }
 
@@ -359,7 +351,7 @@ sealed class PersistentArrayMap<out K, out V>(
     }
 }
 
-fun <K, V> m(vararg pairs: Pair<K, V>): PersistentArrayMap<K, V> =
+fun <K, V> m(vararg pairs: Pair<K, V>): IPersistentMap<K, V> =
     PersistentArrayMap(*pairs)
 
 fun <K, V> Map<K, V>.toPArrayMap(): PersistentArrayMap<K, V> =

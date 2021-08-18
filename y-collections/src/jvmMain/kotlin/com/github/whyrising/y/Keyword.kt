@@ -1,6 +1,7 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.core.IHashEq
+import com.github.whyrising.y.map.IPersistentMap
 import com.github.whyrising.y.util.getValue
 import com.github.whyrising.y.utils.clearCache
 import kotlinx.serialization.KSerializer
@@ -55,9 +56,18 @@ class Keyword private constructor(
     override fun compareTo(other: Keyword): Int = symbol.compareTo(other.symbol)
 
     operator fun <K : Any, V : Any> invoke(
+        map: IPersistentMap<K, V>,
+        default: V? = null
+    ): V? {
+        return map.valAt(this as K, default)
+    }
+
+    operator fun <K : Any, V : Any> invoke(
         map: Map<K, V>,
         default: V? = null
-    ): V? = getValue(this, map, default)
+    ): V? {
+        return getValue(map, this, default)
+    }
 
     companion object {
         const val MAGIC = -0x61c88647

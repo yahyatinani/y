@@ -1,19 +1,14 @@
 package com.github.whyrising.y.hashset
 
 import com.github.whyrising.y.concretions.list.l
+import com.github.whyrising.y.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.concretions.map.PersistentHashMap
 import com.github.whyrising.y.concretions.map.PersistentHashMap.EmptyHashMap
 import com.github.whyrising.y.concretions.map.PersistentHashMap.NodeIterator.NodeIter
 import com.github.whyrising.y.concretions.map.hashMap
 import com.github.whyrising.y.concretions.map.m
-import com.github.whyrising.y.concretions.set.PersistentHashSet
-import com.github.whyrising.y.concretions.set.PersistentHashSet.EmptyHashSet
-import com.github.whyrising.y.concretions.set.PersistentHashSet.HashSet
-import com.github.whyrising.y.concretions.set.PersistentHashSet.TransientHashSet
-import com.github.whyrising.y.concretions.set.PersistentHashSetSerializer
-import com.github.whyrising.y.concretions.set.hashSet
-import com.github.whyrising.y.concretions.set.hs
-import com.github.whyrising.y.concretions.set.toPhashSet
+import com.github.whyrising.y.concretions.set.*
+import com.github.whyrising.y.concretions.set.PersistentHashSet.*
 import com.github.whyrising.y.map.MapIterable
 import com.github.whyrising.y.mocks.MockPersistentMap
 import com.github.whyrising.y.set.PersistentSet
@@ -378,8 +373,8 @@ class PersistentHashSetTest : FreeSpec({
 
     "TransientHashSet" - {
         "count should return the count of the inner transient map" {
-            val tmap1 = m<Int, Int>().asTransient()
-            val tmap2 = m("a" to "1").asTransient()
+            val tmap1 = (m<Int, Int>() as PersistentArrayMap).asTransient()
+            val tmap2 = (m("a" to "1") as PersistentArrayMap).asTransient()
 
             val tSet1 = TransientHashSet(tmap1)
             val tSet2: TransientHashSet<String> = TransientHashSet(tmap2)
@@ -390,6 +385,7 @@ class PersistentHashSetTest : FreeSpec({
 
         "contains(key)" {
             val map = m("a" to "1", "b" to "2", "c" to "3", null to null)
+                    as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
 
             tSet.contains("a").shouldBeTrue()
@@ -402,6 +398,7 @@ class PersistentHashSetTest : FreeSpec({
         "disjoin(key) should return a transient set without the key" {
             checkAll(Arb.set(Arb.string(), 1..100)) { set ->
                 val map = m(*set.map { Pair(it, it) }.toTypedArray())
+                        as PersistentArrayMap
                 val tHashSet = TransientHashSet(map.asTransient())
                 val n = map.array[Random.nextInt(map.count)].first
 
@@ -415,6 +412,7 @@ class PersistentHashSetTest : FreeSpec({
 
         "get(key)" {
             val map = m("a" to "1", "b" to "2", "c" to "3", null to null)
+                    as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
 
             tSet["a"] shouldBe "1"
@@ -427,6 +425,7 @@ class PersistentHashSetTest : FreeSpec({
             val n = "7"
             checkAll(Arb.set(Arb.string().filter { it != n })) { set ->
                 val map = m(*set.map { Pair(it, it) }.toTypedArray())
+                        as PersistentArrayMap
                 val tHashSet = TransientHashSet(map.asTransient())
 
                 val ths = tHashSet.conj(n) as TransientHashSet<String>
@@ -440,6 +439,7 @@ class PersistentHashSetTest : FreeSpec({
         @Suppress("UNCHECKED_CAST")
         "persistent() should return a PersistentHashSet" {
             val map = m("a" to "1", "b" to "2", "c" to "3")
+                    as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
 
             val set = tSet.persistent() as PersistentHashSet<String>
@@ -450,6 +450,7 @@ class PersistentHashSetTest : FreeSpec({
 
         "invoke(key, default)" {
             val map = m("a" to "1", "b" to "2", "c" to "3")
+                    as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
             val default = "notFound"
 
@@ -460,6 +461,7 @@ class PersistentHashSetTest : FreeSpec({
 
         "invoke(key)" {
             val map = m("a" to "1", "b" to "2", "c" to "3")
+                    as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
 
             tSet("a") shouldBe "1"
@@ -488,7 +490,7 @@ class PersistentHashSetTest : FreeSpec({
             val serializer = PersistentHashSetSerializer(element)
 
             serializer.descriptor shouldBeSameInstanceAs
-                serializer.setSerializer.descriptor
+                    serializer.setSerializer.descriptor
         }
     }
 })

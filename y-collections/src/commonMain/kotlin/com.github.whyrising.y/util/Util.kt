@@ -1,16 +1,11 @@
 package com.github.whyrising.y.util
 
 import com.github.whyrising.y.ArrayChunk
-import com.github.whyrising.y.Named
 import com.github.whyrising.y.associative.ILookup
 import com.github.whyrising.y.concretions.list.ChunkedSeq
 import com.github.whyrising.y.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.core.IHashEq
-import com.github.whyrising.y.seq.IPersistentCollection
-import com.github.whyrising.y.seq.ISeq
-import com.github.whyrising.y.seq.LazySeq
-import com.github.whyrising.y.seq.Seqable
-import com.github.whyrising.y.seq.Sequential
+import com.github.whyrising.y.seq.*
 
 internal const val INIT_HASH_CODE = 0
 internal const val HASH_PRIME = 31
@@ -155,8 +150,11 @@ fun hashCombine(seed: Int, hash: Int): Int =
     seed xor hash + -0x61c88647 + (seed shl 6) + (seed shr 2)
 
 @Suppress("UNCHECKED_CAST")
-fun <K : Any, V : Any> getValue(key: Named, map: Map<K, V>, default: V?): V? =
-    when (map) {
-        is ILookup<*, *> -> map.valAt(key, default) as V?
-        else -> (map as Map<Any, Any>)[key] as V? ?: default
-    }
+internal fun <K, V> getValue(
+    map: Map<K, V>,
+    key: Any,
+    default: V? = null
+): V? = when (map) {
+    is ILookup<*, *> -> map.valAt(key, default) as V?
+    else -> (map as Map<Any, Any>)[key] as V? ?: default
+}

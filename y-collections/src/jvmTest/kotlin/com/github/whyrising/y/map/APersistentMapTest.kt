@@ -4,7 +4,7 @@ import com.github.whyrising.y.concretions.list.ASeq
 import com.github.whyrising.y.concretions.list.SeqIterator
 import com.github.whyrising.y.concretions.list.l
 import com.github.whyrising.y.concretions.map.MapEntry
-import com.github.whyrising.y.concretions.map.PersistentArrayMap.ArrayMap
+import com.github.whyrising.y.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.concretions.map.PersistentArrayMap.Iter
 import com.github.whyrising.y.concretions.map.hashMap
 import com.github.whyrising.y.concretions.map.m
@@ -36,7 +36,7 @@ class APersistentMapTest : FreeSpec({
 
     "hashCode()" {
         val array = arrayOf("a" to 1, "b" to 2)
-        val map = m(*array)
+        val map = m(*array) as PersistentArrayMap
         val expHash = ("a".hashCode() xor 1.hashCode()) +
             ("b".hashCode() xor 2.hashCode())
 
@@ -45,7 +45,7 @@ class APersistentMapTest : FreeSpec({
     }
 
     "hasheq()" {
-        val map = m("a" to 1, "b" to 2, "c" to 3)
+        val map = m("a" to 1, "b" to 2, "c" to 3) as PersistentArrayMap
         val expectedHash = Murmur3.hashUnordered(map)
 
         map.hasheq shouldBeExactly 0
@@ -54,8 +54,8 @@ class APersistentMapTest : FreeSpec({
 
         hash shouldBeExactly expectedHash
         map.hasheq shouldBeExactly expectedHash
-        m<String, Int>().hasheq() shouldBeExactly -15128758
-        m<String, Int>().hasheq() shouldBeExactly
+        PersistentArrayMap<String, Int>().hasheq() shouldBeExactly -15128758
+        PersistentArrayMap<String, Int>().hasheq() shouldBeExactly
             hashMap<String, Int>().hasheq()
     }
 
@@ -86,7 +86,7 @@ class APersistentMapTest : FreeSpec({
 
         "when entry is a Map.Entry, it should call assoc() on it" {
             val newMap = map.conj(MapEntry("a", 99))
-                as ArrayMap<String, Int>
+                as PersistentArrayMap<String, Int>
 
             newMap.count shouldBeExactly array.size
             newMap.array[0].second shouldBeExactly 99
@@ -104,7 +104,7 @@ class APersistentMapTest : FreeSpec({
 
             "when count == 2, it should call assoc() on it" {
                 val newMap = map.conj(v("a", 99))
-                    as ArrayMap<String, Int>
+                    as PersistentArrayMap<String, Int>
 
                 newMap.count shouldBeExactly array.size
                 newMap.array[0].second shouldBeExactly 99
@@ -129,7 +129,8 @@ class APersistentMapTest : FreeSpec({
             "when all elements are MapEntry, it should assoc() all" {
                 val entries = l(MapEntry("x", 42), MapEntry("y", 47))
 
-                val newMap = map.conj(entries) as ArrayMap<String, Int>
+                val newMap =
+                    map.conj(entries) as PersistentArrayMap<String, Int>
 
                 newMap.count shouldBeExactly array.size + entries.count
             }
@@ -172,7 +173,7 @@ class APersistentMapTest : FreeSpec({
 
     "invoke() operator" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = m(*array)
+        val map = m(*array) as PersistentArrayMap
 
         "invoke(key, default)" {
             map("a", -1) shouldBe 1
@@ -186,7 +187,7 @@ class APersistentMapTest : FreeSpec({
     }
 
     "KeySeq" - {
-        val map = m("a" to 1, "b" to 2, "c" to 3)
+        val map = m("a" to 1, "b" to 2, "c" to 3) as PersistentArrayMap
 
         "KeySeq should be a seq" {
             val keySeq: ISeq<String> = KeySeq(map)
@@ -246,7 +247,7 @@ class APersistentMapTest : FreeSpec({
     }
 
     "ValSeq" - {
-        val map = m("a" to 1, "b" to 2, "c" to 3)
+        val map = m("a" to 1, "b" to 2, "c" to 3) as PersistentArrayMap
 
         "ValSeq should be a seq" {
             val valSeq: ISeq<Int> = ValSeq(map)
@@ -307,8 +308,8 @@ class APersistentMapTest : FreeSpec({
 
     "Map implementation" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = m(*array)
-        val emptyMap = m<String, Int>()
+        val map = m(*array) as PersistentArrayMap
+        val emptyMap = PersistentArrayMap<String, Int>()
 
         "size()" {
             map.size shouldBeExactly array.size
