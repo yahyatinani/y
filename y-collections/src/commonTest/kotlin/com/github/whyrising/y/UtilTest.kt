@@ -32,7 +32,7 @@ class UtilTest {
 
         shouldThrowExactly<IllegalArgumentException> {
             getFrom<Any, Int>(listOf(1, 5, 3), ":a")
-        }.message shouldBe "`ArrayList` is not a map."
+        }.message shouldBe "`[1, 5, 3]` is not associative."
     }
 
     @Test
