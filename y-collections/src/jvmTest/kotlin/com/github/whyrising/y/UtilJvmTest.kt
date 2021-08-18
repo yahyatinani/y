@@ -25,7 +25,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
 @ExperimentalStdlibApi
-class UtilTest : FreeSpec({
+class UtilJvmTest : FreeSpec({
 
     class UnsupportedNumber : Number() {
         override fun toByte(): Byte = 0

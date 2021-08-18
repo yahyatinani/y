@@ -5,7 +5,9 @@ import com.github.whyrising.y.associative.ILookup
 import com.github.whyrising.y.concretions.list.ChunkedSeq
 import com.github.whyrising.y.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.core.IHashEq
+import com.github.whyrising.y.mutable.set.TransientSet
 import com.github.whyrising.y.seq.*
+import com.github.whyrising.y.set.PersistentSet
 
 internal const val INIT_HASH_CODE = 0
 internal const val HASH_PRIME = 31
@@ -150,11 +152,43 @@ fun hashCombine(seed: Int, hash: Int): Int =
     seed xor hash + -0x61c88647 + (seed shl 6) + (seed shr 2)
 
 @Suppress("UNCHECKED_CAST")
-internal fun <K, V> getValue(
-    map: Map<K, V>,
+internal fun <V> getValue(
+    map: Any,
     key: Any,
     default: V? = null
 ): V? = when (map) {
     is ILookup<*, *> -> map.valAt(key, default) as V?
     else -> (map as Map<Any, Any>)[key] as V? ?: default
+}
+
+fun <K, V> get(map: ILookup<K, V>, key: K, default: V? = null): V? =
+    getFrom<K, V>(map, key, default)
+
+fun <K, V> get(map: Map<K, V>, key: K, default: V? = null): V? =
+    getFrom<K, V>(map, key, default)
+
+fun <E> get(map: PersistentSet<E>, key: E, default: E? = null): E? =
+    getFrom<E, E>(map, key, default)
+
+fun <E> get(map: TransientSet<E>, key: E, default: E? = null): E? =
+    getFrom<E, E>(map, key, default)
+
+fun <K, V> getFrom(map: Any, key: K, default: V? = null): V? = when (map) {
+    is ILookup<*, *> -> map.valAt(key, default) as V?
+    is Map<*, *> -> when {
+        map.contains(key) -> map[key] as V?
+        else -> default
+    }
+    is PersistentSet<*> -> when {
+        map.contains(key) -> map[key] as V?
+        else -> default
+    }
+    is TransientSet<*> ->  when {
+        map.contains(key) -> map[key] as V?
+        else -> default
+    }
+    else -> {
+        val message = "`${map::class.simpleName}` is not a map."
+        throw IllegalArgumentException(message)
+    }
 }

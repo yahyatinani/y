@@ -3,7 +3,6 @@ package com.github.whyrising.y.concretions.map
 import com.github.whyrising.y.associative.ILookup
 import com.github.whyrising.y.mutable.set.TransientSet
 import com.github.whyrising.y.set.PersistentSet
-import com.github.whyrising.y.util.getValue
 
 //fun <K, V> IPersistentMap<K, V>.assocIn(
 //    ks: ISeq<K>,
@@ -25,11 +24,3 @@ import com.github.whyrising.y.util.getValue
 //    ks: ISeq<K>,
 //    v: V
 //): IPersistentMap<K, V> = map.assocIn(ks, v)
-
-fun <K, V> get(map: Map<K, V>, key: Any): V? = getValue(map, key)
-
-fun <K, V> get(map: ILookup<K, V>, key: K): V? = map.valAt(key)
-
-fun <E> get(map: PersistentSet<E>, key: E): E? = map[key]
-
-fun <E> get(map: TransientSet<E>, key: E): E? = map[key]
