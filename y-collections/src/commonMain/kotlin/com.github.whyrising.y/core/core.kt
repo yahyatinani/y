@@ -32,3 +32,24 @@ fun <K, V> assoc(
     is Associative<*, *> -> map.assoc(kv.first, kv.second) as Associative<K, V>
     else -> throw IllegalArgumentException("$map is not Associative")
 }
+
+tailrec fun <K, V> assoc(
+    map: Any?,
+    kv: Pair<K, V>,
+    vararg kvs: Pair<K, V>
+): Associative<K, V> {
+    val m = assoc(map, kv)
+    return when {
+        kvs.isNotEmpty() -> {
+            val rest = kvs.copyInto(
+                arrayOfNulls(kvs.size - 1),
+                0,
+                1,
+                kvs.size
+            ) as Array<out Pair<K, V>>
+
+            assoc(m, kvs[0], *rest)
+        }
+        else -> m
+    }
+}
