@@ -1,6 +1,7 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.concretions.map.m
+import com.github.whyrising.y.concretions.set.hashSet
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.hashCombine
 import io.kotest.core.spec.style.FreeSpec
@@ -69,10 +70,13 @@ class SymbolTest : FreeSpec({
 
     "invoke(map)" {
         val map = m(Symbol("A") to 1, Symbol("B") to 2)
+        val set = hashSet(Symbol("A"), Symbol("B"))
 
-        Symbol("A")(map)!! shouldBeExactly 1
-        Symbol("B")(map)!! shouldBeExactly 2
-        Symbol("Z")(map).shouldBeNull()
+        Symbol("A")<Int>(map)!! shouldBeExactly 1
+        Symbol("B")<Int>(map)!! shouldBeExactly 2
+        Symbol("A")<Int>(set) shouldBe Symbol("A")
+        Symbol("B")<Int>(set) shouldBe Symbol("B")
+        Symbol("Z")<Int>(map).shouldBeNull()
     }
 
     "invoke(map, default)" {

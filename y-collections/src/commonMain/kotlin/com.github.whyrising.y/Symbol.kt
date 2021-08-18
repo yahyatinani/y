@@ -1,9 +1,8 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.core.IHashEq
-import com.github.whyrising.y.map.IPersistentMap
 import com.github.whyrising.y.util.Murmur3
-import com.github.whyrising.y.util.getValue
+import com.github.whyrising.y.util.getFrom
 import com.github.whyrising.y.util.hashCombine
 
 internal class Symbol(
@@ -34,17 +33,10 @@ internal class Symbol(
         else -> name.compareTo(other.name)
     }
 
-    operator fun <K : Any, V : Any> invoke(
-        map: IPersistentMap<K, V>,
+    operator fun <V> invoke(
+        map: Any,
         default: V? = null
-    ): V? {
-        return map.valAt(this as K, default)
-    }
-
-    operator fun <K : Any, V : Any> invoke(
-        map: Map<K, V>,
-        default: V? = null
-    ): V? = getValue(map, this, default)
+    ): V? = getFrom(map, this, default)
 }
 
 internal fun s(name: String): Symbol = Symbol(name)

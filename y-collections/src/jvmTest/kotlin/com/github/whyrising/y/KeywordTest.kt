@@ -1,6 +1,7 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.concretions.map.m
+import com.github.whyrising.y.concretions.set.hashSet
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -63,16 +64,21 @@ class KeywordTest : FreeSpec({
 
     "invoke(map)" {
         val map = m(Keyword("a") to 1, Keyword("b") to 2, "c" to 3)
+        val set = hashSet(Keyword("a"), Keyword("b"), Keyword("c"))
 
-        Keyword("a")(map)!! shouldBe 1
-        Keyword("b")(map)!! shouldBe 2
-        Keyword("c")(map).shouldBeNull()
-        Keyword("z")(map).shouldBeNull()
+        Keyword("a")<Int>(map)!! shouldBe 1
+        Keyword("b")<Int>(map)!! shouldBe 2
+        Keyword("c")<Int>(map).shouldBeNull()
+        Keyword("z")<Int>(map).shouldBeNull()
+
+        Keyword("a")<Int>(set) shouldBe Keyword("a")
+        Keyword("b")<Int>(set) shouldBe Keyword("b")
     }
 
     "invoke(map, default)" {
         val map1 = m(Keyword("a") to 1, Keyword("b") to 2)
         val map2 = mapOf(Keyword("a") to 1, Keyword("b") to 2)
+        val set = hashSet(Keyword("a"), Keyword("b"), Keyword("c"))
 
         Keyword("a")(map1, -1)!! shouldBe 1
         Keyword("b")(map1, -1)!! shouldBe 2
@@ -82,6 +88,8 @@ class KeywordTest : FreeSpec({
         Keyword("b")(map2, -1)!! shouldBe 2
         Keyword("z")(map2, null).shouldBeNull()
         Keyword("x")(map2, -1)!! shouldBe -1
+
+        Keyword("x")(set, -1)!! shouldBe -1
     }
 
     "assert same key instance" {
