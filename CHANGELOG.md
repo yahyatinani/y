@@ -32,11 +32,25 @@ Changelog
 * ```kotlin
   fun <E> ISeq<E>.component2(): ISeq<E>
   ```
+  
+* ```kotlin
+  fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V>
+  ```
 
 #### Updated:
 
 * APIs:
   * `m()` now returns `IPersistentMap<K, V>` instead of `PersistentArrayMap<K, V>`.
+
+#### Removed:
+
+* ```kotlin
+  Map<K, V>.toPArrayMap()
+  ```
+
+* ```
+  Map<K, V>.toPhashMap()
+  ```
 
 ## v0.0.4
 

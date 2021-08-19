@@ -6,6 +6,7 @@ import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator.EmptyNodeIterator
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator.NodeIter
+import com.github.whyrising.y.collections.core.toPmap
 import com.github.whyrising.y.collections.map.APersistentMap
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.map.IPersistentMap
@@ -36,7 +37,7 @@ internal class PersistentHashMapSerializer<K, V>(
     override val descriptor: SerialDescriptor = mapSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): PersistentHashMap<K, V> =
-        mapSerializer.deserialize(decoder).toPhashMap()
+        mapSerializer.deserialize(decoder).toPmap() as PersistentHashMap<K, V>
 
     override fun serialize(encoder: Encoder, value: PersistentHashMap<K, V>) {
         return mapSerializer.serialize(encoder, value)
@@ -1063,12 +1064,13 @@ sealed class PersistentHashMap<out K, out V>(
             return ret.persistent() as PersistentHashMap<K, V>
         }
 
-        internal fun <K, V> create(map: Map<K, V>): PersistentHashMap<K, V> {
+        internal fun <K, V> create(map: Map<K, V>): IPersistentMap<K, V> {
             var ret: TransientMap<K, V> = EmptyHashMap.asTransient()
 
-            for (entry in map.entries) ret = ret.assoc(entry.key, entry.value)
+            for (entry in map.entries)
+                ret = ret.assoc(entry.key, entry.value)
 
-            return ret.persistent() as PersistentHashMap<K, V>
+            return ret.persistent()
         }
     }
 }
@@ -1077,6 +1079,3 @@ fun <K, V> hashMap(): PersistentHashMap<K, V> = PersistentHashMap()
 
 fun <K, V> hashMap(vararg pairs: Pair<K, V>): PersistentHashMap<K, V> =
     PersistentHashMap(*pairs)
-
-fun <K, V> Map<K, V>.toPhashMap(): PersistentHashMap<K, V> =
-    PersistentHashMap.create(this)

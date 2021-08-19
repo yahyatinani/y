@@ -2,6 +2,7 @@ package com.github.whyrising.y.collections.concretions.map
 
 import com.github.whyrising.y.collections.concretions.list.ASeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList
+import com.github.whyrising.y.collections.core.toPmap
 import com.github.whyrising.y.collections.map.APersistentMap
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.map.IPersistentMap
@@ -37,7 +38,7 @@ internal class PersistentArrayMapSerializer<K, V>(
     override val descriptor: SerialDescriptor = mapSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): PersistentArrayMap<K, V> =
-        mapSerializer.deserialize(decoder).toPArrayMap()
+        mapSerializer.deserialize(decoder).toPmap() as PersistentArrayMap<K, V>
 
     override fun serialize(encoder: Encoder, value: PersistentArrayMap<K, V>) {
         return mapSerializer.serialize(encoder, value)
@@ -341,18 +342,16 @@ class PersistentArrayMap<out K, out V>(
                 }
             }
 
-        fun <K, V> create(map: Map<K, V>): PersistentArrayMap<K, V> {
+        fun <K, V> create(map: Map<K, V>): IPersistentMap<K, V> {
             var ret: TransientMap<K, V> = EmptyArrayMap.asTransient()
 
-            for (entry in map.entries) ret = ret.assoc(entry.key, entry.value)
+            for (entry in map.entries)
+                ret = ret.assoc(entry.key, entry.value)
 
-            return ret.persistent() as PersistentArrayMap<K, V>
+            return ret.persistent()
         }
     }
 }
 
 fun <K, V> m(vararg pairs: Pair<K, V>): IPersistentMap<K, V> =
     PersistentArrayMap(*pairs)
-
-fun <K, V> Map<K, V>.toPArrayMap(): PersistentArrayMap<K, V> =
-    PersistentArrayMap.create(this)

@@ -3,6 +3,7 @@ package com.github.whyrising.y.collections.core
 import com.github.whyrising.y.collections.associative.Associative
 import com.github.whyrising.y.collections.associative.ILookup
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
+import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.mutable.set.TransientSet
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.set.PersistentSet
@@ -10,6 +11,9 @@ import com.github.whyrising.y.collections.set.PersistentSet
 operator fun <E> ISeq<E>.component1(): E = this.first()
 
 operator fun <E> ISeq<E>.component2(): ISeq<E> = this.rest()
+
+fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V> =
+    PersistentArrayMap.create(this)
 
 fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V? =
     getFrom<K, V>(map, key, default)
@@ -74,6 +78,7 @@ tailrec fun <K, V> assoc(
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 fun <K, V> assocIn(
     map: Associative<K, V>?,
     ks: ISeq<K>,

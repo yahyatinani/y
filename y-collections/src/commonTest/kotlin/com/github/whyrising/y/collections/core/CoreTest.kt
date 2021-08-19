@@ -1,8 +1,12 @@
 package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.concretions.list.l
+import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
+import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.map.m
 import com.github.whyrising.y.collections.concretions.vector.v
+import com.github.whyrising.y.collections.map.IPersistentMap
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -54,5 +58,23 @@ class CoreTest {
             l(":a", ":b"),
             m(":c" to 74)
         ) shouldBe m(":a" to m(":b" to m(":c" to 74)))
+    }
+
+    @Test
+    fun `toPmap() should return an instance of PersistentArrayMap`() {
+        val map = (1..16).associateWith { i -> "$i" }
+
+        val pam: IPersistentMap<Int, String> = map.toPmap()
+
+        (pam is PersistentArrayMap<*, *>).shouldBeTrue()
+    }
+
+    @Test
+    fun `toPmap() should return an instance of PersistentHashMap`() {
+        val map = (1..20).associateWith { i -> "$i" }
+
+        val pam: IPersistentMap<Int, String> = map.toPmap()
+
+        (pam is PersistentHashMap<*, *>).shouldBeTrue()
     }
 }

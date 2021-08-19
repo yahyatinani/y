@@ -11,9 +11,8 @@ import com.github.whyrising.y.collections.concretions.map.PersistentArrayMapSeri
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.TransientLeanMap
 import com.github.whyrising.y.collections.concretions.map.m
-import com.github.whyrising.y.collections.concretions.map.toPArrayMap
-import com.github.whyrising.y.collections.concretions.map.toPhashMap
 import com.github.whyrising.y.collections.concretions.vector.v
+import com.github.whyrising.y.collections.core.toPmap
 import com.github.whyrising.y.collections.mutable.map.TransientMap
 import com.github.whyrising.y.utils.runAction
 import io.kotest.assertions.throwables.shouldNotThrow
@@ -1061,14 +1060,6 @@ class PersistentArrayMapTest : FreeSpec({
         map("b") shouldBe 2
     }
 
-    "toPArrayMap()" {
-        val map = mapOf("a" to 1, "b" to 2)
-
-        val m = map.toPArrayMap()
-
-        m shouldBe mapOf("a" to 1, "b" to 2)
-    }
-
     "Serialization" - {
 //        val serialModule = SerializersModule {
 //            polymorphic(IPersistentMap::class) {
@@ -1104,7 +1095,7 @@ class PersistentArrayMapTest : FreeSpec({
         "deserialize" {
             val m = mapOf("a" to 1, "b" to 2, "c" to 3)
             val str = Json.encodeToString(m)
-            val expected = m.toPhashMap()
+            val expected = m.toPmap()
 
             val map =
                 Json.decodeFromString<PersistentArrayMap<String, Int>>(str)

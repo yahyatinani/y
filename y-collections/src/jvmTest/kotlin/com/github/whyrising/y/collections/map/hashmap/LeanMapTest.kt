@@ -14,7 +14,7 @@ import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.Node
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.TransientLeanMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMapSerializer
 import com.github.whyrising.y.collections.concretions.map.hashMap
-import com.github.whyrising.y.collections.concretions.map.toPhashMap
+import com.github.whyrising.y.collections.core.toPmap
 import com.github.whyrising.y.collections.util.hasheq
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
@@ -313,14 +313,6 @@ class LeanMapTest : FreeSpec({
         hashmap("c") shouldBe 3
     }
 
-    "toHashMap()" {
-        val map = mapOf("a" to 1, "b" to 2, "c" to 3)
-
-        val hashMap = map.toPhashMap()
-
-        hashMap shouldBe hashMap("a" to 1, "b" to 2, "c" to 3)
-    }
-
     "Serialization" - {
         "serialize" {
             val m = mapOf("a" to 1, "b" to 2, "c" to 3)
@@ -334,7 +326,7 @@ class LeanMapTest : FreeSpec({
         "deserialize" {
             val m = mapOf("a" to 1, "b" to 2, "c" to 3)
             val str = Json.encodeToString(m)
-            val expected = m.toPhashMap()
+            val expected = m.toPmap()
 
             val map = Json.decodeFromString<PersistentHashMap<String, Int>>(str)
 
