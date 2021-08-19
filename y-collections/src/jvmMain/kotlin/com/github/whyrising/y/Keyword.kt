@@ -1,7 +1,7 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.core.IHashEq
-import com.github.whyrising.y.util.getFrom
+import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.utils.clearCache
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

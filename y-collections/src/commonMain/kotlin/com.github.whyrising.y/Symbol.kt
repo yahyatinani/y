@@ -1,8 +1,8 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.core.IHashEq
+import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.util.Murmur3
-import com.github.whyrising.y.util.getFrom
 import com.github.whyrising.y.util.hashCombine
 
 internal class Symbol(

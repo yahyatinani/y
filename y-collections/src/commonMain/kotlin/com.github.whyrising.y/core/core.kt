@@ -1,28 +1,48 @@
 package com.github.whyrising.y.core
 
 import com.github.whyrising.y.associative.Associative
+import com.github.whyrising.y.associative.ILookup
 import com.github.whyrising.y.concretions.map.PersistentArrayMap
+import com.github.whyrising.y.mutable.set.TransientSet
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.set.PersistentSet
 
-//fun <K, V> IPersistentMap<K, V>.assocIn(
-//    ks: ISeq<K>,
-//    v: V
-//): IPersistentMap<K, V> = when (ks.count) {
-//    0 -> throw IllegalArgumentException("`ks` must have at least 1 key")
-//    1 -> this.assoc(ks.first(), v)
-//    else -> {
-//        val key = ks.first()
-//        val m = this.valAt(key) as IPersistentMap<Any, Any>? ?: m()
-//        this.assoc(key, m.assocIn(ks.rest(), v) as V)
-//    }
-//}
-//
+operator fun <E> ISeq<E>.component1(): E = this.first()
 
-//@JvmName("assocIn1")
-//fun <K, V> assocIn(
-//    map: IPersistentMap<K, V>,
-//    ks: ISeq<K>,
-//    v: V
-//): IPersistentMap<K, V> = map.assocIn(ks, v)
+operator fun <E> ISeq<E>.component2(): ISeq<E> = this.rest()
+
+fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V? =
+    getFrom<K, V>(map, key, default)
+
+fun <K, V> get(map: Map<K, V>?, key: K, default: V? = null): V? =
+    getFrom<K, V>(map, key, default)
+
+fun <E> get(map: PersistentSet<E>?, key: E, default: E? = null): E? =
+    getFrom<E, E>(map, key, default)
+
+fun <E> get(map: TransientSet<E>?, key: E, default: E? = null): E? =
+    getFrom<E, E>(map, key, default)
+
+fun <K, V> getFrom(map: Any?, key: K, default: V? = null): V? = when (map) {
+    null -> null
+    is ILookup<*, *> -> map.valAt(key, default) as V?
+    is Map<*, *> -> when {
+        map.contains(key) -> map[key] as V?
+        else -> default
+    }
+    is PersistentSet<*> -> when {
+        map.contains(key) -> map[key] as V?
+        else -> default
+    }
+    is TransientSet<*> -> when {
+        map.contains(key) -> map[key] as V?
+        else -> default
+    }
+    else -> {
+        val message = "`$map` is not associative."
+        throw IllegalArgumentException(message)
+    }
+}
 
 fun <K, V> assoc(
     map: Associative<K, V>?,
@@ -51,5 +71,23 @@ tailrec fun <K, V> assoc(
             assoc(m, kvs[0], *rest)
         }
         else -> m
+    }
+}
+
+fun <K, V> assocIn(
+    map: Associative<K, V>?,
+    ks: ISeq<K>,
+    v: V
+): Associative<K, V> = ks.let { (k, kz) ->
+    when {
+        ks.count > 1 -> {
+            val m = assocIn(
+                getFrom<K, Associative<K, V>>(map, k),
+                kz,
+                v
+            )
+            assoc(map, k to m) as Associative<K, V>
+        }
+        else -> assoc(map, k to v)
     }
 }

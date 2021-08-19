@@ -5,8 +5,8 @@ import com.github.whyrising.y.concretions.map.m
 import com.github.whyrising.y.concretions.set.PersistentHashSet.TransientHashSet
 import com.github.whyrising.y.concretions.set.hashSet
 import com.github.whyrising.y.concretions.vector.v
-import com.github.whyrising.y.util.get
-import com.github.whyrising.y.util.getFrom
+import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getFrom
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -29,6 +29,7 @@ class UtilTest {
         get(hashSet(54, 69, 36), 54) shouldBe 54
         get(transientHashSet, ":a") shouldBe 5
         getFrom<Any, Int>(m(":a" to 15, ":b" to 74), ":a") shouldBe 15
+        getFrom<Any, Int>(null, ":a").shouldBeNull()
 
         shouldThrowExactly<IllegalArgumentException> {
             getFrom<Any, Int>(listOf(1, 5, 3), ":a")
