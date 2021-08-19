@@ -4,7 +4,11 @@ import com.github.whyrising.y.ArrayChunk
 import com.github.whyrising.y.concretions.list.ChunkedSeq
 import com.github.whyrising.y.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.core.IHashEq
-import com.github.whyrising.y.seq.*
+import com.github.whyrising.y.seq.IPersistentCollection
+import com.github.whyrising.y.seq.ISeq
+import com.github.whyrising.y.seq.LazySeq
+import com.github.whyrising.y.seq.Seqable
+import com.github.whyrising.y.seq.Sequential
 
 internal const val INIT_HASH_CODE = 0
 internal const val HASH_PRIME = 31

@@ -15,13 +15,8 @@ import kotlin.test.Test
 class UtilTest {
     @Test
     fun `get(map, key)`() {
-        val transientHashSet = TransientHashSet(
-            (m(
-                ":a" to 5,
-                ":b" to 6,
-                ":c" to 3
-            ) as PersistentArrayMap).asTransient()
-        )
+        val arrayMap = m(":a" to 5, ":b" to 6, ":c" to 3) as PersistentArrayMap
+        val transientHashSet = TransientHashSet(arrayMap.asTransient())
 
         get(mapOf(":a" to 1, ":b" to 2, ":c" to 3), ":a") shouldBe 1
         get(m(":a" to 1, ":b" to 2, ":c" to 3), ":a") shouldBe 1
@@ -38,13 +33,8 @@ class UtilTest {
 
     @Test
     fun `get(map, key) should return null`() {
-        val transientHashSet = TransientHashSet(
-            (m(
-                ":a" to 5,
-                ":b" to 6,
-                ":c" to 3
-            ) as PersistentArrayMap).asTransient()
-        )
+        val arrayMap = m(":a" to 5, ":b" to 6, ":c" to 3) as PersistentArrayMap
+        val transientHashSet = TransientHashSet(arrayMap.asTransient())
 
         get(mapOf(":a" to 1, ":b" to 2, ":c" to 3), ":x").shouldBeNull()
         get(m(":a" to 1, ":b" to 2, ":c" to 3), ":x").shouldBeNull()
@@ -56,13 +46,8 @@ class UtilTest {
 
     @Test
     fun `get(map, key) should return default`() {
-        val transientHashSet = TransientHashSet(
-            (m(
-                ":a" to 5,
-                ":b" to 6,
-                ":c" to 3
-            ) as PersistentArrayMap).asTransient()
-        )
+        val arrayMap = m(":a" to 5, ":b" to 6, ":c" to 3) as PersistentArrayMap
+        val transientHashSet = TransientHashSet(arrayMap.asTransient())
 
         get(mapOf(":a" to 1, ":b" to 2, ":c" to 3), ":x", -1) shouldBe -1
         get(m(":a" to 1, ":b" to 2, ":c" to 3), ":x", -1) shouldBe -1
