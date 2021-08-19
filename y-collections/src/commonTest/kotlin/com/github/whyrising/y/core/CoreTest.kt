@@ -12,10 +12,6 @@ class CoreTest {
         assoc(null, ":a" to 15) shouldBe m(":a" to 15)
         assoc(m(":a" to 15), ":b" to 20) shouldBe m(":a" to 15, ":b" to 20)
         assoc(v(15, 56), 2 to 20) shouldBe v(15, 56, 20)
-
-        shouldThrowExactly<IllegalArgumentException> {
-            assoc(listOf(15, 56), 2 to 20)
-        }.message shouldBe "[15, 56] is not Associative"
     }
 
     @Test

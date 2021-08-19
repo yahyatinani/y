@@ -25,16 +25,16 @@ import com.github.whyrising.y.concretions.map.PersistentArrayMap
 //): IPersistentMap<K, V> = map.assocIn(ks, v)
 
 fun <K, V> assoc(
-    map: Any?,
+    map: Associative<K, V>?,
     kv: Pair<K, V>
 ): Associative<K, V> = when (map) {
     null -> PersistentArrayMap(kv)
-    is Associative<*, *> -> map.assoc(kv.first, kv.second) as Associative<K, V>
-    else -> throw IllegalArgumentException("$map is not Associative")
+    else -> map.assoc(kv.first, kv.second)
 }
 
+@Suppress("UNCHECKED_CAST")
 tailrec fun <K, V> assoc(
-    map: Any?,
+    map: Associative<K, V>?,
     kv: Pair<K, V>,
     vararg kvs: Pair<K, V>
 ): Associative<K, V> {
