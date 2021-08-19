@@ -1,6 +1,43 @@
 Changelog
 ========
 
+## v0.0.5
+
+#### Added:
+
+* ```kotlin
+  fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V?
+  ```
+  
+* ```kotlin
+  fun <K, V> getFrom(map: Any?, key: K, default: V? = null): V?
+  ```
+
+* ```kotlin
+  fun <K, V> assoc(map: Associative<K, V>?, kv: Pair<K, V>): Associative<K, V>
+  ```
+
+* ```kotlin
+  fun <K, V> assoc(
+      map: Associative<K, V>?,
+      kv: Pair<K, V>,
+      vararg kvs: Pair<K, V>
+  ):Associative<K, V>
+  ```
+  
+* ```kotlin
+  fun <E> ISeq<E>.component1(): E
+  ```
+
+* ```kotlin
+  fun <E> ISeq<E>.component2(): ISeq<E>
+  ```
+
+#### Updated:
+
+* APIs:
+  * `m()` now returns `IPersistentMap<K, V>` instead of `PersistentArrayMap<K, V>`.
+
 ## v0.0.4
 
 #### Updated:
