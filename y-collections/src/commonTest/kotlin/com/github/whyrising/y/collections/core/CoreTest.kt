@@ -121,5 +121,4 @@ class CoreTest {
 
         hashMap("b" to 2, "b" to 3) shouldBe hashMap("b" to 3)
     }
-    // TODO: Implement arrayMap()
 }
