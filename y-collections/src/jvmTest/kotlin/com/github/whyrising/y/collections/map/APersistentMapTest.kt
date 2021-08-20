@@ -7,8 +7,8 @@ import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.Iter
 import com.github.whyrising.y.collections.concretions.map.hashMap
-import com.github.whyrising.y.collections.concretions.map.m
 import com.github.whyrising.y.collections.concretions.vector.v
+import com.github.whyrising.y.collections.core.m
 import com.github.whyrising.y.collections.map.APersistentMap.KeySeq
 import com.github.whyrising.y.collections.map.APersistentMap.ValSeq
 import com.github.whyrising.y.collections.mocks.MockPersistentMap
@@ -47,6 +47,7 @@ class APersistentMapTest : FreeSpec({
     "hasheq()" {
         val map = m("a" to 1, "b" to 2, "c" to 3) as PersistentArrayMap
         val expectedHash = Murmur3.hashUnordered(map)
+        val emptyMap = m<String, Int>() as PersistentArrayMap
 
         map.hasheq shouldBeExactly 0
 
@@ -54,9 +55,9 @@ class APersistentMapTest : FreeSpec({
 
         hash shouldBeExactly expectedHash
         map.hasheq shouldBeExactly expectedHash
-        PersistentArrayMap<String, Int>().hasheq() shouldBeExactly -15128758
-        PersistentArrayMap<String, Int>().hasheq() shouldBeExactly
-            hashMap<String, Int>().hasheq()
+
+        emptyMap.hasheq() shouldBeExactly -15128758
+        emptyMap.hasheq() shouldBeExactly hashMap<String, Int>().hasheq()
     }
 
     "equals(other)" {
@@ -309,7 +310,7 @@ class APersistentMapTest : FreeSpec({
     "Map implementation" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
         val map = m(*array) as PersistentArrayMap
-        val emptyMap = PersistentArrayMap<String, Int>()
+        val emptyMap = m<String, Int>() as PersistentArrayMap
 
         "size()" {
             map.size shouldBeExactly array.size

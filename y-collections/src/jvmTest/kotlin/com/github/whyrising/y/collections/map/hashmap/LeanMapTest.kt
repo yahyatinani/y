@@ -6,6 +6,7 @@ import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.BitMapIndexedNode
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.Companion.bitpos
+import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.Companion.create
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.EmptyHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator.EmptyNodeIterator
@@ -60,20 +61,10 @@ class LeanMapTest : FreeSpec({
         t.root.shouldBeNull()
     }
 
-    "invoke(...pairs)" {
-        PersistentHashMap("a" to 1).count shouldBeExactly 1
-        PersistentHashMap("a" to 1, "b" to 2).count shouldBeExactly 2
-        PersistentHashMap("a" to 1, "b" to 2, "c" to 3).count shouldBeExactly 3
-
-        shouldThrowExactly<IllegalArgumentException> {
-            PersistentHashMap("a" to 1, "b" to 2, "c" to 3, "c" to 4)
-        }.message shouldBe "Duplicate key: c"
-    }
-
     "create(map)" {
-        val map1 = PersistentHashMap.create(mapOf("a" to 1))
-        val map2 = PersistentHashMap.create(mapOf("a" to 1, "b" to 2))
-        val map3 = PersistentHashMap.create(mapOf("a" to 1, "b" to 2, "c" to 3))
+        val map1 = create(mapOf("a" to 1))
+        val map2 = create(mapOf("a" to 1, "b" to 2))
+        val map3 = create(mapOf("a" to 1, "b" to 2, "c" to 3))
 
         map1.count shouldBeExactly 1
         map1.containsKey("a")
@@ -89,13 +80,13 @@ class LeanMapTest : FreeSpec({
     }
 
     "empty() should return EmptyLeanMap" {
-        val map = PersistentHashMap("a" to 1)
+        val map = create("a" to 1)
 
         (map.empty() === EmptyHashMap).shouldBeTrue()
     }
 
     "entryAt(key)" {
-        val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+        val map = create("a" to 1, "b" to 2, "c" to 3)
 
         PersistentHashMap<String, Int>().entryAt("a").shouldBeNull()
         map.entryAt("x").shouldBeNull()
@@ -104,7 +95,7 @@ class LeanMapTest : FreeSpec({
     }
 
     "valAt(key, default)" {
-        val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+        val map = create("a" to 1, "b" to 2, "c" to 3)
 
         PersistentHashMap<String, Int>().valAt("x", -1) shouldBe -1
         map.valAt("x", -1) shouldBe -1
@@ -113,7 +104,7 @@ class LeanMapTest : FreeSpec({
     }
 
     "valAt(key)" {
-        val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+        val map = create("a" to 1, "b" to 2, "c" to 3)
 
         PersistentHashMap<String, Int>().valAt("x").shouldBeNull()
         map.valAt("x").shouldBeNull()
@@ -123,7 +114,7 @@ class LeanMapTest : FreeSpec({
 
     @Suppress("UNCHECKED_CAST")
     "seq()" {
-        val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+        val map = create("a" to 1, "b" to 2, "c" to 3)
 
         (PersistentHashMap<String, Int>().seq() === Empty).shouldBeTrue()
         val seq = map.seq() as NodeSeq<String, Int>
@@ -136,7 +127,7 @@ class LeanMapTest : FreeSpec({
     }
 
     "containsKey(key)" {
-        val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3, null to 185)
+        val map = create("a" to 1, "b" to 2, "c" to 3, null to 185)
         val empty = PersistentHashMap<String, Int>() as Associative<String, Int>
 
         empty.containsKey("x").shouldBeFalse()
@@ -149,7 +140,7 @@ class LeanMapTest : FreeSpec({
         "when key doesn't exist, it should add the new key/value" {
             val key = "x"
             val value = 77
-            val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+            val map = create("a" to 1, "b" to 2, "c" to 3)
 
             val newMap1 = PersistentHashMap<String, Int>().assoc(key, value)
             val newMap2 = map.assoc(key, value)
@@ -162,7 +153,7 @@ class LeanMapTest : FreeSpec({
         }
 
         "when key already exists, it should update the assoc value" {
-            val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+            val map = create("a" to 1, "b" to 2, "c" to 3)
 
             val newMap = map.assoc("a", 77) as PersistentHashMap<String, Int>
 
@@ -176,7 +167,7 @@ class LeanMapTest : FreeSpec({
 
     "assocNew(key, value)" - {
         "when key already exists, it should throw an exception" {
-            val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+            val map = create("a" to 1, "b" to 2, "c" to 3)
 
             shouldThrowExactly<RuntimeException> {
                 map.assocNew("a", 77)
@@ -185,7 +176,7 @@ class LeanMapTest : FreeSpec({
 
         "when key is new, it should add the key/value to the map" {
             val key = "x"
-            val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+            val map = create("a" to 1, "b" to 2, "c" to 3)
 
             val newMap = map.assocNew(key, 77)
 
@@ -196,7 +187,7 @@ class LeanMapTest : FreeSpec({
 
     "dissoc(key)" {
         val emptyMap = PersistentHashMap<String, Int>()
-        val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+        val map = create("a" to 1, "b" to 2, "c" to 3)
 
         val newMap0 = emptyMap.dissoc("a")
         val newMap1 = map.dissoc("a") as PersistentHashMap<String, Int>
@@ -211,7 +202,7 @@ class LeanMapTest : FreeSpec({
         map.containsKey("c").shouldBeTrue()
 
         newMap0 shouldBeSameInstanceAs EmptyHashMap
-        PersistentHashMap("a" to 1).dissoc("a") shouldBeSameInstanceAs
+        create("a" to 1).dissoc("a") shouldBeSameInstanceAs
             EmptyHashMap
 
         root1.edit.value.shouldBeNull()
@@ -243,7 +234,7 @@ class LeanMapTest : FreeSpec({
             val gen = Arb.set(Arb.string(0, 8), 0..6)
             checkAll(gen) { set: Set<String> ->
                 val a = set.map { s: String -> Pair(s, Random.nextInt()) }
-                val map = PersistentHashMap(*a.toTypedArray())
+                val map = create(*a.toTypedArray())
 
                 val iter = map.iterator()
                     as NodeIterator<String, Int, MapEntry<String, Int>>
@@ -278,7 +269,7 @@ class LeanMapTest : FreeSpec({
 
         @Suppress("UNCHECKED_CAST")
         "when map is LMap, it should return NodeIter" {
-            val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+            val map = create("a" to 1, "b" to 2, "c" to 3)
 
             val keyIter = map.keyIterator() as NodeIterator<String, Int, String>
 
@@ -295,7 +286,7 @@ class LeanMapTest : FreeSpec({
 
         @Suppress("UNCHECKED_CAST")
         "when map is LMap, it should return NodeIter" {
-            val map = PersistentHashMap("a" to 1, "b" to 2, "c" to 3)
+            val map = create("a" to 1, "b" to 2, "c" to 3)
 
             val keyIter = map.valIterator() as NodeIterator<String, Int, Int>
 

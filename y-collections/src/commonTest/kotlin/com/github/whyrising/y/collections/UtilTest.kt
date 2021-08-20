@@ -1,12 +1,12 @@
 package com.github.whyrising.y.collections
 
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
-import com.github.whyrising.y.collections.concretions.map.m
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet.TransientHashSet
 import com.github.whyrising.y.collections.concretions.set.hashSet
 import com.github.whyrising.y.collections.concretions.vector.v
 import com.github.whyrising.y.collections.core.get
 import com.github.whyrising.y.collections.core.getFrom
+import com.github.whyrising.y.collections.core.m
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe

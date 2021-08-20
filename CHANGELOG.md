@@ -40,7 +40,7 @@ Changelog
 #### Updated:
 
 * APIs:
-  * `m()` now returns `IPersistentMap<K, V>` instead of `PersistentArrayMap<K, V>`.
+  * `m(pairs)` now returns `IPersistentMap<K, V>` instead of `PersistentArrayMap<K, V>`.
 
 #### Removed:
 

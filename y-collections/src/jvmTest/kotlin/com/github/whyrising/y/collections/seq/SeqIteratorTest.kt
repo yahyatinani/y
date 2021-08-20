@@ -4,7 +4,7 @@ import com.github.whyrising.y.collections.concretions.list.ASeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.concretions.list.SeqIterator
-import com.github.whyrising.y.collections.concretions.map.m
+import com.github.whyrising.y.collections.core.m
 import com.github.whyrising.y.collections.map.APersistentMap.KeySeq
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec

@@ -42,7 +42,7 @@ class MockPersistentMap<K, V> private constructor(
         @Suppress("UNCHECKED_CAST")
         operator
         fun <K, V> invoke(vararg pairs: Pair<K, V>): MockPersistentMap<K, V> =
-            MockPersistentMap(PersistentArrayMap(*pairs))
+            MockPersistentMap(PersistentArrayMap.createWithCheck(*pairs))
     }
 
     override val entries: Set<Map.Entry<K, V>>

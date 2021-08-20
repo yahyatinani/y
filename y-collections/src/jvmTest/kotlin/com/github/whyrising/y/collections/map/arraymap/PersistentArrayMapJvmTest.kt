@@ -6,12 +6,13 @@ import com.github.whyrising.y.collections.concretions.map.HASHTABLE_THRESHOLD
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.Companion.EmptyArrayMap
+import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.Companion.createWithCheck
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.TransientArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMapSerializer
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.TransientLeanMap
-import com.github.whyrising.y.collections.concretions.map.m
 import com.github.whyrising.y.collections.concretions.vector.v
+import com.github.whyrising.y.collections.core.m
 import com.github.whyrising.y.collections.core.toPmap
 import com.github.whyrising.y.collections.mutable.map.TransientMap
 import com.github.whyrising.y.utils.runAction
@@ -49,7 +50,7 @@ import kotlin.time.Duration
 @ExperimentalKotest
 @ExperimentalSerializationApi
 @ExperimentalStdlibApi
-class PersistentArrayMapTest : FreeSpec({
+class PersistentArrayMapJvmTest : FreeSpec({
     "TransientArrayMap" - {
         "ctor" {
             val gen = Arb.list(Arb.pair(Arb.string(), Arb.int()))
@@ -657,7 +658,7 @@ class PersistentArrayMapTest : FreeSpec({
 
             "dissoc(key)" {
                 continually(Duration.seconds(10)) {
-                    val initial = PersistentArrayMap<Int, String>()
+                    val initial = m<Int, String>() as PersistentArrayMap
                     val transientMap = l.fold(initial) { map, entry ->
                         map.assoc(
                             entry.key,
@@ -682,7 +683,7 @@ class PersistentArrayMapTest : FreeSpec({
 
     "asTransient()" {
         val a = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = PersistentArrayMap(*a)
+        val map = createWithCheck(*a)
 
         val tr = map.asTransient() as TransientArrayMap<String, Int>
         val array = tr.array
@@ -695,41 +696,6 @@ class PersistentArrayMapTest : FreeSpec({
     }
 
     "ArrayMap" - {
-        "invoke(pairs)" - {
-            "when pairs is empty, it should return EmptyMap" {
-                val array = arrayOf<Pair<String, Int>>()
-
-                m(*array) shouldBeSameInstanceAs EmptyArrayMap
-            }
-
-            "it should return an ArrayMap" {
-                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-
-                val map = PersistentArrayMap(*array)
-                val pairs = map.array
-
-                pairs shouldBe array
-            }
-
-            "when duplicate keys, it should throw an exception" {
-                shouldThrowExactly<IllegalArgumentException> {
-                    m("a" to 1, "b" to 2, "b" to 3)
-                }.message shouldBe "Duplicate key: b"
-
-                shouldThrowExactly<IllegalArgumentException> {
-                    m("a" to 1, "a" to 2, "b" to 3)
-                }.message shouldBe "Duplicate key: a"
-
-                shouldThrowExactly<IllegalArgumentException> {
-                    m("a" to 1, "b" to 2, "a" to 3)
-                }.message shouldBe "Duplicate key: a"
-
-                shouldThrowExactly<IllegalArgumentException> {
-                    m(1L to "a", 1 to "b")
-                }.message shouldBe "Duplicate key: 1"
-            }
-        }
-
         "assoc(key, val)" - {
             "when map is empty, it should add the new entry" {
                 val map = m<String, Int>()
@@ -964,7 +930,7 @@ class PersistentArrayMapTest : FreeSpec({
 
             "when map is populated, it should return a seq of entries" {
                 val array = arrayOf("a" to 1)
-                val map = PersistentArrayMap(*array)
+                val map = createWithCheck(*array)
 
                 val seq = map.seq()
                 val rest = seq.rest()
@@ -1010,7 +976,7 @@ class PersistentArrayMapTest : FreeSpec({
         }
 
         "keyIterator()" {
-            val map = PersistentArrayMap("a" to 1, "b" to 2, "c" to 3)
+            val map = createWithCheck("a" to 1, "b" to 2, "c" to 3)
 
             val iter: Iterator<String> = map.keyIterator()
 
@@ -1026,7 +992,7 @@ class PersistentArrayMapTest : FreeSpec({
         }
 
         "valIterator()" {
-            val map = PersistentArrayMap("a" to 1, "b" to 2, "c" to 3)
+            val map = createWithCheck("a" to 1, "b" to 2, "c" to 3)
 
             val iter: Iterator<Int> = map.valIterator()
 
@@ -1050,14 +1016,6 @@ class PersistentArrayMapTest : FreeSpec({
         "hashCode()" {
             m<String, Int>().hashCode() shouldBeExactly 0
         }
-    }
-
-    "m() should return a PersistentArrayMap" {
-        val map = PersistentArrayMap("a" to 1, "b" to 2)
-
-        map.count shouldBeExactly 2
-        map("a") shouldBe 1
-        map("b") shouldBe 2
     }
 
     "Serialization" - {

@@ -51,7 +51,7 @@ class Murmur3Test : FreeSpec({
 
     "Murmur3.hashUnordered(x)" {
         val arrayMap: PersistentArrayMap<Any, Any> =
-            PersistentArrayMap("a" to "b", true to "false")
+            PersistentArrayMap.createWithCheck("a" to "b", true to "false")
         var expectedHash = 0
         for (x in arrayMap) expectedHash += hasheq(x)
         expectedHash = Murmur3.mixCollHash(expectedHash, arrayMap.size)

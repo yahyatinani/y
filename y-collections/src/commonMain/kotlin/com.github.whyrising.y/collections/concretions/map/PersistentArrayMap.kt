@@ -80,7 +80,7 @@ class PersistentArrayMap<out K, out V>(
             }
             else -> {
                 if (array.size >= HASHTABLE_THRESHOLD)
-                    return PersistentHashMap(*array).assoc(key, value)
+                    return PersistentHashMap.create(*array).assoc(key, value)
 
                 newPairs = arrayOfNulls(array.size + 1)
 
@@ -106,7 +106,8 @@ class PersistentArrayMap<out K, out V>(
             throw RuntimeException("The key $key is already present.")
 
         if (array.size >= HASHTABLE_THRESHOLD)
-            return PersistentHashMap(*array).assocNew(key, value)
+            return PersistentHashMap.createWithCheck(*array)
+                .assocNew(key, value)
 
         newPairs = arrayOfNulls(array.size + 1)
 
@@ -263,14 +264,20 @@ class PersistentArrayMap<out K, out V>(
                 ensureEditable()
 
                 val index = indexOf(key)
-                if (index >= 0) {
-                    if (array[index]!!.second != value)
-                        array[index] = Pair(key, value)
-                } else if (_length.value >= array.size) {
-                    return PersistentHashMap(*(array as Array<Pair<K, V>>))
-                        .asTransient().assoc(key, value)
-                } else array[_length.getAndIncrement()] =
-                    Pair(key, value)
+                when {
+                    index >= 0 -> {
+                        if (array[index]!!.second != value)
+                            array[index] = Pair(key, value)
+                    }
+                    _length.value >= array.size -> {
+                        return PersistentHashMap
+                            .create(*array as Array<Pair<K, V>>)
+                            .asTransient()
+                            .assoc(key, value)
+                    }
+                    else -> array[_length.getAndIncrement()] = Pair(key, value)
+                }
+
                 return this
             }
         }
@@ -318,31 +325,26 @@ class PersistentArrayMap<out K, out V>(
         internal val EmptyArrayMap =
             PersistentArrayMap<Nothing, Nothing>(emptyArray())
 
-        operator fun <K, V> invoke(): PersistentArrayMap<K, V> = EmptyArrayMap
-
         private fun <K> areKeysEqual(key1: K, key2: K): Boolean = when (key1) {
             key2 -> true
             else -> equiv(key1, key2)
         }
 
         @Suppress("UNCHECKED_CAST")
-        operator
-        fun <K, V> invoke(vararg pairs: Pair<K, V>): PersistentArrayMap<K, V> =
-            when {
-                pairs.isEmpty() -> EmptyArrayMap
-                else -> {
-                    for (i in pairs.indices)
-                        for (j in i + 1 until pairs.size)
-                            if (areKeysEqual(pairs[i].first, pairs[j].first))
-                                throw IllegalArgumentException(
-                                    "Duplicate key: ${pairs[i].first}"
-                                )
+        internal fun <K, V> createWithCheck(
+            vararg pairs: Pair<K, V>
+        ): PersistentArrayMap<K, V> {
+            for (i in pairs.indices)
+                for (j in i + 1 until pairs.size)
+                    if (areKeysEqual(pairs[i].first, pairs[j].first))
+                        throw IllegalArgumentException(
+                            "Duplicate key: ${pairs[i].first}"
+                        )
 
-                    PersistentArrayMap(pairs as Array<Pair<K, V>>)
-                }
-            }
+            return PersistentArrayMap(pairs as Array<Pair<K, V>>)
+        }
 
-        fun <K, V> create(map: Map<K, V>): IPersistentMap<K, V> {
+        internal fun <K, V> create(map: Map<K, V>): IPersistentMap<K, V> {
             var ret: TransientMap<K, V> = EmptyArrayMap.asTransient()
 
             for (entry in map.entries)
@@ -352,6 +354,3 @@ class PersistentArrayMap<out K, out V>(
         }
     }
 }
-
-fun <K, V> m(vararg pairs: Pair<K, V>): IPersistentMap<K, V> =
-    PersistentArrayMap(*pairs)

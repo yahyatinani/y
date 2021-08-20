@@ -2,11 +2,11 @@ package com.github.whyrising.y.collections.hashset
 
 import com.github.whyrising.y.collections.concretions.list.l
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
+import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.Companion.createWithCheck
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.EmptyHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator.NodeIter
 import com.github.whyrising.y.collections.concretions.map.hashMap
-import com.github.whyrising.y.collections.concretions.map.m
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet.HashSet
@@ -15,6 +15,7 @@ import com.github.whyrising.y.collections.concretions.set.PersistentHashSetSeria
 import com.github.whyrising.y.collections.concretions.set.hashSet
 import com.github.whyrising.y.collections.concretions.set.hs
 import com.github.whyrising.y.collections.concretions.set.toPhashSet
+import com.github.whyrising.y.collections.core.m
 import com.github.whyrising.y.collections.map.MapIterable
 import com.github.whyrising.y.collections.mocks.MockPersistentMap
 import com.github.whyrising.y.collections.set.PersistentSet
@@ -403,8 +404,8 @@ class PersistentHashSetTest : FreeSpec({
 
         "disjoin(key) should return a transient set without the key" {
             checkAll(Arb.set(Arb.string(), 1..100)) { set ->
-                val map = m(*set.map { Pair(it, it) }.toTypedArray())
-                    as PersistentArrayMap
+                val pairs = set.map { Pair(it, it) }.toTypedArray()
+                val map = createWithCheck(*pairs)
                 val tHashSet = TransientHashSet(map.asTransient())
                 val n = map.array[Random.nextInt(map.count)].first
 
@@ -430,8 +431,8 @@ class PersistentHashSetTest : FreeSpec({
         "conj(e)" {
             val n = "7"
             checkAll(Arb.set(Arb.string().filter { it != n })) { set ->
-                val map = m(*set.map { Pair(it, it) }.toTypedArray())
-                    as PersistentArrayMap
+                val pairs = set.map { Pair(it, it) }.toTypedArray()
+                val map = createWithCheck(*pairs)
                 val tHashSet = TransientHashSet(map.asTransient())
 
                 val ths = tHashSet.conj(n) as TransientHashSet<String>

@@ -6,7 +6,6 @@ import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator.EmptyNodeIterator
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator.NodeIter
-import com.github.whyrising.y.collections.core.toPmap
 import com.github.whyrising.y.collections.map.APersistentMap
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.map.IPersistentMap
@@ -37,7 +36,8 @@ internal class PersistentHashMapSerializer<K, V>(
     override val descriptor: SerialDescriptor = mapSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): PersistentHashMap<K, V> =
-        mapSerializer.deserialize(decoder).toPmap() as PersistentHashMap<K, V>
+        PersistentHashMap.create(mapSerializer.deserialize(decoder))
+            as PersistentHashMap<K, V>
 
     override fun serialize(encoder: Encoder, value: PersistentHashMap<K, V>) {
         return mapSerializer.serialize(encoder, value)
@@ -1047,7 +1047,7 @@ sealed class PersistentHashMap<out K, out V>(
         internal
         operator fun <K, V> invoke(): PersistentHashMap<K, V> = EmptyHashMap
 
-        internal operator fun <K, V> invoke(
+        internal fun <K, V> createWithCheck(
             vararg pairs: Pair<K, V>
         ): PersistentHashMap<K, V> {
             var ret: TransientMap<K, V> = EmptyHashMap.asTransient()
@@ -1072,10 +1072,21 @@ sealed class PersistentHashMap<out K, out V>(
 
             return ret.persistent()
         }
+
+        internal fun <K, V> create(
+            vararg pairs: Pair<K, V>
+        ): PersistentHashMap<K, V> {
+            var ret: TransientMap<K, V> = EmptyHashMap.asTransient()
+
+            for ((k, v) in pairs)
+                ret = ret.assoc(k, v)
+
+            return ret.persistent() as PersistentHashMap<K, V>
+        }
     }
 }
 
 fun <K, V> hashMap(): PersistentHashMap<K, V> = PersistentHashMap()
 
 fun <K, V> hashMap(vararg pairs: Pair<K, V>): PersistentHashMap<K, V> =
-    PersistentHashMap(*pairs)
+    PersistentHashMap.createWithCheck(*pairs)

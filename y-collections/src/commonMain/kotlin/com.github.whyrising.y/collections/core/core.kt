@@ -2,7 +2,9 @@ package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.associative.Associative
 import com.github.whyrising.y.collections.associative.ILookup
+import com.github.whyrising.y.collections.concretions.map.HASHTABLE_THRESHOLD
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
+import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.mutable.set.TransientSet
 import com.github.whyrising.y.collections.seq.ISeq
@@ -14,6 +16,12 @@ operator fun <E> ISeq<E>.component2(): ISeq<E> = this.rest()
 
 fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V> =
     PersistentArrayMap.create(this)
+
+fun <K, V> m(vararg ps: Pair<K, V>): IPersistentMap<K, V> = when {
+    ps.isEmpty() -> PersistentArrayMap.EmptyArrayMap
+    ps.size <= HASHTABLE_THRESHOLD -> PersistentArrayMap.createWithCheck(*ps)
+    else -> PersistentHashMap.createWithCheck(*ps)
+}
 
 fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V? =
     getFrom<K, V>(map, key, default)
@@ -52,7 +60,7 @@ fun <K, V> assoc(
     map: Associative<K, V>?,
     kv: Pair<K, V>
 ): Associative<K, V> = when (map) {
-    null -> PersistentArrayMap(kv)
+    null -> PersistentArrayMap(arrayOf(kv))
     else -> map.assoc(kv.first, kv.second)
 }
 

@@ -1,13 +1,17 @@
 package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.concretions.list.l
+import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
-import com.github.whyrising.y.collections.concretions.map.m
 import com.github.whyrising.y.collections.concretions.vector.v
 import com.github.whyrising.y.collections.map.IPersistentMap
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
 
 class CoreTest {
@@ -71,10 +75,38 @@ class CoreTest {
 
     @Test
     fun `toPmap() should return an instance of PersistentHashMap`() {
-        val map = (1..20).associateWith { i -> "$i" }
+        val map = (1..20).associateWith { "$it" }
 
         val pam: IPersistentMap<Int, String> = map.toPmap()
 
         (pam is PersistentHashMap<*, *>).shouldBeTrue()
     }
+
+    @Test
+    fun `m()`() {
+        val arrayMap: IPersistentMap<String, Int> = m("a" to 1)
+        val pairs = (1..20).map { Pair(it, "$it") }.toTypedArray()
+        val hashMap: IPersistentMap<Int, String> = m(*pairs)
+
+        m<Int, Int>() shouldBeSameInstanceAs PersistentArrayMap.EmptyArrayMap
+
+        (arrayMap is PersistentArrayMap<*, *>).shouldBeTrue()
+        arrayMap.count shouldBeExactly 1
+        arrayMap.containsKey("a").shouldBeTrue()
+
+        (hashMap is PersistentHashMap<*, *>).shouldBeTrue()
+        hashMap.count shouldBeExactly pairs.size
+        hashMap shouldContainAll (1..20).map { MapEntry(it, "$it") }
+
+        shouldThrowExactly<IllegalArgumentException> {
+            m("a" to 1, "b" to 2, "b" to 3)
+        }.message shouldBe "Duplicate key: b"
+
+        shouldThrowExactly<IllegalArgumentException> {
+            m(*pairs.plus(Pair(1, "1")))
+        }.message shouldBe "Duplicate key: 1"
+    }
+
+    // TODO: make hashMap() update dup key instead of throwing
+    // TODO: Implement arrayMap()
 }

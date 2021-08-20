@@ -1,9 +1,5 @@
 package com.github.whyrising.y.concurrency
 
-import com.github.whyrising.y.concurrency.ARef
-import com.github.whyrising.y.concurrency.Atom
-import com.github.whyrising.y.concurrency.IRef
-import com.github.whyrising.y.concurrency.atom
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
