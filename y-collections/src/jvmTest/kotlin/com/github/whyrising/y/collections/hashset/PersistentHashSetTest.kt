@@ -6,7 +6,6 @@ import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.Com
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.EmptyHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator.NodeIter
-import com.github.whyrising.y.collections.concretions.map.hashMap
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet.EmptyHashSet
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet.HashSet
@@ -15,6 +14,7 @@ import com.github.whyrising.y.collections.concretions.set.PersistentHashSetSeria
 import com.github.whyrising.y.collections.concretions.set.hashSet
 import com.github.whyrising.y.collections.concretions.set.hs
 import com.github.whyrising.y.collections.concretions.set.toPhashSet
+import com.github.whyrising.y.collections.core.hashMap
 import com.github.whyrising.y.collections.core.m
 import com.github.whyrising.y.collections.map.MapIterable
 import com.github.whyrising.y.collections.mocks.MockPersistentMap

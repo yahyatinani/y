@@ -4,6 +4,7 @@ import com.github.whyrising.y.collections.concretions.list.l
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
+import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.EmptyHashMap
 import com.github.whyrising.y.collections.concretions.vector.v
 import com.github.whyrising.y.collections.map.IPersistentMap
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -107,6 +108,18 @@ class CoreTest {
         }.message shouldBe "Duplicate key: 1"
     }
 
-    // TODO: make hashMap() update dup key instead of throwing
+    @Test
+    fun `hashmap()`() {
+        val map = hashMap("a" to 1, "b" to 2, "c" to 3)
+        val emptyMap = hashMap<String, Int>()
+
+        emptyMap shouldBeSameInstanceAs EmptyHashMap
+        map.count shouldBeExactly 3
+        map("a") shouldBe 1
+        map("b") shouldBe 2
+        map("c") shouldBe 3
+
+        hashMap("b" to 2, "b" to 3) shouldBe hashMap("b" to 3)
+    }
     // TODO: Implement arrayMap()
 }

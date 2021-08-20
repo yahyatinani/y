@@ -6,8 +6,8 @@ import com.github.whyrising.y.collections.concretions.list.l
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.Iter
-import com.github.whyrising.y.collections.concretions.map.hashMap
 import com.github.whyrising.y.collections.concretions.vector.v
+import com.github.whyrising.y.collections.core.hashMap
 import com.github.whyrising.y.collections.core.m
 import com.github.whyrising.y.collections.map.APersistentMap.KeySeq
 import com.github.whyrising.y.collections.map.APersistentMap.ValSeq

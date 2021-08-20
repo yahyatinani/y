@@ -14,7 +14,7 @@ import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.Node
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeSeq
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.TransientLeanMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMapSerializer
-import com.github.whyrising.y.collections.concretions.map.hashMap
+import com.github.whyrising.y.collections.core.hashMap
 import com.github.whyrising.y.collections.core.toPmap
 import com.github.whyrising.y.collections.util.hasheq
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -292,16 +292,6 @@ class LeanMapTest : FreeSpec({
 
             keyIter.next() shouldBe 1
         }
-    }
-
-    "hashMap()" {
-        val hashmap = hashMap("a" to 1, "b" to 2, "c" to 3)
-
-        hashMap<String, Int>() shouldBeSameInstanceAs EmptyHashMap
-        hashmap.count shouldBeExactly 3
-        hashmap("a") shouldBe 1
-        hashmap("b") shouldBe 2
-        hashmap("c") shouldBe 3
     }
 
     "Serialization" - {

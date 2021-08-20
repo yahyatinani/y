@@ -17,10 +17,15 @@ operator fun <E> ISeq<E>.component2(): ISeq<E> = this.rest()
 fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V> =
     PersistentArrayMap.create(this)
 
-fun <K, V> m(vararg ps: Pair<K, V>): IPersistentMap<K, V> = when {
-    ps.isEmpty() -> PersistentArrayMap.EmptyArrayMap
-    ps.size <= HASHTABLE_THRESHOLD -> PersistentArrayMap.createWithCheck(*ps)
-    else -> PersistentHashMap.createWithCheck(*ps)
+fun <K, V> m(vararg kvs: Pair<K, V>): IPersistentMap<K, V> = when {
+    kvs.isEmpty() -> PersistentArrayMap.EmptyArrayMap
+    kvs.size <= HASHTABLE_THRESHOLD -> PersistentArrayMap.createWithCheck(*kvs)
+    else -> PersistentHashMap.createWithCheck(*kvs)
+}
+
+fun <K, V> hashMap(vararg kvs: Pair<K, V>): PersistentHashMap<K, V> = when {
+    kvs.isEmpty() -> PersistentHashMap.EmptyHashMap
+    else -> PersistentHashMap.create(*kvs)
 }
 
 fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V? =

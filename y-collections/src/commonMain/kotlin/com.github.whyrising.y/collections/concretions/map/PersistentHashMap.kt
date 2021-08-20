@@ -1085,8 +1085,3 @@ sealed class PersistentHashMap<out K, out V>(
         }
     }
 }
-
-fun <K, V> hashMap(): PersistentHashMap<K, V> = PersistentHashMap()
-
-fun <K, V> hashMap(vararg pairs: Pair<K, V>): PersistentHashMap<K, V> =
-    PersistentHashMap.createWithCheck(*pairs)
