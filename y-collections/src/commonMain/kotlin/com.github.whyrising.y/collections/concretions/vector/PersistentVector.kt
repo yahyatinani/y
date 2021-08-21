@@ -5,7 +5,6 @@ import com.github.whyrising.y.collections.Chunk
 import com.github.whyrising.y.collections.Edit
 import com.github.whyrising.y.collections.concretions.list.ASeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList
-import com.github.whyrising.y.collections.concretions.vector.PersistentVector.EmptyVector
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.collections.core.InstaCount
 import com.github.whyrising.y.collections.mutable.collection.IMutableCollection
@@ -445,22 +444,63 @@ sealed class PersistentVector<out E>(
     }
 
     companion object {
+        @Suppress("UNCHECKED_CAST")
         internal operator fun <E> invoke(): PersistentVector<E> = EmptyVector
 
         @Suppress("UNCHECKED_CAST")
-        internal operator fun <E> invoke(vararg args: E): PersistentVector<E> {
-            val argsCount = args.size
+        internal operator fun <E> invoke(vararg args: E): PersistentVector<E> =
+            when {
+                args.isEmpty() -> EmptyVector
+                args.size <= BF -> {
+                    Vector(args.size, SHIFT, EmptyNode, args as Array<Any?>)
+                }
+                else -> {
+                    var ret: TransientVector<E> = EmptyVector.asTransient()
+                    for (item in args)
+                        ret = ret.conj(item)
+                    ret.persistent()
+                }
+            }
+
+        internal operator fun <E> invoke(seq: ISeq<E>): PersistentVector<E> {
+            val tail = arrayOfNulls<Any>(BF)
+            var i = 0
+            var s = seq
+            while (s != PersistentList.Empty && i < BF) {
+                tail[i++] = s.first()
+                s = s.rest()
+            }
 
             return when {
-                argsCount == 0 -> EmptyVector
-                argsCount <= BF -> {
-                    val tail = args as Array<Any?>
-                    Vector(argsCount, SHIFT, EmptyNode, tail)
+                s != PersistentList.Empty -> {
+                    val start = Vector(BF, SHIFT, EmptyNode, tail)
+                    var ret: TransientVector<E> = start.asTransient()
+                    while (s != PersistentList.Empty) {
+                        ret = ret.conj(s.first())
+                        s = s.rest()
+                    }
+                    ret.persistent()
                 }
+                i == BF -> Vector(BF, SHIFT, EmptyNode, tail)
+                else -> {
+                    val trimmedTail = arrayOfNulls<Any>(i)
+                    tail.copyInto(trimmedTail, 0, 0, i)
+                    Vector(i, 5, EmptyNode, trimmedTail)
+                }
+            }
+        }
+
+        internal fun <E> create(list: List<E>): PersistentVector<E> {
+            val size = list.size
+
+            return when {
+                size == 0 -> EmptyVector
+                size <= BF ->
+                    Vector(size, SHIFT, EmptyNode, list.toTypedArray())
                 else -> {
                     val empty: TransientVector<E> = EmptyVector.asTransient()
 
-                    args.fold(empty) { tVec, e -> tVec.conj(e) }.persistent()
+                    list.fold(empty) { tVec, e -> tVec.conj(e) }.persistent()
                 }
             }
         }
@@ -482,26 +522,7 @@ sealed class PersistentVector<out E>(
 
             return newPath(edit, level - SHIFT, path)
         }
-
-        internal fun <E> create(list: List<E>): PersistentVector<E> {
-            val size = list.size
-
-            return when {
-                size == 0 -> EmptyVector
-                size <= BF ->
-                    Vector(size, SHIFT, EmptyNode, list.toTypedArray())
-                else -> {
-                    val empty: TransientVector<E> = EmptyVector.asTransient()
-
-                    list.fold(empty) { tVec, e -> tVec.conj(e) }.persistent()
-                }
-            }
-        }
     }
 }
-
-fun <E> v(): PersistentVector<E> = EmptyVector
-
-fun <E> v(vararg elements: E): PersistentVector<E> = PersistentVector(*elements)
 
 fun <E> List<E>.toPvector(): PersistentVector<E> = PersistentVector.create(this)

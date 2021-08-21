@@ -3,8 +3,9 @@ package com.github.whyrising.y.collections
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.Cons
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
-import com.github.whyrising.y.collections.concretions.vector.v
 import com.github.whyrising.y.collections.core.IHashEq
+import com.github.whyrising.y.collections.core.seq
+import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.mocks.HashEqMock
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.seq.LazySeq
@@ -15,7 +16,6 @@ import com.github.whyrising.y.collections.util.category
 import com.github.whyrising.y.collections.util.hasheq
 import com.github.whyrising.y.collections.util.lazyChunkedSeq
 import com.github.whyrising.y.collections.util.ops
-import com.github.whyrising.y.collections.util.toSeq
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -133,15 +133,15 @@ class UtilJvmTest : FreeSpec({
         }
     }
 
-    "toSeq(x)" - {
+    "seq(x)" - {
         "when x is null, it should return null" {
-            toSeq<Int>(null).shouldBeNull()
+            seq<Int>(null).shouldBeNull()
         }
 
         "ASeq" {
             val x: Any = Cons(1, Empty)
 
-            val seq = toSeq<Int>(x) as ISeq<Int>
+            val seq = seq<Int>(x) as ISeq<Int>
 
             seq.first() shouldBeExactly 1
         }
@@ -149,7 +149,7 @@ class UtilJvmTest : FreeSpec({
         "Seqable" {
             val x: Any = v(1, 2)
 
-            val seq = toSeq<Int>(x) as ISeq<Int>
+            val seq = seq<Int>(x) as ISeq<Int>
 
             seq.first() shouldBeExactly 1
         }
@@ -157,7 +157,7 @@ class UtilJvmTest : FreeSpec({
         "Iterable<*>" {
             val x = listOf(1, 2, 3, 5)
 
-            val seq = toSeq<Int>(x) as ISeq<Int>
+            val seq = seq<Int>(x) as ISeq<Int>
 
             seq.first() shouldBeExactly x[0]
             seq.count shouldBeExactly x.size
@@ -167,7 +167,7 @@ class UtilJvmTest : FreeSpec({
             val x: Any = true
 
             val e = shouldThrowExactly<IllegalArgumentException> {
-                toSeq<Int>(x)
+                seq<Int>(x)
             }
 
             e.message shouldBe

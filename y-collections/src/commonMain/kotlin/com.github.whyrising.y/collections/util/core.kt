@@ -4,10 +4,10 @@ import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.core.IHashEq
+import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.seq.LazySeq
-import com.github.whyrising.y.collections.seq.Seqable
 import com.github.whyrising.y.collections.seq.Sequential
 
 internal const val INIT_HASH_CODE = 0
@@ -59,6 +59,11 @@ fun <E> equiv(e1: E, e2: Any?): Boolean = when {
     }
 }
 
+fun equals(o1: Any?, o2: Any?): Boolean = when {
+    o1 === o2 -> true
+    else -> o1 != null && o1 == o2
+}
+
 fun <E> lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> {
     if (iterator.hasNext()) {
         return LazySeq {
@@ -75,17 +80,6 @@ fun <E> lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> {
         }
     }
     return Empty
-}
-
-@Suppress("UNCHECKED_CAST")
-fun <E> toSeq(x: Any?): ISeq<E>? = when (x) {
-    null -> null
-    is ISeq<*> -> x as ISeq<E>
-    is Seqable<*> -> x.seq() as ISeq<E>
-    is Iterable<*> -> lazyChunkedSeq(x.iterator() as Iterator<E>)
-    else -> throw IllegalArgumentException(
-        "Don't know how to create ISeq from: ${x::class.simpleName}"
-    )
 }
 
 fun compareNumbers(x: Number, y: Number): Int {
@@ -135,7 +129,7 @@ fun hasheq(x: Any?): Int = when (x) {
 }
 
 fun <E> nth(seq: Sequential, index: Int): E {
-    val s = toSeq<E>(seq)
+    val s = seq<E>(seq)
 
     if (index >= s!!.count || index < 0)
         throw IndexOutOfBoundsException("index = $index")

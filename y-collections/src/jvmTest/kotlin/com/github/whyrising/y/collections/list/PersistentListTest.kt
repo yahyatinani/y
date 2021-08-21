@@ -8,8 +8,8 @@ import com.github.whyrising.y.collections.concretions.list.PersistentListSeriali
 import com.github.whyrising.y.collections.concretions.list.SeqIterator
 import com.github.whyrising.y.collections.concretions.list.l
 import com.github.whyrising.y.collections.concretions.list.toPlist
-import com.github.whyrising.y.collections.concretions.vector.v
 import com.github.whyrising.y.collections.core.InstaCount
+import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.mocks.MockSeq
 import com.github.whyrising.y.collections.mocks.User
 import com.github.whyrising.y.collections.seq.ISeq

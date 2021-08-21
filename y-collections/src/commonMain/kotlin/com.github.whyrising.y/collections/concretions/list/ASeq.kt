@@ -3,6 +3,7 @@ package com.github.whyrising.y.collections.concretions.list
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.core.IHashEq
 import com.github.whyrising.y.collections.core.InstaCount
+import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.seq.Sequential
@@ -11,7 +12,6 @@ import com.github.whyrising.y.collections.util.INIT_HASH_CODE
 import com.github.whyrising.y.collections.util.Murmur3
 import com.github.whyrising.y.collections.util.equiv
 import com.github.whyrising.y.collections.util.nth
-import com.github.whyrising.y.collections.util.toSeq
 
 abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
     internal var hashCode: Int = INIT_HASH_CODE
@@ -32,7 +32,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
             other !is List<*> && other !is Sequential -> return false
             else -> {
                 var thisSeq = seq()
-                var otherSeq = toSeq<E>(other) as ISeq<E>
+                var otherSeq = seq<E>(other) as ISeq<E>
                 while (thisSeq !is Empty) {
                     if (otherSeq is Empty ||
                         !areEqual(thisSeq.first(), otherSeq.first())

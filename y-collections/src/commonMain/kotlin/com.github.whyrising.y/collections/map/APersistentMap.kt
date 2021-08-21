@@ -4,11 +4,11 @@ import com.github.whyrising.y.collections.concretions.list.ASeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.core.IHashEq
+import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.util.Murmur3
 import com.github.whyrising.y.collections.util.equiv
-import com.github.whyrising.y.collections.util.toSeq
 import com.github.whyrising.y.collections.vector.IPersistentVector
 import kotlin.collections.Map.Entry
 
@@ -113,7 +113,7 @@ abstract class APersistentMap<out K, out V> :
         }
         else -> {
             var result: IPersistentMap<K, V> = this
-            var seq = toSeq<Any?>(e) as ISeq<Any?>
+            var seq = seq<Any?>(e) as ISeq<Any?>
 
             for (i in 0 until seq.count) {
                 val entry = seq.first()

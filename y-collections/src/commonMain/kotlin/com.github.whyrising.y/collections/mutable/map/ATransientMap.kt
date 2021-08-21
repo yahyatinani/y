@@ -1,10 +1,10 @@
 package com.github.whyrising.y.collections.mutable.map
 
 import com.github.whyrising.y.collections.concretions.map.MapEntry
+import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.seq.ISeq
-import com.github.whyrising.y.collections.util.toSeq
 import com.github.whyrising.y.collections.vector.IPersistentVector
 
 abstract class ATransientMap<out K, out V> :
@@ -66,7 +66,7 @@ abstract class ATransientMap<out K, out V> :
             else -> {
                 var rtm: TransientMap<K, V> = this
 
-                var seq = toSeq<Any?>(e) as ISeq<Any?>
+                var seq = seq<Any?>(e) as ISeq<Any?>
                 for (i in 0 until seq.count)
                     when (val entry = seq.first()) {
                         is Map.Entry<*, *> -> {

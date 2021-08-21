@@ -13,7 +13,7 @@ import com.github.whyrising.y.collections.concretions.vector.PersistentVector.No
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.TransientVector
 import com.github.whyrising.y.collections.concretions.vector.PersistentVectorSerializer
 import com.github.whyrising.y.collections.concretions.vector.toPvector
-import com.github.whyrising.y.collections.concretions.vector.v
+import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.mocks.MockSeq
 import com.github.whyrising.y.collections.mocks.User
@@ -52,7 +52,7 @@ const val SHIFT = 5
 
 @ExperimentalSerializationApi
 @ExperimentalStdlibApi
-class PersistentVectorTest : FreeSpec({
+class PersistentVectorJvmTest : FreeSpec({
     "Node" - {
         @Suppress("UNCHECKED_CAST")
         "Node does have an array of nodes" {
@@ -256,7 +256,7 @@ class PersistentVectorTest : FreeSpec({
         "assocN(index, val)" - {
 
             "when index out of bounds, it should throw an exception"{
-                val vec = v(1, 2, 3, 4)
+                val vec = PersistentVector(1, 2, 3, 4)
 
                 shouldThrowExactly<IndexOutOfBoundsException> {
                     vec.assocN(10, 15)
@@ -264,7 +264,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "when index equals the count of the vector, it should conj" {
-                val vec = v(1, 2, 3, 4)
+                val vec = PersistentVector(1, 2, 3, 4)
                 val index = vec.count
                 val value = 15
 
@@ -292,7 +292,7 @@ class PersistentVectorTest : FreeSpec({
                 }
 
                 "when index within the tail" {
-                    val vec = v(1, 2, 3, 4)
+                    val vec = PersistentVector(1, 2, 3, 4)
                     val index1 = vec.count - 1
                     val index2 = 0
                     val value = 15
@@ -314,7 +314,7 @@ class PersistentVectorTest : FreeSpec({
                 }
 
                 "when index within the tree and level 5" {
-                    val vec = v(*(1..50).toList().toTypedArray())
+                    val vec = PersistentVector(*(1..50).toList().toTypedArray())
                     val index = 30
                     val value = 99
 
@@ -398,7 +398,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "when called on a filled vector, it should return a ChunkedSeq" {
-                val vec = v(1, 2, 3)
+                val vec = PersistentVector(1, 2, 3)
 
                 val chunkedSeq = vec.seq() as ChunkedSeq<Int>
 
@@ -420,7 +420,7 @@ class PersistentVectorTest : FreeSpec({
                 val expectedHash = list.fold(1) { hash, i ->
                     prime * hash + i.hashCode()
                 }
-                val vec = v(*list.toTypedArray())
+                val vec = PersistentVector(*list.toTypedArray())
 
                 vec.hashCode shouldBeExactly INIT_HASH_CODE
                 vec.hashCode() shouldBeExactly expectedHash
@@ -434,16 +434,16 @@ class PersistentVectorTest : FreeSpec({
         "equals(x)" {
             v(1, 2, 3, 4).equals(null).shouldBeFalse()
 
-            (v(1) == v(1, 2, 3)).shouldBeFalse()
+            (v(1) == PersistentVector(1, 2, 3)).shouldBeFalse()
 
-            (v(1, 2, 3) == v(1, 2, 3)).shouldBeTrue()
+            (v(1, 2, 3) == PersistentVector(1, 2, 3)).shouldBeTrue()
 
-            val v = v(1, 2, 3)
-            (v == v).shouldBeTrue()
+            val vector = PersistentVector(1, 2, 3)
+            (vector == vector).shouldBeTrue()
 
-            (v(1, 2, 3) == v(1, 2, 5)).shouldBeFalse()
+            (v(1, 2, 3) == PersistentVector(1, 2, 5)).shouldBeFalse()
 
-            (v(v(1)) == v(v(1))).shouldBeTrue()
+            (vector(vector(1)) == vector(vector(1))).shouldBeTrue()
 
             (v(1, 2, 3) == listOf(1, 4)).shouldBeFalse()
 
@@ -513,7 +513,7 @@ class PersistentVectorTest : FreeSpec({
         }
 
         "hasheq()" {
-            val vec = v(1, 2, 3, 4)
+            val vec = PersistentVector(1, 2, 3, 4)
 
             vec.hasheq shouldBeExactly 0
 
@@ -529,7 +529,7 @@ class PersistentVectorTest : FreeSpec({
         }
 
         "valAt(key, default)" {
-            val vec = v(1, 2, 3, 4)
+            val vec = PersistentVector(1, 2, 3, 4)
 
             vec.valAt(4, default) shouldBe default
             vec.valAt(0, default) shouldBe 1
@@ -537,7 +537,7 @@ class PersistentVectorTest : FreeSpec({
         }
 
         "valAt(key)" {
-            val vec = v(1, 2, 3, 4)
+            val vec = PersistentVector(1, 2, 3, 4)
 
             vec.valAt(4) shouldBe null
             vec.valAt(0) shouldBe 1
@@ -545,14 +545,14 @@ class PersistentVectorTest : FreeSpec({
         }
 
         "containsKey(key)" {
-            val vec = v(1, 2, 3, 4)
+            val vec = PersistentVector(1, 2, 3, 4)
 
             vec.containsKey(0).shouldBeTrue()
             vec.containsKey(10).shouldBeFalse()
         }
 
         "entryAt(key)" {
-            val vec = v(1, 2, 3, 4)
+            val vec = PersistentVector(1, 2, 3, 4)
 
             val entry = vec.entryAt(2) as IMapEntry<Int, Int>
 
@@ -563,7 +563,7 @@ class PersistentVectorTest : FreeSpec({
         }
 
         "assoc(key, value)" {
-            val vec = v(1, 2, 3, 4)
+            val vec = PersistentVector(1, 2, 3, 4)
 
             vec.assoc(0, 74).nth(0) shouldBe 74
             vec.assoc(1, 73).nth(1) shouldBe 73
@@ -578,7 +578,7 @@ class PersistentVectorTest : FreeSpec({
         "subvec(start, end)" {
             val start = 1
             val end = 5
-            val vec = v(1, 2, 3, 4, 5, 6)
+            val vec = PersistentVector(1, 2, 3, 4, 5, 6)
 
             val subvec = vec.subvec(start, end) as SubVector<Int>
 
@@ -589,15 +589,15 @@ class PersistentVectorTest : FreeSpec({
 
         "compareTo(other)" - {
             "when this.count < other.count, it should return -1" {
-                val vec1 = v(1, 2, 3)
-                val vec2 = v(1, 2, 3, 4)
+                val vec1 = PersistentVector(1, 2, 3)
+                val vec2 = PersistentVector(1, 2, 3, 4)
 
                 vec1.compareTo(vec2) shouldBeExactly -1
             }
 
             "when this count > other count, it should return 1" {
-                val vec1 = v(1, 2, 3, 4)
-                val vec2 = v(1, 2, 3)
+                val vec1 = PersistentVector(1, 2, 3, 4)
+                val vec2 = PersistentVector(1, 2, 3)
 
                 vec1.compareTo(vec2) shouldBeExactly 1
             }
@@ -605,26 +605,39 @@ class PersistentVectorTest : FreeSpec({
             "when this count == other count" - {
 
                 "when all items are equal, it should return 0" {
-                    v(1, 2, 3).compareTo(v(1, 2, 3)) shouldBeExactly 0
-                    v<Number>(1L, 2).compareTo(v(1.0, 2)) shouldBeExactly 0
-                    v<Any>(v(1, 2)).compareTo(v(v(1L, 2.0))) shouldBeExactly 0
+                    PersistentVector(1, 2, 3)
+                        .compareTo(v(1, 2, 3)) shouldBeExactly 0
+
+                    PersistentVector<Number>(1L, 2)
+                        .compareTo(v(1.0, 2)) shouldBeExactly 0
+
+                    PersistentVector<Any>(v(1, 2))
+                        .compareTo(v(v(1L, 2.0))) shouldBeExactly 0
                 }
 
                 "when this items < than other's, it should return -1" {
-                    v(null, 2, 3).compareTo(v(1, 2, 3)) shouldBeExactly -1
-                    v<Number>(1L, 2).compareTo(v(1.1, 2)) shouldBeExactly -1
+                    PersistentVector(null, 2, 3)
+                        .compareTo(v(1, 2, 3)) shouldBeExactly -1
+
+                    PersistentVector<Number>(1L, 2)
+                        .compareTo(v(1.1, 2)) shouldBeExactly -1
                 }
 
                 "when this items > than other's, it should return 1" {
-                    v<Int?>(1, 2, 3).compareTo(v(null, 2, 3)) shouldBeExactly 1
-                    v<Number>(1.1, 2).compareTo(v(1L, 2)) shouldBeExactly 1
-                    v<Any>(v(1.1, 2)).compareTo(v(v(1L, 2.0))) shouldBeExactly 1
+                    PersistentVector<Int?>(1, 2, 3)
+                        .compareTo(v(null, 2, 3)) shouldBeExactly 1
+
+                    PersistentVector<Number>(1.1, 2)
+                        .compareTo(v(1L, 2)) shouldBeExactly 1
+
+                    PersistentVector<Any>(v(1.1, 2))
+                        .compareTo(v(v(1L, 2.0))) shouldBeExactly 1
                 }
             }
         }
 
         "invoke(index) should return the associate value of the given index" {
-            val vec = v(1, 2, 3, 4)
+            val vec = PersistentVector(1, 2, 3, 4)
 
             vec(0) shouldBeExactly 1
             vec(1) shouldBeExactly 2
@@ -638,13 +651,13 @@ class PersistentVectorTest : FreeSpec({
 
         "reverse()" - {
             "when the the vec is empty, it should return the empty seq" {
-                val rseq: ISeq<Int> = v<Int>().reverse()
+                val rseq: ISeq<Int> = PersistentVector<Int>().reverse()
 
                 rseq shouldBeSameInstanceAs Empty
             }
 
             "when vec is populated, it should return the reversed seq of it " {
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
 
                 val rseq = vec.reverse() as RSeq<Int>
 
@@ -669,7 +682,8 @@ class PersistentVectorTest : FreeSpec({
 
             "when tail length > 1, it should remove the last element in it" {
                 checkAll(Arb.list(Arb.int(), 2..32)) { list: List<Int> ->
-                    val v = v(*list.toTypedArray())
+                    val v =
+                        PersistentVector(*list.toTypedArray())
 
                     val vec = v.pop()
 
@@ -684,7 +698,7 @@ class PersistentVectorTest : FreeSpec({
             "when tail length == 1" - {
                 """when level = 5 & root contains only 1 element after popping,
                    root should become the empty node""" {
-                    val v = v(*(1..33).toList().toTypedArray())
+                    val v = PersistentVector(*(1..33).toList().toTypedArray())
 
                     val vec = v.pop()
 
@@ -697,7 +711,7 @@ class PersistentVectorTest : FreeSpec({
 
                 """when level = 5 & root contains more than 1 element after 
                    popping, it should set the rightmost leaf to null""" {
-                    val v = v(*(1..65).toList().toTypedArray())
+                    val v = PersistentVector(*(1..65).toList().toTypedArray())
 
                     val vec = v.pop()
                     val root = vec.root
@@ -715,7 +729,7 @@ class PersistentVectorTest : FreeSpec({
                 """when level > 5 & root contains only 1 element after 
                    popping, it should decrease level and eliminate the empty
                    node""" {
-                    val v = v(*(1..1057).toList().toTypedArray())
+                    val v = PersistentVector(*(1..1057).toList().toTypedArray())
 
                     val vec = v.pop()
                     val root = vec.root
@@ -732,7 +746,8 @@ class PersistentVectorTest : FreeSpec({
                 """when level > 10 & root contains only 1 element after 
                    popping, it should decrease level and eliminate the 
                    empty node""" {
-                    val v = v(*(1..32801).toList().toTypedArray())
+                    val v =
+                        PersistentVector(*(1..32801).toList().toTypedArray())
 
                     val vec = v.pop()
                     val root = vec.root
@@ -749,7 +764,7 @@ class PersistentVectorTest : FreeSpec({
         }
 
         "+ operator should act like conj" {
-            val vec = v(1, 2, 3, 4)
+            val vec = PersistentVector(1, 2, 3, 4)
 
             val r = vec + 5
 
@@ -759,7 +774,7 @@ class PersistentVectorTest : FreeSpec({
 
         "ChunkedSeq" - {
             "firstChunk()" {
-                val vec = v(1, 2, 3)
+                val vec = PersistentVector(1, 2, 3)
                 val chunkedSeq = ChunkedSeq(vec, 0, 0)
                 val node = vec.leafArrayBy(0)
 
@@ -773,7 +788,7 @@ class PersistentVectorTest : FreeSpec({
             "restChunks()" {
                 val index = 0
                 val offset = 0
-                val vec = v(*(0..45).toList().toTypedArray())
+                val vec = PersistentVector(*(0..45).toList().toTypedArray())
                 val chunkedSeq = ChunkedSeq(vec, index, offset)
                 val node = vec.leafArrayBy(0)
 
@@ -787,7 +802,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "first()" {
-                val vec = v(*(0..45).toList().toTypedArray())
+                val vec = PersistentVector(*(0..45).toList().toTypedArray())
                 val chunkedSeq = ChunkedSeq(vec, 0, 0)
 
                 chunkedSeq.first() shouldBeExactly 0
@@ -795,7 +810,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "rest()" {
-                val vec = v(*(0..45).toList().toTypedArray())
+                val vec = PersistentVector(*(0..45).toList().toTypedArray())
                 val chunkedSeq = ChunkedSeq(vec, 0, 0)
 
                 val rest = chunkedSeq.rest() as ChunkedSeq<Int>
@@ -821,7 +836,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "count" {
-                val vec = v(*(0..45).toList().toTypedArray())
+                val vec = PersistentVector(*(0..45).toList().toTypedArray())
                 val chunkedSeq = ChunkedSeq(vec, 0, 0)
 
                 val rest = chunkedSeq.rest() as ChunkedSeq<Int>
@@ -841,7 +856,7 @@ class PersistentVectorTest : FreeSpec({
         "List implementation" - {
             "size()" {
                 checkAll { l: List<Int> ->
-                    val vec = v(*l.toTypedArray())
+                    val vec = PersistentVector(*l.toTypedArray())
 
                     val list = vec as List<Int>
 
@@ -852,7 +867,7 @@ class PersistentVectorTest : FreeSpec({
             "get()" {
                 val genA = Arb.list(Arb.int()).filter { it.isNotEmpty() }
                 checkAll(genA) { l: List<Int> ->
-                    val vec = v(*l.toTypedArray())
+                    val vec = PersistentVector(*l.toTypedArray())
 
                     val list = vec as List<Int>
 
@@ -861,14 +876,14 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "isEmpty()" {
-                v<Int>().isEmpty().shouldBeTrue()
+                PersistentVector<Int>().isEmpty().shouldBeTrue()
 
-                v(1, 2, 3, 4).isEmpty().shouldBeFalse()
+                PersistentVector(1, 2, 3, 4).isEmpty().shouldBeFalse()
             }
 
             "iterator()" {
                 checkAll { list: List<Int> ->
-                    val vec = v(*list.toTypedArray())
+                    val vec = PersistentVector(*list.toTypedArray())
 
                     val iter = vec.iterator()
 
@@ -885,7 +900,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "indexOf(element)" {
-                val vec = v(1L, 2.0, 3, 4)
+                val vec = PersistentVector(1L, 2.0, 3, 4)
 
                 vec.indexOf(3) shouldBeExactly 2
                 vec.indexOf(4L) shouldBeExactly 3
@@ -894,7 +909,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "lastIndexOf(element)" - {
-                val vec = v(1, 1, 6, 6, 4, 5, 4)
+                val vec = PersistentVector(1, 1, 6, 6, 4, 5, 4)
 
                 "when the element is not in the list, it should return -1" {
                     vec.lastIndexOf(10) shouldBeExactly -1
@@ -911,7 +926,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "listIterator(index)" {
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
 
                 val iter = vec.listIterator(2)
 
@@ -955,7 +970,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "listIterator()" {
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
 
                 val iter = vec.listIterator()
 
@@ -1001,7 +1016,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "contains(element)" {
-                val vec = v(1, 2, 3, 4L)
+                val vec = PersistentVector(1, 2, 3, 4L)
 
                 vec.contains(1).shouldBeTrue()
                 vec.contains(1L).shouldBeTrue()
@@ -1010,17 +1025,17 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "containsAll(elements)" {
-                val vec = v(1, 2L, 3, 4, "a")
+                val vec = PersistentVector(1, 2L, 3, 4, "a")
 
-                vec.containsAll(v(1, 2, "a")).shouldBeTrue()
+                vec.containsAll(PersistentVector(1, 2, "a")).shouldBeTrue()
 
-                vec.containsAll(v(1, 2, "b")).shouldBeFalse()
+                vec.containsAll(PersistentVector(1, 2, "b")).shouldBeFalse()
             }
 
             "subList(fromIndex, toIndex)" {
                 val fromIndex = 1
                 val toIndex = 5
-                val vec = v(1, 2, 3, 4, 5, 6)
+                val vec = PersistentVector(1, 2, 3, 4, 5, 6)
 
                 val subvec = vec.subList(fromIndex, toIndex) as SubVector<Int>
 
@@ -1071,7 +1086,7 @@ class PersistentVectorTest : FreeSpec({
     "SubVector" - {
         "invoke()/ctor" - {
             "when start & end is out of bounds, it should throw exception" {
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
 
                 val e1 = shouldThrowExactly<IndexOutOfBoundsException> {
                     SubVector(vec, 3, 2)
@@ -1093,7 +1108,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "when end == start, it should return the EmptyVector" {
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
 
                 val empty = SubVector(vec, 2, 2)
 
@@ -1103,7 +1118,7 @@ class PersistentVectorTest : FreeSpec({
             "when start & end are valid, it should return a SubVector" {
                 val start = 1
                 val end = 5
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
 
                 val subvec = SubVector(vec, start, end) as SubVector<Int>
 
@@ -1116,7 +1131,7 @@ class PersistentVectorTest : FreeSpec({
         "count" {
             val start = 1
             val end = 5
-            val vec = v(1, 2, 3, 4, 5)
+            val vec = PersistentVector(1, 2, 3, 4, 5)
 
             val subvec = SubVector(vec, start, end) as SubVector<Int>
 
@@ -1126,14 +1141,14 @@ class PersistentVectorTest : FreeSpec({
         "empty()" {
             val start = 1
             val end = 5
-            val vec = v(1, 2, 3, 4, 5)
+            val vec = PersistentVector(1, 2, 3, 4, 5)
 
             SubVector(vec, start, end).empty() shouldBeSameInstanceAs
                 EmptyVector
         }
 
         "nth(index)" {
-            val vec = v(1, 2, 3, 4, 5)
+            val vec = PersistentVector(1, 2, 3, 4, 5)
             val subvec = SubVector(vec, 1, 5)
 
             shouldThrowExactly<IndexOutOfBoundsException> {
@@ -1150,7 +1165,7 @@ class PersistentVectorTest : FreeSpec({
         "conj(e)" {
             val start = 1
             val end = 5
-            val vec = v(1, 2, 3, 4, 5)
+            val vec = PersistentVector(1, 2, 3, 4, 5)
             val subvec = SubVector(vec, start, end)
             val e = 66
 
@@ -1168,7 +1183,7 @@ class PersistentVectorTest : FreeSpec({
 
         "assocN(index, value)" - {
             "when the index is out of bounds, it should throw an exception" {
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
                 val subvec = SubVector(vec, 1, 5)
 
                 shouldThrowExactly<IndexOutOfBoundsException> {
@@ -1177,7 +1192,7 @@ class PersistentVectorTest : FreeSpec({
             }
 
             "when index == count, it should append the value to the end" {
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
                 val subvec = SubVector(vec, 1, 5)
 
                 val r = subvec.assocN(4, 75) as SubVector<Int>
@@ -1190,7 +1205,7 @@ class PersistentVectorTest : FreeSpec({
                 val end = 5
                 val index = 3
                 val value = 62
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
                 val subvec = SubVector(vec, start, end)
 
                 val r = subvec.assocN(index, value) as SubVector<Int>
@@ -1208,7 +1223,7 @@ class PersistentVectorTest : FreeSpec({
             "iterator of a subvec of APersistentVector" {
                 val start = 1
                 val end = 4
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
 
                 val subvec = SubVector(vec, start, end)
 
@@ -1230,7 +1245,7 @@ class PersistentVectorTest : FreeSpec({
             "iterator of the subvec of a subvec of APersistentVector" {
                 val start = 0
                 val end = 3
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
                 val subvec = SubVector(vec, 1, 4)
                 val subSubVec = SubVector(subvec, start, end)
 
@@ -1251,7 +1266,7 @@ class PersistentVectorTest : FreeSpec({
             "when the inner vector is not a APersistentVector, return super" {
                 val start = 1
                 val end = 4
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
 
                 val subvec = SubVector(VectorMock(vec), start, end)
 
@@ -1275,7 +1290,7 @@ class PersistentVectorTest : FreeSpec({
             "when the subvec count > 1, it should decrease the end by 1" {
                 val start = 1
                 val end = 4
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
                 val subvec = SubVector(vec, start, end) as SubVector<Int>
 
                 val popped = subvec.pop() as SubVector<Int>
@@ -1288,7 +1303,7 @@ class PersistentVectorTest : FreeSpec({
             "when the subvec count = 1, it should return the empty vector" {
                 val start = 1
                 val end = 2
-                val vec = v(1, 2, 3, 4, 5)
+                val vec = PersistentVector(1, 2, 3, 4, 5)
                 val subvec = SubVector(vec, start, end) as SubVector<Int>
 
                 subvec.pop() shouldBeSameInstanceAs EmptyVector
@@ -1299,7 +1314,7 @@ class PersistentVectorTest : FreeSpec({
     "RSeq" - {
         "first" {
             checkAll(Arb.list(Arb.int(), 1..20)) { list: List<Int> ->
-                val vec = v(*list.toTypedArray())
+                val vec = PersistentVector(*list.toTypedArray())
                 val lastIndex = list.size - 1
 
                 val rSeq = RSeq(vec, lastIndex)
@@ -1311,7 +1326,7 @@ class PersistentVectorTest : FreeSpec({
 
         "rest()" - {
             "when the index is 0, it should return the empty seq" {
-                val vec = v(1)
+                val vec = PersistentVector(1)
                 val rseq = RSeq(vec, vec.size - 1)
 
                 val rest = rseq.rest()
@@ -1321,7 +1336,7 @@ class PersistentVectorTest : FreeSpec({
 
             "when index > 0, it should return the rest of the reversed seq" {
                 checkAll(Arb.list(Arb.int(), 2..20)) { list: List<Int> ->
-                    val vec = v(*list.toTypedArray())
+                    val vec = PersistentVector(*list.toTypedArray())
                     val lastIndex = list.size - 1
 
                     val rest = RSeq(vec, lastIndex).rest() as RSeq<Int>
@@ -1336,23 +1351,6 @@ class PersistentVectorTest : FreeSpec({
         }
     }
 
-    "v() should return an empty persistent vector" {
-        val empty = v<Int>()
-
-        empty shouldBeSameInstanceAs EmptyVector
-    }
-
-    "v(args) should return an empty persistent vector" {
-        val vec = v(1, 2, 3, 4)
-
-        vec.count shouldBeExactly 4
-
-        vec.nth(0) shouldBeExactly 1
-        vec.nth(1) shouldBeExactly 2
-        vec.nth(2) shouldBeExactly 3
-        vec.nth(3) shouldBeExactly 4
-    }
-
     "toPvector()" {
         listOf<Int>() shouldBe EmptyVector
         listOf(1, 2, "3", 4).toPvector() shouldBe v(1, 2, "3", 4)
@@ -1362,7 +1360,7 @@ class PersistentVectorTest : FreeSpec({
         "serialize" {
             val array = arrayOf(1, 2, 3, 4)
             val encoded = Json.encodeToString(array)
-            val vec = v(*array)
+            val vec = PersistentVector(*array)
 
             val encodeToString = Json.encodeToString(vec)
 

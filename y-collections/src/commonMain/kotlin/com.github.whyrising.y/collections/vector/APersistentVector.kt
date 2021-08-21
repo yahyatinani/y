@@ -5,6 +5,7 @@ import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.EmptyVector
 import com.github.whyrising.y.collections.core.IHashEq
+import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
@@ -16,7 +17,6 @@ import com.github.whyrising.y.collections.util.INIT_HASH_CODE
 import com.github.whyrising.y.collections.util.Murmur3
 import com.github.whyrising.y.collections.util.compare
 import com.github.whyrising.y.collections.util.hasheq
-import com.github.whyrising.y.collections.util.toSeq
 import com.github.whyrising.y.collections.vector.APersistentVector.Seq.Companion.emptySeq
 
 abstract class APersistentVector<out E> :
@@ -124,7 +124,7 @@ abstract class APersistentVector<out E> :
             else -> {
                 if (other !is Sequential) return false
 
-                var seq = toSeq<E>(other) as ISeq<E>
+                var seq = seq<E>(other) as ISeq<E>
 
                 var i = 0
                 while (i < count) {

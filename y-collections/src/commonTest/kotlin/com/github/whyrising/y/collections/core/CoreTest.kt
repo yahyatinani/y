@@ -5,8 +5,9 @@ import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.EmptyHashMap
-import com.github.whyrising.y.collections.concretions.vector.v
+import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.map.IPersistentMap
+import com.github.whyrising.y.collections.seq.Seqable
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainAll
@@ -120,5 +121,36 @@ class CoreTest {
         map("c") shouldBe 3
 
         hashMap("b" to 2, "b" to 3) shouldBe hashMap("b" to 3)
+    }
+
+    @Test
+    fun `cons()`() {
+        cons(1, null) shouldBe l()
+        cons(1, l(2, 3)) shouldBe l(1, 2, 3)
+        cons(1, listOf(2, 3)) shouldBe l(1, 2, 3)
+        cons(1, v(2, 3) as Seqable<*>) shouldBe l(1, 2, 3)
+        cons(1, mapOf(2 to 3)) shouldBe l(1, MapEntry(2, 3))
+        cons(1, intArrayOf(2, 3)) shouldBe l(1, 2, 3)
+        cons(1, arrayOf('2', 3)) shouldBe l(1, '2', 3)
+    }
+
+    @Test
+    fun `v()`() {
+        v<Int>() shouldBeSameInstanceAs PersistentVector.EmptyVector
+
+        v(1) shouldBe PersistentVector(1)
+
+        v(1, 2) shouldBe PersistentVector(1, 2)
+
+        v(1, 2, 3) shouldBe PersistentVector(1, 2, 3)
+
+        v(1, 2, 3, 4) shouldBe PersistentVector(1, 2, 3, 4)
+
+        v(1, 2, 3, 4, 5) shouldBe PersistentVector(1, 2, 3, 4, 5)
+
+        v(1, 2, 3, 4, 5, 6) shouldBe PersistentVector(1, 2, 3, 4, 5, 6)
+
+        v(1, 2, 3, 4, 5, 6, 7, 8) shouldBe
+            PersistentVector(1, 2, 3, 4, 5, 6, 7, 8)
     }
 }

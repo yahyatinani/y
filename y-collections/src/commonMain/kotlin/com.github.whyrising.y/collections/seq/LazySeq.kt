@@ -5,10 +5,10 @@ import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.concretions.list.SeqIterator
 import com.github.whyrising.y.collections.core.IHashEq
 import com.github.whyrising.y.collections.core.IPending
+import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.util.Murmur3
 import com.github.whyrising.y.collections.util.equiv
 import com.github.whyrising.y.collections.util.nth
-import com.github.whyrising.y.collections.util.toSeq
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 
@@ -52,7 +52,7 @@ class LazySeq<out E>(
 
                 while (lazySeq is LazySeq<*>) lazySeq = lazySeq.seqVal()
 
-                seq = toSeq<E>(lazySeq) as ISeq<E>
+                seq = seq<E>(lazySeq) as ISeq<E>
             }
 
             return seq
@@ -92,7 +92,7 @@ class LazySeq<out E>(
         !is Empty -> s.equiv(other)
         else ->
             (other is Sequential || other is List<*>) &&
-                toSeq<E>(other) is Empty
+                seq<E>(other) is Empty
     }
 
     override fun conj(e: @UnsafeVariance E): ISeq<E> = cons(e)
@@ -103,7 +103,7 @@ class LazySeq<out E>(
         !is Empty -> s == other
         else ->
             (other is Sequential || other is List<*>) &&
-                toSeq<E>(other) is Empty
+                seq<E>(other) is Empty
     }
 
     @ExperimentalStdlibApi

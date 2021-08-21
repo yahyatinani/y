@@ -1,8 +1,7 @@
 package com.github.whyrising.y.collections.vector
 
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
-import com.github.whyrising.y.collections.concretions.vector.v
-import com.github.whyrising.y.collections.vector.PersistentVectorTest.Companion.assertArraysAreEquiv
+import com.github.whyrising.y.collections.vector.PersistentVectorJvmTest.Companion.assertArraysAreEquiv
 import com.github.whyrising.y.utils.runAction
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -309,7 +308,7 @@ class TransientVectorTest : FreeSpec({
 
     "concurrency" {
         val i = 45
-        val v = v<Int>()
+        val v = PersistentVector<Int>()
 
         continually(Duration.seconds(10)) {
             val transientVec = PersistentVector.TransientVector(v)

@@ -37,10 +37,16 @@ Changelog
   fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V>
   ```
 
+* ```kotlin
+  fun <E> cons(x: E, coll: Any?): ISeq<E>
+  ```
+
 #### Updated:
 
 * APIs:
   * `m(pairs)` now returns `IPersistentMap<K, V>` instead of `PersistentArrayMap<K, V>`.
+  * v(args) now returns `IPersistentVector<E>` instead of `PersistentVector<E>`.
+  * `toSeq()` became `seq()` and moved to core.
 
 #### Removed:
 
