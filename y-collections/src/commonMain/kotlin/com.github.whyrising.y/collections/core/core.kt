@@ -43,6 +43,43 @@ operator fun <E> ISeq<E>.component1(): E = this.first()
 
 operator fun <E> ISeq<E>.component2(): ISeq<E> = this.rest()
 
+fun <E> vec(coll: Iterable<E>): IPersistentVector<E> =
+    PersistentVector.create(coll)
+
+fun <E> vec(coll: Any?): IPersistentVector<E> = when (coll) {
+    null -> PersistentVector.EmptyVector
+    is ISeq<*> -> PersistentVector(coll) as IPersistentVector<E>
+    is Iterable<*> -> PersistentVector.create(coll) as IPersistentVector<E>
+    is Array<*> -> PersistentVector(*coll) as IPersistentVector<E>
+    is ShortArray -> {
+        PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
+    }
+    is IntArray -> {
+        PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
+    }
+    is FloatArray -> {
+        PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
+    }
+    is DoubleArray -> {
+        PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
+    }
+    is LongArray -> {
+        PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
+    }
+    is ByteArray -> {
+        PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
+    }
+    is CharArray -> {
+        PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
+    }
+    is BooleanArray -> {
+        PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
+    }
+    else -> throw IllegalArgumentException(
+        "${coll::class} can't be turned into a vec."
+    )
+}
+
 fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V> =
     PersistentArrayMap.create(this)
 

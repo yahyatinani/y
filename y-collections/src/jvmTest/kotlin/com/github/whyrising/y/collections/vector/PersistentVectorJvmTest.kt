@@ -12,7 +12,6 @@ import com.github.whyrising.y.collections.concretions.vector.PersistentVector.No
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.TransientVector
 import com.github.whyrising.y.collections.concretions.vector.PersistentVectorSerializer
-import com.github.whyrising.y.collections.concretions.vector.toPvector
 import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.mocks.MockSeq
@@ -1349,11 +1348,6 @@ class PersistentVectorJvmTest : FreeSpec({
                 }
             }
         }
-    }
-
-    "toPvector()" {
-        listOf<Int>() shouldBe EmptyVector
-        listOf(1, 2, "3", 4).toPvector() shouldBe v(1, 2, "3", 4)
     }
 
     "Serialization" - {

@@ -7,6 +7,7 @@ import com.github.whyrising.y.collections.concretions.list.ASeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.collections.core.InstaCount
+import com.github.whyrising.y.collections.core.vec
 import com.github.whyrising.y.collections.mutable.collection.IMutableCollection
 import com.github.whyrising.y.collections.mutable.collection.ITransientCollection
 import com.github.whyrising.y.collections.seq.IChunkedSeq
@@ -37,7 +38,7 @@ internal class PersistentVectorSerializer<E>(element: KSerializer<E>) :
     override val descriptor: SerialDescriptor = listSerializer.descriptor
 
     override fun deserialize(decoder: Decoder): PersistentVector<E> =
-        listSerializer.deserialize(decoder).toPvector()
+        vec(listSerializer.deserialize(decoder)) as PersistentVector<E>
 
     override fun serialize(encoder: Encoder, value: PersistentVector<E>) =
         listSerializer.serialize(encoder, value)
@@ -505,6 +506,20 @@ sealed class PersistentVector<out E>(
             }
         }
 
+        @Suppress("UNCHECKED_CAST")
+        internal fun <E> create(list: Iterable<E>): PersistentVector<E> {
+            if (list is ArrayList<E>)
+                return create(list)
+
+            val iter: Iterator<*> = list.iterator()
+
+            var ret: TransientVector<E> = EmptyVector.asTransient()
+            while (iter.hasNext())
+                ret = ret.conj(iter.next() as E)
+
+            return ret.persistent()
+        }
+
         private fun tailOffset(count: Int): Int = when {
             count < BF -> 0
             else -> ((count - 1) ushr SHIFT) shl SHIFT
@@ -524,5 +539,3 @@ sealed class PersistentVector<out E>(
         }
     }
 }
-
-fun <E> List<E>.toPvector(): PersistentVector<E> = PersistentVector.create(this)
