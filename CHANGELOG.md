@@ -41,6 +41,12 @@ Changelog
   fun <E> cons(x: E, coll: Any?): ISeq<E>
   ```
 
+* ```kotlin
+  fun <E> vec(coll: Iterable<E>): IPersistentVector<E>
+  ```
+
+* ArraySeq<E>
+
 #### Updated:
 
 * APIs:
@@ -54,8 +60,12 @@ Changelog
   Map<K, V>.toPArrayMap()
   ```
 
-* ```
+* ```kotlin
   Map<K, V>.toPhashMap()
+  ```
+  
+* ```kotlin
+  fun <E> List.toPVector(): IPersistentVector<E>
   ```
 
 ## v0.0.4
