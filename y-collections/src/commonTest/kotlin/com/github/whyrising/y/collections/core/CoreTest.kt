@@ -132,6 +132,7 @@ class CoreTest {
         cons(1, mapOf(2 to 3)) shouldBe l(1, MapEntry(2, 3))
         cons(1, intArrayOf(2, 3)) shouldBe l(1, 2, 3)
         cons(1, arrayOf('2', 3)) shouldBe l(1, '2', 3)
+        cons(1, "abc") shouldBe l(1, 'a', 'b', 'c')
     }
 
     @Test

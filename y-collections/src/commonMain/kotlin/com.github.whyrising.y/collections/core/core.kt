@@ -1,6 +1,7 @@
 package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.ArraySeq
+import com.github.whyrising.y.collections.StringSeq
 import com.github.whyrising.y.collections.associative.Associative
 import com.github.whyrising.y.collections.associative.ILookup
 import com.github.whyrising.y.collections.concretions.list.Cons
@@ -32,7 +33,7 @@ fun <E> seq(x: Any?): ISeq<E>? = when (x) {
     is CharArray -> ArraySeq(x) as ISeq<E>
     is BooleanArray -> ArraySeq(x) as ISeq<E>
     is Array<*> -> ArraySeq(x) as ISeq<E>
-    is CharSequence -> TODO("needs StringSeq class")
+    is CharSequence -> StringSeq(x) as ISeq<E>
     is Map<*, *> -> seq(x.entries)
     else -> throw IllegalArgumentException(
         "Don't know how to create ISeq from: ${x::class.simpleName}"
