@@ -1,6 +1,73 @@
 Changelog
 ========
 
+## v0.0.5
+
+#### Added:
+
+* ```kotlin
+  fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V?
+  ```
+  
+* ```kotlin
+  fun <K, V> getFrom(map: Any?, key: K, default: V? = null): V?
+  ```
+
+* ```kotlin
+  fun <K, V> assoc(map: Associative<K, V>?, kv: Pair<K, V>): Associative<K, V>
+  ```
+
+* ```kotlin
+  fun <K, V> assoc(
+      map: Associative<K, V>?,
+      kv: Pair<K, V>,
+      vararg kvs: Pair<K, V>
+  ):Associative<K, V>
+  ```
+  
+* ```kotlin
+  fun <E> ISeq<E>.component1(): E
+  ```
+
+* ```kotlin
+  fun <E> ISeq<E>.component2(): ISeq<E>
+  ```
+  
+* ```kotlin
+  fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V>
+  ```
+
+* ```kotlin
+  fun <E> cons(x: E, coll: Any?): ISeq<E>
+  ```
+
+* ```kotlin
+  fun <E> vec(coll: Iterable<E>): IPersistentVector<E>
+  ```
+
+* ArraySeq<E>
+
+#### Updated:
+
+* APIs:
+  * `m(pairs)` now returns `IPersistentMap<K, V>` instead of `PersistentArrayMap<K, V>`.
+  * v(args) now returns `IPersistentVector<E>` instead of `PersistentVector<E>`.
+  * `toSeq()` became `seq()` and moved to core.
+
+#### Removed:
+
+* ```kotlin
+  Map<K, V>.toPArrayMap()
+  ```
+
+* ```kotlin
+  Map<K, V>.toPhashMap()
+  ```
+  
+* ```kotlin
+  fun <E> List.toPVector(): IPersistentVector<E>
+  ```
+
 ## v0.0.4
 
 #### Updated:
