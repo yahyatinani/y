@@ -1,6 +1,6 @@
 package com.github.whyrising.y.collections
 
-import com.github.whyrising.y.collections.concretions.set.hashSet
+import com.github.whyrising.y.collections.core.hashSet
 import com.github.whyrising.y.collections.core.m
 import com.github.whyrising.y.collections.util.Murmur3
 import com.github.whyrising.y.collections.util.hashCombine

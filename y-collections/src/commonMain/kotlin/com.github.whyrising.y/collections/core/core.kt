@@ -9,6 +9,7 @@ import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.map.HASHTABLE_THRESHOLD
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
+import com.github.whyrising.y.collections.concretions.set.PersistentHashSet
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.mutable.set.TransientSet
@@ -47,6 +48,7 @@ operator fun <E> ISeq<E>.component2(): ISeq<E> = this.rest()
 fun <E> vec(coll: Iterable<E>): IPersistentVector<E> =
     PersistentVector.create(coll)
 
+@Suppress("UNCHECKED_CAST")
 fun <E> vec(coll: Any?): IPersistentVector<E> = when (coll) {
     null -> PersistentVector.EmptyVector
     is ISeq<*> -> PersistentVector(coll) as IPersistentVector<E>
@@ -95,6 +97,7 @@ fun <K, V> hashMap(vararg kvs: Pair<K, V>): PersistentHashMap<K, V> = when {
     else -> PersistentHashMap.create(*kvs)
 }
 
+@Suppress("UNCHECKED_CAST")
 fun <E> cons(x: E, coll: Any?): ISeq<E> = when (coll) {
     null -> PersistentList()
     is ISeq<*> -> Cons(x, coll) as ISeq<E>
@@ -130,6 +133,22 @@ fun <E> v(
     cons(a, cons(b, cons(c, cons(d, cons(e, cons(f, args))))))
 )
 
+fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
+
+fun <E> hashSet(vararg e: E): PersistentHashSet<E> =
+    PersistentHashSet.create(*e)
+
+fun <E> hashSet(seq: ISeq<E>): PersistentHashSet<E> =
+    PersistentHashSet.create(seq)
+
+fun <E> hs(): PersistentSet<E> = PersistentHashSet.EmptyHashSet
+
+fun <E> hs(vararg e: E): PersistentSet<E> =
+    PersistentHashSet.createWithCheck(*e)
+
+fun <E> Set<E>.toPhashSet(): PersistentHashSet<E> =
+    PersistentHashSet.create(this)
+
 fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V? =
     getFrom<K, V>(map, key, default)
 
@@ -142,6 +161,7 @@ fun <E> get(map: PersistentSet<E>?, key: E, default: E? = null): E? =
 fun <E> get(map: TransientSet<E>?, key: E, default: E? = null): E? =
     getFrom<E, E>(map, key, default)
 
+@Suppress("UNCHECKED_CAST")
 fun <K, V> getFrom(map: Any?, key: K, default: V? = null): V? = when (map) {
     null -> null
     is ILookup<*, *> -> map.valAt(key, default) as V?

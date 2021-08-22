@@ -1,6 +1,6 @@
 package com.github.whyrising.y.collections
 
-import com.github.whyrising.y.collections.concretions.set.hashSet
+import com.github.whyrising.y.collections.core.hashSet
 import com.github.whyrising.y.collections.core.m
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse

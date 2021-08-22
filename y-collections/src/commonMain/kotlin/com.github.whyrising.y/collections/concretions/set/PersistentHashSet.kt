@@ -1,8 +1,7 @@
 package com.github.whyrising.y.collections.concretions.set
 
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
-import com.github.whyrising.y.collections.concretions.set.PersistentHashSet.Companion.create
-import com.github.whyrising.y.collections.concretions.set.PersistentHashSet.Companion.createWithCheck
+import com.github.whyrising.y.collections.core.toPhashSet
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.mutable.collection.IMutableCollection
 import com.github.whyrising.y.collections.mutable.collection.ITransientCollection
@@ -128,15 +127,3 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
         }
     }
 }
-
-fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
-
-fun <E> hashSet(vararg e: E) = create(*e)
-
-fun <E> hashSet(seq: ISeq<E>): PersistentHashSet<E> = create(seq)
-
-fun <E> hs(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
-
-fun <E> hs(vararg e: E): PersistentHashSet<E> = createWithCheck(*e)
-
-fun <E> Set<E>.toPhashSet(): PersistentHashSet<E> = create(this)
