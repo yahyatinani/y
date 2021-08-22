@@ -479,7 +479,7 @@ class PersistentHashSetTest : FreeSpec({
 
     "Serialization" - {
         "serialize" {
-            val hashSet = hs(1, 2, 3, 4)
+            val hashSet = hs(1, 2, 3, 4) as PersistentHashSet<Int>
 
             val encodeToString = Json.encodeToString(hashSet)
 
