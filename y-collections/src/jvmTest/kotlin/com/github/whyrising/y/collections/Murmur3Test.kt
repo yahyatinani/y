@@ -1,7 +1,7 @@
 package com.github.whyrising.y.collections
 
-import com.github.whyrising.y.collections.concretions.list.l
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
+import com.github.whyrising.y.collections.core.l
 import com.github.whyrising.y.collections.util.Murmur3
 import com.github.whyrising.y.collections.util.hasheq
 import io.kotest.core.spec.style.FreeSpec

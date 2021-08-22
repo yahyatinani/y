@@ -1,11 +1,11 @@
 package com.github.whyrising.y.collections.vector
 
-import com.github.whyrising.y.collections.concretions.list.l
-import com.github.whyrising.y.collections.concretions.list.toPlist
 import com.github.whyrising.y.collections.concretions.vector.BF
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.Node
 import com.github.whyrising.y.collections.concretions.vector.SHIFT
+import com.github.whyrising.y.collections.core.l
+import com.github.whyrising.y.collections.core.toPlist
 import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.core.vec
 import com.github.whyrising.y.collections.seq.ISeq

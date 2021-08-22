@@ -41,6 +41,12 @@ fun <E> seq(x: Any?): ISeq<E>? = when (x) {
     )
 }
 
+fun <E> l(): PersistentList<E> = PersistentList.Empty
+
+fun <E> l(vararg elements: E): PersistentList<E> = PersistentList(*elements)
+
+fun <E> List<E>.toPlist(): PersistentList<E> = PersistentList.create(this)
+
 operator fun <E> ISeq<E>.component1(): E = this.first()
 
 operator fun <E> ISeq<E>.component2(): ISeq<E> = this.rest()

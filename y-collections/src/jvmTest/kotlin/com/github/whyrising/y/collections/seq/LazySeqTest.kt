@@ -4,7 +4,7 @@ import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.concretions.list.SeqIterator
-import com.github.whyrising.y.collections.concretions.list.l
+import com.github.whyrising.y.collections.core.l
 import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.mocks.MockSeq
 import com.github.whyrising.y.collections.util.Murmur3

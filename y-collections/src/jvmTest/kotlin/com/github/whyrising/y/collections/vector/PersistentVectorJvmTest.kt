@@ -4,7 +4,6 @@ import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.Edit
 import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
-import com.github.whyrising.y.collections.concretions.list.l
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.EmptyVector
@@ -12,6 +11,7 @@ import com.github.whyrising.y.collections.concretions.vector.PersistentVector.No
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.TransientVector
 import com.github.whyrising.y.collections.concretions.vector.PersistentVectorSerializer
+import com.github.whyrising.y.collections.core.l
 import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.mocks.MockSeq

@@ -1,7 +1,7 @@
 package com.github.whyrising.y.collections.concretions.list
 
-import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.core.InstaCount
+import com.github.whyrising.y.collections.core.toPlist
 import com.github.whyrising.y.collections.list.IPersistentList
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
@@ -142,9 +142,3 @@ sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
         }
     }
 }
-
-fun <E> l(): PersistentList<E> = Empty
-
-fun <E> l(vararg elements: E): PersistentList<E> = PersistentList(*elements)
-
-fun <E> List<E>.toPlist(): PersistentList<E> = PersistentList.create(this)

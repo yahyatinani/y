@@ -1,6 +1,5 @@
 package com.github.whyrising.y.collections.core
 
-import com.github.whyrising.y.collections.concretions.list.l
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap

@@ -2,7 +2,7 @@ package com.github.whyrising.y.collections.seq
 
 import com.github.whyrising.y.collections.concretions.list.Cons
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
-import com.github.whyrising.y.collections.concretions.list.l
+import com.github.whyrising.y.collections.core.l
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.types.shouldBeSameInstanceAs

@@ -6,9 +6,9 @@ import com.github.whyrising.y.collections.concretions.list.PersistentList.Cons
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.concretions.list.PersistentListSerializer
 import com.github.whyrising.y.collections.concretions.list.SeqIterator
-import com.github.whyrising.y.collections.concretions.list.l
-import com.github.whyrising.y.collections.concretions.list.toPlist
 import com.github.whyrising.y.collections.core.InstaCount
+import com.github.whyrising.y.collections.core.l
+import com.github.whyrising.y.collections.core.toPlist
 import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.mocks.MockSeq
 import com.github.whyrising.y.collections.mocks.User

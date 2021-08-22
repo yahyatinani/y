@@ -1,6 +1,5 @@
 package com.github.whyrising.y.collections.hashset
 
-import com.github.whyrising.y.collections.concretions.list.l
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.Companion.createWithCheck
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
@@ -14,6 +13,7 @@ import com.github.whyrising.y.collections.concretions.set.PersistentHashSetSeria
 import com.github.whyrising.y.collections.core.hashMap
 import com.github.whyrising.y.collections.core.hashSet
 import com.github.whyrising.y.collections.core.hs
+import com.github.whyrising.y.collections.core.l
 import com.github.whyrising.y.collections.core.m
 import com.github.whyrising.y.collections.core.toPhashSet
 import com.github.whyrising.y.collections.map.MapIterable
