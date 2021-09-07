@@ -407,7 +407,9 @@ class PersistentHashSetTest : FreeSpec({
                 val pairs = set.map { Pair(it, it) }.toTypedArray()
                 val map = createWithCheck(*pairs)
                 val tHashSet = TransientHashSet(map.asTransient())
-                val n = map.array[Random.nextInt(map.count)].first
+                val nextInt = Random.nextInt(map.count)
+                val m = if (nextInt % 2 == 0) nextInt else nextInt + 1
+                val n = map.array[m] as String
 
                 val ths = tHashSet.disjoin(n) as TransientHashSet<String>
 

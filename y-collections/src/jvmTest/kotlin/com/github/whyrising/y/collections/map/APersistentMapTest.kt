@@ -30,7 +30,8 @@ class APersistentMapTest : FreeSpec({
     "toString()" {
         m<String, Int>().toString() shouldBe "{}"
         m("a" to 1).toString() shouldBe "{a 1}"
-        m("a" to 1, "b" to 2).toString() shouldBe "{a 1, b 2}"
+        PersistentArrayMap.createWithCheck("a" to 1, "b" to 2)
+            .toString() shouldBe "{a 1, b 2}"
         m("a" to 1, "b" to 2, "c" to 3).toString() shouldBe "{a 1, b 2, c 3}"
     }
 
@@ -90,9 +91,9 @@ class APersistentMapTest : FreeSpec({
                 as PersistentArrayMap<String, Int>
 
             newMap.count shouldBeExactly array.size
-            newMap.array[0].second shouldBeExactly 99
-            newMap.array[1].second shouldBeExactly 2
-            newMap.array[2].second shouldBeExactly 3
+            newMap.array[1] shouldBe 99
+            newMap.array[3] shouldBe 2
+            newMap.array[5] shouldBe 3
         }
 
         "when entry is a IPersistentVector" - {
@@ -108,9 +109,9 @@ class APersistentMapTest : FreeSpec({
                     as PersistentArrayMap<String, Int>
 
                 newMap.count shouldBeExactly array.size
-                newMap.array[0].second shouldBeExactly 99
-                newMap.array[1].second shouldBeExactly 2
-                newMap.array[2].second shouldBeExactly 3
+                newMap.array[1] shouldBe 99
+                newMap.array[3] shouldBe 2
+                newMap.array[5] shouldBe 3
             }
         }
 

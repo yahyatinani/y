@@ -247,7 +247,10 @@ class LeanMapTest : FreeSpec({
 
                 if (iter is NodeIter<String, Int, MapEntry<String, Int>>) {
                     iter.node shouldBeSameInstanceAs map.root
-                    iter._f(a[0]) shouldBe MapEntry(a[0].first, a[0].second)
+                    iter._f(a[0].first, a[0].second) shouldBe MapEntry(
+                        a[0].first,
+                        a[0].second
+                    )
                 }
 
                 shouldThrowExactly<NoSuchElementException> { iter.next() }

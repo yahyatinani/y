@@ -67,7 +67,7 @@ class CoreTest {
 
     @Test
     fun `toPmap() should return an instance of PersistentArrayMap`() {
-        val map = (1..16).associateWith { i -> "$i" }
+        val map = (1..8).associateWith { i -> "$i" }
 
         val pam: IPersistentMap<Int, String> = map.toPmap()
 

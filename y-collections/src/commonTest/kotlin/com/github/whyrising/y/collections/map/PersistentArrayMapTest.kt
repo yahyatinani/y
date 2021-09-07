@@ -13,7 +13,7 @@ class PersistentArrayMapTest {
         val map: PersistentArrayMap<String, Int> =
             PersistentArrayMap.createWithCheck(*arrayOfPairs)
 
-        map.array shouldBe arrayOfPairs
+        map.array shouldBe arrayOf("a", 1, "b", 2, "c", 3)
     }
 
     @Test

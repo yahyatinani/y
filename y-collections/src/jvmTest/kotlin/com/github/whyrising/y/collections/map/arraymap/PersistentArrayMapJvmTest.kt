@@ -1,7 +1,6 @@
 package com.github.whyrising.y.collections.map.arraymap
 
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
-import com.github.whyrising.y.collections.concretions.map.HASHTABLE_THRESHOLD
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.Companion.EmptyArrayMap
@@ -14,9 +13,7 @@ import com.github.whyrising.y.collections.core.l
 import com.github.whyrising.y.collections.core.m
 import com.github.whyrising.y.collections.core.toPmap
 import com.github.whyrising.y.collections.core.v
-import com.github.whyrising.y.collections.mutable.map.TransientMap
 import com.github.whyrising.y.utils.runAction
-import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FreeSpec
@@ -27,17 +24,10 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldNotContainAnyOf
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
-import io.kotest.property.Arb
-import io.kotest.property.arbitrary.int
-import io.kotest.property.arbitrary.list
-import io.kotest.property.arbitrary.pair
-import io.kotest.property.arbitrary.string
-import io.kotest.property.checkAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -52,38 +42,17 @@ import kotlin.time.Duration
 @ExperimentalStdlibApi
 class PersistentArrayMapJvmTest : FreeSpec({
     "TransientArrayMap" - {
-        "ctor" {
-            val gen = Arb.list(Arb.pair(Arb.string(), Arb.int()))
-            checkAll(gen) { list: List<Pair<String, Int>> ->
-                val array = list.toTypedArray()
-
-                val tam = TransientArrayMap(array)
-
-                tam.array shouldNotBeSameInstanceAs array
-                when {
-                    list.size <= HASHTABLE_THRESHOLD -> {
-                        tam.array.size shouldBeExactly HASHTABLE_THRESHOLD
-                    }
-                    else -> {
-                        tam.array.size shouldBeExactly list.size
-                    }
-                }
-                tam.length shouldBeExactly list.size
-                tam.edit.shouldNotBeNull()
-                shouldNotThrow<Exception> { tam.ensureEditable() }
-            }
-        }
+        val array: Array<Any?> = arrayOf("a", 1, "b", 2, "c", 3)
 
         "doPersistent()" {
-            val array = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-            val tam = TransientArrayMap(array)
+            val tam = TransientArrayMap<String, Int>(array)
 
             val map = tam.doPersistent() as PersistentArrayMap<String, Int>
 
             tam.edit.shouldBeNull()
-            map.count shouldBeExactly array.size
+            map.count shouldBeExactly array.size / 2
             map.array shouldNotBeSameInstanceAs array
-            map shouldBe m("a" to 1, "b" to 2, "c" to 3)
+            map shouldBe mapOf("a" to 1, "b" to 2, "c" to 3)
 
             shouldThrowExactly<IllegalStateException> {
                 tam.doPersistent()
@@ -91,13 +60,12 @@ class PersistentArrayMapJvmTest : FreeSpec({
         }
 
         "persistent()" {
-            val array = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-            val tam = TransientArrayMap(array)
+            val tam = TransientArrayMap<String, Int>(array)
 
             val map = tam.persistent() as PersistentArrayMap<String, Int>
 
             tam.edit.shouldBeNull()
-            map.count shouldBeExactly array.size
+            map.count shouldBeExactly array.size / 2
             map.array shouldNotBeSameInstanceAs array
             map shouldBe m("a" to 1, "b" to 2, "c" to 3)
 
@@ -108,8 +76,7 @@ class PersistentArrayMapJvmTest : FreeSpec({
 
         "doAssoc(k,v)" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.persistent()
 
@@ -120,30 +87,29 @@ class PersistentArrayMapJvmTest : FreeSpec({
 
             "when the key is new, it should add it to the map" - {
                 "when length < array.length, return a TransientArrayMap" {
-                    val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-                    val tam = TransientArrayMap(array)
+                    val tam = TransientArrayMap<String, Int>(array)
 
                     val newTam = tam.doAssoc("d", 4) as
                         TransientArrayMap<String, Int>
                     val pairs = newTam.array
 
-                    pairs[0]!!.first shouldBe "a"
-                    pairs[0]!!.second shouldBe 1
+                    pairs[0] shouldBe "a"
+                    pairs[1] shouldBe 1
 
-                    pairs[3]!!.first shouldBe "d"
-                    pairs[3]!!.second shouldBe 4
+                    pairs[6] shouldBe "d"
+                    pairs[7] shouldBe 4
                 }
 
                 @Suppress("UNCHECKED_CAST")
                 "when length >= array.length, return TransientLeanMap" {
                     val size = 16
-                    val a: Array<Pair<String, Int>?> = arrayOfNulls(size)
-                    var i = 0
-                    while (i < size) {
-                        a[i] = Pair("$i", i)
-                        i++
+                    val a: Array<Any?> = arrayOfNulls(size)
+
+                    for (i in 0 until size step 2) {
+                        a[i] = "$i"
+                        a[i + 1] = i
                     }
-                    val tam = TransientArrayMap(a as Array<Pair<String, Int>>)
+                    val tam = TransientArrayMap<String, Int>(a)
 
                     val newTam = tam.doAssoc("a", 74)
                         as TransientLeanMap<String, Int>
@@ -157,45 +123,44 @@ class PersistentArrayMapJvmTest : FreeSpec({
                    it should update the value""" {
                 val key = 2
                 val value = "78"
-                val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val tam = TransientArrayMap(array)
+                val a: Array<Any?> = arrayOf(1L, "1", 2L, "2", 3, "3")
+                val tam = TransientArrayMap<Number, String>(a)
 
                 val newTam = tam.doAssoc(key, value)
                     as TransientArrayMap<Any, String>
                 val pairs = newTam.array
 
-                tam.length shouldBeExactly array.size
+                tam.length shouldBeExactly a.size
 
-                pairs[0]!!.first shouldBe 1L
-                pairs[0]!!.second shouldBe "1"
+                pairs[0] shouldBe 1L
+                pairs[1] shouldBe "1"
 
-                pairs[1]!!.first shouldBe key
-                pairs[1]!!.second shouldBe value
+                pairs[2] shouldBe key
+                pairs[3] shouldBe value
 
-                pairs[2]!!.first shouldBe 3
-                pairs[2]!!.second shouldBe "3"
+                pairs[4] shouldBe 3
+                pairs[5] shouldBe "3"
             }
 
             """when map already has the same key/value,
                    it should return the same map""" {
                 val key = 2
                 val value = "2"
-                val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val tam = TransientArrayMap(array)
+                val a: Array<Any?> = arrayOf(1L, "1", 2L, "2", 3, "3")
+                val tam = TransientArrayMap<Number, String>(a)
 
                 val newTam = tam.doAssoc(key, value)
                     as TransientArrayMap<Any, String>
-                val pairs = newTam.array
 
                 tam shouldBeSameInstanceAs newTam
-                pairs[1]!!.first.shouldBeInstanceOf<Long>()
+                newTam.array[0].shouldBeInstanceOf<Long>()
+                newTam.array[2].shouldBeInstanceOf<Long>()
             }
         }
 
         "assoc(k,v)" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.persistent()
 
@@ -206,30 +171,29 @@ class PersistentArrayMapJvmTest : FreeSpec({
 
             "when the key is new, it should add it to the map" - {
                 "when length < array.length, return a TransientArrayMap" {
-                    val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-                    val tam = TransientArrayMap(array)
+                    val tam = TransientArrayMap<String, Int>(array)
 
                     val newTam = tam.assoc("d", 4) as
                         TransientArrayMap<String, Int>
                     val pairs = newTam.array
 
-                    pairs[0]!!.first shouldBe "a"
-                    pairs[0]!!.second shouldBe 1
+                    pairs[0] shouldBe "a"
+                    pairs[1] shouldBe 1
 
-                    pairs[3]!!.first shouldBe "d"
-                    pairs[3]!!.second shouldBe 4
+                    pairs[6] shouldBe "d"
+                    pairs[7] shouldBe 4
                 }
 
                 @Suppress("UNCHECKED_CAST")
                 "when length >= array.length, return PersistentHashMap" {
                     val size = 16
-                    val a: Array<Pair<String, Int>?> = arrayOfNulls(size)
+                    val a: Array<Any?> = arrayOfNulls(size)
                     var i = 0
                     while (i < size) {
                         a[i] = Pair("$i", i)
                         i++
                     }
-                    val tam = TransientArrayMap(a as Array<Pair<String, Int>>)
+                    val tam = TransientArrayMap<String, Int>(a)
 
                     val newTam = tam.assoc("a", 74)
                         as TransientLeanMap<String, Int>
@@ -243,46 +207,46 @@ class PersistentArrayMapJvmTest : FreeSpec({
                    it should update the value""" {
                 val key = 2
                 val value = "78"
-                val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val tam = TransientArrayMap(array)
+                val a: Array<Any?> = arrayOf(1L, "1", 2L, "2", 3, "3")
+                val tam = TransientArrayMap<Number, String>(a)
 
                 val newTam = tam.assoc(key, value)
                     as TransientArrayMap<Any, String>
                 val pairs = newTam.array
 
-                tam.length shouldBeExactly array.size
+                tam.length shouldBeExactly a.size
 
-                pairs[0]!!.first shouldBe 1L
-                pairs[0]!!.second shouldBe "1"
+                pairs[0] shouldBe 1L
+                pairs[1] shouldBe "1"
 
-                pairs[1]!!.first shouldBe key
-                pairs[1]!!.second shouldBe value
+                pairs[2] shouldBe key
+                pairs[3] shouldBe value
 
-                pairs[2]!!.first shouldBe 3
-                pairs[2]!!.second shouldBe "3"
+                pairs[4] shouldBe 3
+                pairs[5] shouldBe "3"
             }
 
             """when map already has the same key/value,
                    it should return the same map""" {
                 val key = 2
                 val value = "2"
-                val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val tam = TransientArrayMap(array)
+                val a: Array<Any?> = arrayOf(1L, "1", 2L, "2", 3, "3")
+                val tam = TransientArrayMap<Any, String>(a)
 
                 val newTam = tam.assoc(key, value)
                     as TransientArrayMap<Any, String>
-                val pairs = newTam.array
 
                 tam shouldBeSameInstanceAs newTam
-                pairs[1]!!.first.shouldBeInstanceOf<Long>()
+                newTam.array[0].shouldBeInstanceOf<Long>()
+                newTam.array[2].shouldBeInstanceOf<Long>()
+                newTam.array[4].shouldBeInstanceOf<Int>()
             }
         }
 
         @Suppress("UNCHECKED_CAST")
         "conj(e)" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.persistent()
 
@@ -292,22 +256,20 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             "when entry is a Map.Entry, it should call assoc() on it" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 val newTam = tam.conj(MapEntry("a", 99))
                     as TransientArrayMap<String, Int>
 
-                newTam.length shouldBeExactly a.size
-                newTam.array[0]!!.second shouldBeExactly 99
-                newTam.array[1]!!.second shouldBeExactly 2
-                newTam.array[2]!!.second shouldBeExactly 3
+                newTam.length shouldBeExactly array.size
+                newTam.array[1] shouldBe 99
+                newTam.array[3] shouldBe 2
+                newTam.array[5] shouldBe 3
             }
 
             "when entry is a IPersistentVector" - {
                 "when count != 2, it should throw" {
-                    val a = arrayOf(Pair("a", 1), Pair("b", 2))
-                    val tam = TransientArrayMap(a)
+                    val tam = TransientArrayMap<String, Int>(array)
 
                     shouldThrowExactly<IllegalArgumentException> {
                         tam.conj(v("a", 99, 75))
@@ -316,29 +278,26 @@ class PersistentArrayMapJvmTest : FreeSpec({
                 }
 
                 "when count == 2, it should call assoc() on it" {
-                    val a = arrayOf(Pair("a", 1), Pair("b", 2))
-                    val tam = TransientArrayMap(a)
+                    val tam = TransientArrayMap<String, Int>(array)
 
                     val newMap = tam.conj(v("a", 99))
                         as TransientArrayMap<String, Int>
 
-                    newMap.length shouldBeExactly a.size
-                    newMap.array[0]!!.second shouldBeExactly 99
-                    newMap.array[1]!!.second shouldBeExactly 2
+                    newMap.length shouldBeExactly array.size
+                    newMap.array[1] shouldBe 99
+                    newMap.array[3] shouldBe 2
                 }
             }
 
             "when entry is null, it should return this" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.conj(null) shouldBeSameInstanceAs tam
             }
 
             "when entry is a seq of MapEntry" - {
                 "when an element is not a MapEntry, it should throw" {
-                    val a = arrayOf(Pair("a", 1), Pair("b", 2))
-                    val tam = TransientArrayMap(a)
+                    val tam = TransientArrayMap<String, Int>(array)
 
                     shouldThrowExactly<IllegalArgumentException> {
                         tam.conj(l(MapEntry("x", 42), "item"))
@@ -348,21 +307,26 @@ class PersistentArrayMapJvmTest : FreeSpec({
                 }
 
                 "when all elements are MapEntry, it should assoc() all" {
-                    val a = arrayOf(Pair("a", 1), Pair("b", 2))
-                    val tam = TransientArrayMap(a)
+                    val tam = TransientArrayMap<String, Int>(array)
                     val entries = l(MapEntry("x", 42), MapEntry("y", 47))
 
                     val newTam = tam.conj(entries)
                         as TransientArrayMap<String, Int>
-                    val pairs = newTam.array
 
                     newTam.length shouldBeExactly
-                        a.size + entries.count
+                        array.size + (entries.count * 2)
 
-                    pairs[0]!! shouldBe Pair("a", 1)
-                    pairs[1]!! shouldBe Pair("b", 2)
-                    pairs[2]!! shouldBe Pair("x", 42)
-                    pairs[3]!! shouldBe Pair("y", 47)
+                    newTam.array[0] shouldBe "a"
+                    newTam.array[1] shouldBe 1
+
+                    newTam.array[2] shouldBe "b"
+                    newTam.array[3] shouldBe 2
+
+                    newTam.array[6] shouldBe "x"
+                    newTam.array[7] shouldBe 42
+
+                    newTam.array[8] shouldBe "y"
+                    newTam.array[9] shouldBe 47
                 }
             }
         }
@@ -370,8 +334,8 @@ class PersistentArrayMapJvmTest : FreeSpec({
         @Suppress("UNCHECKED_CAST")
         "doDissoc(key)" - {
             "when key doesn't exit, it should return the same instance" {
-                val a = arrayOf(Pair(1, "a"), Pair(2, "b"), Pair(3, "c"))
-                val tam = TransientArrayMap(a)
+                val a: Array<Any?> = arrayOf(1, "a", 2, "b", 3, "c")
+                val tam = TransientArrayMap<Int, String>(a)
 
                 val dissoc = tam.doDissoc(10)
 
@@ -379,36 +343,34 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             "when key exists and size is 1, it returns an empty transient" {
-                val a = arrayOf(2L to "b")
-                val tam = TransientArrayMap(a)
+                val a: Array<Any?> = arrayOf(2L, "b")
+                val tam = TransientArrayMap<Number, String>(a)
 
                 val rTam = tam.doDissoc(2) as TransientArrayMap<Int, String>
 
                 rTam.length shouldBeExactly 0
-                val pairs = rTam.array
-
-                for (i in pairs.indices)
-                    pairs[i].shouldBeNull()
             }
 
             "when key exists, it should return a new map without that key" {
-                val a = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val tam = TransientArrayMap(a)
+                val a: Array<Any?> = arrayOf(1L, "1", 2L, "2", 3, "3")
+                val tam = TransientArrayMap<Number, String>(a)
 
                 val rTam = tam.doDissoc(1) as TransientArrayMap<Any?, String>
-                val pairs = rTam.array
 
-                rTam.length shouldBeExactly a.size - 1
-                pairs[0] shouldBe (3 to "3")
-                pairs[1] shouldBe (2L to "2")
+                rTam.length shouldBeExactly a.size - 2
+
+                rTam.array[0] shouldBe 3
+                rTam.array[1] shouldBe "3"
+
+                rTam.array[2] shouldBe 2L
+                rTam.array[3] shouldBe "2"
             }
         }
 
         @Suppress("UNCHECKED_CAST")
         "dissoc(key)" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.persistent()
 
@@ -418,8 +380,8 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             "when key doesn't exit, it should return the same instance" {
-                val a = arrayOf(Pair(1, "a"), Pair(2, "b"), Pair(3, "c"))
-                val tam = TransientArrayMap(a)
+                val a: Array<Any?> = arrayOf(1, "a", 2, "b", 3, "c")
+                val tam = TransientArrayMap<Int, String>(a)
 
                 val dissoc = tam.dissoc(10)
 
@@ -427,46 +389,50 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             "when key exists and size is 1, it returns an empty transient" {
-                val a = arrayOf(2L to "b")
-                val tam = TransientArrayMap(a)
+                val a: Array<Any?> = arrayOf(2L, "b")
+                val tam = TransientArrayMap<Number, String>(a)
 
                 val rTam = tam.dissoc(2) as TransientArrayMap<Int, String>
 
                 rTam.length shouldBeExactly 0
-                val pairs = rTam.array
 
-                for (i in pairs.indices)
-                    pairs[i].shouldBeNull()
+//                for (i in rTam.array.indices)
+//                    rTam.array[i].shouldBeNull()
             }
 
             "when key exists, it should return a new map without that key" {
-                val a = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val tam = TransientArrayMap(a)
+                val a: Array<Any?> = arrayOf(1L, "1", 2L, "2", 3, "3")
+                val tam = TransientArrayMap<Number, String>(a)
 
                 val rTam = tam.dissoc(1) as TransientArrayMap<Any?, String>
                 val pairs = rTam.array
 
-                rTam.length shouldBeExactly a.size - 1
-                pairs[0] shouldBe (3 to "3")
-                pairs[1] shouldBe (2L to "2")
+                rTam.length shouldBeExactly a.size - 2
+                pairs[0] shouldBe 3
+                pairs[1] shouldBe "3"
+
+                pairs[2] shouldBe 2L
+                pairs[3] shouldBe "2"
             }
         }
 
         "doCount" {
-            val a1: Array<Pair<Number, String>> = arrayOf()
-            val a2: Array<Pair<Number, String>> =
-                arrayOf(1L to "1", 2L to "2", 3 to "3")
-            val tam = TransientArrayMap(a2).dissoc(1) as TransientArrayMap<*, *>
+            val a: Array<Any?> = emptyArray()
+            val b: Array<Any?> = arrayOf(1L, "1", 2L, "2", 3, "3")
+            val tam = TransientArrayMap<Number, String>(b)
+                .dissoc(1) as TransientArrayMap<*, *>
 
-            TransientArrayMap(a1).doCount shouldBeExactly 0
-            TransientArrayMap(a2).doCount shouldBeExactly a2.size
+            TransientArrayMap<Number, String>(a).doCount shouldBeExactly 0
+
+            TransientArrayMap<Number, String>(b).doCount shouldBeExactly
+                b.size / 2
+
             tam.doCount shouldBeExactly 2
         }
 
         "count" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.persistent()
 
@@ -476,19 +442,21 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             "assertions" {
-                val a1: Array<Pair<Number, String>> = arrayOf()
-                val a2: Array<Pair<Number, String>> =
-                    arrayOf(1L to "1", 2L to "2", 3 to "3")
+                val a: Array<Any?> = arrayOf()
+                val b: Array<Any?> = arrayOf(1L, "1", 2L, "2", 3, "3")
 
-                TransientArrayMap(a1).count shouldBeExactly 0
-                TransientArrayMap(a2).count shouldBeExactly a2.size
-                TransientArrayMap(a2).dissoc(1).count shouldBeExactly 2
+                TransientArrayMap<Number, String>(a).count shouldBeExactly 0
+
+                TransientArrayMap<Number, String>(b)
+                    .count shouldBeExactly b.size / 2
+
+                TransientArrayMap<Number, String>(b)
+                    .dissoc(1).count shouldBeExactly 2
             }
         }
 
         "doValAt(key, default)" - {
-            val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val tam = TransientArrayMap(array)
+            val tam = TransientArrayMap<String, Int>(array)
 
             "when key exists, it should return the assoc value" {
                 tam.doValAt("a", -1) shouldBe 1
@@ -501,8 +469,7 @@ class PersistentArrayMapJvmTest : FreeSpec({
 
         "valAt(key, default)" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.persistent()
 
@@ -512,15 +479,13 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             "when key exists, it should return the assoc value" {
-                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-                val tam = TransientArrayMap(array)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.valAt("a", -1) shouldBe 1
             }
 
             "when key doesn't exist, it should return the default value" {
-                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-                val tam = TransientArrayMap(array)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.valAt("z", -1) shouldBe -1
             }
@@ -528,8 +493,7 @@ class PersistentArrayMapJvmTest : FreeSpec({
 
         "valAt(key)" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.persistent()
 
@@ -539,15 +503,13 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             "when key exists, it should return the assoc value" {
-                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-                val tam = TransientArrayMap(array)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.valAt("a") shouldBe 1
             }
 
             "when key doesn't exist, it should return the default value" {
-                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-                val tam = TransientArrayMap(array)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.valAt("z").shouldBeNull()
             }
@@ -555,8 +517,7 @@ class PersistentArrayMapJvmTest : FreeSpec({
 
         "containsKey(key)" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
                 tam.persistent()
 
                 shouldThrowExactly<IllegalStateException> {
@@ -565,8 +526,7 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             "assertions" {
-                val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-                val tam = TransientArrayMap(array)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.containsKey("a").shouldBeTrue()
                 tam.containsKey("b").shouldBeTrue()
@@ -577,8 +537,7 @@ class PersistentArrayMapJvmTest : FreeSpec({
 
         "entryAt(key)" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
                 tam.persistent()
 
                 shouldThrowExactly<IllegalStateException> {
@@ -587,17 +546,13 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             "when key doesn't exit, it should return null" {
-                val a: Array<Pair<String?, Int>> =
-                    arrayOf("a" to 1, "b" to 2, "c" to 3)
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String?, Int>(array)
 
                 tam.entryAt(null).shouldBeNull()
             }
 
             "when key does exist, it should return a MapEntry" {
-                val a: Array<Pair<String, Int>> =
-                    arrayOf("a" to 1, "b" to 2, "c" to 3)
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 val mapEntry = tam.entryAt("a") as MapEntry<String, Int>
 
@@ -608,8 +563,7 @@ class PersistentArrayMapJvmTest : FreeSpec({
 
         "invoke() operator" - {
             "when called after calling persistent, it should throw" {
-                val a = arrayOf(Pair("a", 1), Pair("b", 2), Pair("c", 3))
-                val tam = TransientArrayMap(a)
+                val tam = TransientArrayMap<String, Int>(array)
 
                 tam.persistent()
 
@@ -619,7 +573,7 @@ class PersistentArrayMapJvmTest : FreeSpec({
             }
 
             val a = arrayOf("a" to 1, "b" to 2, "c" to 3)
-            val tam = TransientArrayMap(a)
+            val tam = TransientArrayMap<String, Int>(array)
 
             "invoke(key, default)" {
                 tam("a", -1) shouldBe 1
@@ -633,15 +587,12 @@ class PersistentArrayMapJvmTest : FreeSpec({
         }
 
         "concurrency" - {
-            val range16 = 1..16
-            val l = range16.fold(listOf<MapEntry<Int, String>>()) { coll, i ->
-                coll.plus<MapEntry<Int, String>>(MapEntry(i, "$i"))
-            }
+            val l = (1..8).map { MapEntry(it, "$it") }
 
             "assoc(key, val) under 16 entries-" {
                 continually(Duration.seconds(10)) {
-                    val t1: TransientMap<Int, String> =
-                        EmptyArrayMap.asTransient()
+                    val t1 = EmptyArrayMap.asTransient()
+                        as TransientArrayMap<Int, String>
 
                     withContext(Dispatchers.Default) {
                         runAction(16, 3) {
@@ -650,7 +601,7 @@ class PersistentArrayMapJvmTest : FreeSpec({
                         }
                     }
 
-                    t1.count shouldBeExactly 16
+                    t1.count shouldBeExactly 8
                     val m = t1.persistent() as PersistentArrayMap<Int, String>
                     m.shouldContainAll(l)
                 }
@@ -688,11 +639,14 @@ class PersistentArrayMapJvmTest : FreeSpec({
         val tr = map.asTransient() as TransientArrayMap<String, Int>
         val array = tr.array
 
-        tr.length shouldBeExactly 3
+        tr.length shouldBeExactly a.size * 2
         array.size shouldBeExactly 16
-        array[0] shouldBe ("a" to 1)
-        array[1] shouldBe ("b" to 2)
-        array[2] shouldBe ("c" to 3)
+        array[0] shouldBe "a"
+        array[1] shouldBe 1
+        array[2] shouldBe "b"
+        array[3] shouldBe 2
+        array[4] shouldBe "c"
+        array[5] shouldBe 3
     }
 
     "ArrayMap" - {
@@ -704,24 +658,22 @@ class PersistentArrayMapJvmTest : FreeSpec({
                     map.assoc("a", 1) as PersistentArrayMap<String, Int>
                 val pairs = newMap.array
 
-                pairs[0].first shouldBe "a"
-                pairs[0].second shouldBe 1
+                pairs[0] shouldBe "a"
+                pairs[1] shouldBe 1
             }
 
             "when the key is new, it should add it to the map" - {
                 "when size < threshold, it should return a PersistentArrayMap" {
-                    val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-                    val map = m(*array)
+                    val map = m("a" to 1, "b" to 2, "c" to 3)
 
-                    val newMap =
-                        map.assoc("d", 4) as PersistentArrayMap<String, Int>
-                    val pairs = newMap.array
+                    val newMap = map.assoc("d", 4)
+                        as PersistentArrayMap<String, Int>
 
-                    pairs[0].first shouldBe "a"
-                    pairs[0].second shouldBe 1
+                    newMap.array[0] shouldBe "a"
+                    newMap.array[1] shouldBe 1
 
-                    pairs[3].first shouldBe "d"
-                    pairs[3].second shouldBe 4
+                    newMap.array[6] shouldBe "d"
+                    newMap.array[7] shouldBe 4
                 }
 
                 @Suppress("UNCHECKED_CAST")
@@ -752,38 +704,33 @@ class PersistentArrayMapJvmTest : FreeSpec({
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
                 val map = m(*array)
 
-                val newMap =
-                    map.assoc(key, value) as PersistentArrayMap<String, Int>
-                val pairs = newMap.array
+                val newMap = map.assoc(key, value)
+                    as PersistentArrayMap<String, Int>
 
-                pairs.size shouldBeExactly array.size
+                newMap.array.size shouldBeExactly array.size * 2
 
                 array[1].first shouldBe key
                 array[1].second shouldBe "2"
 
-                pairs[0].first shouldBe 1L
-                pairs[0].second shouldBe "1"
-
-                pairs[1].first shouldBe key
-                pairs[1].second shouldBe value
-
-                pairs[2].first shouldBe 3
-                pairs[2].second shouldBe "3"
+                newMap.array[0] shouldBe 1L
+                newMap.array[1] shouldBe "1"
+                newMap.array[2] shouldBe key
+                newMap.array[3] shouldBe value
+                newMap.array[4] shouldBe 3
+                newMap.array[5] shouldBe "3"
             }
 
             """when map already has the same key/value,
                it should return the same map""" {
                 val key = 2
                 val value = "2"
-                val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
-                val map = m(*array)
+                val map = m(1L to "1", 2L to "2", 3 to "3")
 
-                val newMap =
-                    map.assoc(key, value) as PersistentArrayMap<String, Int>
-                val pairs = newMap.array
+                val newMap = map.assoc(key, value)
+                    as PersistentArrayMap<String, Int>
 
                 newMap shouldBeSameInstanceAs map
-                pairs[1].first.shouldBeInstanceOf<Long>()
+                newMap.array[2].shouldBeInstanceOf<Long>()
             }
         }
 
@@ -804,30 +751,25 @@ class PersistentArrayMapJvmTest : FreeSpec({
                 val array = arrayOf(1L to "1", 2L to "2", 3 to "3")
                 val map = m(*array)
 
-                val newMap =
-                    map.assocNew(key, value) as PersistentArrayMap<String, Int>
-                val pairs = newMap.array
+                val newMap = map.assocNew(key, value)
+                    as PersistentArrayMap<String, Int>
 
-                pairs.size shouldBeExactly array.size + 1
+                newMap.array.size shouldBeExactly (array.size * 2) + 2
 
-                pairs[0].first shouldBe 1L
-                pairs[0].second shouldBe "1"
-
-                pairs[2].first shouldBe 3
-                pairs[2].second shouldBe "3"
-
-                pairs[array.size].first shouldBe key
-                pairs[array.size].second shouldBe value
+                newMap.array[0] shouldBe key
+                newMap.array[1] shouldBe value
+                newMap.array[2] shouldBe 1L
+                newMap.array[3] shouldBe "1"
+                newMap.array[6] shouldBe 3
+                newMap.array[7] shouldBe "3"
             }
 
             @Suppress("UNCHECKED_CAST")
             "when size >= THRESHOLD, it should return LeanMap" {
                 val size = 16
                 val array: Array<Pair<String, Int>?> = arrayOfNulls(size)
-                var i = 0
-                while (i < size) {
-                    array[i] = Pair("$i", i)
-                    i++
+                for(i in 0 until size) {
+                    array[i] =  Pair("$i", i)
                 }
                 val m = m(*(array as Array<Pair<String, Int>>))
 
@@ -862,11 +804,12 @@ class PersistentArrayMapJvmTest : FreeSpec({
                 val map = m(*array)
 
                 val newMap = map.dissoc(2) as PersistentArrayMap<Any?, String>
-                val pairs = newMap.array
 
-                pairs.size shouldBeExactly array.size - 1
-                pairs[0] shouldBe array[0]
-                pairs[1] shouldBe array[2]
+                newMap.array.size shouldBeExactly 4
+                newMap.array[0] shouldBe array[0].first
+                newMap.array[1] shouldBe array[0].second
+                newMap.array[2] shouldBe array[2].first
+                newMap.array[3] shouldBe array[2].second
             }
         }
 

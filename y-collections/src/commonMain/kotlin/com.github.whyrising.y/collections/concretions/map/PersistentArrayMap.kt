@@ -46,74 +46,75 @@ internal class PersistentArrayMapSerializer<K, V>(
 }
 
 @Serializable(PersistentArrayMapSerializer::class)
-class PersistentArrayMap<out K, out V>(
-    internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>
+class PersistentArrayMap<out K, out V> internal constructor(
+    internal val array: Array<Any?>
 ) : APersistentMap<K, V>(), MapIterable<K, V>, IMutableCollection<Any?> {
 
     @Suppress("UNCHECKED_CAST")
-    private fun createArrayMap(newPairs: Array<out Pair<K, V>?>) =
-        PersistentArrayMap(newPairs as Array<Pair<K, V>>)
+    private fun <K, V> createArrayMap(newPairs: Array<Any?>) =
+        PersistentArrayMap<K, V>(newPairs)
 
     private fun indexOf(key: @UnsafeVariance K): Int {
-        for (i in array.indices)
-            if (equiv(key, array[i].first)) return i
+        for (i in array.indices step 2)
+            if (equiv(key, array[i])) return i
 
         return -1
     }
 
-    private fun keyIsAlreadyAvailable(index: Int): Boolean = index >= 0
+    private fun keyExists(index: Int): Boolean = index >= 0
 
-    @ExperimentalStdlibApi
     override fun assoc(
         key: @UnsafeVariance K,
         value: @UnsafeVariance V
     ): IPersistentMap<K, V> {
         val index: Int = indexOf(key)
-        val newPairs: Array<out Pair<K, V>?>
+        val newPairs: Array<Any?>
 
         when {
-            keyIsAlreadyAvailable(index) -> {
-                if (array[index].second == value) return this
+            keyExists(index) -> {
+                if (array[index + 1] == value) return this
 
                 newPairs = array.copyOf()
-                newPairs[index] = Pair(key, value)
+                newPairs[index + 1] = value
             }
             else -> {
                 if (array.size >= HASHTABLE_THRESHOLD)
-                    return PersistentHashMap.create(*array).assoc(key, value)
+                    return PersistentHashMap.create<K, V>(array)
+                        .assoc(key, value)
 
-                newPairs = arrayOfNulls(array.size + 1)
+                newPairs = arrayOfNulls(array.size + 2)
 
                 if (array.isNotEmpty())
                     array.copyInto(newPairs, 0, 0, array.size)
 
-                newPairs[newPairs.size - 1] = Pair(key, value)
+                newPairs[newPairs.size - 2] = key
+                newPairs[newPairs.size - 1] = value
             }
         }
 
         return createArrayMap(newPairs)
     }
 
-    @ExperimentalStdlibApi
     override fun assocNew(
         key: @UnsafeVariance K,
         value: @UnsafeVariance V
     ): IPersistentMap<K, V> {
         val index: Int = indexOf(key)
-        val newPairs: Array<out Pair<K, V>?>
 
-        if (keyIsAlreadyAvailable(index))
+        if (keyExists(index))
             throw RuntimeException("The key $key is already present.")
 
-        if (array.size >= HASHTABLE_THRESHOLD)
-            return PersistentHashMap.createWithCheck(*array)
+        if (count >= HASHTABLE_THRESHOLD)
+            return PersistentHashMap.createWithCheck<K, V>(array)
                 .assocNew(key, value)
 
-        newPairs = arrayOfNulls(array.size + 1)
+        val newPairs: Array<Any?> = arrayOfNulls(array.size + 2)
 
-        if (array.isNotEmpty()) array.copyInto(newPairs, 0, 0, array.size)
+        if (array.isNotEmpty())
+            array.copyInto(newPairs, 2, 0, array.size)
 
-        newPairs[newPairs.size - 1] = Pair(key, value)
+        newPairs[0] = key
+        newPairs[1] = value
 
         return createArrayMap(newPairs)
     }
@@ -121,14 +122,15 @@ class PersistentArrayMap<out K, out V>(
     override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> =
         indexOf(key).let { index ->
             when {
-                keyIsAlreadyAvailable(index) -> {
-                    val size = array.size - 1
+                keyExists(index) -> {
+                    val newSize = array.size - 2
 
-                    if (size == 0) return EmptyArrayMap
+                    if (newSize == 0)
+                        return EmptyArrayMap
 
-                    val newPairs: Array<Pair<K, V>?> = arrayOfNulls(size)
+                    val newPairs: Array<Any?> = arrayOfNulls(newSize)
                     array.copyInto(newPairs, 0, 0, index)
-                    array.copyInto(newPairs, index, index + 1, array.size)
+                    array.copyInto(newPairs, index, index + 2, array.size)
 
                     return createArrayMap(newPairs)
                 }
@@ -137,16 +139,16 @@ class PersistentArrayMap<out K, out V>(
         }
 
     override fun containsKey(key: @UnsafeVariance K): Boolean =
-        keyIsAlreadyAvailable(indexOf(key))
+        keyExists(indexOf(key))
 
     override fun entryAt(
         key: @UnsafeVariance K
     ): IMapEntry<K, V>? = indexOf(key).let { index ->
         when {
-            keyIsAlreadyAvailable(index) -> {
-                val (first, second) = array[index]
-                MapEntry(first, second)
-            }
+            keyExists(index) -> MapEntry(
+                array[index] as K,
+                array[index + 1] as V
+            )
             else -> null
         }
     }
@@ -156,7 +158,7 @@ class PersistentArrayMap<out K, out V>(
         default: @UnsafeVariance V?
     ): V? = indexOf(key).let { index ->
         when {
-            keyIsAlreadyAvailable(index) -> array[index].second
+            keyExists(index) -> array[index + 1] as V
             else -> default
         }
     }
@@ -168,7 +170,7 @@ class PersistentArrayMap<out K, out V>(
         else -> Seq(array, 0)
     }
 
-    override val count: Int = array.size
+    override val count: Int = array.size / 2
 
     override fun empty(): IPersistentCollection<Any?> = EmptyArrayMap
 
@@ -181,63 +183,61 @@ class PersistentArrayMap<out K, out V>(
     override fun asTransient(): TransientMap<K, V> = TransientArrayMap(array)
 
     internal class Iter<K, V, R>(
-        private val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>,
-        val f: (Pair<K, V>) -> R
+        private val array: Array<Any?>,
+        val f: (k: K, v: V) -> R
     ) : Iterator<R> {
 
         var index = 0
 
-        override fun hasNext(): Boolean = index < array.size
+        override fun hasNext(): Boolean = index <= array.size - 2
 
         override fun next(): R = when {
-            index >= array.size -> throw NoSuchElementException()
+            index > array.size - 2 -> throw NoSuchElementException()
             else -> {
                 val cached = index
-                index++
-                f(array[cached])
+                index += 2
+                f(array[cached] as K, array[cached + 1] as V)
             }
         }
     }
 
     internal class Seq<out K, out V>(
-        private val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>>,
+        private val array: Array<Any?>,
         val index: Int
     ) : ASeq<MapEntry<K, V>>() {
 
-        override val count: Int = array.size - index
+        override val count: Int = (array.size - index) / 2
 
-        override
-        fun first(): MapEntry<K, V> = array[index].let { (first, second) ->
-            MapEntry(first, second)
-        }
+        override fun first(): MapEntry<K, V> = MapEntry(
+            array[index] as K,
+            array[index + 1] as V
+        )
 
-        override fun rest(): ISeq<MapEntry<K, V>> = (index + 1).let { i ->
-            when {
-                i < array.size -> Seq(array, i)
-                else -> PersistentList.Empty
-            }
+        override fun rest(): ISeq<MapEntry<K, V>> = when {
+            index + 2 < array.size -> Seq(array, index + 2)
+            else -> PersistentList.Empty
         }
     }
 
     internal class TransientArrayMap<out K, out V> private constructor(
-        internal val array: Array<Pair<@UnsafeVariance K, @UnsafeVariance V>?>,
+        internal val array: Array<Any?>,
         edit: Any?,
         length: Int
     ) : ATransientMap<K, V>() {
         private val _edit: AtomicRef<Any?> = atomic(edit)
         private val _length = atomic(length)
 
-        constructor(array: Array<Pair<K, V>>) : this(
+        constructor(array: Array<Any?>) : this(
             array.copyOf(max(HASHTABLE_THRESHOLD, array.size)),
             Any(),
-            array.size
+            length = array.size
         )
 
         val edit by _edit
         val length by _length
 
         override val doCount: Int
-            by _length
+            get() = length / 2
 
         override fun ensureEditable() {
             if (_edit.value == null)
@@ -247,8 +247,8 @@ class PersistentArrayMap<out K, out V>(
         }
 
         private fun indexOf(key: @UnsafeVariance K): Int {
-            for (i in 0 until length)
-                if (equiv(key, array[i]?.first)) return i
+            for (i in 0 until length step 2)
+                if (equiv(key, array[i])) return i
 
             return -1
         }
@@ -266,16 +266,19 @@ class PersistentArrayMap<out K, out V>(
                 val index = indexOf(key)
                 when {
                     index >= 0 -> {
-                        if (array[index]!!.second != value)
-                            array[index] = Pair(key, value)
+                        if (array[index + 1] != value)
+                            array[index + 1] = value
                     }
-                    _length.value >= array.size -> {
+                    length >= array.size -> {
                         return PersistentHashMap
-                            .create(*array as Array<Pair<K, V>>)
+                            .create<K, V>(array)
                             .asTransient()
                             .assoc(key, value)
                     }
-                    else -> array[_length.getAndIncrement()] = Pair(key, value)
+                    else -> {
+                        array[_length.getAndIncrement()] = key
+                        array[_length.getAndIncrement()] = value
+                    }
                 }
 
                 return this
@@ -287,12 +290,13 @@ class PersistentArrayMap<out K, out V>(
                 val index: Int = indexOf(key)
 
                 if (index >= 0) {
-                    _length.update { currentLength: Int ->
-                        array[index] = when {
-                            currentLength > 1 -> array[currentLength - 1]
-                            else -> null
+                    _length.update { currentLength ->
+                        if (currentLength >= 2) {
+                            array[index] = array[currentLength - 2]
+                            array[index + 1] = array[currentLength - 1]
                         }
-                        currentLength - 1
+
+                        currentLength - 2
                     }
                 }
                 return this
@@ -304,10 +308,10 @@ class PersistentArrayMap<out K, out V>(
             ensureEditable()
 
             _edit.value = null
-            val ar = arrayOfNulls<Pair<K, V>>(_length.value)
-            array.copyInto(ar, 0, 0, ar.size)
+            val ar = arrayOfNulls<Any?>(length)
+            array.copyInto(ar, 0, 0, length)
 
-            return PersistentArrayMap(ar as Array<Pair<K, V>>)
+            return PersistentArrayMap(ar)
         }
 
         override fun doValAt(
@@ -315,7 +319,7 @@ class PersistentArrayMap<out K, out V>(
             default: @UnsafeVariance V?
         ): V? = indexOf(key).let { index ->
             when {
-                index >= 0 -> array[index]!!.second
+                index >= 0 -> array[index + 1] as V
                 else -> default
             }
         }
@@ -341,7 +345,15 @@ class PersistentArrayMap<out K, out V>(
                             "Duplicate key: ${pairs[i].first}"
                         )
 
-            return PersistentArrayMap(pairs as Array<Pair<K, V>>)
+            val entries = arrayOfNulls<Any?>(pairs.size * 2)
+            var i = 0
+            for ((f, s) in pairs) {
+                entries[i] = f
+                entries[i + 1] = s
+                i += 2
+            }
+
+            return PersistentArrayMap(entries)
         }
 
         internal fun <K, V> create(map: Map<K, V>): IPersistentMap<K, V> {

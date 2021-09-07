@@ -94,7 +94,7 @@ fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V> =
 
 fun <K, V> m(vararg kvs: Pair<K, V>): IPersistentMap<K, V> = when {
     kvs.isEmpty() -> PersistentArrayMap.EmptyArrayMap
-    kvs.size <= HASHTABLE_THRESHOLD -> PersistentArrayMap.createWithCheck(*kvs)
+    kvs.size * 2 <= HASHTABLE_THRESHOLD -> PersistentArrayMap.createWithCheck(*kvs)
     else -> PersistentHashMap.createWithCheck(*kvs)
 }
 
@@ -193,7 +193,7 @@ fun <K, V> assoc(
     map: Associative<K, V>?,
     kv: Pair<K, V>
 ): Associative<K, V> = when (map) {
-    null -> PersistentArrayMap(arrayOf(kv))
+    null -> PersistentArrayMap.createWithCheck(kv)
     else -> map.assoc(kv.first, kv.second)
 }
 

@@ -182,6 +182,7 @@ abstract class APersistentMap<out K, out V> :
 
     override val keys: Set<K>
         get() = object : AbstractSet<K>(), Set<K> {
+
             override val size: Int
                 get() = count
 
@@ -241,16 +242,19 @@ abstract class APersistentMap<out K, out V> :
         }
 
     protected val makeMapEntry: (
-        Pair<@UnsafeVariance K, @UnsafeVariance V>
-    ) -> MapEntry<K, V> = { MapEntry(it.first, it.second) }
-
-    protected val makeKey: (Pair<@UnsafeVariance K, @UnsafeVariance V>) -> K = {
-        it.first
+        @UnsafeVariance K, @UnsafeVariance V
+    ) -> MapEntry<K, V> = { k, v ->
+        MapEntry(k, v)
     }
 
+    protected val makeKey: (@UnsafeVariance K, @UnsafeVariance V) -> K =
+        { k, _ ->
+            k
+        }
+
     protected
-    val makeValue: (Pair<@UnsafeVariance K, @UnsafeVariance V>) -> V = {
-        it.second
+    val makeValue: (@UnsafeVariance K, @UnsafeVariance V) -> V = { _, v ->
+        v
     }
 
     internal class KeySeq<out K, out V> private constructor(

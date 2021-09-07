@@ -50,7 +50,7 @@ sealed class PersistentHashMap<out K, out V>(
     val root: Node<K, V>?
 ) : APersistentMap<K, V>(), IMutableCollection<Any?>, MapIterable<K, V> {
 
-    @ExperimentalStdlibApi
+    @OptIn(ExperimentalStdlibApi::class)
     override fun assoc(
         key: @UnsafeVariance K,
         value: @UnsafeVariance V
@@ -64,7 +64,6 @@ sealed class PersistentHashMap<out K, out V>(
         return LMap(if (addedLeaf.value == null) count else count + 1, newRoot)
     }
 
-    @ExperimentalStdlibApi
     override fun assocNew(
         key: @UnsafeVariance K,
         value: @UnsafeVariance V
@@ -113,7 +112,7 @@ sealed class PersistentHashMap<out K, out V>(
         private val _root: Node<K, V>
     ) : PersistentHashMap<K, V>(_count, _root) {
 
-        @ExperimentalStdlibApi
+        @OptIn(ExperimentalStdlibApi::class)
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
             val newRoot = _root.without(
                 Edit(null), 0, hasheq(key), key, Box(null)
@@ -128,22 +127,21 @@ sealed class PersistentHashMap<out K, out V>(
             }
         }
 
+        @OptIn(ExperimentalStdlibApi::class)
         @Suppress("UNCHECKED_CAST")
-        @ExperimentalStdlibApi
         override fun containsKey(key: @UnsafeVariance K): Boolean =
             _root.find(0, hasheq(key), key, NOT_FOUND as V) != NOT_FOUND
 
-        @ExperimentalStdlibApi
+        @OptIn(ExperimentalStdlibApi::class)
         override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? {
             return _root.find(0, hasheq(key), key)
         }
 
-        @ExperimentalStdlibApi
+        @OptIn(ExperimentalStdlibApi::class)
         override
         fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? =
             _root.find(0, hasheq(key), key, default)
 
-        @ExperimentalStdlibApi
         override fun valAt(key: @UnsafeVariance K): V? = valAt(key, null)
 
         override fun seq(): ISeq<Any?> = _root.nodeSeq()
@@ -207,11 +205,11 @@ sealed class PersistentHashMap<out K, out V>(
 
     internal sealed class NodeIterator<K, V, R>(
         val node: Node<K, V>?,
-        val f: (Pair<K, V>) -> R
+        val f: (k: K, v: V) -> R
     ) : Iterator<R> {
 
         object EmptyNodeIterator : NodeIterator<Nothing, Nothing, Nothing>(
-            null, { throw RuntimeException() }
+            null, { _, _ -> throw RuntimeException() }
         ) {
             override fun hasNext(): Boolean = false
 
@@ -221,7 +219,7 @@ sealed class PersistentHashMap<out K, out V>(
         @Suppress("UNCHECKED_CAST")
         class NodeIter<K, V, R>(
             _node: Node<K, V>,
-            val _f: (Pair<K, V>) -> R
+            val _f: (k: K, v: V) -> R
         ) : NodeIterator<K, V, R>(_node, _f) {
             private val _null = Any()
             private var nextEntry: R = _null as R
@@ -244,14 +242,14 @@ sealed class PersistentHashMap<out K, out V>(
                 }
 
                 val k = 2 * dataIndex
-                nextEntry = _f(Pair(array[k] as K, array[k + 1] as V))
+                nextEntry = _f(array[k] as K, array[k + 1] as V)
             }
 
             private fun advance(): Boolean {
                 if (dataIndex < dataLength) {
                     dataIndex++
                     val k = 2 * dataIndex
-                    nextEntry = _f(Pair(array[k] as K, array[k + 1] as V))
+                    nextEntry = _f(array[k] as K, array[k + 1] as V)
 
                     return true
                 } else {
@@ -276,11 +274,10 @@ sealed class PersistentHashMap<out K, out V>(
                                     dataIndex = 0
                                     dataLength = n.dataArity() - 1
                                     val k = 2 * dataIndex
-                                    val p = Pair(
+                                    nextEntry = _f(
                                         array[k] as K,
                                         array[k + 1] as V
                                     )
-                                    nextEntry = _f(p)
 
                                     return true
                                 }
@@ -346,7 +343,7 @@ sealed class PersistentHashMap<out K, out V>(
                 )
         }
 
-        @ExperimentalStdlibApi
+        @OptIn(ExperimentalStdlibApi::class)
         override fun doAssoc(
             key: @UnsafeVariance K,
             value: @UnsafeVariance V
@@ -374,7 +371,7 @@ sealed class PersistentHashMap<out K, out V>(
             return this
         }
 
-        @ExperimentalStdlibApi
+        @OptIn(ExperimentalStdlibApi::class)
         override fun doDissoc(key: @UnsafeVariance K): TransientMap<K, V> {
             leafFlag.value = null
 
@@ -408,7 +405,7 @@ sealed class PersistentHashMap<out K, out V>(
             }
         }
 
-        @ExperimentalStdlibApi
+        @OptIn(ExperimentalStdlibApi::class)
         override fun doValAt(
             key: @UnsafeVariance K,
             default: @UnsafeVariance V?
@@ -535,8 +532,8 @@ sealed class PersistentHashMap<out K, out V>(
         private fun nodeIndexBy(bitpos: Int) =
             array.size - 1 - bitmapNodeIndex(nodemap, bitpos)
 
+        @OptIn(ExperimentalStdlibApi::class)
         @Suppress("UNCHECKED_CAST")
-        @ExperimentalStdlibApi
         override fun assoc(
             edit: Edit,
             shift: Int,
@@ -626,9 +623,7 @@ sealed class PersistentHashMap<out K, out V>(
             array.copyInto(newArray, newIndex + 2, newIndex, oldIndex)
             array.copyInto(newArray, oldIndex + 2, oldIndex + 1, array.size)
 
-            return BMIN(
-                edit, datamap or bitpos, nodemap xor bitpos, newArray
-            )
+            return BMIN(edit, datamap or bitpos, nodemap xor bitpos, newArray)
         }
 
         @Suppress("UNCHECKED_CAST")
@@ -886,7 +881,6 @@ sealed class PersistentHashMap<out K, out V>(
             return newArray
         }
 
-        @ExperimentalStdlibApi
         @Suppress("UNCHECKED_CAST")
         override fun without(
             edit: Edit,
@@ -1048,6 +1042,21 @@ sealed class PersistentHashMap<out K, out V>(
         operator fun <K, V> invoke(): PersistentHashMap<K, V> = EmptyHashMap
 
         internal fun <K, V> createWithCheck(
+            array: Array<Any?>
+        ): PersistentHashMap<K, V> {
+            var ret: TransientMap<K, V> = EmptyHashMap.asTransient()
+
+            for (i in array.indices step 2) {
+                ret = ret.assoc(array[i] as K, array[i + 1] as V)
+
+                if (ret.count != i / 2 + 1)
+                    throw IllegalArgumentException("Duplicate key: ${array[i]}")
+            }
+
+            return ret.persistent() as PersistentHashMap<K, V>
+        }
+
+        internal fun <K, V> createWithCheck(
             vararg pairs: Pair<K, V>
         ): PersistentHashMap<K, V> {
             var ret: TransientMap<K, V> = EmptyHashMap.asTransient()
@@ -1080,6 +1089,16 @@ sealed class PersistentHashMap<out K, out V>(
 
             for ((k, v) in pairs)
                 ret = ret.assoc(k, v)
+
+            return ret.persistent() as PersistentHashMap<K, V>
+        }
+
+        internal
+        fun <K, V> create(array: Array<Any?>): PersistentHashMap<K, V> {
+            var ret: TransientMap<K, V> = EmptyHashMap.asTransient()
+
+            for (i in array.indices step 2)
+                ret = ret.assoc(array[i] as K, array[i + 1] as V)
 
             return ret.persistent() as PersistentHashMap<K, V>
         }
