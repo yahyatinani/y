@@ -242,7 +242,8 @@ abstract class APersistentMap<out K, out V> :
         }
 
     protected val makeMapEntry: (
-        @UnsafeVariance K, @UnsafeVariance V
+        @UnsafeVariance K,
+        @UnsafeVariance V
     ) -> MapEntry<K, V> = { k, v ->
         MapEntry(k, v)
     }

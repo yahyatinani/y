@@ -768,8 +768,8 @@ class PersistentArrayMapJvmTest : FreeSpec({
             "when size >= THRESHOLD, it should return LeanMap" {
                 val size = 16
                 val array: Array<Pair<String, Int>?> = arrayOfNulls(size)
-                for(i in 0 until size) {
-                    array[i] =  Pair("$i", i)
+                for (i in 0 until size) {
+                    array[i] = Pair("$i", i)
                 }
                 val m = m(*(array as Array<Pair<String, Int>>))
 
