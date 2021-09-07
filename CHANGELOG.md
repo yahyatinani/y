@@ -1,6 +1,12 @@
 Changelog
 ========
 
+## v0.0.6
+
+* #### Performance/Optimization:
+
+  * Reimplement `PersistentArrayMap<K, V>`.
+
 ## v0.0.5
 
 #### Added:
