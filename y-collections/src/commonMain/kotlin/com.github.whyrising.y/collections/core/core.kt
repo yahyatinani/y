@@ -238,3 +238,15 @@ fun <K, V> assocIn(
         else -> assoc(map, k to v)
     }
 }
+
+operator fun <E> IPersistentVector<E>.component1(): E = this.nth(0)
+
+operator fun <E> IPersistentVector<E>.component2(): E = this.nth(1)
+
+operator fun <E> IPersistentVector<E>.component3(): E = this.nth(2)
+
+operator fun <E> IPersistentVector<E>.component4(): E = this.nth(3)
+
+operator fun <E> IPersistentVector<E>.component5(): E = this.nth(4)
+
+//operator fun <E> IPersistentVector<E>.get(index: Int): E = this.nth(index)

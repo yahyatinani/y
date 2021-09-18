@@ -1,5 +1,5 @@
 object Ci {
-    private const val snapshotBase = "0.0.6"
+    private const val snapshotBase = "0.0.7"
 
     private fun githubBuildNumber() = System.getenv("GITHUB_RUN_NUMBER")
 

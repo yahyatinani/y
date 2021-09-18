@@ -153,4 +153,49 @@ class CoreTest {
         v(1, 2, 3, 4, 5, 6, 7, 8) shouldBe
             PersistentVector(1, 2, 3, 4, 5, 6, 7, 8)
     }
+
+    @Test
+    fun `component1()`() {
+        val (a) = v(1)
+
+        a shouldBeExactly 1
+    }
+
+    @Test
+    fun `component2()`() {
+        val (a, b) = v(1, 2)
+
+        a shouldBeExactly 1
+        b shouldBeExactly 2
+    }
+
+    @Test
+    fun `component3()`() {
+        val (a, b, c) = v(1, 2, 3)
+
+        a shouldBeExactly 1
+        b shouldBeExactly 2
+        c shouldBeExactly 3
+    }
+
+    @Test
+    fun `component4()`() {
+        val (a, b, c, d) = v(1, 2, 3, 4)
+
+        a shouldBeExactly 1
+        b shouldBeExactly 2
+        c shouldBeExactly 3
+        d shouldBeExactly 4
+    }
+
+    @Test
+    fun `component5()`() {
+        val (a, b, c, d, e) = v(1, 2, 3, 4, 5)
+
+        a shouldBeExactly 1
+        b shouldBeExactly 2
+        c shouldBeExactly 3
+        d shouldBeExactly 4
+        e shouldBeExactly 5
+    }
 }
