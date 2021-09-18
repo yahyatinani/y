@@ -6,6 +6,7 @@ import com.github.whyrising.y.collections.seq.Sequential
 import com.github.whyrising.y.collections.stack.IPersistentStack
 
 interface IPersistentVector<out E> :
+    List<E>,
     Associative<Int, E>,
     IPersistentCollection<E>,
     IPersistentStack<E>,

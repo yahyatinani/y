@@ -21,7 +21,6 @@ import com.github.whyrising.y.collections.vector.APersistentVector.Seq.Companion
 
 abstract class APersistentVector<out E> :
     IPersistentVector<E>,
-    List<E>,
     Comparable<IPersistentVector<@UnsafeVariance E>>,
     RandomAccess,
     Reversible<E>,
@@ -172,9 +171,10 @@ abstract class APersistentVector<out E> :
         else -> MapEntry(key, nth(key))
     }
 
-    override
-    fun assoc(key: Int, value: @UnsafeVariance E): IPersistentVector<E> =
-        assocN(key, value)
+    override fun assoc(
+        key: Int,
+        value: @UnsafeVariance E
+    ): IPersistentVector<E> = assocN(key, value)
 
     override fun subvec(start: Int, end: Int): IPersistentVector<E> =
         SubVector(this, start, end)

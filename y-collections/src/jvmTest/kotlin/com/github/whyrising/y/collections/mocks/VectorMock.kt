@@ -74,4 +74,47 @@ class VectorMock<out E>(val vec: PersistentVector<E>) : IPersistentVector<E> {
     override fun pop(): IPersistentStack<E> {
         TODO("Not yet implemented")
     }
+
+    override val size: Int
+        get() = TODO("Not yet implemented")
+
+    override fun contains(element: @UnsafeVariance E): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun get(index: Int): E {
+        TODO("Not yet implemented")
+    }
+
+    override fun indexOf(element: @UnsafeVariance E): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun isEmpty(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun iterator(): Iterator<E> {
+        TODO("Not yet implemented")
+    }
+
+    override fun lastIndexOf(element: @UnsafeVariance E): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun listIterator(): ListIterator<E> {
+        TODO("Not yet implemented")
+    }
+
+    override fun listIterator(index: Int): ListIterator<E> {
+        TODO("Not yet implemented")
+    }
+
+    override fun subList(fromIndex: Int, toIndex: Int): List<E> {
+        TODO("Not yet implemented")
+    }
 }

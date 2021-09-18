@@ -11,6 +11,7 @@ import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
@@ -155,14 +156,14 @@ class CoreTest {
     }
 
     @Test
-    fun `component1()`() {
+    fun `IPersistentVector component1()`() {
         val (a) = v(1)
 
         a shouldBeExactly 1
     }
 
     @Test
-    fun `component2()`() {
+    fun `IPersistentVector component2()`() {
         val (a, b) = v(1, 2)
 
         a shouldBeExactly 1
@@ -170,7 +171,7 @@ class CoreTest {
     }
 
     @Test
-    fun `component3()`() {
+    fun `IPersistentVector component3()`() {
         val (a, b, c) = v(1, 2, 3)
 
         a shouldBeExactly 1
@@ -179,7 +180,7 @@ class CoreTest {
     }
 
     @Test
-    fun `component4()`() {
+    fun `IPersistentVector component4()`() {
         val (a, b, c, d) = v(1, 2, 3, 4)
 
         a shouldBeExactly 1
@@ -189,7 +190,7 @@ class CoreTest {
     }
 
     @Test
-    fun `component5()`() {
+    fun `IPersistentVector component5()`() {
         val (a, b, c, d, e) = v(1, 2, 3, 4, 5)
 
         a shouldBeExactly 1
@@ -206,5 +207,33 @@ class CoreTest {
         vec[0] shouldBeExactly 1
         vec[1] shouldBeExactly 2
         vec[2] shouldBeExactly 3
+    }
+
+    @Test
+    fun `IPersistentVector iterator()`() {
+        val vec = v(1, 2, 3)
+
+        for ((i, n) in vec.withIndex())
+            n shouldBeExactly vec[i]
+    }
+
+    @Test
+    fun `IPersistentMap iterator()`() {
+        val m = m(0 to 45, 1 to 55, 2 to 12)
+        var i = 0
+        for ((_, v) in m) {
+            v shouldBeExactly m[i]!!
+            i++
+        }
+    }
+
+    @Test
+    fun `IPersistentMap get operator`() {
+        val m = m("a" to 1, "b" to 2, "c" to 3)
+
+        m["a"] shouldBe 1
+        m["b"] shouldBe 2
+        m["c"] shouldBe 3
+        m["d"].shouldBeNull()
     }
 }
