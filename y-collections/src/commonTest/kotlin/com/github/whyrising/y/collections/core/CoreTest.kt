@@ -198,4 +198,13 @@ class CoreTest {
         d shouldBeExactly 4
         e shouldBeExactly 5
     }
+
+    @Test
+    fun `IPersistentVector get operator`() {
+        val vec = v(1, 2, 3)
+
+        vec[0] shouldBeExactly 1
+        vec[1] shouldBeExactly 2
+        vec[2] shouldBeExactly 3
+    }
 }

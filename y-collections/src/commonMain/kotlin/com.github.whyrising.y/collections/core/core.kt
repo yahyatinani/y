@@ -249,4 +249,4 @@ operator fun <E> IPersistentVector<E>.component4(): E = this.nth(3)
 
 operator fun <E> IPersistentVector<E>.component5(): E = this.nth(4)
 
-//operator fun <E> IPersistentVector<E>.get(index: Int): E = this.nth(index)
+operator fun <E> IPersistentVector<E>.get(index: Int): E = this.nth(index)
