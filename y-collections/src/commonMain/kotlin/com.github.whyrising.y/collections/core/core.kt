@@ -14,6 +14,7 @@ import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.mutable.set.TransientSet
 import com.github.whyrising.y.collections.seq.ISeq
+import com.github.whyrising.y.collections.seq.LazySeq
 import com.github.whyrising.y.collections.seq.Seqable
 import com.github.whyrising.y.collections.set.PersistentSet
 import com.github.whyrising.y.collections.util.lazyChunkedSeq
@@ -25,6 +26,8 @@ fun <E> seq(x: Any?): ISeq<E>? = when (x) {
     is ISeq<*> -> x as ISeq<E>
     is Seqable<*> -> x.seq() as ISeq<E>
     is Iterable<*> -> lazyChunkedSeq(x.iterator() as Iterator<E>)
+    // TODO: support Sequence<E>
+    is LazySeq<*> -> x.seq() as ISeq<E>
     is ShortArray -> ArraySeq(x) as ISeq<E>
     is IntArray -> ArraySeq(x) as ISeq<E>
     is FloatArray -> ArraySeq(x) as ISeq<E>
@@ -251,4 +254,11 @@ operator fun <E> IPersistentVector<E>.component5(): E = this.nth(4)
 
 operator fun <K, V> IPersistentMap<K, V>.get(key: K): V? = this.valAt(key)
 
-fun <E> lazySeq(): ISeq<E> = LazySeq { null }
+fun <E> lazySeq(): LazySeq<E> = LazySeq { null }
+
+/**
+ * @return an instance of [LazySeq]
+ *
+ * @throws IllegalArgumentException if x cannot be an ISeq.
+ */
+fun <E> lazySeq(x: Any): LazySeq<E> = LazySeq { x }

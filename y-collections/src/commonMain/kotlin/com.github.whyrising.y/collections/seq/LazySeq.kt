@@ -12,16 +12,16 @@ import com.github.whyrising.y.collections.util.nth
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 
-class LazySeq<out E> internal constructor(_f: () -> ISeq<E>?) :
+class LazySeq<out E> internal constructor(_f: () -> Any?) :
     SynchronizedObject(), ISeq<E>, List<E>, Sequence<E>, IHashEq, IPending,
     Sequential {
-    internal var f: (() -> ISeq<@UnsafeVariance E>?)?
+    internal var f: (() -> Any?)?
         private set
 
     internal var seq: ISeq<@UnsafeVariance E>
         private set
 
-    internal var sVal: ISeq<@UnsafeVariance E>?
+    internal var sVal: Any?
         private set
 
     init {
@@ -30,14 +30,15 @@ class LazySeq<out E> internal constructor(_f: () -> ISeq<E>?) :
         sVal = null
     }
 
-    internal fun seqVal(): ISeq<E>? {
+    internal fun seqVal(): Any {
         synchronized(this) {
             if (f != null) {
-                sVal = f?.invoke()
+                sVal = f!!.invoke()
                 f = null
             }
 
-            if (sVal != null) return sVal
+            if (sVal != null)
+                return sVal!!
 
             return seq
         }
@@ -47,10 +48,10 @@ class LazySeq<out E> internal constructor(_f: () -> ISeq<E>?) :
         synchronized(this) {
             seqVal()
             if (sVal != null) {
-                var lazySeq = sVal
+                var lazySeq: Any = sVal!!
                 sVal = null
 
-                while (lazySeq is LazySeq<E>)
+                while (lazySeq is LazySeq<*>)
                     lazySeq = lazySeq.seqVal()
 
                 seq = seq<E>(lazySeq) as ISeq<E>

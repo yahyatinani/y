@@ -51,7 +51,7 @@ class LazySeqJvmTest : FreeSpec({
         "when f != null & returns , it should return seq" {
             val chunk = ArrayChunk(arrayOf(1, 2, 3))
             val chunkedSeq = ChunkedSeq(chunk)
-            val lazySeq = LazySeq { chunkedSeq }
+            val lazySeq = LazySeq<Int> { chunkedSeq }
             lazySeq.seq()
 
             var seqVal: Any? = null
