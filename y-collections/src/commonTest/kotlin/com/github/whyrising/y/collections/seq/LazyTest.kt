@@ -5,7 +5,7 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class LazyTest {
+class LazySeqTest {
     @Test
     fun `empty lazySeq()`() {
         val seq = lazySeq<Int>()

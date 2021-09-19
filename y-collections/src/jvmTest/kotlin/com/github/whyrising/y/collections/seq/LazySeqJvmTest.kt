@@ -20,7 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @ExperimentalStdlibApi
-class LazySeqTest : FreeSpec({
+class LazySeqJvmTest : FreeSpec({
     "ctor(fn)" {
         val chunk = ArrayChunk(arrayOf(1, 2, 3))
         val chunkedSeq = ChunkedSeq(chunk)
@@ -51,8 +51,7 @@ class LazySeqTest : FreeSpec({
         "when f != null & returns , it should return seq" {
             val chunk = ArrayChunk(arrayOf(1, 2, 3))
             val chunkedSeq = ChunkedSeq(chunk)
-            val f: () -> Any? = { chunkedSeq }
-            val lazySeq = LazySeq<Int>(f)
+            val lazySeq = LazySeq { chunkedSeq }
             lazySeq.seq()
 
             var seqVal: Any? = null
