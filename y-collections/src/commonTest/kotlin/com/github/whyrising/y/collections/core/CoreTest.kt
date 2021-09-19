@@ -236,4 +236,5 @@ class CoreTest {
         m["c"] shouldBe 3
         m["d"].shouldBeNull()
     }
+
 }

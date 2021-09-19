@@ -12,9 +12,9 @@ import com.github.whyrising.y.collections.util.nth
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 
-class LazySeq<out E>(
-    _f: () -> Any?
-) : SynchronizedObject(), ISeq<E>, List<E>, IHashEq, IPending, Sequential {
+class LazySeq<out E> internal constructor(_f: () -> Any?) :
+    SynchronizedObject(), ISeq<E>, List<E>, Sequence<E>, IHashEq, IPending,
+    Sequential {
     internal var f: (() -> Any?)?
         private set
 
@@ -50,7 +50,8 @@ class LazySeq<out E>(
                 var lazySeq = sVal
                 sVal = null
 
-                while (lazySeq is LazySeq<*>) lazySeq = lazySeq.seqVal()
+                while (lazySeq is LazySeq<*>)
+                    lazySeq = lazySeq.seqVal()
 
                 seq = seq<E>(lazySeq) as ISeq<E>
             }
@@ -106,11 +107,10 @@ class LazySeq<out E>(
                 seq<E>(other) is Empty
     }
 
-    @ExperimentalStdlibApi
+    @OptIn(ExperimentalStdlibApi::class)
     override fun hasheq(): Int = Murmur3.hashOrdered(this)
 
-    override
-    fun toString(): String = "(${fold("") { acc, e -> "$acc $e" }.trim()})"
+    override fun toString(): String = seq().toString()
 
     // list implementation
     override val size: Int
@@ -148,9 +148,9 @@ class LazySeq<out E>(
 
     override fun isEmpty(): Boolean = seq() is Empty
 
-    override fun iterator(): Iterator<E> = SeqIterator(this)
+    override operator fun iterator(): Iterator<E> = SeqIterator(this)
 
-    private fun reify() = this.toList()
+    private fun reify(): List<E> = ArrayList(this)
 
     override fun lastIndexOf(element: @UnsafeVariance E): Int =
         reify().lastIndexOf(element)

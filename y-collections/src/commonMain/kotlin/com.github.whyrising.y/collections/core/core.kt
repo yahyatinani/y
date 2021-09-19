@@ -250,3 +250,5 @@ operator fun <E> IPersistentVector<E>.component4(): E = this.nth(3)
 operator fun <E> IPersistentVector<E>.component5(): E = this.nth(4)
 
 operator fun <K, V> IPersistentMap<K, V>.get(key: K): V? = this.valAt(key)
+
+fun <E> lazySeq(): ISeq<E> = LazySeq { null }
