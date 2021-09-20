@@ -13,7 +13,12 @@ import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 
 class LazySeq<out E> internal constructor(_f: () -> Any?) :
-    SynchronizedObject(), ISeq<E>, List<E>, Sequence<E>, IHashEq, IPending,
+    SynchronizedObject(),
+    ISeq<E>,
+    List<E>,
+    Sequence<E>,
+    IHashEq,
+    IPending,
     Sequential {
     internal var f: (() -> Any?)?
         private set
