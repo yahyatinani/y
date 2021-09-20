@@ -20,6 +20,14 @@ class ChunkedSeq<out E>(
         else -> restChunks()
     }
 
+    override fun next(): ISeq<E>? = when {
+        firstChunk.count > 1 -> ChunkedSeq(firstChunk.dropFirst(), restChunks)
+        else -> when (restChunks) {
+            is Empty -> null
+            else -> restChunks
+        }
+    }
+
     override fun firstChunk(): Chunk<E> = firstChunk
 
     override fun restChunks(): ISeq<E> = restChunks

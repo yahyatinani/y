@@ -1,20 +1,20 @@
 package com.github.whyrising.y.collections.concretions.list
 
-import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.seq.ISeq
 
-data class SeqIterator<out E>(
-    internal var next: ISeq<@UnsafeVariance E>
-) : Iterator<E> {
+class SeqIterator<out E>(next: ISeq<@UnsafeVariance E>?) : Iterator<E> {
+    internal var next: ISeq<@UnsafeVariance E>? = when (next) {
+        is PersistentList.Empty -> null
+        else -> next
+    }
 
-    private var currentSeq: ISeq<@UnsafeVariance E> = Empty
+    private var currentSeq: ISeq<@UnsafeVariance E>? = null
 
     override fun hasNext(): Boolean {
-
         if (currentSeq === next)
-            next = currentSeq.rest()
+            next = currentSeq?.next()
 
-        return !(next === Empty)
+        return next != null
     }
 
     override fun next(): E {
@@ -22,6 +22,6 @@ data class SeqIterator<out E>(
 
         currentSeq = next
 
-        return next.first()
+        return next!!.first()
     }
 }

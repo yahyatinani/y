@@ -71,6 +71,13 @@ class LazySeq<out E> internal constructor(_f: () -> Any?) :
         return seq.rest()
     }
 
+    override fun next(): ISeq<E>? {
+        seq()
+        if (seq is Empty)
+            return null
+        return seq.next()
+    }
+
     override fun cons(e: @UnsafeVariance E): ISeq<E> = when (val s = seq()) {
         is Empty -> seq.cons(e)
         else -> Cons(e, s)

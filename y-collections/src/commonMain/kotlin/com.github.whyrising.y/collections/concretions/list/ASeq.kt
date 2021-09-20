@@ -80,6 +80,8 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
 
     override fun seq(): ISeq<E> = this
 
+    override fun rest(): ISeq<E> = next() ?: Empty
+
     override fun empty(): IPersistentCollection<E> = Empty
 
     override fun cons(e: @UnsafeVariance E): ISeq<E> = Cons(e, this)

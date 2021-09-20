@@ -301,10 +301,13 @@ sealed class PersistentVector<out E>(
         @Suppress("UNCHECKED_CAST")
         override fun first(): E = node[offset] as E
 
-        override fun rest(): ISeq<E> = (offset + 1).let {
+        override fun next(): ISeq<E>? = (offset + 1).let {
             when {
                 it < node.size -> ChunkedSeq(vector, node, index, it)
-                else -> restChunks()
+                else -> when (val restChunks = restChunks()) {
+                    is PersistentList.Empty -> null
+                    else -> restChunks
+                }
             }
         }
     }
