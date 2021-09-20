@@ -17,7 +17,7 @@ class LazySeqTest {
 
     @Test
     fun `lazySeq(lazySeq)`() {
-        val seq = lazySeq<Int>(lazySeq<Int>(l(1)))
+        val seq = lazySeq<Int> { lazySeq<Int> { l(1) } }
 
         seq.toString() shouldBe "(1)"
         seq.count shouldBeExactly 1

@@ -5,6 +5,7 @@ import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.concretions.list.SeqIterator
 import com.github.whyrising.y.collections.core.l
+import com.github.whyrising.y.collections.core.lazySeq
 import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.mocks.MockSeq
 import com.github.whyrising.y.collections.util.Murmur3
@@ -263,12 +264,9 @@ class LazySeqJvmTest : FreeSpec({
 
     "toString()" {
         val chunk = ArrayChunk(arrayOf(45, 89, 36))
-        val chunkedSeq = ChunkedSeq(chunk)
-        val f: () -> ISeq<Int>? = { chunkedSeq }
 
-        val lazySeq = LazySeq<Int>(f)
-
-        lazySeq.toString() shouldBe "(45 89 36)"
+        LazySeq<Int> { ChunkedSeq(chunk) }.toString() shouldBe "(45 89 36)"
+        LazySeq<Int> { null }.toString() shouldBe "()"
     }
 
     "List implementation" - {

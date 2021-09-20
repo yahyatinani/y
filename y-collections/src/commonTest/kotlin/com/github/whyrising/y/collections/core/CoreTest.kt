@@ -1,5 +1,7 @@
 package com.github.whyrising.y.collections.core
 
+import com.github.whyrising.y.collections.ArrayChunk
+import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
@@ -235,6 +237,66 @@ class CoreTest {
         m["b"] shouldBe 2
         m["c"] shouldBe 3
         m["d"].shouldBeNull()
+    }
+
+    @Test
+    fun `first()`() {
+        first<Int>(l(1, 2, 3)) shouldBe 1
+        first<Int>(listOf(1, 2, 3)) shouldBe 1
+        first<Int>(v(1, 2, 3)) shouldBe 1
+        first<Int>(v<Int>()).shouldBeNull()
+        first<Int>(null).shouldBeNull()
+    }
+
+    @Test
+    fun `consChunk(chunk, rest) should return rest`() {
+        val rest = l(1, 2)
+
+        val r = consChunk(ArrayChunk(arrayOf()), rest)
+
+        r shouldBeSameInstanceAs rest
+    }
+
+    @Test
+    fun `consChunk(chunk, rest) should return ChunkedSeq`() {
+        val cs = consChunk(ArrayChunk(arrayOf(1, 2)), l(3, 4))
+
+        cs.count shouldBeExactly 4
+        cs.toString() shouldBe "(1 2 3 4)"
+    }
+
+    @Test
+    fun `concat()`() {
+        val c = concat<Int>()
+
+        c.count shouldBeExactly 0
+        c.toString() shouldBe "()"
+    }
+
+    @Test
+    fun `concat(x)`() {
+        val c = concat<Int>(l(1, 2))
+
+        c.count shouldBeExactly 2
+        c.toString() shouldBe "(1 2)"
+    }
+
+    @Test
+    fun `concat(x, y)`() {
+        val c = concat<Int>(l(1, 2), l(3, 4))
+
+        c.count shouldBeExactly 4
+        c.toString() shouldBe "(1 2 3 4)"
+    }
+
+    @Test
+    fun `concat(x, y) ChunkedSeq`() {
+        val chunk1 = ArrayChunk(arrayOf(1, 2))
+
+        val concatenation = concat<Int>(ChunkedSeq(chunk1), l(3, 4))
+
+        concatenation.count shouldBeExactly 4
+        concatenation.toString() shouldBe "(1 2 3 4)"
     }
 
 }

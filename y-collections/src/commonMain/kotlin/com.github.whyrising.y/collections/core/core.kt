@@ -1,9 +1,11 @@
 package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.ArraySeq
+import com.github.whyrising.y.collections.Chunk
 import com.github.whyrising.y.collections.StringSeq
 import com.github.whyrising.y.collections.associative.Associative
 import com.github.whyrising.y.collections.associative.ILookup
+import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.Cons
 import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.map.HASHTABLE_THRESHOLD
@@ -13,6 +15,7 @@ import com.github.whyrising.y.collections.concretions.set.PersistentHashSet
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.mutable.set.TransientSet
+import com.github.whyrising.y.collections.seq.IChunkedSeq
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.seq.LazySeq
 import com.github.whyrising.y.collections.seq.Seqable
@@ -114,6 +117,12 @@ fun <E> cons(x: E, coll: Any?): ISeq<E> = when (coll) {
     else -> Cons(x, seq<E>(coll) as ISeq<E>)
 }
 
+fun <E> consChunk(chunk: Chunk<E>, rest: ISeq<E>): ISeq<E> =
+    when (chunk.count) {
+        0 -> rest
+        else -> ChunkedSeq(chunk, rest)
+    }
+
 fun <E> v(): IPersistentVector<E> = PersistentVector()
 
 fun <E> v(a: E): IPersistentVector<E> = PersistentVector(a)
@@ -140,7 +149,22 @@ fun <E> v(
     f: E,
     vararg args: E
 ): IPersistentVector<E> = PersistentVector(
-    cons(a, cons(b, cons(c, cons(d, cons(e, cons(f, args))))))
+    cons(
+        a,
+        cons(
+            b,
+            cons(
+                c,
+                cons(
+                    d,
+                    cons(
+                        e,
+                        cons(f, args)
+                    )
+                )
+            )
+        )
+    )
 )
 
 fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
@@ -254,6 +278,17 @@ operator fun <E> IPersistentVector<E>.component5(): E = this.nth(4)
 
 operator fun <K, V> IPersistentMap<K, V>.get(key: K): V? = this.valAt(key)
 
+fun <E> first(x: Any?): E? = when (val seq = seq<E>(x)) {
+    null -> null
+    else -> {
+        try {
+            seq.first()
+        } catch (e: NoSuchElementException) {
+            null
+        }
+    }
+}
+
 fun <E> lazySeq(): LazySeq<E> = LazySeq { null }
 
 /**
@@ -261,4 +296,24 @@ fun <E> lazySeq(): LazySeq<E> = LazySeq { null }
  *
  * @throws IllegalArgumentException if x cannot be an ISeq.
  */
-fun <E> lazySeq(x: Any): LazySeq<E> = LazySeq { x }
+fun <E> lazySeq(body: () -> Any?): LazySeq<E> = LazySeq { body() }
+
+fun <E> concat(): LazySeq<E> = lazySeq()
+
+fun <E> concat(x: Any?): LazySeq<E> = lazySeq { x }
+
+fun <E> concat(x: Any?, y: Any?): LazySeq<E> = lazySeq {
+    val s = seq<E>(x)
+    when {
+        s === null || s is PersistentList.Empty -> y
+        else -> {
+            when (s) {
+                is IChunkedSeq<*> -> {
+                    consChunk(s.firstChunk(), concat(s.restChunks(), y))
+                }
+                else -> cons(s.first(), concat<E>(s.rest(), y))
+            }
+        }
+    }
+}
+
