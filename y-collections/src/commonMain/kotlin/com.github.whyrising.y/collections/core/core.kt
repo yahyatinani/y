@@ -303,17 +303,21 @@ fun <E> concat(): LazySeq<E> = lazySeq()
 fun <E> concat(x: Any?): LazySeq<E> = lazySeq { x }
 
 fun <E> concat(x: Any?, y: Any?): LazySeq<E> = lazySeq {
-    val s = seq<E>(x)
-    when {
-        s === null || s is PersistentList.Empty -> y
-        else -> {
-            when (s) {
-                is IChunkedSeq<*> -> {
-                    consChunk(s.firstChunk(), concat(s.restChunks(), y))
-                }
-                else -> cons(s.first(), concat<E>(s.rest(), y))
+    when (val s = seq<E>(x)) {
+        null -> y
+        else -> when (s) {
+            is IChunkedSeq<*> -> {
+                consChunk(s.firstChunk(), concat(nextChunks(s), y))
             }
+            else -> cons(s.first(), concat<E>(s.next(), y))
         }
+    }
+}
+
+fun <E> nextChunks(chunk: IChunkedSeq<E>): ISeq<E>? {
+    return when (val rs = chunk.restChunks()) {
+        is PersistentList.Empty -> null
+        else -> rs
     }
 }
 
@@ -321,18 +325,15 @@ fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
     fun cat(xy: Any?, zzs: Any?): LazySeq<E> = lazySeq {
         val xys = seq<E>(xy)
         when {
-            xys === null || xys is PersistentList.Empty -> {
-                val argsSeq = seq<E>(zzs)
-                when {
-                    argsSeq === null || argsSeq is PersistentList.Empty -> null
-                    else -> cat(first(argsSeq), argsSeq.rest())
-                }
+            xys === null -> when (val argsSeq = seq<E>(zzs)) {
+                null -> null
+                else -> cat(first(argsSeq), argsSeq.next())
             }
             else -> when (xys) {
                 is IChunkedSeq<*> -> {
-                    consChunk(xys.firstChunk(), cat(xys.restChunks(), zzs))
+                    consChunk(xys.firstChunk(), cat(nextChunks(xys), zzs))
                 }
-                else -> cons(xys.first(), cat(xys.rest(), zzs))
+                else -> cons(xys.first(), cat(xys.next(), zzs))
             }
         }
     }

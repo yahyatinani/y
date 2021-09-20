@@ -287,6 +287,10 @@ class CoreTest {
 
         c.count shouldBeExactly 4
         c.toString() shouldBe "(1 2 3 4)"
+
+        concat<Int>(null, l(3, 4)).toString() shouldBe "(3 4)"
+
+        concat<Int>(l(1, 2), null).toString() shouldBe "(1 2)"
     }
 
     @Test
@@ -305,6 +309,12 @@ class CoreTest {
 
         concatenation.count shouldBeExactly 6
         concatenation.toString() shouldBe "(1 2 3 4 5 6)"
+
+        concat<Int>(l(1, 2), l(3, 4), null).toString() shouldBe "(1 2 3 4)"
+
+        concat<Int>(null, l(3, 4), l(5, 6)).toString() shouldBe "(3 4 5 6)"
+
+        concat<Int>(l(1, 2), null, l(5, 6)).toString() shouldBe "(1 2 5 6)"
 
         val ch1 = ArrayChunk(arrayOf(1, 2))
         val ch2 = ArrayChunk(arrayOf(3, 4))
