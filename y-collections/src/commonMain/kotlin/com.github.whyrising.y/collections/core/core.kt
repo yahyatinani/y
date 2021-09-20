@@ -324,21 +324,15 @@ fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
             xys === null || xys is PersistentList.Empty -> {
                 val argsSeq = seq<E>(zzs)
                 when {
-                    argsSeq === null || argsSeq is PersistentList.Empty -> {
-                        null
-                    }
-                    else -> {
-                        cat(first(argsSeq), argsSeq.rest())
-                    }
+                    argsSeq === null || argsSeq is PersistentList.Empty -> null
+                    else -> cat(first(argsSeq), argsSeq.rest())
                 }
             }
             else -> when (xys) {
                 is IChunkedSeq<*> -> {
                     consChunk(xys.firstChunk(), cat(xys.restChunks(), zzs))
                 }
-                else -> {
-                    cons(xys.first(), cat(xys.rest(), zzs))
-                }
+                else -> cons(xys.first(), cat(xys.rest(), zzs))
             }
         }
     }
