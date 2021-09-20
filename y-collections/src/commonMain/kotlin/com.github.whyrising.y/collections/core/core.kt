@@ -317,3 +317,31 @@ fun <E> concat(x: Any?, y: Any?): LazySeq<E> = lazySeq {
     }
 }
 
+fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
+    fun cat(xy: Any?, zzs: Any?): LazySeq<E> = lazySeq {
+        val xys = seq<E>(xy)
+        when {
+            xys === null || xys is PersistentList.Empty -> {
+                val argsSeq = seq<E>(zzs)
+                when {
+                    argsSeq === null || argsSeq is PersistentList.Empty -> {
+                        null
+                    }
+                    else -> {
+                        cat(first(argsSeq), argsSeq.rest())
+                    }
+                }
+            }
+            else -> when (xys) {
+                is IChunkedSeq<*> -> {
+                    consChunk(xys.firstChunk(), cat(xys.restChunks(), zzs))
+                }
+                else -> {
+                    cons(xys.first(), cat(xys.rest(), zzs))
+                }
+            }
+        }
+    }
+
+    return cat(concat<E>(x, y), zs)
+}

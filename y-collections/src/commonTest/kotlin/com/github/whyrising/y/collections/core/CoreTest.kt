@@ -299,4 +299,16 @@ class CoreTest {
         concatenation.toString() shouldBe "(1 2 3 4)"
     }
 
+    @Test
+    fun `concat(x, y, zs)`() {
+        val concatenation = concat<Int>(l(1, 2), l(3, 4), l(5, 6))
+
+        concatenation.count shouldBeExactly 6
+        concatenation.toString() shouldBe "(1 2 3 4 5 6)"
+
+        val ch1 = ArrayChunk(arrayOf(1, 2))
+        val ch2 = ArrayChunk(arrayOf(3, 4))
+        val concat = concat<Int>(ChunkedSeq(ch1), ChunkedSeq(ch2), l(5, 6))
+        concat.toString() shouldBe "(1 2 3 4 5 6)"
+    }
 }
