@@ -320,5 +320,11 @@ class CoreTest {
         val ch2 = ArrayChunk(arrayOf(3, 4))
         val concat = concat<Int>(ChunkedSeq(ch1), ChunkedSeq(ch2), l(5, 6))
         concat.toString() shouldBe "(1 2 3 4 5 6)"
+
+        concat<Int>(l(1, 2), listOf(3, 4), listOf(5, 6)).toString() shouldBe
+            "(1 2 3 4 5 6)"
+
+        concat<Int>(listOf(1, 2), v(3, 4), listOf(5, 6)).toString() shouldBe
+            "(1 2 3 4 5 6)"
     }
 }
