@@ -22,7 +22,7 @@ class ChunkedSeq<out E>(
 
     override fun next(): ISeq<E>? = when {
         firstChunk.count > 1 -> ChunkedSeq(firstChunk.dropFirst(), restChunks)
-        else -> when (restChunks) {
+        else -> when (restChunks.seq()) {
             is Empty -> null
             else -> restChunks
         }

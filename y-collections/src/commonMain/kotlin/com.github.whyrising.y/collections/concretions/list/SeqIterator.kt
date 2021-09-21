@@ -7,23 +7,26 @@ import com.github.whyrising.y.collections.seq.ISeq
 class SeqIterator<out E>(next: ISeq<@UnsafeVariance E>?) : Iterator<E> {
     private var isFresh = true
 
-    internal var next: ISeq<@UnsafeVariance E> = when (next) {
-        null -> Empty
+    internal var next: ISeq<@UnsafeVariance E>? = when (next) {
+        Empty -> null
         else -> next
     }
 
-    private var currentSeq: ISeq<@UnsafeVariance E> = Empty
+    private var currentSeq: ISeq<@UnsafeVariance E>? = null
 
     override fun hasNext(): Boolean {
         when {
             isFresh -> {
                 isFresh = false
-                next = seq(next)!!
+
+                next = seq(next)
             }
-            currentSeq === next -> next = currentSeq.rest()
+            currentSeq === next -> {
+                next = currentSeq?.next()
+            }
         }
 
-        return next != Empty
+        return next != null
     }
 
     override fun next(): E {
@@ -31,6 +34,14 @@ class SeqIterator<out E>(next: ISeq<@UnsafeVariance E>?) : Iterator<E> {
 
         currentSeq = next
 
-        return next.first()
+        return next!!.first()
     }
+}
+
+fun <E> next(x: Any?): ISeq<E>? {
+    if (x is ISeq<*>) return x.next() as ISeq<E>?
+
+    val seq: ISeq<E> = seq(x) ?: return null
+
+    return seq.next()
 }
