@@ -173,6 +173,15 @@ class UtilJvmTest : FreeSpec({
             e.message shouldBe
                 "Don't know how to create ISeq from: ${x::class.simpleName}"
         }
+
+        "Kotlin Sequence<E>" {
+            val x = sequenceOf(1, 2)
+
+            val seq = seq<Int>(x) as ISeq<Int>
+
+            seq.first() shouldBeExactly 1
+            seq.rest().first() shouldBeExactly 2
+        }
     }
 
     "hasheq(object)" {

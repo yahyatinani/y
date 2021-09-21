@@ -29,7 +29,7 @@ fun <E> seq(x: Any?): ISeq<E>? = when (x) {
     is ISeq<*> -> x as ISeq<E>
     is Seqable<*> -> x.seq() as ISeq<E>
     is Iterable<*> -> lazyChunkedSeq(x.iterator() as Iterator<E>)
-    // TODO: support Sequence<E>
+    is Sequence<*> -> lazyChunkedSeq(x.iterator() as Iterator<E>)
     is LazySeq<*> -> x.seq() as ISeq<E>
     is ShortArray -> ArraySeq(x) as ISeq<E>
     is IntArray -> ArraySeq(x) as ISeq<E>
