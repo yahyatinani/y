@@ -12,7 +12,7 @@ import com.github.whyrising.y.collections.util.nth
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 
-class LazySeq<out E> internal constructor(_f: () -> Any?) :
+class LazySeq<out E> constructor(_f: () -> Any?) :
     SynchronizedObject(),
     ISeq<E>,
     List<E>,
@@ -59,7 +59,8 @@ class LazySeq<out E> internal constructor(_f: () -> Any?) :
                 while (lazySeq is LazySeq<*>)
                     lazySeq = lazySeq.seqVal()
 
-                seq = seq<E>(lazySeq) as ISeq<E>
+                // TODO: make seq nullable maybe?
+                seq = seq(lazySeq) ?: Empty
             }
 
             return seq
@@ -91,10 +92,10 @@ class LazySeq<out E> internal constructor(_f: () -> Any?) :
     override val count: Int
         get() {
             var c = 0
-            var s = seq()
-            while (s != empty()) {
+            var s: ISeq<E>? = seq()
+            while (s != null && s !is Empty) {
                 ++c
-                s = s.rest()
+                s = s.next()
             }
 
             return c
@@ -104,9 +105,11 @@ class LazySeq<out E> internal constructor(_f: () -> Any?) :
 
     override fun equiv(other: Any?): Boolean = when (val s = seq()) {
         !is Empty -> s.equiv(other)
-        else ->
+        else -> {
+            val seq1 = seq<E>(other)
             (other is Sequential || other is List<*>) &&
-                seq<E>(other) is Empty
+                (seq1 is Empty || seq1 == null)
+        }
     }
 
     override fun conj(e: @UnsafeVariance E): ISeq<E> = cons(e)
@@ -115,9 +118,11 @@ class LazySeq<out E> internal constructor(_f: () -> Any?) :
 
     override fun equals(other: Any?): Boolean = when (val s = seq()) {
         !is Empty -> s == other
-        else ->
+        else -> {
+            val seq1 = seq<E>(other)
             (other is Sequential || other is List<*>) &&
-                seq<E>(other) is Empty
+                (seq1 is Empty || seq1 == null)
+        }
     }
 
     @OptIn(ExperimentalStdlibApi::class)

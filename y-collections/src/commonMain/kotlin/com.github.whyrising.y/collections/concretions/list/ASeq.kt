@@ -31,18 +31,19 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
             this === other -> return true
             other !is List<*> && other !is Sequential -> return false
             else -> {
-                var thisSeq = seq()
-                var otherSeq = seq<E>(other) as ISeq<E>
-                while (thisSeq !is Empty) {
-                    if (otherSeq is Empty ||
+                var thisSeq: ISeq<E>? = seq()
+                var otherSeq: ISeq<E>? = seq(other)
+                while (thisSeq !is Empty && thisSeq != null) {
+                    if (
+                        otherSeq == null ||
                         !areEqual(thisSeq.first(), otherSeq.first())
                     ) return false
 
-                    thisSeq = thisSeq.rest()
-                    otherSeq = otherSeq.rest()
+                    thisSeq = thisSeq.next()
+                    otherSeq = otherSeq.next()
                 }
 
-                return otherSeq is Empty
+                return otherSeq == null
             }
         }
     }

@@ -1,6 +1,26 @@
 Changelog
 ========
 
+## v0.0.7
+
+#### Added:
+
+* concat()
+
+* first()
+
+* IPersistentVector<E>.componentN()
+
+* IPersistentVector<E>.get(index: Int)
+
+*  consChunk()
+
+*  map()
+
+* ```kotlin
+  fun nextChunks()
+  ```
+
 ## v0.0.6
 
 * #### Performance/Optimization:

@@ -37,11 +37,3 @@ class SeqIterator<out E>(next: ISeq<@UnsafeVariance E>?) : Iterator<E> {
         return next!!.first()
     }
 }
-
-fun <E> next(x: Any?): ISeq<E>? {
-    if (x is ISeq<*>) return x.next() as ISeq<E>?
-
-    val seq: ISeq<E> = seq(x) ?: return null
-
-    return seq.next()
-}

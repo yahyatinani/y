@@ -2,6 +2,7 @@ package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
+import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
@@ -326,5 +327,16 @@ class CoreTest {
 
         concat<Int>(listOf(1, 2), v(3, 4), listOf(5, 6)).toString() shouldBe
             "(1 2 3 4 5 6)"
+    }
+
+    @Test
+    fun `map(f, coll)`() {
+        map<Int, Int>({ i -> i + 1 }, null) shouldBe PersistentList.Empty
+
+        map<Int, Int>({ i -> i + 1 }, listOf(11, 5, 9)) shouldBe
+            listOf(12, 6, 10)
+
+        val chunkedSeq = ChunkedSeq(ArrayChunk(arrayOf(11, 5, 9)))
+        map<Int, Int>({ i -> i + 1 }, chunkedSeq) shouldBe listOf(12, 6, 10)
     }
 }
