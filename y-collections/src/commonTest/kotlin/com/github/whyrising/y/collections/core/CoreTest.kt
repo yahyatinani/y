@@ -331,12 +331,67 @@ class CoreTest {
 
     @Test
     fun `map(f, coll)`() {
-        map<Int, Int>({ i -> i + 1 }, null) shouldBe PersistentList.Empty
+        val f: (Int) -> Int = { i -> i + 1 }
 
-        map<Int, Int>({ i -> i + 1 }, listOf(11, 5, 9)) shouldBe
-            listOf(12, 6, 10)
+        map(f, null) shouldBe PersistentList.Empty
+
+        map(f, listOf(11, 5, 9)) shouldBe l(12, 6, 10)
 
         val chunkedSeq = ChunkedSeq(ArrayChunk(arrayOf(11, 5, 9)))
-        map<Int, Int>({ i -> i + 1 }, chunkedSeq) shouldBe listOf(12, 6, 10)
+        map(f, chunkedSeq) shouldBe listOf(12, 6, 10)
+
+        map(f, null).toString() shouldBe "()"
+    }
+
+    @Test
+    fun `map(f, c1, c2)`() {
+        val f: (Int, Int) -> Int = { i, j -> i + j }
+
+        map(f, l(5), l(8)) shouldBe l(13)
+
+        map(f, null, null) shouldBe l()
+
+        map(f, l(5), null) shouldBe l()
+
+        map(f, null, l(8)) shouldBe l()
+    }
+
+    @Test
+    fun `map(f, c1, c2, c3)`() {
+        val f: (Int, Int, Int) -> Int = { i, j, k -> i + j + k }
+
+        map(f, l(5), l(8), l(1)) shouldBe l(14)
+
+        map(f, null, null, null) shouldBe l()
+
+        map(f, l(5), null, null) shouldBe l()
+
+        map(f, null, l(8), null) shouldBe l()
+    }
+
+    @Test
+    fun `apply(f(X), x)`() {
+        fun f(i: Int, vararg j: Int): Int {
+            return j.fold(i) { acc, n ->
+                n * acc
+            }
+        }
+
+        apply<Int, Int>({ i: Int -> i * 2 }, l(5)) shouldBeExactly 10
+
+        apply<Int, Int>({ i: Int, j: Int -> i * j }, l(5, 6)) shouldBeExactly 30
+
+        apply({ i: Int, j: Int -> i * j }, 5, l(6)) shouldBeExactly 30
+
+        apply({ i: Int, j: Int -> i * j }, 5, 6, l<Int>()) shouldBeExactly 30
+
+        shouldThrowExactly<RuntimeException> {
+            apply<Int, Int>({ i: Int -> i * 2 }, l<Int>())
+        }
+    }
+
+    @Test
+    fun `map(f, c1, c2, c3, colls)`() {
+        // TODO: apply needed
     }
 }

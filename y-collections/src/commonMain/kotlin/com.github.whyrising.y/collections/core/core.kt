@@ -351,16 +351,114 @@ fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
 
 @Suppress("UNCHECKED_CAST")
 fun <T, R> map(f: (T) -> R, coll: Any?): LazySeq<R> = lazySeq {
-    val s = seq<T>(coll) ?: return@lazySeq null
+    when (val s = seq<T>(coll)) {
+        null -> return@lazySeq null
+        is IChunkedSeq<*> -> {
+            val firstChunk = s.firstChunk() as Chunk<T>
+            val count = s.count
+            val chunkBuffer = arrayOfNulls<Any?>(count)
+            for (i in 0 until count)
+                chunkBuffer[i] = f(firstChunk.nth(i))
 
-    if (s is IChunkedSeq<*>) {
-        val firstChunk = s.firstChunk() as Chunk<T>
-        val count = s.count
-        val chunkBuffer = arrayOfNulls<Any?>(count)
-        for (i in 0 until count)
-            chunkBuffer[i] = f(firstChunk.nth(i))
+            consChunk(ArrayChunk(chunkBuffer), map(f, s.restChunks()))
 
-        consChunk(ArrayChunk(chunkBuffer), map(f, s.restChunks()))
+        }
+        else -> cons(f(s.first()), map(f, s.rest()))
+    }
+}
 
-    } else cons(f(s.first()), map(f, s.rest()))
+fun <T1, T2, R> map(f: (T1, T2) -> R, c1: Any?, c2: Any?): LazySeq<R> =
+    lazySeq {
+        val s1 = seq<T1>(c1)
+        val s2 = seq<T2>(c2)
+
+        if (s1 == null || s2 == null)
+            return@lazySeq null
+
+        cons(f(s1.first(), s2.first()), map(f, s1.rest(), s2.rest()))
+    }
+
+fun <T1, T2, T3, R> map(
+    f: (T1, T2, T3) -> R,
+    c1: Any?,
+    c2: Any?,
+    c3: Any?
+): LazySeq<R> = lazySeq {
+    val s1 = seq<T1>(c1)
+    val s2 = seq<T2>(c2)
+    val s3 = seq<T3>(c3)
+
+    if (s1 == null || s2 == null || s3 == null)
+        return@lazySeq null
+
+    cons(
+        f(s1.first(), s2.first(), s3.first()),
+        map(f, s1.rest(), s2.rest(), s3.rest())
+    )
+}
+
+typealias F1 <T, R> = (T) -> R
+typealias F2 <T1, T2, R> = (T1, T2) -> R
+typealias F3 <T1, T2, T3, R> = (T1, T2, T3) -> R
+typealias F4 <T1, T2, T3, T4, R> = (T1, T2, T3, T4) -> R
+typealias F5 <T1, T2, T3, T4, T5, R> = (T1, T2, T3, T4, T5) -> R
+typealias F6 <T1, T2, T3, T4, T5, T6, R> = (T1, T2, T3, T4, T5, T6) -> R
+typealias F7 <T1, T2, T3, T4, T5, T6, T7, R> = (T1, T2, T3, T4, T5, T6, T7) -> R
+
+typealias F8 <T1, T2, T3, T4, T5, T6, T7, T8, R> =
+        (T1, T2, T3, T4, T5, T6, T7, T8) -> R
+
+typealias F9 <T1, T2, T3, T4, T5, T6, T7, T8, T9, R> =
+        (T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R
+
+typealias F10 <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> =
+        (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) -> R
+
+fun <T, R> apply(f: Function<R>, coll: Any): R = applyTo(f, seq<T>(coll))
+
+fun <T, R> apply(f: Function<R>, a: T, coll: Any): R {
+    // TODO: extract list*
+    return applyTo(f, cons(a, coll))
+}
+
+fun <T1, T2, R> apply(
+    f: Function<R>,
+    a: T1,
+    b: T2,
+    coll: Any
+): R {
+    return applyTo(f, cons(a, cons(b, coll)))
+}
+
+fun <R> applyTo(f: Function<R>, s: ISeq<Any?>?): R {
+    if (s == null)
+        throw RuntimeException("Wrong number of args (0) passed to $f")
+
+    return when (s.count) {
+        0 -> TODO()
+        1 -> (f as F1<Any?, R>)(s.first())
+        2 -> (f as F2<Any?, Any?, R>)(s.first(), s.rest().first())
+        3 -> (f as F3<Any?, Any?, Any?, R>)(
+            s.first(),
+            s.rest().first(),
+            s.rest().rest().first()
+        )
+        else -> TODO()
+    }
+}
+
+fun <T> a(k: Int, vararg i: T): Int {
+    return 0
+}
+
+fun <T1, T2, T3, Ts, R> map(
+    f: (T1, T2, T3, Array<out Ts>) -> R,
+    c1: Any?,
+    c2: Any?,
+    c3: Any?,
+    vararg colls: Any?
+): LazySeq<R> = lazySeq {
+//    val kFunction1: KFunction2<Int, Array<Int>, Int> = ::a
+
+    TODO()
 }
