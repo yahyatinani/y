@@ -19,6 +19,7 @@ import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.mutable.set.TransientSet
 import com.github.whyrising.y.collections.seq.IChunkedSeq
+import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.seq.LazySeq
 import com.github.whyrising.y.collections.seq.Seqable
@@ -349,54 +350,6 @@ fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
     return cat(concat<E>(x, y), zs)
 }
 
-@Suppress("UNCHECKED_CAST")
-fun <T, R> map(f: (T) -> R, coll: Any?): LazySeq<R> = lazySeq {
-    when (val s = seq<T>(coll)) {
-        null -> return@lazySeq null
-        is IChunkedSeq<*> -> {
-            val firstChunk = s.firstChunk() as Chunk<T>
-            val count = s.count
-            val chunkBuffer = arrayOfNulls<Any?>(count)
-            for (i in 0 until count)
-                chunkBuffer[i] = f(firstChunk.nth(i))
-
-            consChunk(ArrayChunk(chunkBuffer), map(f, s.restChunks()))
-
-        }
-        else -> cons(f(s.first()), map(f, s.rest()))
-    }
-}
-
-fun <T1, T2, R> map(f: (T1, T2) -> R, c1: Any?, c2: Any?): LazySeq<R> =
-    lazySeq {
-        val s1 = seq<T1>(c1)
-        val s2 = seq<T2>(c2)
-
-        if (s1 == null || s2 == null)
-            return@lazySeq null
-
-        cons(f(s1.first(), s2.first()), map(f, s1.rest(), s2.rest()))
-    }
-
-fun <T1, T2, T3, R> map(
-    f: (T1, T2, T3) -> R,
-    c1: Any?,
-    c2: Any?,
-    c3: Any?
-): LazySeq<R> = lazySeq {
-    val s1 = seq<T1>(c1)
-    val s2 = seq<T2>(c2)
-    val s3 = seq<T3>(c3)
-
-    if (s1 == null || s2 == null || s3 == null)
-        return@lazySeq null
-
-    cons(
-        f(s1.first(), s2.first(), s3.first()),
-        map(f, s1.rest(), s2.rest(), s3.rest())
-    )
-}
-
 internal fun spread(arglist: Any?): ISeq<Any?>? {
     val s = seq<Any?>(arglist)
     return when {
@@ -496,14 +449,108 @@ fun <T1, T2, T3, T4, R> apply(
     vararg args: Any
 ): R = applyTo(f, cons(a, cons(b, cons(c, cons(d, spread(args))))))
 
-fun <T1, T2, T3, Ts, R> map(
-    f: (T1, T2, T3, Array<out Ts>) -> R,
+fun <T> isEvery(pred: (T) -> Boolean, coll: Any?): Boolean {
+    val s = seq<Any?>(coll) ?: return true
+
+    val first = s.first()
+
+    if (first != null && pred(first as T)) return isEvery(pred, s.next())
+
+    return false
+}
+
+fun <T> conj(coll: IPersistentCollection<T>?, x: T): IPersistentCollection<T> {
+    return when (coll) {
+        null -> l(x)
+        else -> coll.conj(x)
+    }
+}
+
+fun <T> conj(
+    coll: IPersistentCollection<T>?,
+    x: T,
+    vararg xs: T
+): IPersistentCollection<T> {
+    tailrec fun conj(
+        coll: IPersistentCollection<T>,
+        s: ISeq<T>?
+    ): IPersistentCollection<T> = when (s) {
+        null -> coll
+        else -> conj(coll.conj(s.first()), s.next())
+    }
+
+    return conj(coll?.conj(x) ?: l(x), seq(xs))
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <T, R> map(f: (T) -> R, coll: Any?): LazySeq<R> = lazySeq {
+    when (val s = seq<T>(coll)) {
+        null -> return@lazySeq null
+        is IChunkedSeq<*> -> {
+            val firstChunk = s.firstChunk() as Chunk<T>
+            val count = s.count
+            val chunkBuffer = arrayOfNulls<Any?>(count)
+            for (i in 0 until count)
+                chunkBuffer[i] = f(firstChunk.nth(i))
+
+            consChunk(ArrayChunk(chunkBuffer), map(f, s.restChunks()))
+        }
+        else -> cons(f(s.first()), map(f, s.rest()))
+    }
+}
+
+fun <T1, T2, R> map(f: (T1, T2) -> R, c1: Any?, c2: Any?): LazySeq<R> =
+    lazySeq {
+        val s1 = seq<T1>(c1)
+        val s2 = seq<T2>(c2)
+
+        if (s1 == null || s2 == null)
+            return@lazySeq null
+
+        cons(f(s1.first(), s2.first()), map(f, s1.rest(), s2.rest()))
+    }
+
+fun <T1, T2, T3, R> map(
+    f: (T1, T2, T3) -> R,
+    c1: Any?,
+    c2: Any?,
+    c3: Any?
+): LazySeq<R> = lazySeq {
+    val s1 = seq<T1>(c1)
+    val s2 = seq<T2>(c2)
+    val s3 = seq<T3>(c3)
+
+    if (s1 == null || s2 == null || s3 == null)
+        return@lazySeq null
+
+    cons(
+        f(s1.first(), s2.first(), s3.first()),
+        map(f, s1.rest(), s2.rest(), s3.rest())
+    )
+}
+
+fun <R> map(
+    f: Function<R>,
     c1: Any?,
     c2: Any?,
     c3: Any?,
     vararg colls: Any?
-): LazySeq<R> = lazySeq {
-//    val kFunction1: KFunction2<Int, Array<Int>, Int> = ::a
+): LazySeq<R> {
+    fun step(cs: IPersistentCollection<Any?>): ISeq<Any?>? {
+        val ss = map<Any?, ISeq<Any?>?>({ seq(it) }, cs)
 
-    TODO()
+        if (isEvery<ISeq<Any?>?>({ it != null }, ss)) {
+            return cons(
+                map<ISeq<Any?>, Any?>({ it.first() }, ss),
+                step(map<ISeq<Any?>, Any?>({ it.rest() }, ss))
+            )
+        }
+
+        return null
+    }
+
+    return map<Any, R>(
+        { apply<Any, R>(f, it) },
+        step(conj(seq(colls), c1, c2, c3))
+    )
 }

@@ -11,6 +11,7 @@ import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.seq.Seqable
 import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
@@ -330,46 +331,6 @@ class CoreTest {
     }
 
     @Test
-    fun `map(f, coll)`() {
-        val f: (Int) -> Int = { i -> i + 1 }
-
-        map(f, null) shouldBe PersistentList.Empty
-
-        map(f, listOf(11, 5, 9)) shouldBe l(12, 6, 10)
-
-        val chunkedSeq = ChunkedSeq(ArrayChunk(arrayOf(11, 5, 9)))
-        map(f, chunkedSeq) shouldBe listOf(12, 6, 10)
-
-        map(f, null).toString() shouldBe "()"
-    }
-
-    @Test
-    fun `map(f, c1, c2)`() {
-        val f: (Int, Int) -> Int = { i, j -> i + j }
-
-        map(f, l(5), l(8)) shouldBe l(13)
-
-        map(f, null, null) shouldBe l()
-
-        map(f, l(5), null) shouldBe l()
-
-        map(f, null, l(8)) shouldBe l()
-    }
-
-    @Test
-    fun `map(f, c1, c2, c3)`() {
-        val f: (Int, Int, Int) -> Int = { i, j, k -> i + j + k }
-
-        map(f, l(5), l(8), l(1)) shouldBe l(14)
-
-        map(f, null, null, null) shouldBe l()
-
-        map(f, l(5), null, null) shouldBe l()
-
-        map(f, null, l(8), null) shouldBe l()
-    }
-
-    @Test
     fun `spread()`() {
         spread(null).shouldBeNull()
 
@@ -458,7 +419,79 @@ class CoreTest {
     }
 
     @Test
+    fun `isEvery(pred, coll)`() {
+        isEvery<Int>({ true }, null).shouldBeTrue()
+
+        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 6)).shouldBeTrue()
+
+        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 1)).shouldBeFalse()
+
+        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, null)).shouldBeFalse()
+    }
+
+    @Test
+    fun `conj()`() {
+        conj(null, 2) shouldBe l(2)
+
+        conj(v(1), 2) shouldBe v(1, 2)
+
+        conj(v(1), 2, 3, 4) shouldBe v(1, 2, 3, 4)
+
+        conj(v(1), null, 3, 4) shouldBe v(1, null, 3, 4)
+
+        conj(null, 1, 3, 4) shouldBe v(4, 3, 1)
+    }
+
+    @Test
+    fun `map(f, coll)`() {
+        val f: (Int) -> Int = { i -> i + 1 }
+
+        map(f, null) shouldBe PersistentList.Empty
+
+        map(f, listOf(11, 5, 9)) shouldBe l(12, 6, 10)
+
+        val chunkedSeq = ChunkedSeq(ArrayChunk(arrayOf(11, 5, 9)))
+        map(f, chunkedSeq) shouldBe listOf(12, 6, 10)
+
+        map(f, null).toString() shouldBe "()"
+    }
+
+    @Test
+    fun `map(f, c1, c2)`() {
+        val f: (Int, Int) -> Int = { i, j -> i + j }
+
+        map(f, l(5), l(8)) shouldBe l(13)
+
+        map(f, null, null) shouldBe l()
+
+        map(f, l(5), null) shouldBe l()
+
+        map(f, null, l(8)) shouldBe l()
+    }
+
+    @Test
+    fun `map(f, c1, c2, c3)`() {
+        val f: (Int, Int, Int) -> Int = { i, j, k -> i + j + k }
+
+        map(f, l(5), l(8), l(1)) shouldBe l(14)
+
+        map(f, null, null, null) shouldBe l()
+
+        map(f, l(5), null, null) shouldBe l()
+
+        map(f, null, l(8), null) shouldBe l()
+    }
+
+    @Test
     fun `map(f, c1, c2, c3, colls)`() {
-        // TODO: apply needed
+        val f: (Int, Int, Int) -> Int = { i, j, k -> i + j + k }
+
+        map(f, listOf(1, 2), listOf(1, 3), listOf(1, 4)) shouldBe l(3, 9)
+
+        map(f, l(1, 2), l(1, 3), l(1, 4)) shouldBe l(3, 9)
+
+        map(f, l(1, 2), l(1, 3), l(1, 4), null) shouldBe l()
+
+        map(f, l(1, 2), l(1, 3), null, l(1, 4)) shouldBe l()
     }
 }
