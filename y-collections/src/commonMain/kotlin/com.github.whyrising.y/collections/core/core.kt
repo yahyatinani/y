@@ -118,7 +118,7 @@ fun <K, V> hashMap(vararg kvs: Pair<K, V>): PersistentHashMap<K, V> = when {
 
 @Suppress("UNCHECKED_CAST")
 fun <E> cons(x: E, coll: Any?): ISeq<E> = when (coll) {
-    null -> Empty
+    null -> l(x)
     is ISeq<*> -> Cons(x, coll) as ISeq<E>
     else -> Cons(x, seq<E>(coll) as ISeq<E>)
 }
