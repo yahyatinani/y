@@ -370,13 +370,16 @@ class CoreTest {
     }
 
     @Test
-    fun `apply(f(X), x)`() {
-        fun f(i: Int, vararg j: Int): Int {
-            return j.fold(i) { acc, n ->
-                n * acc
-            }
-        }
+    fun `spread()`() {
+        spread(null).shouldBeNull()
 
+        spread(arrayOf(listOf(1))) shouldBe l(1)
+
+        spread(arrayOf(1, 2, 3, listOf(4))) shouldBe l(1, 2, 3, 4)
+    }
+
+    @Test
+    fun `apply(f(X), x)`() {
         apply<Int, Int>({ i: Int -> i * 2 }, l(5)) shouldBeExactly 10
 
         apply<Int, Int>({ i: Int, j: Int -> i * j }, l(5, 6)) shouldBeExactly 30
@@ -385,9 +388,73 @@ class CoreTest {
 
         apply({ i: Int, j: Int -> i * j }, 5, 6, l<Int>()) shouldBeExactly 30
 
-        shouldThrowExactly<RuntimeException> {
+        apply({ i: Int, j: Int -> i * j }, 5, l(6)) shouldBeExactly 30
+
+        apply(
+            { i: Int, j: Int, k: Int -> i * j * k },
+            5,
+            6,
+            2,
+            l<Int>()
+        ) shouldBeExactly 60
+
+        apply(
+            { i: Int, j: Int, k: Int, l: Int -> i * j * k * l },
+            5,
+            6,
+            2,
+            2,
+            l<Int>()
+        ) shouldBeExactly 120
+
+        apply(
+            { i: Int, j: Int, k: Int, l: Int, m: Int -> i * j * k * l * m },
+            5,
+            6,
+            2,
+            2,
+            2,
+            l<Int>()
+        ) shouldBeExactly 240
+
+        apply(
+            { i: Int, j: Int, k: Int, l: Int, m: Int, n: Int ->
+                i * j * k * l * m * n
+            },
+            5,
+            6,
+            2,
+            2,
+            2,
+            l(2)
+        ) shouldBeExactly 480
+
+        apply(
+            { i: Int, j: Int, k: Int, l: Int, m: Int, n: Int, o: Int ->
+                i * j * k * l * m * n * o
+            },
+            5,
+            6,
+            2,
+            2,
+            2,
+            l(2, 2)
+        ) shouldBeExactly 960
+
+        shouldThrowExactly<ArityException> {
+            apply<Int, Int>({ i: Int -> i * 2 }, l(5, 6))
+        }.message shouldBe "Wrong number of args (2) passed to: (kotlin.Int)" +
+            " -> kotlin.Int"
+
+        shouldThrowExactly<ArityException> {
             apply<Int, Int>({ i: Int -> i * 2 }, l<Int>())
-        }
+        }.message shouldBe "Wrong number of args (0) passed to: (kotlin.Int)" +
+            " -> kotlin.Int"
+
+        shouldThrowExactly<ArityException> {
+            apply({ i: Int, j: Int -> i * j }, 1, l<Int>())
+        }.message shouldBe "Wrong number of args (1) passed to: " +
+            "(kotlin.Int, kotlin.Int) -> kotlin.Int"
     }
 
     @Test

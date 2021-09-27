@@ -397,6 +397,15 @@ fun <T1, T2, T3, R> map(
     )
 }
 
+internal fun spread(arglist: Any?): ISeq<Any?>? {
+    val s = seq<Any?>(arglist)
+    return when {
+        s == null -> null
+        s.next() == null -> seq(s.first())
+        else -> cons(s.first(), spread(s.next()))
+    }
+}
+
 typealias F1 <T, R> = (T) -> R
 typealias F2 <T1, T2, R> = (T1, T2) -> R
 typealias F3 <T1, T2, T3, R> = (T1, T2, T3) -> R
@@ -405,51 +414,87 @@ typealias F5 <T1, T2, T3, T4, T5, R> = (T1, T2, T3, T4, T5) -> R
 typealias F6 <T1, T2, T3, T4, T5, T6, R> = (T1, T2, T3, T4, T5, T6) -> R
 typealias F7 <T1, T2, T3, T4, T5, T6, T7, R> = (T1, T2, T3, T4, T5, T6, T7) -> R
 
-typealias F8 <T1, T2, T3, T4, T5, T6, T7, T8, R> =
-        (T1, T2, T3, T4, T5, T6, T7, T8) -> R
+class ArityException(n: Int, f: Any) : IllegalArgumentException(
+    "Wrong number of args ($n) passed to: $f"
+)
 
-typealias F9 <T1, T2, T3, T4, T5, T6, T7, T8, T9, R> =
-        (T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R
+fun <R> applyTo(f: Function<R>, s: ISeq<Any?>?): R {
+    if (s == null) throw ArityException(0, f)
 
-typealias F10 <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> =
-        (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) -> R
+    return try {
+        when (s.count) {
+            0 -> TODO()
+            1 -> (f as F1<Any?, R>)(s.first())
+            2 -> (f as F2<Any?, Any?, R>)(s.first(), s.rest().first())
+            3 -> (f as F3<Any?, Any?, Any?, R>)(
+                s.first(),
+                s.rest().first(),
+                s.rest().rest().first()
+            )
+            4 -> (f as F4<Any?, Any?, Any?, Any?, R>)(
+                s.first(),
+                s.rest().first(),
+                s.rest().rest().first(),
+                s.rest().rest().rest().first()
+            )
+            5 -> (f as F5<Any?, Any?, Any?, Any?, Any?, R>)(
+                s.first(),
+                s.rest().first(),
+                s.rest().rest().first(),
+                s.rest().rest().rest().first(),
+                s.rest().rest().rest().rest().first(),
+            )
+            6 -> (f as F6<Any?, Any?, Any?, Any?, Any?, Any?, R>)(
+                s.first(),
+                s.rest().first(),
+                s.rest().rest().first(),
+                s.rest().rest().rest().first(),
+                s.rest().rest().rest().rest().first(),
+                s.rest().rest().rest().rest().rest().first(),
+            )
+            7 -> (f as F7<Any?, Any?, Any?, Any?, Any?, Any?, Any?, R>)(
+                s.first(),
+                s.rest().first(),
+                s.rest().rest().first(),
+                s.rest().rest().rest().first(),
+                s.rest().rest().rest().rest().first(),
+                s.rest().rest().rest().rest().rest().first(),
+                s.rest().rest().rest().rest().rest().rest().first(),
+            )
+            else -> TODO("Apply fn supports only 7 in this version")
+        }
+    } catch (e: ClassCastException) {
+        throw ArityException(s.count, f)
+    }
+}
 
 fun <T, R> apply(f: Function<R>, coll: Any): R = applyTo(f, seq<T>(coll))
 
-fun <T, R> apply(f: Function<R>, a: T, coll: Any): R {
-    // TODO: extract list*
-    return applyTo(f, cons(a, coll))
-}
+fun <T, R> apply(f: Function<R>, a: T, coll: Any): R = applyTo(f, cons(a, coll))
 
 fun <T1, T2, R> apply(
     f: Function<R>,
     a: T1,
     b: T2,
     coll: Any
-): R {
-    return applyTo(f, cons(a, cons(b, coll)))
-}
+): R = applyTo(f, cons(a, cons(b, coll)))
 
-fun <R> applyTo(f: Function<R>, s: ISeq<Any?>?): R {
-    if (s == null)
-        throw RuntimeException("Wrong number of args (0) passed to $f")
+fun <T1, T2, T3, R> apply(
+    f: Function<R>,
+    a: T1,
+    b: T2,
+    c: T3,
+    coll: Any
+): R = applyTo(f, cons(a, cons(b, cons(c, coll))))
 
-    return when (s.count) {
-        0 -> TODO()
-        1 -> (f as F1<Any?, R>)(s.first())
-        2 -> (f as F2<Any?, Any?, R>)(s.first(), s.rest().first())
-        3 -> (f as F3<Any?, Any?, Any?, R>)(
-            s.first(),
-            s.rest().first(),
-            s.rest().rest().first()
-        )
-        else -> TODO()
-    }
-}
-
-fun <T> a(k: Int, vararg i: T): Int {
-    return 0
-}
+fun <T1, T2, T3, T4, R> apply(
+    f: Function<R>,
+    a: T1,
+    b: T2,
+    c: T3,
+    d: T4,
+    vararg args: Any
+): R = applyTo(f, cons(a, cons(b, cons(c, cons(d, spread(args))))))
 
 fun <T1, T2, T3, Ts, R> map(
     f: (T1, T2, T3, Array<out Ts>) -> R,
