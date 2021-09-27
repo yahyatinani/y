@@ -16,6 +16,7 @@ import io.kotest.matchers.doubles.shouldBeExactly
 import io.kotest.matchers.floats.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.longs.shouldBeExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
@@ -63,6 +64,24 @@ class ArraySeqTest {
 
         restSeq shouldBeSameInstanceAs Empty
         ArraySeq(arrayOf(1), 0).rest() shouldBeSameInstanceAs Empty
+    }
+
+    @Test
+    fun `next() should a new ArraySeq with same array and incremented i`() {
+        val array = arrayOf(54, 5, 3, 98)
+        val i = 0
+
+        val restSeq = ArraySeq(array, i).next() as ArraySeq<Int>
+
+        restSeq.array shouldBeSameInstanceAs array
+        restSeq.i shouldBeExactly i + 1
+    }
+
+    @Test
+    fun `next() should return null when array is empty`() {
+
+        ArraySeq<Int>(arrayOf(), 0).next().shouldBeNull()
+        ArraySeq(arrayOf(1), 0).next().shouldBeNull()
     }
 
     @Test
@@ -252,6 +271,23 @@ class ShortArraySeqTest {
 
         restSeq shouldBeSameInstanceAs Empty
         ShortArraySeq(shortArrayOf(1), 0).rest() shouldBeSameInstanceAs Empty
+    }
+
+    @Test
+    fun `next() should a new ArraySeq with same array and incremented i`() {
+        val array = shortArrayOf(54, 5, 3, 98)
+        val i = 0
+
+        val restSeq = ShortArraySeq(array, i).rest() as ShortArraySeq
+
+        restSeq.array shouldBeSameInstanceAs array
+        restSeq.i shouldBeExactly i + 1
+    }
+
+    @Test
+    fun `next() should return null when array is empty`() {
+        ShortArraySeq(shortArrayOf(), 0).next().shouldBeNull()
+        ShortArraySeq(shortArrayOf(1), 0).next().shouldBeNull()
     }
 
     @Test
@@ -454,6 +490,23 @@ class FloatArraySeqTest {
     }
 
     @Test
+    fun `next() should a new ArraySeq with same array and incremented i`() {
+        val array = floatArrayOf(54F, 5F, 3F, 98F)
+        val i = 0
+
+        val restSeq = FloatArraySeq(array, i).next() as FloatArraySeq
+
+        restSeq.array shouldBeSameInstanceAs array
+        restSeq.i shouldBeExactly i + 1
+    }
+
+    @Test
+    fun `next() should return null when array is empty`() {
+        FloatArraySeq(floatArrayOf(), 0).next().shouldBeNull()
+        FloatArraySeq(floatArrayOf(1F), 0).next().shouldBeNull()
+    }
+
+    @Test
     fun `count should return array size minus index`() {
         FloatArraySeq(floatArrayOf(), 0).count shouldBeExactly 0
 
@@ -557,6 +610,23 @@ class DoubleArraySeqTest {
 
         DoubleArraySeq(doubleArrayOf(1.0), 0)
             .rest() shouldBeSameInstanceAs Empty
+    }
+
+    @Test
+    fun `next() should a new ArraySeq with same array and incremented i`() {
+        val array = doubleArrayOf(54.0, 5.0, 3.0, 98.0)
+        val i = 0
+
+        val restSeq = DoubleArraySeq(array, i).rest() as DoubleArraySeq
+
+        restSeq.array shouldBeSameInstanceAs array
+        restSeq.i shouldBeExactly i + 1
+    }
+
+    @Test
+    fun `next() should return null when array is empty`() {
+        DoubleArraySeq(doubleArrayOf(), 0).next().shouldBeNull()
+        DoubleArraySeq(doubleArrayOf(1.0), 0).next().shouldBeNull()
     }
 
     @Test
@@ -671,6 +741,23 @@ class LongArraySeqTest {
     }
 
     @Test
+    fun `next() should a new ArraySeq with same array and incremented i`() {
+        val array = longArrayOf(54, 5, 3, 98)
+        val i = 0
+
+        val restSeq = LongArraySeq(array, i).next() as LongArraySeq
+
+        restSeq.array shouldBeSameInstanceAs array
+        restSeq.i shouldBeExactly i + 1
+    }
+
+    @Test
+    fun `next() should return null when array is empty`() {
+        LongArraySeq(longArrayOf(), 0).next().shouldBeNull()
+        LongArraySeq(longArrayOf(1), 0).next().shouldBeNull()
+    }
+
+    @Test
     fun `count should return array size minus index`() {
         LongArraySeq(longArrayOf(), 0).count shouldBeExactly 0
 
@@ -770,6 +857,23 @@ class ByteArraySeqTest {
     }
 
     @Test
+    fun `next() should a new ArraySeq with same array and incremented i`() {
+        val array = byteArrayOf(54, 5, 3, 98)
+        val i = 0
+
+        val restSeq = ByteArraySeq(array, i).next() as ByteArraySeq
+
+        restSeq.array shouldBeSameInstanceAs array
+        restSeq.i shouldBeExactly i + 1
+    }
+
+    @Test
+    fun `next() should return null when array is empty`() {
+        ByteArraySeq(byteArrayOf(), 0).next().shouldBeNull()
+        ByteArraySeq(byteArrayOf(1), 0).next().shouldBeNull()
+    }
+
+    @Test
     fun `count should return array size minus index`() {
         ByteArraySeq(byteArrayOf(), 0).count shouldBeExactly 0
 
@@ -866,6 +970,23 @@ class CharArraySeqTest {
 
         restSeq shouldBeSameInstanceAs Empty
         CharArraySeq(charArrayOf('1'), 0).rest() shouldBeSameInstanceAs Empty
+    }
+
+    @Test
+    fun `next() should a new ArraySeq with same array and incremented i`() {
+        val array = charArrayOf('4', '5', '3', '8')
+        val i = 0
+
+        val restSeq = CharArraySeq(array, i).next() as CharArraySeq
+
+        restSeq.array shouldBeSameInstanceAs array
+        restSeq.i shouldBeExactly i + 1
+    }
+
+    @Test
+    fun `next() should return null when array is empty`() {
+        CharArraySeq(charArrayOf(), 0).next().shouldBeNull()
+        CharArraySeq(charArrayOf('1'), 0).next().shouldBeNull()
     }
 
     @Test
@@ -971,6 +1092,23 @@ class BooleanArraySeqTest {
 
         BooleanArraySeq(booleanArrayOf(true), 0)
             .rest() shouldBeSameInstanceAs Empty
+    }
+
+    @Test
+    fun `next() should a new ArraySeq with same array and incremented i`() {
+        val array = booleanArrayOf(true, false, true, false)
+        val i = 0
+
+        val restSeq = BooleanArraySeq(array, i).next() as BooleanArraySeq
+
+        restSeq.array shouldBeSameInstanceAs array
+        restSeq.i shouldBeExactly i + 1
+    }
+
+    @Test
+    fun `next() should return null when array is empty`() {
+        BooleanArraySeq(booleanArrayOf(), 0).next().shouldBeNull()
+        BooleanArraySeq(booleanArrayOf(true), 0).next().shouldBeNull()
     }
 
     @Test

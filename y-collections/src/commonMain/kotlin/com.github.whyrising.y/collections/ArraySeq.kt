@@ -73,8 +73,9 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Short>
         }
 
-        override fun next(): ISeq<Short>? {
-            TODO("Not yet implemented")
+        override fun next(): ISeq<Short>? = when {
+            i + 1 < array.size -> ShortArraySeq(array, i + 1)
+            else -> null
         }
 
         override val count: Int
@@ -155,8 +156,9 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Float>
         }
 
-        override fun next(): ISeq<Float>? {
-            TODO("Not yet implemented")
+        override fun next(): ISeq<Float>? = when {
+            i + 1 < array.size -> FloatArraySeq(array, i + 1)
+            else -> null
         }
 
         override val count: Int
@@ -198,8 +200,9 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Double>
         }
 
-        override fun next(): ISeq<Double>? {
-            TODO("Not yet implemented")
+        override fun next(): ISeq<Double>? = when {
+            i + 1 < array.size -> DoubleArraySeq(array, i + 1)
+            else -> null
         }
 
         override val count: Int
@@ -241,8 +244,9 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Long>
         }
 
-        override fun next(): ISeq<Long>? {
-            TODO("Not yet implemented")
+        override fun next(): ISeq<Long>? = when {
+            i + 1 < array.size -> LongArraySeq(array, i + 1)
+            else -> null
         }
 
         override val count: Int
@@ -284,8 +288,9 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Byte>
         }
 
-        override fun next(): ISeq<Byte>? {
-            TODO("Not yet implemented")
+        override fun next(): ISeq<Byte>? = when {
+            i + 1 < array.size -> ByteArraySeq(array, i + 1)
+            else -> null
         }
 
         override val count: Int
@@ -327,8 +332,9 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Char>
         }
 
-        override fun next(): ISeq<Char>? {
-            TODO("Not yet implemented")
+        override fun next(): ISeq<Char>? = when {
+            i + 1 < array.size -> CharArraySeq(array, i + 1)
+            else -> null
         }
 
         override val count: Int
@@ -370,8 +376,9 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Boolean>
         }
 
-        override fun next(): ISeq<Boolean>? {
-            TODO("Not yet implemented")
+        override fun next(): ISeq<Boolean>? = when {
+            i + 1 < array.size -> BooleanArraySeq(array, i + 1)
+            else -> null
         }
 
         override val count: Int
