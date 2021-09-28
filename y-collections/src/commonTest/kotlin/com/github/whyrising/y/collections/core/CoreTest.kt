@@ -129,7 +129,7 @@ class CoreTest {
 
     @Test
     fun `cons()`() {
-        cons(1, null) shouldBe l()
+        cons(1, null) shouldBe l(1)
         cons(1, l(2, 3)) shouldBe l(1, 2, 3)
         cons(1, listOf(2, 3)) shouldBe l(1, 2, 3)
         cons(1, v(2, 3) as Seqable<*>) shouldBe l(1, 2, 3)
