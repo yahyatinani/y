@@ -1310,46 +1310,6 @@ class PersistentVectorJvmTest : FreeSpec({
         }
     }
 
-    "RSeq" - {
-        "first" {
-            checkAll(Arb.list(Arb.int(), 1..20)) { list: List<Int> ->
-                val vec = PersistentVector(*list.toTypedArray())
-                val lastIndex = list.size - 1
-
-                val rSeq = RSeq(vec, lastIndex)
-
-                rSeq.count shouldBeExactly vec.count
-                rSeq.first() shouldBeExactly vec[lastIndex]
-            }
-        }
-
-        "rest()" - {
-            "when the index is 0, it should return the empty seq" {
-                val vec = PersistentVector(1)
-                val rseq = RSeq(vec, vec.size - 1)
-
-                val rest = rseq.rest()
-
-                rest shouldBeSameInstanceAs Empty
-            }
-
-            "when index > 0, it should return the rest of the reversed seq" {
-                checkAll(Arb.list(Arb.int(), 2..20)) { list: List<Int> ->
-                    val vec = PersistentVector(*list.toTypedArray())
-                    val lastIndex = list.size - 1
-
-                    val rest = RSeq(vec, lastIndex).rest() as RSeq<Int>
-
-                    rest.index shouldBeExactly lastIndex - 1
-                    rest.count shouldBeExactly rest.index + 1
-                    rest.first() shouldBeExactly vec[lastIndex - 1]
-
-                    rest.rest().count shouldBeExactly rest.index
-                }
-            }
-        }
-    }
-
     "Serialization" - {
         "serialize" {
             val array = arrayOf(1, 2, 3, 4)

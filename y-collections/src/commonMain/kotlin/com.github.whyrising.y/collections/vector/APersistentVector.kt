@@ -420,8 +420,9 @@ abstract class APersistentVector<out E> :
             else -> emptySeq()
         }
 
-        override fun next(): ISeq<E>? {
-            TODO("Not yet implemented")
+        override fun next(): ISeq<E>? = when {
+            index > 0 -> RSeq(vec, index - 1)
+            else -> null
         }
 
         override val count: Int = index + 1
