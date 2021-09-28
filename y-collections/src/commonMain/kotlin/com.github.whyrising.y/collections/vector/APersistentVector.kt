@@ -331,7 +331,11 @@ abstract class APersistentVector<out E> :
         }
 
         override fun next(): ISeq<E>? {
-            TODO("Not yet implemented")
+            val i = index + 1
+
+            if (i < pv.count) return Seq(pv, i)
+
+            return null
         }
 
         override val count: Int

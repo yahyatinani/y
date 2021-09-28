@@ -390,7 +390,7 @@ class PersistentVectorJvmTest : FreeSpec({
         }
 
         "seq()" - {
-            "when called on an empty vector, it should return null" {
+            "when called on an empty vector, it should return Empty" {
                 val emptyVec = v<Int>()
 
                 emptyVec.seq() shouldBeSameInstanceAs Empty
