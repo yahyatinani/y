@@ -17,6 +17,7 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
 
@@ -404,18 +405,15 @@ class CoreTest {
 
         shouldThrowExactly<ArityException> {
             apply<Int, Int>({ i: Int -> i * 2 }, l(5, 6))
-        }.message shouldBe "Wrong number of args (2) passed to: (kotlin.Int)" +
-            " -> kotlin.Int"
+        }.message shouldContain "Wrong number of args (2) passed to:"
 
         shouldThrowExactly<ArityException> {
             apply<Int, Int>({ i: Int -> i * 2 }, l<Int>())
-        }.message shouldBe "Wrong number of args (0) passed to: (kotlin.Int)" +
-            " -> kotlin.Int"
+        }.message shouldContain "Wrong number of args (0) passed to:"
 
         shouldThrowExactly<ArityException> {
             apply({ i: Int, j: Int -> i * j }, 1, l<Int>())
-        }.message shouldBe "Wrong number of args (1) passed to: " +
-            "(kotlin.Int, kotlin.Int) -> kotlin.Int"
+        }.message shouldContain "Wrong number of args (1) passed to:"
     }
 
     @Test
