@@ -135,10 +135,11 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
         get() = count
 
     override fun contains(element: @UnsafeVariance E): Boolean {
-        var s = seq()
-        while (s !is Empty) {
-            if (equiv(s.first(), element)) return true
-            s = s.rest()
+        var s: ISeq<E>? = seq()
+        while (s != null) {
+            if (equiv(s.first(), element))
+                return true
+            s = s.next()
         }
 
         return false
