@@ -1,5 +1,5 @@
 object Libs {
-    const val kotlinVersion = "1.5.21"
+    const val kotlinVersion = "1.5.30"
     const val kotlinApiVersion = "1.5"
     const val jvmTargetVersion = "1.8"
 
