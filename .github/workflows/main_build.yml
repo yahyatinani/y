@@ -1,6 +1,11 @@
 name: Main Build
 
 on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "The branch"
+        required: true
   push:
     paths-ignore:
       - 'doc/**'
