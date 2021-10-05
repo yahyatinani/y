@@ -1,7 +1,5 @@
 package com.github.whyrising.y.collections.core
 
-import com.github.whyrising.y.collections.ArrayChunk
-import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
@@ -10,7 +8,6 @@ import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.seq.Seqable
 import io.kotest.assertions.throwables.shouldThrowExactly
-import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
@@ -128,7 +125,7 @@ class CoreTest {
 
     @Test
     fun `cons()`() {
-        cons(1, null) shouldBe l(1)
+        cons(1, null) shouldBe l()
         cons(1, l(2, 3)) shouldBe l(1, 2, 3)
         cons(1, listOf(2, 3)) shouldBe l(1, 2, 3)
         cons(1, v(2, 3) as Seqable<*>) shouldBe l(1, 2, 3)
@@ -159,15 +156,48 @@ class CoreTest {
     }
 
     @Test
-    fun `IPersistentVector componentN()`() {
-        val (a, b, c, d, e, f) = v(1, 2, 3, 4, 5, 6)
+    fun `IPersistentVector component1()`() {
+        val (a) = v(1)
+
+        a shouldBeExactly 1
+    }
+
+    @Test
+    fun `IPersistentVector component2()`() {
+        val (a, b) = v(1, 2)
+
+        a shouldBeExactly 1
+        b shouldBeExactly 2
+    }
+
+    @Test
+    fun `IPersistentVector component3()`() {
+        val (a, b, c) = v(1, 2, 3)
+
+        a shouldBeExactly 1
+        b shouldBeExactly 2
+        c shouldBeExactly 3
+    }
+
+    @Test
+    fun `IPersistentVector component4()`() {
+        val (a, b, c, d) = v(1, 2, 3, 4)
+
+        a shouldBeExactly 1
+        b shouldBeExactly 2
+        c shouldBeExactly 3
+        d shouldBeExactly 4
+    }
+
+    @Test
+    fun `IPersistentVector component5()`() {
+        val (a, b, c, d, e) = v(1, 2, 3, 4, 5)
 
         a shouldBeExactly 1
         b shouldBeExactly 2
         c shouldBeExactly 3
         d shouldBeExactly 4
         e shouldBeExactly 5
-        f shouldBeExactly 6
     }
 
     @Test
@@ -205,127 +235,5 @@ class CoreTest {
         m["b"] shouldBe 2
         m["c"] shouldBe 3
         m["d"].shouldBeNull()
-    }
-
-    @Test
-    fun `first()`() {
-        first<Int>(l(1, 2, 3)) shouldBe 1
-        first<Int>(listOf(1, 2, 3)) shouldBe 1
-        first<Int>(v(1, 2, 3)) shouldBe 1
-        first<Int>(v<Int>()).shouldBeNull()
-        first<Int>(null).shouldBeNull()
-    }
-
-    @Test
-    fun `consChunk(chunk, rest) should return rest`() {
-        val rest = l(1, 2)
-
-        val r = consChunk(ArrayChunk(arrayOf()), rest)
-
-        r shouldBeSameInstanceAs rest
-    }
-
-    @Test
-    fun `consChunk(chunk, rest) should return ChunkedSeq`() {
-        val cs = consChunk(ArrayChunk(arrayOf(1, 2)), l(3, 4))
-
-        cs.count shouldBeExactly 4
-        cs.toString() shouldBe "(1 2 3 4)"
-    }
-
-    @Test
-    fun `spread()`() {
-        spread(null).shouldBeNull()
-
-        spread(arrayOf(listOf(1))) shouldBe l(1)
-
-        spread(arrayOf(1, 2, 3, listOf(4))) shouldBe l(1, 2, 3, 4)
-    }
-
-    @Test
-    fun `isEvery(pred, coll)`() {
-        isEvery<Int>({ true }, null).shouldBeTrue()
-
-        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 6)).shouldBeTrue()
-
-        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 1)).shouldBeFalse()
-
-        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, null)).shouldBeFalse()
-    }
-
-    @Test
-    fun `conj()`() {
-        conj(null, 2) shouldBe l(2)
-
-        conj(v(1), 2) shouldBe v(1, 2)
-
-        conj(v(1), 2, 3, 4) shouldBe v(1, 2, 3, 4)
-
-        conj(v(1), null, 3, 4) shouldBe v(1, null, 3, 4)
-
-        conj(null, 1, 3, 4) shouldBe v(4, 3, 1)
-    }
-
-    @Test
-    fun `concat()`() {
-        val c = concat<Int>()
-
-        c.count shouldBeExactly 0
-        c.toString() shouldBe "()"
-    }
-
-    @Test
-    fun `concat(x)`() {
-        val c = concat<Int>(l(1, 2))
-
-        c.count shouldBeExactly 2
-        c.toString() shouldBe "(1 2)"
-    }
-
-    @Test
-    fun `concat(x, y)`() {
-        val c = concat<Int>(l(1, 2), l(3, 4))
-
-        c.count shouldBeExactly 4
-        c.toString() shouldBe "(1 2 3 4)"
-
-        concat<Int>(null, l(3, 4)).toString() shouldBe "(3 4)"
-
-        concat<Int>(l(1, 2), null).toString() shouldBe "(1 2)"
-    }
-
-    @Test
-    fun `concat(x, y) ChunkedSeq`() {
-        val chunk1 = ArrayChunk(arrayOf(1, 2))
-
-        val concatenation = concat<Int>(ChunkedSeq(chunk1), l(3, 4))
-
-        concatenation.count shouldBeExactly 4
-        concatenation.toString() shouldBe "(1 2 3 4)"
-    }
-
-    @Test
-    fun `concat(x, y, zs)`() {
-        val concatenation = concat<Int>(l(1, 2), l(3, 4), l(5, 6))
-
-        concatenation.count shouldBeExactly 6
-        concatenation.toString() shouldBe "(1 2 3 4 5 6)"
-
-        concat<Int>(l(1, 2), l(3, 4), null).toString() shouldBe "(1 2 3 4)"
-
-        concat<Int>(null, l(3, 4), l(5, 6)).toString() shouldBe "(3 4 5 6)"
-
-        concat<Int>(l(1, 2), null, l(5, 6)).toString() shouldBe "(1 2 5 6)"
-
-        val ch1 = ArrayChunk(arrayOf(1, 2))
-        val ch2 = ArrayChunk(arrayOf(3, 4))
-        val concat = concat<Int>(ChunkedSeq(ch1), ChunkedSeq(ch2), l(5, 6))
-        concat.toString() shouldBe "(1 2 3 4 5 6)"
-
-        concat<Int>(l(1, 2), listOf(3, 4), listOf(5, 6)).toString() shouldBe
-            "(1 2 3 4 5 6)"
-
-        concat<Int>(listOf(1, 2), v(3, 4), listOf(5, 6)).toString() shouldBe
-            "(1 2 3 4 5 6)"
     }
 }

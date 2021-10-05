@@ -5,7 +5,5 @@ interface ISeq<out E> : IPersistentCollection<E> {
 
     fun rest(): ISeq<E>
 
-    fun next(): ISeq<E>?
-
     fun cons(e: @UnsafeVariance E): ISeq<E>
 }

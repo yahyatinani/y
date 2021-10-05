@@ -4,8 +4,6 @@ import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.Cons
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.core.IHashEq
-import com.github.whyrising.y.collections.core.l
-import com.github.whyrising.y.collections.core.lazySeq
 import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.core.v
 import com.github.whyrising.y.collections.mocks.HashEqMock
@@ -23,7 +21,6 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
@@ -175,24 +172,6 @@ class UtilJvmTest : FreeSpec({
 
             e.message shouldBe
                 "Don't know how to create ISeq from: ${x::class.simpleName}"
-        }
-
-        "Kotlin Sequence<E>" {
-            val x = sequenceOf(1, 2)
-
-            val seq = seq<Int>(x) as ISeq<Int>
-
-            seq::class.shouldBeSubtypeOf<LazySeq<*>>()
-            seq.first() shouldBeExactly 1
-            seq.rest().first() shouldBeExactly 2
-        }
-
-        "when passing Empty seq, ti should return null" {
-            seq<Int>(Empty).shouldBeNull()
-        }
-
-        "when passing a lazySeq, it should realize the sequence" {
-            seq<Int>(lazySeq<Int> { l(1) }) shouldBe l(1)
         }
     }
 

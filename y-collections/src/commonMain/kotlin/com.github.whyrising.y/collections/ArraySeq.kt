@@ -15,9 +15,14 @@ class ArraySeq<out E> internal constructor(
         else -> array[i]
     }
 
-    override fun next(): ISeq<E>? = when {
+    /**
+     * @return a new ArraySeq of the rest of the elements of this ArraySeq
+     * except the first element, or the Empty seq if the there are no elements
+     * left.
+     */
+    override fun rest(): ISeq<E> = when {
         i + 1 < array.size -> ArraySeq(array, i + 1)
-        else -> null
+        else -> empty() as ISeq<E>
     }
 
     override val count: Int
@@ -73,11 +78,6 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Short>
         }
 
-        override fun next(): ISeq<Short>? = when {
-            i + 1 < array.size -> ShortArraySeq(array, i + 1)
-            else -> null
-        }
-
         override val count: Int
             get() = array.size - i
 
@@ -112,9 +112,9 @@ class ArraySeq<out E> internal constructor(
             else -> array[i]
         }
 
-        override fun next(): ISeq<Int>? = when {
+        override fun rest(): ISeq<Int> = when {
             i + 1 < array.size -> IntArraySeq(array, i + 1)
-            else -> null
+            else -> empty() as ISeq<Int>
         }
 
         override val count: Int
@@ -156,11 +156,6 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Float>
         }
 
-        override fun next(): ISeq<Float>? = when {
-            i + 1 < array.size -> FloatArraySeq(array, i + 1)
-            else -> null
-        }
-
         override val count: Int
             get() = array.size - i
 
@@ -198,11 +193,6 @@ class ArraySeq<out E> internal constructor(
         override fun rest(): ISeq<Double> = when {
             i + 1 < array.size -> DoubleArraySeq(array, i + 1)
             else -> empty() as ISeq<Double>
-        }
-
-        override fun next(): ISeq<Double>? = when {
-            i + 1 < array.size -> DoubleArraySeq(array, i + 1)
-            else -> null
         }
 
         override val count: Int
@@ -244,11 +234,6 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Long>
         }
 
-        override fun next(): ISeq<Long>? = when {
-            i + 1 < array.size -> LongArraySeq(array, i + 1)
-            else -> null
-        }
-
         override val count: Int
             get() = array.size - i
 
@@ -286,11 +271,6 @@ class ArraySeq<out E> internal constructor(
         override fun rest(): ISeq<Byte> = when {
             i + 1 < array.size -> ByteArraySeq(array, i + 1)
             else -> empty() as ISeq<Byte>
-        }
-
-        override fun next(): ISeq<Byte>? = when {
-            i + 1 < array.size -> ByteArraySeq(array, i + 1)
-            else -> null
         }
 
         override val count: Int
@@ -332,11 +312,6 @@ class ArraySeq<out E> internal constructor(
             else -> empty() as ISeq<Char>
         }
 
-        override fun next(): ISeq<Char>? = when {
-            i + 1 < array.size -> CharArraySeq(array, i + 1)
-            else -> null
-        }
-
         override val count: Int
             get() = array.size - i
 
@@ -374,11 +349,6 @@ class ArraySeq<out E> internal constructor(
         override fun rest(): ISeq<Boolean> = when {
             i + 1 < array.size -> BooleanArraySeq(array, i + 1)
             else -> empty() as ISeq<Boolean>
-        }
-
-        override fun next(): ISeq<Boolean>? = when {
-            i + 1 < array.size -> BooleanArraySeq(array, i + 1)
-            else -> null
         }
 
         override val count: Int

@@ -43,10 +43,7 @@ sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
 
         override fun first(): E = first
 
-        override fun next(): ISeq<E>? = when (count) {
-            1 -> null
-            else -> rest as ISeq<E>?
-        }
+        override fun rest(): ISeq<E> = rest as ISeq<E>
 
         override val count: Int = rest.count + 1
 
@@ -68,8 +65,6 @@ sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
             throw NoSuchElementException("PersistentList is empty.")
 
         override fun rest(): ISeq<E> = this
-
-        override fun next(): ISeq<E>? = null
 
         override val count: Int = 0
 

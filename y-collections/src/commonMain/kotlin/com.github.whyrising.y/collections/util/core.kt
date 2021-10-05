@@ -74,7 +74,7 @@ fun <E> lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> {
                 array[i++] = iterator.next()
 
             return@LazySeq ChunkedSeq(
-                ArrayChunk(array as Array<E>, 0, i),
+                ArrayChunk(array, 0, i),
                 lazyChunkedSeq(iterator)
             )
         }

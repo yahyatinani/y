@@ -949,39 +949,28 @@ class BitMapIndexedNodeTest : FreeSpec({
             "when node is empty, it should return an empty seq" {
                 val node = BitMapIndexedNode<String, Int>()
 
-                val nodeSeq = node.nodeSeq()
-
-                nodeSeq shouldBeSameInstanceAs PersistentList.Empty
-                nodeSeq.rest() shouldBeSameInstanceAs PersistentList.Empty
-                nodeSeq.next().shouldBeNull()
+                node.nodeSeq() shouldBeSameInstanceAs PersistentList.Empty
             }
 
             "it should return a seq of map entries" {
                 val shift = 0
                 val edit = Edit(Any())
-                val hash = hasheq("672")
                 val leafFlag = Box(null)
-                val removedLeaf = Box(null)
-                var indexedNode = BitMapIndexedNode<String, Int>()
+                var n = BitMapIndexedNode<String, Int>()
                 var i = 0
                 while (i < 1000) {
                     val k = "$i"
-                    indexedNode = indexedNode.assoc(
+                    n = n.assoc(
                         edit, shift, hasheq(k), k, i, leafFlag
                     ) as BitMapIndexedNode<String, Int>
                     i += 2
                 }
 
-                val nodeSeq = indexedNode.nodeSeq() as NodeSeq<String, Int>
-                val next = nodeSeq.next() as NodeSeq<String, Int>
+                val nodeSeq = n.nodeSeq() as NodeSeq<String, Int>
 
                 nodeSeq.count shouldBeExactly 500
                 nodeSeq[0] shouldBe MapEntry("672", 672)
                 nodeSeq[499] shouldBe MapEntry("784", 784)
-
-                next.count shouldBe 499
-                next.first() shouldBe MapEntry("52", 52)
-                next[498] shouldBe MapEntry("784", 784)
             }
         }
     }

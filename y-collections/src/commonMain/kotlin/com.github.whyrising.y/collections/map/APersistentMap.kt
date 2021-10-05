@@ -266,9 +266,9 @@ abstract class APersistentMap<out K, out V> :
         @Suppress("UNCHECKED_CAST")
         override fun first(): K = (_seq.first() as Entry<K, V>).key
 
-        override fun next(): ISeq<K>? = when {
+        override fun rest(): ISeq<K> = when {
             count > 1 -> KeySeq<K, V>(_seq.rest(), null)
-            else -> null
+            else -> PersistentList.Empty
         }
 
         override val count: Int
@@ -304,9 +304,9 @@ abstract class APersistentMap<out K, out V> :
         @Suppress("UNCHECKED_CAST")
         override fun first(): V = (_seq.first() as Entry<K, V>).value
 
-        override fun next(): ISeq<V>? = when {
+        override fun rest(): ISeq<V> = when {
             count > 1 -> ValSeq<K, V>(_seq.rest(), null)
-            else -> null
+            else -> PersistentList.Empty
         }
 
         override val count: Int = _seq.count

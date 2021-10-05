@@ -11,9 +11,9 @@ class StringSeq internal constructor(
 ) : ASeq<Char>(), IndexedSeq {
     override fun first(): Char = s[i]
 
-    override fun next(): ISeq<Char>? = when {
+    override fun rest(): ISeq<Char> = when {
         i + 1 < s.length -> StringSeq(s, i + 1)
-        else -> null
+        else -> PersistentList.Empty
     }
 
     override val count: Int

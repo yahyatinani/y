@@ -13,11 +13,6 @@ class Cons<out E>(
 
     override fun rest(): ISeq<E> = _rest
 
-    override fun next(): ISeq<E>? = when (rest().seq()) {
-        is Empty -> null
-        else -> _rest
-    }
-
     // Move to Util when needed
     private fun count(): Int {
         when (_rest) {
