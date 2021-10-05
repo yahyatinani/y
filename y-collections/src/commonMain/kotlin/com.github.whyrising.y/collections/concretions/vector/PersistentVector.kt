@@ -301,10 +301,13 @@ sealed class PersistentVector<out E>(
         @Suppress("UNCHECKED_CAST")
         override fun first(): E = node[offset] as E
 
-        override fun rest(): ISeq<E> = (offset + 1).let {
+        override fun next(): ISeq<E>? = (offset + 1).let {
             when {
                 it < node.size -> ChunkedSeq(vector, node, index, it)
-                else -> restChunks()
+                else -> when (val restChunks = restChunks()) {
+                    is PersistentList.Empty -> null
+                    else -> restChunks
+                }
             }
         }
     }
@@ -466,19 +469,19 @@ sealed class PersistentVector<out E>(
         internal operator fun <E> invoke(seq: ISeq<E>): PersistentVector<E> {
             val tail = arrayOfNulls<Any>(BF)
             var i = 0
-            var s = seq
-            while (s != PersistentList.Empty && i < BF) {
+            var s: ISeq<E>? = seq
+            while (s != null && i < BF) {
                 tail[i++] = s.first()
-                s = s.rest()
+                s = s.next()
             }
 
             return when {
-                s != PersistentList.Empty -> {
+                s != null -> {
                     val start = Vector(BF, SHIFT, EmptyNode, tail)
                     var ret: TransientVector<E> = start.asTransient()
-                    while (s != PersistentList.Empty) {
+                    while (s != null) {
                         ret = ret.conj(s.first())
-                        s = s.rest()
+                        s = s.next()
                     }
                     ret.persistent()
                 }

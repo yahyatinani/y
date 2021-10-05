@@ -68,16 +68,15 @@ abstract class ARef<T> : IRef<T> {
     @Suppress("UNCHECKED_CAST")
     fun notifyWatches(oldVal: T, newVal: T) {
         val ws = _watches.value
-        if (ws.count > 0) {
-            var s = ws.seq() as ISeq<MapEntry<Any, (Any, IRef<T>, T, T) -> Any>>
-            val emptySeq = s.empty()
-            while (s != emptySeq) {
-                val e = s.first()
-                val f = e.value
-                f(e.key, this, oldVal, newVal)
+        if (ws.count <= 0) return
 
-                s = s.rest()
-            }
+        var s = ws.seq() as ISeq<MapEntry<Any, (Any, IRef<T>, T, T) -> Any>>?
+        while (s != null) {
+            val e = s.first()
+            val f = e.value
+            f(e.key, this, oldVal, newVal)
+
+            s = s.next()
         }
     }
 }

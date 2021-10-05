@@ -1,11 +1,15 @@
 package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.ArraySeq
+import com.github.whyrising.y.collections.Chunk
 import com.github.whyrising.y.collections.StringSeq
 import com.github.whyrising.y.collections.associative.Associative
 import com.github.whyrising.y.collections.associative.ILookup
+import com.github.whyrising.y.collections.concretions.list.ASeq
+import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.Cons
 import com.github.whyrising.y.collections.concretions.list.PersistentList
+import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.concretions.map.HASHTABLE_THRESHOLD
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
@@ -13,35 +17,43 @@ import com.github.whyrising.y.collections.concretions.set.PersistentHashSet
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.mutable.set.TransientSet
+import com.github.whyrising.y.collections.seq.IChunkedSeq
+import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
+import com.github.whyrising.y.collections.seq.LazySeq
 import com.github.whyrising.y.collections.seq.Seqable
 import com.github.whyrising.y.collections.set.PersistentSet
 import com.github.whyrising.y.collections.util.lazyChunkedSeq
 import com.github.whyrising.y.collections.vector.IPersistentVector
 
 @Suppress("UNCHECKED_CAST")
-fun <E> seq(x: Any?): ISeq<E>? = when (x) {
-    null -> null
-    is ISeq<*> -> x as ISeq<E>
-    is Seqable<*> -> x.seq() as ISeq<E>
-    is Iterable<*> -> lazyChunkedSeq(x.iterator() as Iterator<E>)
-    is ShortArray -> ArraySeq(x) as ISeq<E>
-    is IntArray -> ArraySeq(x) as ISeq<E>
-    is FloatArray -> ArraySeq(x) as ISeq<E>
-    is DoubleArray -> ArraySeq(x) as ISeq<E>
-    is LongArray -> ArraySeq(x) as ISeq<E>
-    is ByteArray -> ArraySeq(x) as ISeq<E>
-    is CharArray -> ArraySeq(x) as ISeq<E>
-    is BooleanArray -> ArraySeq(x) as ISeq<E>
-    is Array<*> -> ArraySeq(x) as ISeq<E>
-    is CharSequence -> StringSeq(x) as ISeq<E>
-    is Map<*, *> -> seq(x.entries)
+fun <E> seq(coll: Any?): ISeq<E>? = when (coll) {
+    null, Empty -> null
+    is ASeq<*> -> coll as ASeq<E>
+    is LazySeq<*> -> when (val seq = coll.seq()) {
+        is Empty -> null
+        else -> seq as ISeq<E>
+    }
+    is Seqable<*> -> coll.seq() as ISeq<E>
+    is Iterable<*> -> lazyChunkedSeq(coll.iterator() as Iterator<E>)
+    is Sequence<*> -> lazyChunkedSeq(coll.iterator() as Iterator<E>)
+    is ShortArray -> ArraySeq(coll) as ISeq<E>
+    is IntArray -> ArraySeq(coll) as ISeq<E>
+    is FloatArray -> ArraySeq(coll) as ISeq<E>
+    is DoubleArray -> ArraySeq(coll) as ISeq<E>
+    is LongArray -> ArraySeq(coll) as ISeq<E>
+    is ByteArray -> ArraySeq(coll) as ISeq<E>
+    is CharArray -> ArraySeq(coll) as ISeq<E>
+    is BooleanArray -> ArraySeq(coll) as ISeq<E>
+    is Array<*> -> ArraySeq(coll) as ISeq<E>
+    is CharSequence -> StringSeq(coll) as ISeq<E>
+    is Map<*, *> -> seq(coll.entries)
     else -> throw IllegalArgumentException(
-        "Don't know how to create ISeq from: ${x::class.simpleName}"
+        "Don't know how to create ISeq from: ${coll::class.simpleName}"
     )
 }
 
-fun <E> l(): PersistentList<E> = PersistentList.Empty
+fun <E> l(): PersistentList<E> = Empty
 
 fun <E> l(vararg elements: E): PersistentList<E> = PersistentList(*elements)
 
@@ -106,10 +118,16 @@ fun <K, V> hashMap(vararg kvs: Pair<K, V>): PersistentHashMap<K, V> = when {
 
 @Suppress("UNCHECKED_CAST")
 fun <E> cons(x: E, coll: Any?): ISeq<E> = when (coll) {
-    null -> PersistentList()
+    null -> l(x)
     is ISeq<*> -> Cons(x, coll) as ISeq<E>
     else -> Cons(x, seq<E>(coll) as ISeq<E>)
 }
+
+fun <E> consChunk(chunk: Chunk<E>, rest: ISeq<E>): ISeq<E> =
+    when (chunk.count) {
+        0 -> rest
+        else -> ChunkedSeq(chunk, rest)
+    }
 
 fun <E> v(): IPersistentVector<E> = PersistentVector()
 
@@ -137,7 +155,22 @@ fun <E> v(
     f: E,
     vararg args: E
 ): IPersistentVector<E> = PersistentVector(
-    cons(a, cons(b, cons(c, cons(d, cons(e, cons(f, args))))))
+    cons(
+        a,
+        cons(
+            b,
+            cons(
+                c,
+                cons(
+                    d,
+                    cons(
+                        e,
+                        cons(f, args)
+                    )
+                )
+            )
+        )
+    )
 )
 
 fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
@@ -249,4 +282,113 @@ operator fun <E> IPersistentVector<E>.component4(): E = this.nth(3)
 
 operator fun <E> IPersistentVector<E>.component5(): E = this.nth(4)
 
+operator fun <E> IPersistentVector<E>.component6(): E = this.nth(5)
+
 operator fun <K, V> IPersistentMap<K, V>.get(key: K): V? = this.valAt(key)
+
+fun <E> first(x: Any?): E? = when (val seq = seq<E>(x)) {
+    null -> null
+    else -> {
+        try {
+            seq.first()
+        } catch (e: NoSuchElementException) {
+            null
+        }
+    }
+}
+
+fun <E> lazySeq(): LazySeq<E> = LazySeq { null }
+
+/**
+ * @return an instance of [LazySeq]
+ *
+ * @throws IllegalArgumentException if x cannot be an ISeq.
+ */
+inline fun <E> lazySeq(crossinline body: () -> Any?): LazySeq<E> = LazySeq {
+    body()
+}
+
+fun <E> nextChunks(chunk: IChunkedSeq<E>): ISeq<E>? {
+    return when (val rs = chunk.restChunks()) {
+        is Empty -> null
+        else -> rs
+    }
+}
+
+internal fun spread(arglist: Any?): ISeq<Any?>? {
+    val s = seq<Any?>(arglist)
+    return when {
+        s == null -> null
+        s.next() == null -> seq(s.first())
+        else -> cons(s.first(), spread(s.next()))
+    }
+}
+
+fun <T> isEvery(pred: (T) -> Boolean, coll: Any?): Boolean {
+    val s = seq<Any?>(coll) ?: return true
+
+    val first = s.first()
+
+    if (first != null && pred(first as T)) return isEvery(pred, s.next())
+
+    return false
+}
+
+fun <T> conj(coll: IPersistentCollection<T>?, x: T): IPersistentCollection<T> {
+    return when (coll) {
+        null -> l(x)
+        else -> coll.conj(x)
+    }
+}
+
+fun <T> conj(
+    coll: IPersistentCollection<T>?,
+    x: T,
+    vararg xs: T
+): IPersistentCollection<T> {
+    tailrec fun conj(
+        coll: IPersistentCollection<T>,
+        s: ISeq<T>?
+    ): IPersistentCollection<T> = when (s) {
+        null -> coll
+        else -> conj(coll.conj(s.first()), s.next())
+    }
+
+    return conj(coll?.conj(x) ?: l(x), seq(xs))
+}
+
+fun <E> concat(): LazySeq<E> = lazySeq()
+
+fun <E> concat(x: Any?): LazySeq<E> = lazySeq { x }
+
+fun <E> concat(x: Any?, y: Any?): LazySeq<E> = lazySeq {
+    when (val s = seq<E>(x)) {
+        null -> y
+        else -> when (s) {
+            is IChunkedSeq<*> -> {
+                consChunk(s.firstChunk(), concat(nextChunks(s), y))
+            }
+            else -> cons(s.first(), concat<E>(s.next(), y))
+        }
+    }
+}
+
+fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
+    fun cat(xy: Any?, zzs: Any?): LazySeq<E> = lazySeq {
+        val xys = seq<E>(xy)
+        when {
+            xys === null -> when (val argsSeq = seq<E>(zzs)) {
+                null -> null
+                else -> cat(argsSeq.first(), argsSeq.rest())
+            }
+            else -> when (xys) {
+                is IChunkedSeq<*> -> {
+                    consChunk(xys.firstChunk(), cat(xys.restChunks(), zzs))
+                }
+                else -> cons(xys.first(), cat(xys.rest(), zzs))
+            }
+        }
+    }
+
+    return cat(concat<E>(x, y), zs)
+}

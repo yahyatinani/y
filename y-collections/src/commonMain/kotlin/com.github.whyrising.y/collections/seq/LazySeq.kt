@@ -12,9 +12,14 @@ import com.github.whyrising.y.collections.util.nth
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 
-class LazySeq<out E>(
-    _f: () -> Any?
-) : SynchronizedObject(), ISeq<E>, List<E>, IHashEq, IPending, Sequential {
+class LazySeq<out E> constructor(_f: () -> Any?) :
+    SynchronizedObject(),
+    ISeq<E>,
+    List<E>,
+    Sequence<E>,
+    IHashEq,
+    IPending,
+    Sequential {
     internal var f: (() -> Any?)?
         private set
 
@@ -30,14 +35,15 @@ class LazySeq<out E>(
         sVal = null
     }
 
-    internal fun seqVal(): Any? {
+    internal fun seqVal(): Any {
         synchronized(this) {
             if (f != null) {
-                sVal = f?.invoke()
+                sVal = f!!.invoke()
                 f = null
             }
 
-            if (sVal != null) return sVal
+            if (sVal != null)
+                return sVal!!
 
             return seq
         }
@@ -47,12 +53,14 @@ class LazySeq<out E>(
         synchronized(this) {
             seqVal()
             if (sVal != null) {
-                var lazySeq = sVal
+                var lazySeq: Any = sVal!!
                 sVal = null
 
-                while (lazySeq is LazySeq<*>) lazySeq = lazySeq.seqVal()
+                while (lazySeq is LazySeq<*>)
+                    lazySeq = lazySeq.seqVal()
 
-                seq = seq<E>(lazySeq) as ISeq<E>
+                // TODO: make seq nullable maybe?
+                seq = seq(lazySeq) ?: Empty
             }
 
             return seq
@@ -69,6 +77,13 @@ class LazySeq<out E>(
         return seq.rest()
     }
 
+    override fun next(): ISeq<E>? {
+        seq()
+        if (seq is Empty)
+            return null
+        return seq.next()
+    }
+
     override fun cons(e: @UnsafeVariance E): ISeq<E> = when (val s = seq()) {
         is Empty -> seq.cons(e)
         else -> Cons(e, s)
@@ -77,10 +92,10 @@ class LazySeq<out E>(
     override val count: Int
         get() {
             var c = 0
-            var s = seq()
-            while (s != empty()) {
+            var s: ISeq<E>? = seq()
+            while (s != null && s !is Empty) {
                 ++c
-                s = s.rest()
+                s = s.next()
             }
 
             return c
@@ -90,9 +105,11 @@ class LazySeq<out E>(
 
     override fun equiv(other: Any?): Boolean = when (val s = seq()) {
         !is Empty -> s.equiv(other)
-        else ->
+        else -> {
+            val seq1 = seq<E>(other)
             (other is Sequential || other is List<*>) &&
-                seq<E>(other) is Empty
+                (seq1 is Empty || seq1 == null)
+        }
     }
 
     override fun conj(e: @UnsafeVariance E): ISeq<E> = cons(e)
@@ -101,26 +118,28 @@ class LazySeq<out E>(
 
     override fun equals(other: Any?): Boolean = when (val s = seq()) {
         !is Empty -> s == other
-        else ->
+        else -> {
+            val seq1 = seq<E>(other)
             (other is Sequential || other is List<*>) &&
-                seq<E>(other) is Empty
+                (seq1 is Empty || seq1 == null)
+        }
     }
 
-    @ExperimentalStdlibApi
+    @OptIn(ExperimentalStdlibApi::class)
     override fun hasheq(): Int = Murmur3.hashOrdered(this)
 
-    override
-    fun toString(): String = "(${fold("") { acc, e -> "$acc $e" }.trim()})"
+    override fun toString(): String = seq().toString()
 
     // list implementation
     override val size: Int
         get() = count
 
     override fun contains(element: @UnsafeVariance E): Boolean {
-        var s = seq()
-        while (s !is Empty) {
-            if (equiv(s.first(), element)) return true
-            s = s.rest()
+        var s: ISeq<E>? = seq()
+        while (s != null) {
+            if (equiv(s.first(), element))
+                return true
+            s = s.next()
         }
 
         return false
@@ -148,9 +167,9 @@ class LazySeq<out E>(
 
     override fun isEmpty(): Boolean = seq() is Empty
 
-    override fun iterator(): Iterator<E> = SeqIterator(this)
+    override operator fun iterator(): Iterator<E> = SeqIterator(this)
 
-    private fun reify() = this.toList()
+    private fun reify(): List<E> = ArrayList(this)
 
     override fun lastIndexOf(element: @UnsafeVariance E): Int =
         reify().lastIndexOf(element)

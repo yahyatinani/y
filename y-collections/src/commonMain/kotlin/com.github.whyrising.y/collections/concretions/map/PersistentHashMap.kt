@@ -428,9 +428,19 @@ sealed class PersistentHashMap<out K, out V>(
         override fun first(): MapEntry<K, V> =
             MapEntry(array[2 * dataIndex] as K, array[2 * dataIndex + 1] as V)
 
-        override fun rest(): ISeq<MapEntry<K, V>> = createNodeSeq(
-            array, lvl, nodes, cursorLengths, dataIndex, dataLength
-        )
+        override fun next(): ISeq<MapEntry<K, V>>? = when (
+            val seq = createNodeSeq(
+                array,
+                lvl,
+                nodes,
+                cursorLengths,
+                dataIndex,
+                dataLength
+            )
+        ) {
+            PersistentList.Empty -> null
+            else -> seq
+        }
     }
 
     internal sealed class BitMapIndexedNode<out K, out V>(

@@ -14,7 +14,10 @@ import io.kotest.matchers.shouldBe
 
 class SeqIteratorTest : FreeSpec({
     "hasNext()" {
-        SeqIterator(Empty).hasNext().shouldBeFalse()
+        SeqIterator<Int>(null).hasNext().shouldBeFalse()
+
+        SeqIterator<Int>(Empty).hasNext().shouldBeFalse()
+
         SeqIterator(PersistentList(1)).hasNext().shouldBeTrue()
     }
 

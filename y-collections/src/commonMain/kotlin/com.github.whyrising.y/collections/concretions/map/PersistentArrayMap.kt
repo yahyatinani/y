@@ -213,9 +213,9 @@ class PersistentArrayMap<out K, out V> internal constructor(
             array[index + 1] as V
         )
 
-        override fun rest(): ISeq<MapEntry<K, V>> = when {
+        override fun next(): ISeq<MapEntry<K, V>>? = when {
             index + 2 < array.size -> Seq(array, index + 2)
-            else -> PersistentList.Empty
+            else -> null
         }
     }
 

@@ -123,17 +123,17 @@ abstract class APersistentVector<out E> :
             else -> {
                 if (other !is Sequential) return false
 
-                var seq = seq<E>(other) as ISeq<E>
+                var seq: ISeq<E>? = seq<E>(other) as ISeq<E>
 
                 var i = 0
                 while (i < count) {
-                    if (!areEqual(nth(i), seq.first()))
+                    if (seq == null || !areEqual(nth(i), seq.first()))
                         return false
-                    seq = seq.rest()
+                    seq = seq.next()
                     i++
                 }
 
-                if (seq != emptySeq<E>()) return false
+                if (seq != null) return false
             }
         }
 
@@ -225,12 +225,12 @@ abstract class APersistentVector<out E> :
         get() = count
 
     override fun contains(element: @UnsafeVariance E): Boolean {
-        var seq = seq()
+        var seq: ISeq<E>? = seq()
         var i = 0
-        while (i < count) {
+        while (seq != null) {
             if (com.github.whyrising.y.collections.util.equiv(element, nth(i)))
                 return true
-            seq = seq.rest()
+            seq = seq.next()
             i++
         }
 
@@ -330,6 +330,14 @@ abstract class APersistentVector<out E> :
             return emptySeq()
         }
 
+        override fun next(): ISeq<E>? {
+            val i = index + 1
+
+            if (i < pv.count) return Seq(pv, i)
+
+            return null
+        }
+
         override val count: Int
             get() = pv.count - index
 
@@ -414,6 +422,11 @@ abstract class APersistentVector<out E> :
         override fun rest(): ISeq<E> = when {
             index > 0 -> RSeq(vec, index - 1)
             else -> emptySeq()
+        }
+
+        override fun next(): ISeq<E>? = when {
+            index > 0 -> RSeq(vec, index - 1)
+            else -> null
         }
 
         override val count: Int = index + 1
