@@ -2,7 +2,6 @@ package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
-import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
@@ -17,7 +16,6 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
 
@@ -161,48 +159,15 @@ class CoreTest {
     }
 
     @Test
-    fun `IPersistentVector component1()`() {
-        val (a) = v(1)
-
-        a shouldBeExactly 1
-    }
-
-    @Test
-    fun `IPersistentVector component2()`() {
-        val (a, b) = v(1, 2)
-
-        a shouldBeExactly 1
-        b shouldBeExactly 2
-    }
-
-    @Test
-    fun `IPersistentVector component3()`() {
-        val (a, b, c) = v(1, 2, 3)
-
-        a shouldBeExactly 1
-        b shouldBeExactly 2
-        c shouldBeExactly 3
-    }
-
-    @Test
-    fun `IPersistentVector component4()`() {
-        val (a, b, c, d) = v(1, 2, 3, 4)
-
-        a shouldBeExactly 1
-        b shouldBeExactly 2
-        c shouldBeExactly 3
-        d shouldBeExactly 4
-    }
-
-    @Test
-    fun `IPersistentVector component5()`() {
-        val (a, b, c, d, e) = v(1, 2, 3, 4, 5)
+    fun `IPersistentVector componentN()`() {
+        val (a, b, c, d, e, f) = v(1, 2, 3, 4, 5, 6)
 
         a shouldBeExactly 1
         b shouldBeExactly 2
         c shouldBeExactly 3
         d shouldBeExactly 4
         e shouldBeExactly 5
+        f shouldBeExactly 6
     }
 
     @Test
@@ -269,6 +234,39 @@ class CoreTest {
     }
 
     @Test
+    fun `spread()`() {
+        spread(null).shouldBeNull()
+
+        spread(arrayOf(listOf(1))) shouldBe l(1)
+
+        spread(arrayOf(1, 2, 3, listOf(4))) shouldBe l(1, 2, 3, 4)
+    }
+
+    @Test
+    fun `isEvery(pred, coll)`() {
+        isEvery<Int>({ true }, null).shouldBeTrue()
+
+        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 6)).shouldBeTrue()
+
+        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 1)).shouldBeFalse()
+
+        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, null)).shouldBeFalse()
+    }
+
+    @Test
+    fun `conj()`() {
+        conj(null, 2) shouldBe l(2)
+
+        conj(v(1), 2) shouldBe v(1, 2)
+
+        conj(v(1), 2, 3, 4) shouldBe v(1, 2, 3, 4)
+
+        conj(v(1), null, 3, 4) shouldBe v(1, null, 3, 4)
+
+        conj(null, 1, 3, 4) shouldBe v(4, 3, 1)
+    }
+
+    @Test
     fun `concat()`() {
         val c = concat<Int>()
 
@@ -329,167 +327,5 @@ class CoreTest {
 
         concat<Int>(listOf(1, 2), v(3, 4), listOf(5, 6)).toString() shouldBe
             "(1 2 3 4 5 6)"
-    }
-
-    @Test
-    fun `spread()`() {
-        spread(null).shouldBeNull()
-
-        spread(arrayOf(listOf(1))) shouldBe l(1)
-
-        spread(arrayOf(1, 2, 3, listOf(4))) shouldBe l(1, 2, 3, 4)
-    }
-
-    @Test
-    fun `apply(f(X), x)`() {
-        apply<Int, Int>({ i: Int -> i * 2 }, l(5)) shouldBeExactly 10
-
-        apply<Int, Int>({ i: Int, j: Int -> i * j }, l(5, 6)) shouldBeExactly 30
-
-        apply({ i: Int, j: Int -> i * j }, 5, l(6)) shouldBeExactly 30
-
-        apply({ i: Int, j: Int -> i * j }, 5, 6, l<Int>()) shouldBeExactly 30
-
-        apply({ i: Int, j: Int -> i * j }, 5, l(6)) shouldBeExactly 30
-
-        apply(
-            { i: Int, j: Int, k: Int -> i * j * k },
-            5,
-            6,
-            2,
-            l<Int>()
-        ) shouldBeExactly 60
-
-        apply(
-            { i: Int, j: Int, k: Int, l: Int -> i * j * k * l },
-            5,
-            6,
-            2,
-            2,
-            l<Int>()
-        ) shouldBeExactly 120
-
-        apply(
-            { i: Int, j: Int, k: Int, l: Int, m: Int -> i * j * k * l * m },
-            5,
-            6,
-            2,
-            2,
-            2,
-            l<Int>()
-        ) shouldBeExactly 240
-
-        apply(
-            { i: Int, j: Int, k: Int, l: Int, m: Int, n: Int ->
-                i * j * k * l * m * n
-            },
-            5,
-            6,
-            2,
-            2,
-            2,
-            l(2)
-        ) shouldBeExactly 480
-
-        apply(
-            { i: Int, j: Int, k: Int, l: Int, m: Int, n: Int, o: Int ->
-                i * j * k * l * m * n * o
-            },
-            5,
-            6,
-            2,
-            2,
-            2,
-            l(2, 2)
-        ) shouldBeExactly 960
-
-        shouldThrowExactly<ArityException> {
-            apply<Int, Int>({ i: Int -> i * 2 }, l(5, 6))
-        }.message shouldContain "Wrong number of args (2) passed to:"
-
-        shouldThrowExactly<ArityException> {
-            apply<Int, Int>({ i: Int -> i * 2 }, l<Int>())
-        }.message shouldContain "Wrong number of args (0) passed to:"
-
-        shouldThrowExactly<ArityException> {
-            apply({ i: Int, j: Int -> i * j }, 1, l<Int>())
-        }.message shouldContain "Wrong number of args (1) passed to:"
-    }
-
-    @Test
-    fun `isEvery(pred, coll)`() {
-        isEvery<Int>({ true }, null).shouldBeTrue()
-
-        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 6)).shouldBeTrue()
-
-        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 1)).shouldBeFalse()
-
-        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, null)).shouldBeFalse()
-    }
-
-    @Test
-    fun `conj()`() {
-        conj(null, 2) shouldBe l(2)
-
-        conj(v(1), 2) shouldBe v(1, 2)
-
-        conj(v(1), 2, 3, 4) shouldBe v(1, 2, 3, 4)
-
-        conj(v(1), null, 3, 4) shouldBe v(1, null, 3, 4)
-
-        conj(null, 1, 3, 4) shouldBe v(4, 3, 1)
-    }
-
-    @Test
-    fun `map(f, coll)`() {
-        val f: (Int) -> Int = { i -> i + 1 }
-
-        map(f, null) shouldBe PersistentList.Empty
-
-        map(f, listOf(11, 5, 9)) shouldBe l(12, 6, 10)
-
-        val chunkedSeq = ChunkedSeq(ArrayChunk(arrayOf(11, 5, 9)))
-        map(f, chunkedSeq) shouldBe listOf(12, 6, 10)
-
-        map(f, null).toString() shouldBe "()"
-    }
-
-    @Test
-    fun `map(f, c1, c2)`() {
-        val f: (Int, Int) -> Int = { i, j -> i + j }
-
-        map(f, l(5), l(8)) shouldBe l(13)
-
-        map(f, null, null) shouldBe l()
-
-        map(f, l(5), null) shouldBe l()
-
-        map(f, null, l(8)) shouldBe l()
-    }
-
-    @Test
-    fun `map(f, c1, c2, c3)`() {
-        val f: (Int, Int, Int) -> Int = { i, j, k -> i + j + k }
-
-        map(f, l(5), l(8), l(1)) shouldBe l(14)
-
-        map(f, null, null, null) shouldBe l()
-
-        map(f, l(5), null, null) shouldBe l()
-
-        map(f, null, l(8), null) shouldBe l()
-    }
-
-    @Test
-    fun `map(f, c1, c2, c3, colls)`() {
-        val f: (Int, Int, Int) -> Int = { i, j, k -> i + j + k }
-
-        map(f, listOf(1, 2), listOf(1, 3), listOf(1, 4)) shouldBe l(3, 9)
-
-        map(f, l(1, 2), l(1, 3), l(1, 4)) shouldBe l(3, 9)
-
-        map(f, l(1, 2), l(1, 3), l(1, 4), null) shouldBe l()
-
-        map(f, l(1, 2), l(1, 3), null, l(1, 4)) shouldBe l()
     }
 }

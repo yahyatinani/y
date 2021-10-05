@@ -1,6 +1,5 @@
 package com.github.whyrising.y.collections.core
 
-import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.ArraySeq
 import com.github.whyrising.y.collections.Chunk
 import com.github.whyrising.y.collections.StringSeq
@@ -283,6 +282,8 @@ operator fun <E> IPersistentVector<E>.component4(): E = this.nth(3)
 
 operator fun <E> IPersistentVector<E>.component5(): E = this.nth(4)
 
+operator fun <E> IPersistentVector<E>.component6(): E = this.nth(5)
+
 operator fun <K, V> IPersistentMap<K, V>.get(key: K): V? = this.valAt(key)
 
 fun <E> first(x: Any?): E? = when (val seq = seq<E>(x)) {
@@ -307,47 +308,11 @@ inline fun <E> lazySeq(crossinline body: () -> Any?): LazySeq<E> = LazySeq {
     body()
 }
 
-fun <E> concat(): LazySeq<E> = lazySeq()
-
-fun <E> concat(x: Any?): LazySeq<E> = lazySeq { x }
-
-fun <E> concat(x: Any?, y: Any?): LazySeq<E> = lazySeq {
-    when (val s = seq<E>(x)) {
-        null -> y
-        else -> when (s) {
-            is IChunkedSeq<*> -> {
-                consChunk(s.firstChunk(), concat(nextChunks(s), y))
-            }
-            else -> cons(s.first(), concat<E>(s.next(), y))
-        }
-    }
-}
-
 fun <E> nextChunks(chunk: IChunkedSeq<E>): ISeq<E>? {
     return when (val rs = chunk.restChunks()) {
         is Empty -> null
         else -> rs
     }
-}
-
-fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
-    fun cat(xy: Any?, zzs: Any?): LazySeq<E> = lazySeq {
-        val xys = seq<E>(xy)
-        when {
-            xys === null -> when (val argsSeq = seq<E>(zzs)) {
-                null -> null
-                else -> cat(argsSeq.first(), argsSeq.rest())
-            }
-            else -> when (xys) {
-                is IChunkedSeq<*> -> {
-                    consChunk(xys.firstChunk(), cat(xys.restChunks(), zzs))
-                }
-                else -> cons(xys.first(), cat(xys.rest(), zzs))
-            }
-        }
-    }
-
-    return cat(concat<E>(x, y), zs)
 }
 
 internal fun spread(arglist: Any?): ISeq<Any?>? {
@@ -358,96 +323,6 @@ internal fun spread(arglist: Any?): ISeq<Any?>? {
         else -> cons(s.first(), spread(s.next()))
     }
 }
-
-typealias F1 <T, R> = (T) -> R
-typealias F2 <T1, T2, R> = (T1, T2) -> R
-typealias F3 <T1, T2, T3, R> = (T1, T2, T3) -> R
-typealias F4 <T1, T2, T3, T4, R> = (T1, T2, T3, T4) -> R
-typealias F5 <T1, T2, T3, T4, T5, R> = (T1, T2, T3, T4, T5) -> R
-typealias F6 <T1, T2, T3, T4, T5, T6, R> = (T1, T2, T3, T4, T5, T6) -> R
-typealias F7 <T1, T2, T3, T4, T5, T6, T7, R> = (T1, T2, T3, T4, T5, T6, T7) -> R
-
-class ArityException(n: Int, f: Any) : IllegalArgumentException(
-    "Wrong number of args ($n) passed to: $f"
-)
-
-fun <R> applyTo(f: Function<R>, s: ISeq<Any?>?): R {
-    if (s == null) throw ArityException(0, f)
-
-    return try {
-        when (s.count) {
-            0 -> TODO()
-            1 -> (f as F1<Any?, R>)(s.first())
-            2 -> (f as F2<Any?, Any?, R>)(s.first(), s.rest().first())
-            3 -> (f as F3<Any?, Any?, Any?, R>)(
-                s.first(),
-                s.rest().first(),
-                s.rest().rest().first()
-            )
-            4 -> (f as F4<Any?, Any?, Any?, Any?, R>)(
-                s.first(),
-                s.rest().first(),
-                s.rest().rest().first(),
-                s.rest().rest().rest().first()
-            )
-            5 -> (f as F5<Any?, Any?, Any?, Any?, Any?, R>)(
-                s.first(),
-                s.rest().first(),
-                s.rest().rest().first(),
-                s.rest().rest().rest().first(),
-                s.rest().rest().rest().rest().first(),
-            )
-            6 -> (f as F6<Any?, Any?, Any?, Any?, Any?, Any?, R>)(
-                s.first(),
-                s.rest().first(),
-                s.rest().rest().first(),
-                s.rest().rest().rest().first(),
-                s.rest().rest().rest().rest().first(),
-                s.rest().rest().rest().rest().rest().first(),
-            )
-            7 -> (f as F7<Any?, Any?, Any?, Any?, Any?, Any?, Any?, R>)(
-                s.first(),
-                s.rest().first(),
-                s.rest().rest().first(),
-                s.rest().rest().rest().first(),
-                s.rest().rest().rest().rest().first(),
-                s.rest().rest().rest().rest().rest().first(),
-                s.rest().rest().rest().rest().rest().rest().first(),
-            )
-            else -> TODO("Apply fn supports only 7 in this version")
-        }
-    } catch (e: ClassCastException) {
-        throw ArityException(s.count, f)
-    }
-}
-
-fun <T, R> apply(f: Function<R>, coll: Any): R = applyTo(f, seq<T>(coll))
-
-fun <T, R> apply(f: Function<R>, a: T, coll: Any): R = applyTo(f, cons(a, coll))
-
-fun <T1, T2, R> apply(
-    f: Function<R>,
-    a: T1,
-    b: T2,
-    coll: Any
-): R = applyTo(f, cons(a, cons(b, coll)))
-
-fun <T1, T2, T3, R> apply(
-    f: Function<R>,
-    a: T1,
-    b: T2,
-    c: T3,
-    coll: Any
-): R = applyTo(f, cons(a, cons(b, cons(c, coll))))
-
-fun <T1, T2, T3, T4, R> apply(
-    f: Function<R>,
-    a: T1,
-    b: T2,
-    c: T3,
-    d: T4,
-    vararg args: Any
-): R = applyTo(f, cons(a, cons(b, cons(c, cons(d, spread(args))))))
 
 fun <T> isEvery(pred: (T) -> Boolean, coll: Any?): Boolean {
     val s = seq<Any?>(coll) ?: return true
@@ -482,75 +357,38 @@ fun <T> conj(
     return conj(coll?.conj(x) ?: l(x), seq(xs))
 }
 
-@Suppress("UNCHECKED_CAST")
-fun <T, R> map(f: (T) -> R, coll: Any?): LazySeq<R> = lazySeq {
-    when (val s = seq<T>(coll)) {
-        null -> return@lazySeq null
-        is IChunkedSeq<*> -> {
-            val firstChunk = s.firstChunk() as Chunk<T>
-            val count = s.count
-            val chunkBuffer = arrayOfNulls<Any?>(count)
-            for (i in 0 until count)
-                chunkBuffer[i] = f(firstChunk.nth(i))
+fun <E> concat(): LazySeq<E> = lazySeq()
 
-            consChunk(ArrayChunk(chunkBuffer), map(f, s.restChunks()))
+fun <E> concat(x: Any?): LazySeq<E> = lazySeq { x }
+
+fun <E> concat(x: Any?, y: Any?): LazySeq<E> = lazySeq {
+    when (val s = seq<E>(x)) {
+        null -> y
+        else -> when (s) {
+            is IChunkedSeq<*> -> {
+                consChunk(s.firstChunk(), concat(nextChunks(s), y))
+            }
+            else -> cons(s.first(), concat<E>(s.next(), y))
         }
-        else -> cons(f(s.first()), map(f, s.rest()))
     }
 }
 
-fun <T1, T2, R> map(f: (T1, T2) -> R, c1: Any?, c2: Any?): LazySeq<R> =
-    lazySeq {
-        val s1 = seq<T1>(c1)
-        val s2 = seq<T2>(c2)
-
-        if (s1 == null || s2 == null)
-            return@lazySeq null
-
-        cons(f(s1.first(), s2.first()), map(f, s1.rest(), s2.rest()))
-    }
-
-fun <T1, T2, T3, R> map(
-    f: (T1, T2, T3) -> R,
-    c1: Any?,
-    c2: Any?,
-    c3: Any?
-): LazySeq<R> = lazySeq {
-    val s1 = seq<T1>(c1)
-    val s2 = seq<T2>(c2)
-    val s3 = seq<T3>(c3)
-
-    if (s1 == null || s2 == null || s3 == null)
-        return@lazySeq null
-
-    cons(
-        f(s1.first(), s2.first(), s3.first()),
-        map(f, s1.rest(), s2.rest(), s3.rest())
-    )
-}
-
-fun <R> map(
-    f: Function<R>,
-    c1: Any?,
-    c2: Any?,
-    c3: Any?,
-    vararg colls: Any?
-): LazySeq<R> {
-    fun step(cs: IPersistentCollection<Any?>): ISeq<Any?>? {
-        val ss = map<Any?, ISeq<Any?>?>({ seq(it) }, cs)
-
-        if (isEvery<ISeq<Any?>?>({ it != null }, ss)) {
-            return cons(
-                map<ISeq<Any?>, Any?>({ it.first() }, ss),
-                step(map<ISeq<Any?>, Any?>({ it.rest() }, ss))
-            )
+fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
+    fun cat(xy: Any?, zzs: Any?): LazySeq<E> = lazySeq {
+        val xys = seq<E>(xy)
+        when {
+            xys === null -> when (val argsSeq = seq<E>(zzs)) {
+                null -> null
+                else -> cat(argsSeq.first(), argsSeq.rest())
+            }
+            else -> when (xys) {
+                is IChunkedSeq<*> -> {
+                    consChunk(xys.firstChunk(), cat(xys.restChunks(), zzs))
+                }
+                else -> cons(xys.first(), cat(xys.rest(), zzs))
+            }
         }
-
-        return null
     }
 
-    return map<Any, R>(
-        { apply<Any, R>(f, it) },
-        step(conj(seq(colls), c1, c2, c3))
-    )
+    return cat(concat<E>(x, y), zs)
 }
