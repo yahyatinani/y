@@ -5,21 +5,70 @@ Changelog
 
 #### Added:
 
-* concat()
+* ```kotlin
+  fun <E> first(x: Any?): E?
+  ```
 
-* first()
+* concat function:
 
-* IPersistentVector<E>.componentN()
+  * ```kotlin
+    fun <E> concat(): LazySeq<E>
+    ```
 
-* IPersistentVector<E>.get(index: Int)
+  * ```kotlin
+    fun <E> concat(x: Any?): LazySeq<E> 
+    ```
 
-*  consChunk()
+  * ```kotlin
+    fun <E> concat(x: Any?, y: Any?): LazySeq<E>
+    ```
 
-*  map()
+  * ```kotlin
+    fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E>
+    ```
+
+* ```kotlin
+  fun <T> conj(
+      coll: IPersistentCollection<T>?,
+      x: T,
+      vararg xs: T
+  ): IPersistentCollection<T>
+  ```
+
+* ```kotlin
+  fun <T> isEvery(pred: (T) -> Boolean, coll: Any?): Boolean
+  ```
+
+* ```kotlin
+  fun IPersistentVector<E>.component1()...IPersistentVector<E>.component6()
+  ```
+
+* ```kotlin
+  fun IPersistentVector<E>.get(index: Int)
+  ```
+
+* ```kotlin
+  operator fun <K, V> IPersistentMap<K, V>.get(key: K): V?
+  ```
+
+* ```kotlin
+  fun consChunk()
+  ```
 
 * ```kotlin
   fun nextChunks()
   ```
+  
+* ```kotlin
+  inline fun <E> lazySeq(crossinline body: () -> Any?): LazySeq<E>
+  ```
+
+#### Updated:
+
+* `ISeq<E>` interface:
+  * Add `fun next(): ISeq<E>?`
+
+
 
 ## v0.0.6
 
