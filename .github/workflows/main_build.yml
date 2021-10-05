@@ -7,8 +7,7 @@ on:
       - 'docs/**'
       - '*.md'
       - '**/*.yml'
-    branches:
-      - master
+    branches: [ master ]
 
 jobs:
   linux:
