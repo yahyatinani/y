@@ -254,7 +254,7 @@ class CoreTest {
     }
 
     @Test
-    fun `conj()`() {
+    fun `conj() adds elements to a collection`() {
         conj(null, 2) shouldBe l(2)
 
         conj(v(1), 2) shouldBe v(1, 2)
