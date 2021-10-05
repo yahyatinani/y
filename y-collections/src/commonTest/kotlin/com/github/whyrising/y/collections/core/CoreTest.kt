@@ -295,7 +295,7 @@ class CoreTest {
     }
 
     @Test
-    fun `concat(x, y) ChunkedSeq`() {
+    fun `concat(x, y) a ChunkedSeq`() {
         val chunk1 = ArrayChunk(arrayOf(1, 2))
 
         val concatenation = concat<Int>(ChunkedSeq(chunk1), l(3, 4))
