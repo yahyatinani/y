@@ -15,7 +15,7 @@ class PersistentQueue<out E> private constructor(
     val back: PersistentVector<E>
 ) : IPersistentStack<E> {
 
-    override fun peek(): E? = TODO("Not yet implemented")
+    override fun peek(): E? = first<E>(front)
 
     override fun pop(): IPersistentStack<E> {
         TODO("Not yet implemented")

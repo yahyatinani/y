@@ -5,6 +5,7 @@ import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.core.l
 import com.github.whyrising.y.collections.core.v
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
@@ -43,5 +44,20 @@ class PersistentQueueTest {
         newQueue.count shouldBeExactly 4
         newQueue.front shouldBe l(45)
         newQueue.back shouldBe v(90, 100, 200)
+    }
+
+    @Test
+    fun `peek() should return null, when queue is empty`() {
+        PersistentQueue<Int>().peek().shouldBeNull()
+    }
+
+    @Test
+    fun `peek() should return the first element in the queue`() {
+        val queue = PersistentQueue<Int>()
+            .conj(45)
+            .conj(90)
+            .conj(100)
+
+        queue.peek()!! shouldBeExactly 45
     }
 }
