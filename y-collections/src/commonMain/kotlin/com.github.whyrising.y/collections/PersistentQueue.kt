@@ -17,8 +17,16 @@ class PersistentQueue<out E> private constructor(
 
     override fun peek(): E? = first<E>(front)
 
-    override fun pop(): IPersistentStack<E> {
-        TODO("Not yet implemented")
+    override fun pop(): PersistentQueue<E> = when (front) {
+        is Empty -> EMPTY_QUEUE
+        else -> {
+            val newFront = front.rest()
+            val c = count - 1
+            when (newFront) {
+                is Empty -> PersistentQueue(c, back.seq(), EmptyVector)
+                else -> PersistentQueue(c, newFront, back)
+            }
+        }
     }
 
     override fun conj(e: @UnsafeVariance E): PersistentQueue<E> = when (front) {

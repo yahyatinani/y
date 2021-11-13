@@ -60,4 +60,46 @@ class PersistentQueueTest {
 
         queue.peek()!! shouldBeExactly 45
     }
+
+    @Test
+    fun `pop() should return the empty queue when called on empty queue`() {
+        val queue = PersistentQueue<Int>()
+
+        queue.pop() shouldBeSameInstanceAs queue
+    }
+
+    /**
+     * pop() should drop the first element from the front of the queue and then
+     * put the back in front of the queue, when the front becomes empty
+     */
+    @Test
+    fun `pop() drops first element from front & put the back in front`() {
+        val queue = PersistentQueue<Int>()
+            .conj(45)
+            .conj(90)
+            .conj(100)
+
+        val newQueue = queue.pop()
+
+        newQueue.count shouldBeExactly 2
+        newQueue.front shouldBe l(90, 100)
+        newQueue.back shouldBeSameInstanceAs PersistentVector.EmptyVector
+    }
+
+    @Test
+    fun `pop() should drop the first element from the front of the queue`() {
+        val queue = PersistentQueue<Int>()
+            .conj(45)
+            .conj(90)
+            .conj(100)
+            .pop()
+            .conj(111)
+            .conj(222)
+
+        val newQueue = queue.pop()
+
+        newQueue.count shouldBeExactly 3
+        newQueue.front shouldBe l(100)
+        newQueue.back shouldBe v(111, 222)
+    }
 }
