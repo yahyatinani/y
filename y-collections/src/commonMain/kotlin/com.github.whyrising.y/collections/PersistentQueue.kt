@@ -34,9 +34,7 @@ class PersistentQueue<out E> private constructor(
         else -> PersistentQueue(count + 1, front, back.conj(e))
     }
 
-    override fun empty(): IPersistentCollection<E> {
-        TODO("Not yet implemented")
-    }
+    override fun empty(): IPersistentCollection<E> = EMPTY_QUEUE
 
     override fun equiv(other: Any?): Boolean {
         TODO("Not yet implemented")

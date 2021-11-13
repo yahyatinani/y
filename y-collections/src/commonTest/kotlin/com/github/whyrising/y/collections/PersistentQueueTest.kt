@@ -102,4 +102,10 @@ class PersistentQueueTest {
         newQueue.front shouldBe l(100)
         newQueue.back shouldBe v(111, 222)
     }
+
+    @Test
+    fun `empty() should return the empty queue`() {
+        PersistentQueue<Int>().empty() shouldBeSameInstanceAs
+            PersistentQueue<Int>()
+    }
 }
