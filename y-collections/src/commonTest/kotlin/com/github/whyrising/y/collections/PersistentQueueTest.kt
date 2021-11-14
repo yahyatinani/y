@@ -164,6 +164,7 @@ class PersistentQueueTest {
     fun contains() {
         val queue = PersistentQueue<Int>().conj(90)
 
-//        queue.contains(90).shouldBeTrue()
+        queue.contains(90).shouldBeTrue()
+        queue.contains(100).shouldBeFalse()
     }
 }

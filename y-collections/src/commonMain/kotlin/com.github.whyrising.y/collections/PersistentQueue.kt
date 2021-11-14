@@ -12,6 +12,7 @@ import com.github.whyrising.y.collections.list.IPersistentList
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.util.count
+import com.github.whyrising.y.collections.util.equiv
 
 class PersistentQueue<out E> private constructor(
     override val count: Int,
@@ -63,7 +64,15 @@ class PersistentQueue<out E> private constructor(
         get() = count
 
     override fun contains(element: @UnsafeVariance E): Boolean {
-        TODO("Not yet implemented")
+        var s: ISeq<E>? = seq()
+
+        while (s != null) {
+            if (equiv(s.first(), element))
+                return true
+            s = s.next()
+        }
+
+        return false
     }
 
     override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
