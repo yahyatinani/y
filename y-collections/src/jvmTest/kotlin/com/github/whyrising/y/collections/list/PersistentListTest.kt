@@ -333,7 +333,7 @@ class PersistentListTest : FreeSpec({
 
             val e = shouldThrowExactly<NoSuchElementException> { Empty.first() }
 
-            e.message shouldBe "PersistentList is empty."
+            e.message shouldBe "Calling first() on empty PersistentList."
         }
 
         "rest property should return Empty" {
