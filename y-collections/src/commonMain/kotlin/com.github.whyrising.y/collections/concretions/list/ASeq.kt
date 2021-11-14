@@ -118,11 +118,11 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
         return false
     }
 
-    override
-    fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean =
-        elements.fold(true) { acc: Boolean, e: E ->
-            acc && contains(e)
-        }
+    override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
+        for (e in elements)
+            if (!contains(e)) return false
+        return true
+    }
 
     override fun get(index: Int): E = nth(this, index)
 

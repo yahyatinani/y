@@ -424,7 +424,7 @@ class PersistentListTest : FreeSpec({
                 val list = PersistentList(1, 2, 3, 4L, 1.4f)
 
                 list.containsAll(listOf(3, 2, 4L)).shouldBeTrue()
-                list.containsAll(listOf(3, 2, 0)).shouldBeFalse()
+                list.containsAll(listOf(3, 2, 0, 1, 4)).shouldBeFalse()
             }
 
             "indexOf(element)" {
