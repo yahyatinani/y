@@ -11,6 +11,7 @@ import com.github.whyrising.y.collections.core.l
 import com.github.whyrising.y.collections.list.IPersistentList
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
+import com.github.whyrising.y.collections.util.Murmur3
 import com.github.whyrising.y.collections.util.count
 import com.github.whyrising.y.collections.util.equiv
 import kotlinx.serialization.Transient
@@ -23,6 +24,9 @@ class PersistentQueue<out E> private constructor(
     @Transient
     private var _hash: Int = 0
 
+    @Transient
+    private var _hasheq: Int = 0
+
     override fun equiv(other: Any?): Boolean {
         TODO("Not yet implemented")
     }
@@ -32,7 +36,12 @@ class PersistentQueue<out E> private constructor(
     }
 
     override fun hasheq(): Int {
-        TODO("Not yet implemented")
+        var cache = _hasheq
+        if (cache == 0) {
+            cache = Murmur3.hashOrdered(this)
+            _hasheq = cache
+        }
+        return cache
     }
 
     override fun hashCode(): Int {

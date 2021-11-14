@@ -210,4 +210,11 @@ class PersistentQueueTest {
             PersistentQueue<Int>().iterator().next()
         }
     }
+
+    @Test
+    fun hasheq() {
+        PersistentQueue<Int?>().conj(1).conj(2).conj(3).conj(null)
+            .hasheq() shouldBeExactly 762779652
+        PersistentQueue<Int>().hasheq() shouldBeExactly -2017569654
+    }
 }
