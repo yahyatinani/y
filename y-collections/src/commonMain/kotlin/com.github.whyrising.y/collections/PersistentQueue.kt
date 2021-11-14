@@ -100,8 +100,21 @@ class PersistentQueue<out E> private constructor(
 
     override fun isEmpty(): Boolean = count == 0
 
-    override fun iterator(): Iterator<E> {
-        TODO("Not yet implemented")
+    override fun iterator(): Iterator<E> = object : Iterator<E> {
+        private val backIter: Iterator<E> = back.iterator()
+        private var fSeq: ISeq<E> = front
+
+        override fun hasNext(): Boolean = fSeq !is Empty || backIter.hasNext()
+
+        override fun next(): E = when {
+            fSeq !is Empty -> {
+                val first = fSeq.first()
+                fSeq = fSeq.rest()
+                first
+            }
+            backIter.hasNext() -> backIter.next()
+            else -> throw NoSuchElementException()
+        }
     }
 
     class Seq<E>(

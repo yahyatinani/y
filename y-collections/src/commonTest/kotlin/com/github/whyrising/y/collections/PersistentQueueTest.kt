@@ -4,6 +4,7 @@ import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.core.l
 import com.github.whyrising.y.collections.core.v
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
@@ -183,5 +184,30 @@ class PersistentQueueTest {
         PersistentQueue<Int?>().conj(1).conj(2).conj(3).conj(null)
             .hashCode() shouldBeExactly 955327
         PersistentQueue<Int>().hashCode() shouldBeExactly 1
+    }
+
+    @Test
+    fun `iterator_hasNext()`() {
+        PersistentQueue<Int>().conj(1).iterator().hasNext().shouldBeTrue()
+
+        PersistentQueue<Int>().conj(1).conj(2)
+            .iterator().hasNext().shouldBeTrue()
+
+        PersistentQueue<Int>().iterator().hasNext().shouldBeFalse()
+    }
+
+    @Test
+    fun `iterator_next()`() {
+        val queue = PersistentQueue<Int>().conj(1).conj(2).conj(3)
+        val iterator = queue.iterator()
+
+        iterator.next() shouldBeExactly 1
+        iterator.next() shouldBeExactly 2
+        iterator.next() shouldBeExactly 3
+        shouldThrowExactly<NoSuchElementException> { iterator.next() }
+
+        shouldThrowExactly<NoSuchElementException> {
+            PersistentQueue<Int>().iterator().next()
+        }
     }
 }
