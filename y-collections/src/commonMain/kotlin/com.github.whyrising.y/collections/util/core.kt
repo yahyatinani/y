@@ -4,6 +4,7 @@ import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.core.IHashEq
+import com.github.whyrising.y.collections.core.InstaCount
 import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
@@ -145,3 +146,8 @@ fun <E> nth(seq: Sequential, index: Int): E {
 
 fun hashCombine(seed: Int, hash: Int): Int =
     seed xor hash + -0x61c88647 + (seed shl 6) + (seed shr 2)
+
+fun count(a: Any?): Int = when (a) {
+    is InstaCount -> a.count
+    else -> TODO("Not yet implemented")
+}

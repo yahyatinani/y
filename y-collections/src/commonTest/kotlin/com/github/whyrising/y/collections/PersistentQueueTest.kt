@@ -4,6 +4,8 @@ import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.core.l
 import com.github.whyrising.y.collections.core.v
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -107,5 +109,61 @@ class PersistentQueueTest {
     fun `empty() should return the empty queue`() {
         PersistentQueue<Int>().empty() shouldBeSameInstanceAs
             PersistentQueue<Int>()
+    }
+
+    @Test
+    fun `PersistentQueue_Seq ctor`() {
+        val seq = PersistentQueue.Seq(l(1), v(2, 3, 4, 5).seq())
+
+        seq.count shouldBeExactly 5
+        seq.first() shouldBeExactly 1
+        seq.next() shouldBe l(2, 3, 4, 5)
+    }
+
+    @Test
+    fun `PersistentQueue_Seq_next()`() {
+        PersistentQueue.Seq(l(), v<Int>().seq()).next().shouldBeNull()
+        PersistentQueue.Seq(l(1), v(2).seq()).next() shouldBe l(2)
+        PersistentQueue.Seq(l(1, 2), v<Int>().seq()).next() shouldBe l(2)
+        PersistentQueue.Seq(l(1, 2), v(3, 4).seq()).next() shouldBe l(2, 3, 4)
+    }
+
+    @Test
+    fun `seq() should return Empty seq when queue is empty`() {
+        PersistentQueue<Int>().seq() shouldBe PersistentList.Empty
+    }
+
+    @Test
+    fun seq() {
+        val queue = PersistentQueue<Int>()
+            .conj(45)
+            .conj(90)
+            .conj(100)
+
+        queue.seq() shouldBe l(45, 90, 100)
+    }
+
+    // Collection tests
+
+    @Test
+    fun size() {
+        val queue = PersistentQueue<Int>()
+            .conj(45)
+            .conj(90)
+
+        queue.size shouldBeExactly queue.count
+    }
+
+    @Test
+    fun isEmpty() {
+        PersistentQueue<Int>().isEmpty().shouldBeTrue()
+        PersistentQueue<Int>().conj(90).isEmpty().shouldBeFalse()
+    }
+
+    @Test
+    fun contains() {
+        val queue = PersistentQueue<Int>().conj(90)
+
+//        queue.contains(90).shouldBeTrue()
     }
 }

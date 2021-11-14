@@ -1,19 +1,35 @@
 package com.github.whyrising.y.collections
 
+import com.github.whyrising.y.collections.concretions.list.ASeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.EmptyVector
+import com.github.whyrising.y.collections.core.IHashEq
+import com.github.whyrising.y.collections.core.InstaCount
 import com.github.whyrising.y.collections.core.first
 import com.github.whyrising.y.collections.core.l
+import com.github.whyrising.y.collections.list.IPersistentList
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
-import com.github.whyrising.y.collections.stack.IPersistentStack
+import com.github.whyrising.y.collections.util.count
 
 class PersistentQueue<out E> private constructor(
     override val count: Int,
     val front: ISeq<E>,
     val back: PersistentVector<E>
-) : IPersistentStack<E> {
+) : IPersistentList<E>, Collection<E>, InstaCount, IHashEq {
+
+    override fun equiv(other: Any?): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun equals(other: Any?): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun hasheq(): Int {
+        TODO("Not yet implemented")
+    }
 
     override fun peek(): E? = first<E>(front)
 
@@ -36,17 +52,56 @@ class PersistentQueue<out E> private constructor(
 
     override fun empty(): IPersistentCollection<E> = EMPTY_QUEUE
 
-    override fun equiv(other: Any?): Boolean {
+    override fun seq(): ISeq<E> = when (front) {
+        is Empty -> Empty
+        else -> Seq(front, back.seq())
+    }
+
+    // Collection implementation
+
+    override val size: Int
+        get() = count
+
+    override fun contains(element: @UnsafeVariance E): Boolean {
         TODO("Not yet implemented")
     }
 
-    override fun seq(): ISeq<E> {
+    override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
         TODO("Not yet implemented")
+    }
+
+    override fun isEmpty(): Boolean = count == 0
+
+    override fun iterator(): Iterator<E> {
+        TODO("Not yet implemented")
+    }
+
+    class Seq<E>(
+        private val front: ISeq<E>,
+        private val back: ISeq<E>
+    ) : ASeq<E>() {
+        override val count: Int
+            get() = count(front) + count(back)
+
+        override fun first(): E = front.first()
+
+        override fun next(): ISeq<E>? = when (front) {
+            is Empty -> null
+            else -> {
+                val nextF = front.next()
+                when (back) {
+                    is Empty -> nextF
+                    else -> when (nextF) {
+                        null -> back
+                        else -> Seq(nextF, back)
+                    }
+                }
+            }
+        }
     }
 
     companion object {
         private val EMPTY_QUEUE = PersistentQueue(0, Empty, EmptyVector)
-
         operator fun <E> invoke(): PersistentQueue<E> = EMPTY_QUEUE
     }
 }
