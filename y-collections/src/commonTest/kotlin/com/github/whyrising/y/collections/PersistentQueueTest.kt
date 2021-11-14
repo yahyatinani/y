@@ -167,4 +167,13 @@ class PersistentQueueTest {
         queue.contains(90).shouldBeTrue()
         queue.contains(100).shouldBeFalse()
     }
+
+    @Test
+    fun containsAll() {
+        val queue = PersistentQueue<Int>().conj(1).conj(2)
+        queue.containsAll(l(1, 2, 3)).shouldBeFalse()
+        queue.containsAll(l(1)).shouldBeTrue()
+        PersistentQueue<Int>().conj(90).containsAll(l(90)).shouldBeTrue()
+        PersistentQueue<Int>().conj(90).containsAll(l(90)).shouldBeTrue()
+    }
 }

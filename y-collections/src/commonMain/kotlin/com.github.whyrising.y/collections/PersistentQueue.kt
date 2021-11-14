@@ -76,7 +76,9 @@ class PersistentQueue<out E> private constructor(
     }
 
     override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
-        TODO("Not yet implemented")
+        for (e in elements)
+            if (!contains(e)) return false
+        return true
     }
 
     override fun isEmpty(): Boolean = count == 0
