@@ -125,7 +125,6 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
         }
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     override fun hasheq(): Int = Murmur3.hashOrdered(this)
 
     override fun toString(): String = seq().toString()

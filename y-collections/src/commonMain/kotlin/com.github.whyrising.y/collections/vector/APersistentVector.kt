@@ -70,7 +70,6 @@ abstract class APersistentVector<out E> :
         return hash
     }
 
-    @ExperimentalStdlibApi
     override fun hasheq(): Int {
         var cached = hasheq
         if (cached == INIT_HASH_CODE) {
@@ -313,7 +312,7 @@ abstract class APersistentVector<out E> :
 
     @Suppress("UNCHECKED_CAST")
     override fun subList(fromIndex: Int, toIndex: Int): List<E> =
-        SubVector(this, fromIndex, toIndex) as List<E>
+        SubVector(this, fromIndex, toIndex)
 
     class Seq<out E>(
         private val pv: IPersistentVector<E>,

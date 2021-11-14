@@ -18,7 +18,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 
-@ExperimentalStdlibApi
 class HashCollisionNodeTest : FreeSpec({
     "singleKV() when 1 pair in array, it should return true, otherwise false" {
         val edit = Edit(Any())

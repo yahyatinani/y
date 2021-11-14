@@ -38,7 +38,6 @@ import kotlinx.serialization.serializer
 import kotlin.random.Random
 
 @ExperimentalSerializationApi
-@ExperimentalStdlibApi
 class LeanMapTest : FreeSpec({
     "mask(hash, shift)" {
         PersistentHashMap.mask(hasheq("a"), 0) shouldBeExactly 17

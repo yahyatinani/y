@@ -35,7 +35,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
 @ExperimentalSerializationApi
-@ExperimentalStdlibApi
 class PersistentListTest : FreeSpec({
     "PersistentList" - {
         "invoke() should return Empty list" {

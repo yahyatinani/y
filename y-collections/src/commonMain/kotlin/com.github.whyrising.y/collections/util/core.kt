@@ -75,7 +75,7 @@ fun <E> lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> {
                 array[i++] = iterator.next()
 
             return@LazySeq ChunkedSeq(
-                ArrayChunk(array as Array<E>, 0, i),
+                ArrayChunk(array as Array<*>, 0, i),
                 lazyChunkedSeq(iterator)
             )
         }
@@ -104,7 +104,6 @@ fun <E> compare(e1: E, e2: E): Int = when {
     else -> -1
 }
 
-@ExperimentalStdlibApi
 private fun hashNumber(x: Number): Int = when {
     // TODO: BigInteger
     x is Long || x is Int || x is Short || x is Byte -> {
@@ -120,7 +119,6 @@ private fun hashNumber(x: Number): Int = when {
     else -> x.hashCode()
 }
 
-@ExperimentalStdlibApi
 fun hasheq(x: Any?): Int = when (x) {
     null -> 0
     is IHashEq -> x.hasheq()

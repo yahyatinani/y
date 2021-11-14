@@ -39,7 +39,6 @@ import kotlin.time.Duration
 
 @ExperimentalKotest
 @ExperimentalSerializationApi
-@ExperimentalStdlibApi
 class PersistentArrayMapJvmTest : FreeSpec({
     "TransientArrayMap" - {
         val array: Array<Any?> = arrayOf("a", 1, "b", 2, "c", 3)

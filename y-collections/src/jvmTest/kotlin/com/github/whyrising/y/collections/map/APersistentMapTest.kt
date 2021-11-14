@@ -24,7 +24,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeInstanceOf
 
-@ExperimentalStdlibApi
 @Suppress("UNCHECKED_CAST")
 class APersistentMapTest : FreeSpec({
     "toString()" {

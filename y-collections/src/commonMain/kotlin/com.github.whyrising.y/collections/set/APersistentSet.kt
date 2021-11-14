@@ -55,7 +55,6 @@ abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
         return true
     }
 
-    @ExperimentalStdlibApi
     override fun hasheq(): Int {
         var cached = _hashEq
 

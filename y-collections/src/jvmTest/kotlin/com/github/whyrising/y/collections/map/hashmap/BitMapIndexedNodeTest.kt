@@ -20,7 +20,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 
-@ExperimentalStdlibApi
 class BitMapIndexedNodeTest : FreeSpec({
     "EmptyBitMapIndexedNode" {
         EmptyBitMapIndexedNode.edit.value.shouldBeNull()

@@ -19,7 +19,6 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-@ExperimentalStdlibApi
 class LazySeqJvmTest : FreeSpec({
     "ctor(fn)" {
         val chunk = ArrayChunk(arrayOf(1, 2, 3))

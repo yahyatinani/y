@@ -64,7 +64,6 @@ abstract class APersistentMap<out K, out V> :
         return cashed
     }
 
-    @ExperimentalStdlibApi
     override fun hasheq(): Int {
         var cached = hasheq
         if (cached == 0) {

@@ -50,7 +50,6 @@ import kotlinx.serialization.serializer
 const val SHIFT = 5
 
 @ExperimentalSerializationApi
-@ExperimentalStdlibApi
 class PersistentVectorJvmTest : FreeSpec({
     "Node" - {
         @Suppress("UNCHECKED_CAST")

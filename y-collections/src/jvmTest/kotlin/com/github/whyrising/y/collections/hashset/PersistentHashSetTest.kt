@@ -43,7 +43,6 @@ import kotlinx.serialization.serializer
 import kotlin.random.Random
 
 @ExperimentalSerializationApi
-@ExperimentalStdlibApi
 class PersistentHashSetTest : FreeSpec({
     "empty() should return EmptyHashSet" {
         val map = hashMap("a" to "1", "b" to "2", "c" to "3")

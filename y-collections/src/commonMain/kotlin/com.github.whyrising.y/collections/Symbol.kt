@@ -10,7 +10,6 @@ internal class Symbol(
 ) : Named, IHashEq, Comparable<Symbol> {
     val str: String by lazy { name }
 
-    @ExperimentalStdlibApi
     internal val hasheq: Int by lazy {
         hashCombine(Murmur3.hashUnencodedChars(name), 0)
     }
@@ -25,7 +24,6 @@ internal class Symbol(
 
     override fun hashCode(): Int = hashCombine(name.hashCode(), 0)
 
-    @ExperimentalStdlibApi
     override fun hasheq(): Int = hasheq
 
     override fun compareTo(other: Symbol): Int = when (other) {

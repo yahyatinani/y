@@ -7,7 +7,6 @@ import com.github.whyrising.y.collections.util.hasheq
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.ints.shouldBeExactly
 
-@ExperimentalStdlibApi
 class Murmur3Test : FreeSpec({
     "Murmur3.hashInt(x)" {
         Murmur3.hashInt(0) shouldBeExactly 0

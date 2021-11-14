@@ -71,7 +71,6 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
         return cached
     }
 
-    @ExperimentalStdlibApi
     override fun hasheq(): Int {
         if (hasheq == 0)
             hasheq = Murmur3.hashOrdered(this)
