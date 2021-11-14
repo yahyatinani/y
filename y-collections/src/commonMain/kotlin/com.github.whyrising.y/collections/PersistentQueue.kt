@@ -66,7 +66,7 @@ class PersistentQueue<out E> private constructor(
     override fun contains(element: @UnsafeVariance E): Boolean {
         var s: ISeq<E>? = seq()
 
-        while (s != null) {
+        while (s != null && s !is Empty) {
             if (equiv(s.first(), element))
                 return true
             s = s.next()

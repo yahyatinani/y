@@ -166,6 +166,7 @@ class PersistentQueueTest {
 
         queue.contains(90).shouldBeTrue()
         queue.contains(100).shouldBeFalse()
+        PersistentQueue<Int>().contains(100).shouldBeFalse()
     }
 
     @Test
