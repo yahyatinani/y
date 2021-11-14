@@ -13,12 +13,15 @@ import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.util.count
 import com.github.whyrising.y.collections.util.equiv
+import kotlinx.serialization.Transient
 
 class PersistentQueue<out E> private constructor(
     override val count: Int,
     val front: ISeq<E>,
     val back: PersistentVector<E>
 ) : IPersistentList<E>, Collection<E>, InstaCount, IHashEq {
+    @Transient
+    private var _hash: Int = 0
 
     override fun equiv(other: Any?): Boolean {
         TODO("Not yet implemented")
@@ -30,6 +33,20 @@ class PersistentQueue<out E> private constructor(
 
     override fun hasheq(): Int {
         TODO("Not yet implemented")
+    }
+
+    override fun hashCode(): Int {
+        if (_hash == 0) {
+            var hash = 1
+            var s: ISeq<E>? = seq()
+            while (s != null && s !is Empty) {
+                hash = 31 * hash + (s.first()?.hashCode() ?: 0)
+                s = s.next()
+            }
+            _hash = hash
+        }
+
+        return _hash
     }
 
     override fun peek(): E? = first<E>(front)

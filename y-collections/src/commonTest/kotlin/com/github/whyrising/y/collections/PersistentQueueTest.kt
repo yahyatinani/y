@@ -177,4 +177,11 @@ class PersistentQueueTest {
         PersistentQueue<Int>().conj(90).containsAll(l(90)).shouldBeTrue()
         PersistentQueue<Int>().conj(90).containsAll(l(90)).shouldBeTrue()
     }
+
+    @Test
+    fun `hashCode assertions`() {
+        PersistentQueue<Int?>().conj(1).conj(2).conj(3).conj(null)
+            .hashCode() shouldBeExactly 955327
+        PersistentQueue<Int>().hashCode() shouldBeExactly 1
+    }
 }
