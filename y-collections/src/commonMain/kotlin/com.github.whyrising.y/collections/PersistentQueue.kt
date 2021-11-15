@@ -30,6 +30,18 @@ class PersistentQueue<out E> private constructor(
     @Transient
     private var _hasheq by atomic(0)
 
+    override fun toString(): String {
+        var str = ""
+        var s: ISeq<E>? = seq()
+        while (s != null && s !is Empty) {
+            if (str.isNotEmpty())
+                str += " "
+            str += "${s.first()}"
+            s = s.next()
+        }
+        return "($str)"
+    }
+
     override fun equiv(other: Any?): Boolean {
         if (other !is Sequential)
             return false

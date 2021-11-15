@@ -334,7 +334,7 @@ class CoreTest {
     fun `q should return a PersistentQueue`() {
         q<Int>() shouldBeSameInstanceAs PersistentQueue<Int>()
         q<Int>(null) shouldBeSameInstanceAs PersistentQueue<Int>()
-        q<Int>(l(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
+        (q<Int>(l(1, 2, 3, 4)) == q<Int>().conj(1).conj(2).conj(3).conj(4)).shouldBeTrue()
         q<Int>(v(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
         q<Int>(listOf(1, 2)) shouldBe q<Int>().conj(1).conj(2)
     }

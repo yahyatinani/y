@@ -3,6 +3,7 @@ package com.github.whyrising.y.collections
 import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
 import com.github.whyrising.y.collections.core.l
+import com.github.whyrising.y.collections.core.q
 import com.github.whyrising.y.collections.core.v
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -175,6 +176,12 @@ class PersistentQueueTest {
         (PersistentQueue<Any>().conj(1L) == l(1)).shouldBeFalse()
         (PersistentQueue<Any>().conj(1L) == l(1L)).shouldBeTrue()
         (PersistentQueue<Any?>().conj(null) == v(null)).shouldBeTrue()
+    }
+
+    @Test
+    fun `toString()`() {
+        q<Int>().toString() shouldBe "()"
+        q<Int>(l(1, 2, 3)).toString() shouldBe "(1 2 3)"
     }
 
     // Collection tests
