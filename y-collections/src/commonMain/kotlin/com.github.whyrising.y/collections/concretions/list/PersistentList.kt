@@ -61,11 +61,11 @@ sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
 
         override fun toString(): String = "()"
 
-        @ExperimentalStdlibApi
         override fun hasheq(): Int = HASH_EQ
 
-        override fun first(): E =
-            throw NoSuchElementException("PersistentList is empty.")
+        override fun first(): E = throw NoSuchElementException(
+            "Calling first() on empty PersistentList."
+        )
 
         override fun rest(): ISeq<E> = this
 
@@ -121,7 +121,6 @@ sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
         }
 
         companion object {
-            @ExperimentalStdlibApi
             private val HASH_EQ = Murmur3.hashOrdered(emptyList<Nothing>())
         }
     }

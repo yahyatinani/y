@@ -27,7 +27,6 @@ import io.kotest.matchers.reflection.shouldBeSubtypeOf
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
-@ExperimentalStdlibApi
 class UtilJvmTest : FreeSpec({
 
     class UnsupportedNumber : Number() {

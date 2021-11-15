@@ -4,6 +4,7 @@ import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.core.IHashEq
+import com.github.whyrising.y.collections.core.InstaCount
 import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
@@ -74,7 +75,7 @@ fun <E> lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> {
                 array[i++] = iterator.next()
 
             return@LazySeq ChunkedSeq(
-                ArrayChunk(array as Array<E>, 0, i),
+                ArrayChunk(array as Array<*>, 0, i),
                 lazyChunkedSeq(iterator)
             )
         }
@@ -103,7 +104,6 @@ fun <E> compare(e1: E, e2: E): Int = when {
     else -> -1
 }
 
-@ExperimentalStdlibApi
 private fun hashNumber(x: Number): Int = when {
     // TODO: BigInteger
     x is Long || x is Int || x is Short || x is Byte -> {
@@ -119,7 +119,6 @@ private fun hashNumber(x: Number): Int = when {
     else -> x.hashCode()
 }
 
-@ExperimentalStdlibApi
 fun hasheq(x: Any?): Int = when (x) {
     null -> 0
     is IHashEq -> x.hasheq()
@@ -145,3 +144,8 @@ fun <E> nth(seq: Sequential, index: Int): E {
 
 fun hashCombine(seed: Int, hash: Int): Int =
     seed xor hash + -0x61c88647 + (seed shl 6) + (seed shr 2)
+
+fun count(a: Any?): Int = when (a) {
+    is InstaCount -> a.count
+    else -> TODO("Not yet implemented")
+}

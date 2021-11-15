@@ -28,7 +28,6 @@ import kotlin.time.Duration
 
 @ExperimentalKotest
 @ExperimentalSerializationApi
-@ExperimentalStdlibApi
 class TransientVectorTest : FreeSpec({
     @Suppress("UNCHECKED_CAST")
     "constructor" {

@@ -11,7 +11,6 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 
-@ExperimentalStdlibApi
 class SymbolTest : FreeSpec({
     "name" {
         val a = "A"

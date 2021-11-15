@@ -34,14 +34,12 @@ class Keyword private constructor(
     val str: String by lazy { ":${symbol.name}" }
 
     @Transient
-    @ExperimentalStdlibApi
     internal val hashEq: Int = symbol.hasheq() + MAGIC
 
     override val name: String = symbol.name
 
     override fun toString(): String = str
 
-    @ExperimentalStdlibApi
     override fun hasheq(): Int = hashEq
 
     override fun hashCode(): Int = symbol.hashCode() + MAGIC

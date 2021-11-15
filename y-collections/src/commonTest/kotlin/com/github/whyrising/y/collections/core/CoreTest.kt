@@ -1,6 +1,7 @@
 package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.ArrayChunk
+import com.github.whyrising.y.collections.PersistentQueue
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
@@ -327,5 +328,14 @@ class CoreTest {
 
         concat<Int>(listOf(1, 2), v(3, 4), listOf(5, 6)).toString() shouldBe
             "(1 2 3 4 5 6)"
+    }
+
+    @Test
+    fun `q should return a PersistentQueue`() {
+        q<Int>() shouldBeSameInstanceAs PersistentQueue<Int>()
+        q<Int>(null) shouldBeSameInstanceAs PersistentQueue<Int>()
+        q<Int>(l(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
+        q<Int>(v(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
+        q<Int>(listOf(1, 2)) shouldBe q<Int>().conj(1).conj(2)
     }
 }

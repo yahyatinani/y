@@ -35,7 +35,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
 @ExperimentalSerializationApi
-@ExperimentalStdlibApi
 class PersistentListTest : FreeSpec({
     "PersistentList" - {
         "invoke() should return Empty list" {
@@ -334,7 +333,7 @@ class PersistentListTest : FreeSpec({
 
             val e = shouldThrowExactly<NoSuchElementException> { Empty.first() }
 
-            e.message shouldBe "PersistentList is empty."
+            e.message shouldBe "Calling first() on empty PersistentList."
         }
 
         "rest property should return Empty" {
@@ -424,7 +423,7 @@ class PersistentListTest : FreeSpec({
                 val list = PersistentList(1, 2, 3, 4L, 1.4f)
 
                 list.containsAll(listOf(3, 2, 4L)).shouldBeTrue()
-                list.containsAll(listOf(3, 2, 0)).shouldBeFalse()
+                list.containsAll(listOf(3, 2, 0, 1, 4)).shouldBeFalse()
             }
 
             "indexOf(element)" {
