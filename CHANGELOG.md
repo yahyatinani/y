@@ -1,6 +1,19 @@
 Changelog
 ========
 
+## v0.0.8
+
+#### Added:
+
+* `class PersistentQueue<E>`
+
+  * Utility functions to create the queue:
+
+    * ```kotlin
+      fun <E> q(): PersistentQueue<E> // returns an empty queue
+      fun <E> q(coll: Any?): PersistentQueue<E>
+      ```
+
 ## v0.0.7
 
 #### Added:
