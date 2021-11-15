@@ -45,7 +45,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(Libs.Kotlinx.atomicfu)
+                implementation(Libs.Atomicfu.atomicfu)
                 api(project(":y-collections"))
             }
         }
@@ -61,7 +61,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(Libs.Kotest.runner)
-                implementation(Libs.Kotlinx.coroutinesTest)
+                implementation(Libs.Coroutines.test)
             }
         }
 

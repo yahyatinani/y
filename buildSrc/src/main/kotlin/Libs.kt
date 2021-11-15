@@ -10,16 +10,22 @@ object Libs {
         const val propertyTest = "io.kotest:kotest-property:$version"
     }
 
-    object Kotlinx {
-        private const val gr = "org.jetbrains.kotlinx"
+    const val gr = "org.jetbrains.kotlinx"
 
-        private const val atomicfuVersion = "0.16.3"
-        private const val serialVersion = "1.3.0"
+    object Atomicfu {
+        const val version = "0.16.3"
+        const val atomicfu = "$gr:atomicfu:$version"
+    }
+
+    object Serialization {
+        private const val version = "1.3.0"
+        const val json = "$gr:kotlinx-serialization-json:$version"
+    }
+
+    object Coroutines {
         private const val coroutinesV = "1.5.2"
 
-        const val atomicfu = "$gr:atomicfu:$atomicfuVersion"
-        const val serialJson = "$gr:kotlinx-serialization-json:$serialVersion"
-        const val coroutines = "$gr:kotlinx-coroutines-core:$coroutinesV"
-        const val coroutinesTest = "$gr:kotlinx-coroutines-test:$coroutinesV"
+        const val core = "$gr:kotlinx-coroutines-core:$coroutinesV"
+        const val test = "$gr:kotlinx-coroutines-test:$coroutinesV"
     }
 }

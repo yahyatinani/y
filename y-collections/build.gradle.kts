@@ -45,8 +45,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(Libs.Kotlinx.serialJson)
-                implementation(Libs.Kotlinx.atomicfu)
+                implementation(Libs.Atomicfu.atomicfu)
+                implementation(Libs.Serialization.json)
             }
         }
         val commonTest by getting {
@@ -61,7 +61,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(Libs.Kotest.runner)
-                implementation(Libs.Kotlinx.coroutinesTest)
+                implementation(Libs.Coroutines.test)
             }
         }
 
