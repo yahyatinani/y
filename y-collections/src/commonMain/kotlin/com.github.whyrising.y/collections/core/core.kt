@@ -2,6 +2,7 @@ package com.github.whyrising.y.collections.core
 
 import com.github.whyrising.y.collections.ArraySeq
 import com.github.whyrising.y.collections.Chunk
+import com.github.whyrising.y.collections.PersistentQueue
 import com.github.whyrising.y.collections.StringSeq
 import com.github.whyrising.y.collections.associative.Associative
 import com.github.whyrising.y.collections.associative.ILookup
@@ -391,4 +392,20 @@ fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
     }
 
     return cat(concat<E>(x, y), zs)
+}
+
+fun <E> q(): PersistentQueue<E> = PersistentQueue()
+
+fun <E> q(coll: Any?): PersistentQueue<E> {
+    var s = seq<E>(coll)
+    var q = q<E>()
+
+    if (s == null) return q
+
+    while (s != null && s !is Empty) {
+        q = q.conj(s.first())
+        s = s.next()
+    }
+    
+    return q
 }
