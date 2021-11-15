@@ -42,12 +42,24 @@ class PersistentQueue<out E> private constructor(
             s = s.next()
             ms = ms.next()
         }
-        
+
         return true
     }
 
     override fun equals(other: Any?): Boolean {
-        TODO("Not yet implemented")
+        if (other !is Sequential)
+            return false
+
+        var ms = seq<Any?>(other)
+        var s: ISeq<E>? = seq()
+        while (s != null && s !is Empty) {
+            if (ms == null || s.first() != ms.first())
+                return false
+            s = s.next()
+            ms = ms.next()
+        }
+
+        return true
     }
 
     override fun hasheq(): Int {
