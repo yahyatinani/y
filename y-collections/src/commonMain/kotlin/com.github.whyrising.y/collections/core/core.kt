@@ -406,6 +406,6 @@ fun <E> q(coll: Any?): PersistentQueue<E> {
         q = q.conj(s.first())
         s = s.next()
     }
-    
+
     return q
 }
