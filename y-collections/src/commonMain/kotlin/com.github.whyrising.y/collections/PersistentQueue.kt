@@ -14,6 +14,7 @@ import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.util.Murmur3
 import com.github.whyrising.y.collections.util.count
 import com.github.whyrising.y.collections.util.equiv
+import kotlinx.atomicfu.atomic
 import kotlinx.serialization.Transient
 
 class PersistentQueue<out E> private constructor(
@@ -22,10 +23,10 @@ class PersistentQueue<out E> private constructor(
     val back: PersistentVector<E>
 ) : IPersistentList<E>, Collection<E>, InstaCount, IHashEq {
     @Transient
-    private var _hash: Int = 0
+    private var _hash by atomic(0)
 
     @Transient
-    private var _hasheq: Int = 0
+    private var _hasheq by atomic(0)
 
     override fun equiv(other: Any?): Boolean {
         TODO("Not yet implemented")
