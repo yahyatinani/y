@@ -8,9 +8,11 @@ import com.github.whyrising.y.collections.core.IHashEq
 import com.github.whyrising.y.collections.core.InstaCount
 import com.github.whyrising.y.collections.core.first
 import com.github.whyrising.y.collections.core.l
+import com.github.whyrising.y.collections.core.seq
 import com.github.whyrising.y.collections.list.IPersistentList
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
+import com.github.whyrising.y.collections.seq.Sequential
 import com.github.whyrising.y.collections.util.Murmur3
 import com.github.whyrising.y.collections.util.count
 import com.github.whyrising.y.collections.util.equiv
@@ -29,7 +31,19 @@ class PersistentQueue<out E> private constructor(
     private var _hasheq by atomic(0)
 
     override fun equiv(other: Any?): Boolean {
-        TODO("Not yet implemented")
+        if (other !is Sequential)
+            return false
+
+        var ms = seq<Any?>(other)
+        var s: ISeq<E>? = seq()
+        while (s != null && s !is Empty) {
+            if (ms == null || !equiv(s.first(), ms.first()))
+                return false
+            s = s.next()
+            ms = ms.next()
+        }
+        
+        return true
     }
 
     override fun equals(other: Any?): Boolean {

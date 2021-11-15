@@ -158,6 +158,15 @@ class PersistentQueueTest {
         PersistentQueue<Int>().hasheq() shouldBeExactly -2017569654
     }
 
+    @Test
+    fun equiv() {
+        PersistentQueue<Any>().conj(1L).conj(2).equiv(l(1)).shouldBeFalse()
+        PersistentQueue<Any>().conj(1L).conj(2).equiv(Any()).shouldBeFalse()
+        PersistentQueue<Any>().conj(1L).equiv(l(2)).shouldBeFalse()
+        PersistentQueue<Any>().conj(1L).equiv(l(1L)).shouldBeTrue()
+        PersistentQueue<Any>().conj(1L).equiv(l(1)).shouldBeTrue()
+    }
+
     // Collection tests
 
     @Test
