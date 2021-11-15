@@ -144,6 +144,20 @@ class PersistentQueueTest {
         queue.seq() shouldBe l(45, 90, 100)
     }
 
+    @Test
+    fun `hashCode assertions`() {
+        PersistentQueue<Int?>().conj(1).conj(2).conj(3).conj(null)
+            .hashCode() shouldBeExactly 955327
+        PersistentQueue<Int>().hashCode() shouldBeExactly 1
+    }
+
+    @Test
+    fun hasheq() {
+        PersistentQueue<Int?>().conj(1).conj(2).conj(3).conj(null)
+            .hasheq() shouldBeExactly 762779652
+        PersistentQueue<Int>().hasheq() shouldBeExactly -2017569654
+    }
+
     // Collection tests
 
     @Test
@@ -180,13 +194,6 @@ class PersistentQueueTest {
     }
 
     @Test
-    fun `hashCode assertions`() {
-        PersistentQueue<Int?>().conj(1).conj(2).conj(3).conj(null)
-            .hashCode() shouldBeExactly 955327
-        PersistentQueue<Int>().hashCode() shouldBeExactly 1
-    }
-
-    @Test
     fun `iterator_hasNext()`() {
         PersistentQueue<Int>().conj(1).iterator().hasNext().shouldBeTrue()
 
@@ -209,12 +216,5 @@ class PersistentQueueTest {
         shouldThrowExactly<NoSuchElementException> {
             PersistentQueue<Int>().iterator().next()
         }
-    }
-
-    @Test
-    fun hasheq() {
-        PersistentQueue<Int?>().conj(1).conj(2).conj(3).conj(null)
-            .hasheq() shouldBeExactly 762779652
-        PersistentQueue<Int>().hasheq() shouldBeExactly -2017569654
     }
 }

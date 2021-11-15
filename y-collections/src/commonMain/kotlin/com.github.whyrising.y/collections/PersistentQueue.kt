@@ -152,6 +152,7 @@ class PersistentQueue<out E> private constructor(
 
     companion object {
         private val EMPTY_QUEUE = PersistentQueue(0, Empty, EmptyVector)
+
         operator fun <E> invoke(): PersistentQueue<E> = EMPTY_QUEUE
     }
 }
