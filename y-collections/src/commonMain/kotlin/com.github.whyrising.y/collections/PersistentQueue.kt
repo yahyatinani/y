@@ -47,15 +47,16 @@ class PersistentQueue<out E> private constructor(
             return false
 
         var ms = seq<Any?>(other)
-        var s: ISeq<E>? = seq()
-        while (s != null && s !is Empty) {
+        var s: ISeq<E>? = seq(seq())
+        while (s != null) {
             if (ms == null || !equiv(s.first(), ms.first()))
                 return false
+
             s = s.next()
             ms = ms.next()
         }
 
-        return true
+        return ms == null
     }
 
     override fun equals(other: Any?): Boolean {
@@ -63,15 +64,16 @@ class PersistentQueue<out E> private constructor(
             return false
 
         var ms = seq<Any?>(other)
-        var s: ISeq<E>? = seq()
-        while (s != null && s !is Empty) {
+        var s: ISeq<E>? = seq(seq())
+        while (s != null) {
             if (ms == null || s.first() != ms.first())
                 return false
+
             s = s.next()
             ms = ms.next()
         }
 
-        return true
+        return ms == null
     }
 
     override fun hasheq(): Int {

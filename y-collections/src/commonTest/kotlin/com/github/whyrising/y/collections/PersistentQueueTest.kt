@@ -164,6 +164,8 @@ class PersistentQueueTest {
         PersistentQueue<Any>().conj(1L).conj(2).equiv(v(1)).shouldBeFalse()
         PersistentQueue<Any>().conj(1L).conj(2).equiv(Any()).shouldBeFalse()
         PersistentQueue<Any>().conj(1L).equiv(l(2)).shouldBeFalse()
+        (PersistentQueue<Any>().equiv(PersistentQueue<Any>().conj(v(1))))
+            .shouldBeFalse()
         PersistentQueue<Any>().conj(1L).equiv(v(1L)).shouldBeTrue()
         PersistentQueue<Any>().conj(1L).equiv(l(1)).shouldBeTrue()
     }
@@ -174,6 +176,8 @@ class PersistentQueueTest {
         (PersistentQueue<Any>().conj(1L).conj(2) == Any()).shouldBeFalse()
         (PersistentQueue<Any>().conj(1L) == v(2)).shouldBeFalse()
         (PersistentQueue<Any>().conj(1L) == l(1)).shouldBeFalse()
+        (PersistentQueue<Any>() == PersistentQueue<Any>().conj(v(1)))
+            .shouldBeFalse()
         (PersistentQueue<Any>().conj(1L) == l(1L)).shouldBeTrue()
         (PersistentQueue<Any?>().conj(null) == v(null)).shouldBeTrue()
     }
