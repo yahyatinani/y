@@ -1,5 +1,13 @@
 Changelog
 ========
+## v0.0.9
+
+#### Fixed:
+
+* `PersistentQueue.equals(other)`
+* `PersistentQueue.equiv(other)`
+
+
 
 ## v0.0.8
 
