@@ -101,8 +101,8 @@ class PersistentQueue<out E> private constructor(
 
     override fun peek(): E? = first<E>(front)
 
-    override fun pop(): PersistentQueue<E> = when (front) {
-        is Empty -> EMPTY_QUEUE
+    override fun pop(): PersistentQueue<E> = when {
+        front is Empty || count == 1 -> EMPTY_QUEUE
         else -> {
             val newFront = front.rest()
             val c = count - 1

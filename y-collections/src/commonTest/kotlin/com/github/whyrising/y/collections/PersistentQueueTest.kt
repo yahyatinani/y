@@ -108,6 +108,15 @@ class PersistentQueueTest {
     }
 
     @Test
+    fun `pop() should return the empty queue when queue has only one item`() {
+        val queue = PersistentQueue<Int>().conj(45)
+
+        val newQueue = queue.pop()
+
+        newQueue shouldBeSameInstanceAs PersistentQueue<Int>()
+    }
+
+    @Test
     fun `empty() should return the empty queue`() {
         PersistentQueue<Int>().empty() shouldBeSameInstanceAs
             PersistentQueue<Int>()
