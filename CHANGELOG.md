@@ -1,5 +1,13 @@
 Changelog
 ========
+
+## v0.0.10
+
+#### Fixed:
+
+* `PersistentQueue.pop()` should return the empty queue when only one element in the queue.
+
+
 ## v0.0.9
 
 #### Fixed:
