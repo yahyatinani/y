@@ -49,8 +49,6 @@ sealed class PersistentHashMap<out K, out V>(
     override val count: Int,
     val root: Node<K, V>?
 ) : APersistentMap<K, V>(), IMutableCollection<Any?>, MapIterable<K, V> {
-
-    @OptIn(ExperimentalStdlibApi::class)
     override fun assoc(
         key: @UnsafeVariance K,
         value: @UnsafeVariance V
@@ -112,7 +110,6 @@ sealed class PersistentHashMap<out K, out V>(
         private val _root: Node<K, V>
     ) : PersistentHashMap<K, V>(_count, _root) {
 
-        @OptIn(ExperimentalStdlibApi::class)
         override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
             val newRoot = _root.without(
                 Edit(null), 0, hasheq(key), key, Box(null)
@@ -127,17 +124,14 @@ sealed class PersistentHashMap<out K, out V>(
             }
         }
 
-        @OptIn(ExperimentalStdlibApi::class)
         @Suppress("UNCHECKED_CAST")
         override fun containsKey(key: @UnsafeVariance K): Boolean =
             _root.find(0, hasheq(key), key, NOT_FOUND as V) != NOT_FOUND
 
-        @OptIn(ExperimentalStdlibApi::class)
         override fun entryAt(key: @UnsafeVariance K): IMapEntry<K, V>? {
             return _root.find(0, hasheq(key), key)
         }
 
-        @OptIn(ExperimentalStdlibApi::class)
         override
         fun valAt(key: @UnsafeVariance K, default: @UnsafeVariance V?): V? =
             _root.find(0, hasheq(key), key, default)
@@ -343,7 +337,6 @@ sealed class PersistentHashMap<out K, out V>(
                 )
         }
 
-        @OptIn(ExperimentalStdlibApi::class)
         override fun doAssoc(
             key: @UnsafeVariance K,
             value: @UnsafeVariance V
@@ -371,7 +364,6 @@ sealed class PersistentHashMap<out K, out V>(
             return this
         }
 
-        @OptIn(ExperimentalStdlibApi::class)
         override fun doDissoc(key: @UnsafeVariance K): TransientMap<K, V> {
             leafFlag.value = null
 
@@ -405,7 +397,6 @@ sealed class PersistentHashMap<out K, out V>(
             }
         }
 
-        @OptIn(ExperimentalStdlibApi::class)
         override fun doValAt(
             key: @UnsafeVariance K,
             default: @UnsafeVariance V?
@@ -542,7 +533,6 @@ sealed class PersistentHashMap<out K, out V>(
         private fun nodeIndexBy(bitpos: Int) =
             array.size - 1 - bitmapNodeIndex(nodemap, bitpos)
 
-        @OptIn(ExperimentalStdlibApi::class)
         @Suppress("UNCHECKED_CAST")
         override fun assoc(
             edit: Edit,

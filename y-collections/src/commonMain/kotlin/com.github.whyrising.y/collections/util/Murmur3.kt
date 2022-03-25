@@ -63,7 +63,6 @@ object Murmur3 {
         return temp
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun mixK1(k1: Int): Int {
         var temp = k1 * C1
         temp = temp.rotateLeft(15)
@@ -72,7 +71,6 @@ object Murmur3 {
         return temp
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun mixH1(h1: Int, k1: Int): Int {
         var temp = h1 xor k1
         temp = temp.rotateLeft(13)
@@ -135,7 +133,6 @@ object Murmur3 {
         return fmix(h1, count)
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     fun <E> hashOrdered(xs: Iterable<E>): Int {
         var n = 0
         var hash = 1
@@ -146,8 +143,7 @@ object Murmur3 {
 
         return mixCollHash(hash, n)
     }
-
-    @OptIn(ExperimentalStdlibApi::class)
+    
     fun <E> hashUnordered(xs: Iterable<E>): Int {
         var hash = 0
         var n = 0

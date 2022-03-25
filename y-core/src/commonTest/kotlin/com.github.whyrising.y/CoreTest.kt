@@ -1,5 +1,6 @@
-package com.github.whyrising.y.core
+package com.github.whyrising.y
 
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.doubles.shouldBeExactly
 import io.kotest.matchers.floats.shouldBeExactly
@@ -7,11 +8,9 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.longs.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
-import kotlin.test.Test
 
-class CoreTest {
-    @Test
-    fun `inc(x)`() {
+class CoreTest : FreeSpec({
+    "inc" {
         inc(1.toByte()) shouldBe 2.toByte()
         inc(1.toShort()) shouldBe 2.toShort()
         inc(1) shouldBeExactly 2
@@ -20,8 +19,7 @@ class CoreTest {
         inc(1.2) shouldBeExactly 2.2
     }
 
-    @Test
-    fun `dec(x)`() {
+    "dec" {
         dec(1.toByte()) shouldBe 0.toByte()
         dec(1.toShort()) shouldBe 0.toShort()
         dec(1) shouldBeExactly 0
@@ -30,8 +28,7 @@ class CoreTest {
         dec(1.2) shouldBeExactly 1.2.dec()
     }
 
-    @Test
-    fun `identity(x) should return x`() {
+    "identity(x) should return x" {
         identity(10) shouldBeExactly 10
         identity(10.1) shouldBeExactly 10.1
         identity("a") shouldBe "a"
@@ -40,8 +37,7 @@ class CoreTest {
         identity(f) shouldBeSameInstanceAs f
     }
 
-    @Test
-    fun `str(varargs) should return the string value of the arg`() {
+    "str(varargs) should return the string value of the arg" {
         str() shouldBe ""
         str(null) shouldBe ""
         str(1) shouldBe "1"
@@ -53,8 +49,7 @@ class CoreTest {
         str(1, 2, 3, 4) shouldBe "1234"
     }
 
-    @Test
-    fun `curry(f)`() {
+    "curry" {
         val arg1 = 1
         val arg2 = 1.0
         val arg3 = 1.0F
@@ -88,8 +83,7 @@ class CoreTest {
             f5(arg1, arg2, arg3, arg4, arg5, arg6)
     }
 
-    @Test
-    fun `complement(f) should return a function`() {
+    "complement(f) should return a function" {
         val f1 = { true }
         val f2 = { _: Int -> true }
         val f3 = { _: Int -> { _: Long -> true } }
@@ -117,16 +111,14 @@ class CoreTest {
         complementF5(0)(0L)("")(1.2F) shouldBe false
     }
 
-    @Test
-    fun `compose(f)`() {
+    "compose" {
         val f1: (Int) -> Int = ::identity
 
         compose<Int>() shouldBe ::identity
         compose(f1) shouldBe f1
     }
 
-    @Test
-    fun `when g has no args, compose returns the composition with no args `() {
+    "when g has no args, compose returns the composition with no args" {
         val f: (Int) -> String = { i: Int -> str(i) }
         val g: () -> Int = { 7 }
 
@@ -135,8 +127,7 @@ class CoreTest {
         fog() shouldBe f(g())
     }
 
-    @Test
-    fun `when g has 1 arg, compose should return the composition with 1 arg`() {
+    "when g has 1 arg, compose should return the composition with 1 arg" {
         val f: (Int) -> String = { i: Int -> str(i) }
         val g: (Float) -> Int = { 7 }
 
@@ -145,8 +136,7 @@ class CoreTest {
         fog(1.2f) shouldBe f(g(1.2f))
     }
 
-    @Test
-    fun `when g has 2 args, compose returns the composition with 2 args`() {
+    "when g has 2 args, compose returns the composition with 2 args" {
         val x = 1.2f
         val y = 1.8
         val f: (Int) -> String = { i: Int -> str(i) }
@@ -157,8 +147,7 @@ class CoreTest {
         fog(x)(y) shouldBe f(g(x)(y))
     }
 
-    @Test
-    fun `when g has 3 args, should return the composition with 3 args`() {
+    "when g has 3 args, should return the composition with 3 args" {
         val x = 1.2f
         val y = 1.8
         val z = true
@@ -171,4 +160,4 @@ class CoreTest {
 
         fog(x)(y)(z) shouldBe f(g(x)(y)(z))
     }
-}
+})

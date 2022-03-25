@@ -13,7 +13,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
-@OptIn(ExperimentalStdlibApi::class)
 class TransientLeanMapTest : FreeSpec({
     "ctor" {
         val trlm = TransientLeanMap<String, Int>(EmptyHashMap)
@@ -36,7 +35,7 @@ class TransientLeanMapTest : FreeSpec({
         }
     }
 
-    """assertMutable() when called after the call of persistent(), 
+    """assertMutable() when called after the call of persistent(),
        it should throw ane exception """ {
         val trlm1 = TransientLeanMap<String, Int>(EmptyHashMap)
         val trlm2 = TransientLeanMap<String, Int>(EmptyHashMap)
