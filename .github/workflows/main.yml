@@ -1,0 +1,125 @@
+name: main build
+
+on:
+  push:
+    paths-ignore:
+      - 'doc/**'
+      - 'docs/**'
+      - '*.md'
+      - '**/*.yml'
+    branches:
+      - main
+
+jobs:
+  linux_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Prepare Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '8'
+
+      - uses: gradle/gradle-build-action@v2
+
+      - name: Run tests
+        run: ./gradlew check --scan
+
+      - name: publish snapshots
+        run: ./gradlew publish
+
+      - name: Bundle the build report (when failure)
+        if: failure()
+        run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
+
+      - name: Upload the build report (when failure)
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: error-report
+          path: build-reports.zip
+
+  macos_tests:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        target:
+          - macosX64Test publishMacosX64PublicationToDeployRepository
+          - macosArm64Test publishMacosArm64PublicationToDeployRepository
+          - iosX64Test publishIosX64PublicationToDeployRepository
+          - iosSimulatorArm64Test publishIosSimulatorArm64PublicationToDeployRepository
+          - iosArm64TestKlibrary publishIosArm64PublicationToDeployRepository
+          - iosArm32TestKlibrary publishIosArm32PublicationToDeployRepository
+          - tvosX64Test publishTvosX64PublicationToDeployRepository
+          - tvosArm64TestKlibrary publishTvosArm64PublicationToDeployRepository
+          - watchosArm32TestKlibrary publishWatchosArm32PublicationToDeployRepository
+          - watchosArm64TestKlibrary publishWatchosArm64PublicationToDeployRepository
+          - watchosX86Test publishWatchosX86PublicationToDeployRepository
+          - watchosX64Test publishWatchosX64PublicationToDeployRepository
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Prepare Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '8'
+
+      - uses: gradle/gradle-build-action@v2
+
+      - name: Run tests then publish snapshot
+        run: ./gradlew ${{ matrix.target }} --scan
+
+      - name: Bundle the build report (when failure)
+        if: failure()
+        run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
+
+      - name: Upload the build report (when failure)
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: error-report
+          path: build-reports.zip
+
+  windows_tests:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: gradle/gradle-build-action@v2
+
+      - name: Run tests
+        run: ./gradlew mingwX64Test --scan
+
+      - name: publish mingw64 & mingw86 snapshot
+        run: ./gradlew publishMingwX64PublicationToDeployRepository
+
+      - name: Bundle the build report (when failure)
+        if: failure()
+        run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
+
+      - name: Upload the build report (when failure)
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: error-report
+          path: build-reports.zip
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+  OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+  OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+  ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+  ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}

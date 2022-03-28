@@ -1,4 +1,4 @@
-name: Release Build
+name: release build
 
 on:
   push:
@@ -15,29 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup JDK
-        uses: actions/setup-java@v1
+      - name: Prepare Java
+        uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          distribution: 'adopt'
+          java-version: '8'
 
-      - name: Cache Gradle and wrapper
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Grant Permission for Gradlew to Execute
-        run: chmod +x gradlew
-
-      - name: Run unit tests & ktlint check
+      - name: Run unit tests
         run: ./gradlew check --scan
 
       - name: Bundle the build report
@@ -55,22 +43,11 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Cache Gradle and wrapper
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Grant Permission for Gradlew to Execute
-        run: chmod +x gradlew
+      - uses: gradle/gradle-build-action@v2
 
       - name: Run macos tests
         run: ./gradlew macosX64Test --scan
@@ -99,22 +76,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Cache Gradle and wrapper
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Grant Permission for Gradlew to Execute
-        run: chmod +x gradlew
+      - uses: gradle/gradle-build-action@v2
 
       - name: Run tests
         run: ./gradlew mingwX64Test --scan
