@@ -9,9 +9,9 @@ import kotlinx.coroutines.withContext
 class AtomJvmTest : FreeSpec({
     "swap(f)" - {
         """
-            should loop over and over everytime the atom value doesn't match 
+            should loop over and over everytime the atom value doesn't match
             the expected value due to other threads activities
-        """{
+        """ {
             val atom = Atom(0)
 
             val coroutinesCount = 10

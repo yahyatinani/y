@@ -253,7 +253,7 @@ class PersistentVectorJvmTest : FreeSpec({
 
         "assocN(index, val)" - {
 
-            "when index out of bounds, it should throw an exception"{
+            "when index out of bounds, it should throw an exception" {
                 val vec = PersistentVector(1, 2, 3, 4)
 
                 shouldThrowExactly<IndexOutOfBoundsException> {
@@ -707,7 +707,7 @@ class PersistentVectorJvmTest : FreeSpec({
                     vec(v.count - 2) shouldBeExactly v.nth(v.count - 2)
                 }
 
-                """when level = 5 & root contains more than 1 element after 
+                """when level = 5 & root contains more than 1 element after
                    popping, it should set the rightmost leaf to null""" {
                     val v = PersistentVector(*(1..65).toList().toTypedArray())
 
@@ -724,7 +724,7 @@ class PersistentVectorJvmTest : FreeSpec({
                     root.array[1].shouldBeNull()
                 }
 
-                """when level > 5 & root contains only 1 element after 
+                """when level > 5 & root contains only 1 element after
                    popping, it should decrease level and eliminate the empty
                    node""" {
                     val v = PersistentVector(*(1..1057).toList().toTypedArray())
@@ -741,8 +741,8 @@ class PersistentVectorJvmTest : FreeSpec({
                     }
                 }
 
-                """when level > 10 & root contains only 1 element after 
-                   popping, it should decrease level and eliminate the 
+                """when level > 10 & root contains only 1 element after
+                   popping, it should decrease level and eliminate the
                    empty node""" {
                     val v =
                         PersistentVector(*(1..32801).toList().toTypedArray())

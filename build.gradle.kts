@@ -53,6 +53,7 @@ allprojects {
 
     kotlinter {
         reporters = arrayOf("checkstyle", "plain")
+        indentSize = 0
     }
 
     group = "com.github.whyrising.y"
