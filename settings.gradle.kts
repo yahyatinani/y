@@ -9,7 +9,6 @@ rootProject.name = "y"
 
 include("y-core")
 include("y-concurrency")
-include("y-collections")
 
 plugins {
     id("com.gradle.enterprise") version "3.9"
