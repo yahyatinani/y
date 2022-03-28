@@ -1,6 +1,17 @@
 object Plugins {
-    object Ktlint {
-        const val version = "10.1.0"
-        const val id = "org.jlleitschuh.gradle.ktlint"
+    object Kotlinter {
+        const val id = "org.jmailen.kotlinter"
+        const val version = "3.9.0"
+    }
+
+    object Kotlinx {
+        object Serialization {
+            const val id = "plugin.serialization"
+        }
+    }
+
+    object Kotest {
+        const val id = "io.kotest.multiplatform"
+        const val version = Deps.Kotest.version
     }
 }

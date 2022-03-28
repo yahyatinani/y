@@ -140,3 +140,8 @@ with other modules (e.g. y-collections) to fulfill their purpose.
       val default = k("none")
       key(map, default) // :none
       ```
+Troubleshooting
+===
+When running Kotest common tests on Arch, you may encounter this: `error while loading shared libraries: libcrypt.so.1: cannot open shared object file: No such file or directory`
+
+Install this: https://archlinux.org/packages/core/x86_64/libxcrypt-compat/

@@ -419,7 +419,7 @@ class PersistentListTest : FreeSpec({
                 Empty.contains(0).shouldBeFalse()
             }
 
-            "containsAll(Collection)"{
+            "containsAll(Collection)" {
                 val list = PersistentList(1, 2, 3, 4L, 1.4f)
 
                 list.containsAll(listOf(3, 2, 4L)).shouldBeTrue()
@@ -536,7 +536,7 @@ class PersistentListTest : FreeSpec({
                     }
                 }
 
-                "when index is out of bounds, it should throw"{
+                "when index is out of bounds, it should throw" {
                     shouldThrowExactly<IndexOutOfBoundsException> {
                         list.listIterator(4)
                     }

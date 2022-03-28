@@ -1,9 +1,6 @@
 [*.{kt, kts}]
 
 max_line_length = 80
-
-disabled_rules = curly-spacing
-
 indent_style = space
 indent_size = 4
 charset = utf-8

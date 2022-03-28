@@ -39,7 +39,7 @@ class KeywordTest : FreeSpec({
         key.hashCode() shouldBeExactly s("a").hashCode() + -0x61c88647
     }
 
-    "equals(other)"{
+    "equals(other)" {
         val key = Keyword("a")
 
         (key == key).shouldBeTrue()
@@ -49,7 +49,7 @@ class KeywordTest : FreeSpec({
         (Keyword("a") == Keyword("b")).shouldBeFalse()
     }
 
-    "compareTo(other)"{
+    "compareTo(other)" {
         Keyword("a").compareTo(Keyword("a")) shouldBeExactly 0
         Keyword("a").compareTo(Keyword("b")) shouldBeLessThan 0
         Keyword("b").compareTo(Keyword("a")) shouldBeGreaterThan 0
@@ -101,7 +101,7 @@ class KeywordTest : FreeSpec({
         Keyword("a") shouldBe key
     }
 
-    "toString() should return print property"{
+    "toString() should return print property" {
         val a = Keyword("a")
         val b = Keyword("b")
 
