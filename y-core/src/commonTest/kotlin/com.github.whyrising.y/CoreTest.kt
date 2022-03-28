@@ -28,7 +28,7 @@ class CoreTest : FreeSpec({
         dec(1.2) shouldBeExactly 1.2.dec()
     }
 
-    "identity(x) should return x" {
+    "`identity` should return x" {
         identity(10) shouldBeExactly 10
         identity(10.1) shouldBeExactly 10.1
         identity("a") shouldBe "a"
@@ -37,7 +37,7 @@ class CoreTest : FreeSpec({
         identity(f) shouldBeSameInstanceAs f
     }
 
-    "str(varargs) should return the string value of the arg" {
+    "`str` should return the string value of the arg" {
         str() shouldBe ""
         str(null) shouldBe ""
         str(1) shouldBe "1"
@@ -83,7 +83,7 @@ class CoreTest : FreeSpec({
             f5(arg1, arg2, arg3, arg4, arg5, arg6)
     }
 
-    "complement(f) should return a function" {
+    "`complement` should return a function" {
         val f1 = { true }
         val f2 = { _: Int -> true }
         val f3 = { _: Int -> { _: Long -> true } }
@@ -111,53 +111,54 @@ class CoreTest : FreeSpec({
         complementF5(0)(0L)("")(1.2F) shouldBe false
     }
 
-    "compose" {
-        val f1: (Int) -> Int = ::identity
+    "compose" - {
+        "when it takes only one function f, it should return f" {
+            val f: (Int) -> Int = ::identity
 
-        compose<Int>() shouldBe ::identity
-        compose(f1) shouldBe f1
-    }
+            compose<Int>() shouldBe ::identity
+            compose(f) shouldBe f
+        }
 
-    "when g has no args, compose returns the composition with no args" {
-        val f: (Int) -> String = { i: Int -> str(i) }
-        val g: () -> Int = { 7 }
+        "when g has no args, compose returns the composition with no args" {
+            val f: (Int) -> String = { i: Int -> str(i) }
+            val g: () -> Int = { 7 }
 
-        val fog: () -> String = compose(f, g)
+            val fog: () -> String = compose(f, g)
 
-        fog() shouldBe f(g())
-    }
+            fog() shouldBe f(g())
+        }
 
-    "when g has 1 arg, compose should return the composition with 1 arg" {
-        val f: (Int) -> String = { i: Int -> str(i) }
-        val g: (Float) -> Int = { 7 }
+        "when g has 1 arg, compose should return the composition with 1 arg" {
+            val f: (Int) -> String = { i: Int -> str(i) }
+            val g: (Float) -> Int = { 7 }
 
-        val fog: (Float) -> String = compose(f, g)
+            val fog: (Float) -> String = compose(f, g)
 
-        fog(1.2f) shouldBe f(g(1.2f))
-    }
+            fog(1.2f) shouldBe f(g(1.2f))
+        }
 
-    "when g has 2 args, compose returns the composition with 2 args" {
-        val x = 1.2f
-        val y = 1.8
-        val f: (Int) -> String = { i: Int -> str(i) }
-        val g: (Float) -> (Double) -> Int = { { 7 } }
+        "when g has 2 args, compose returns the composition with 2 args" {
+            val x = 1.2f
+            val y = 1.8
+            val f: (Int) -> String = { i: Int -> str(i) }
+            val g: (Float) -> (Double) -> Int = { { 7 } }
 
-        val fog: (Float) -> (Double) -> String = compose(f, g)
+            val fog: (Float) -> (Double) -> String = compose(f, g)
 
-        fog(x)(y) shouldBe f(g(x)(y))
-    }
+            fog(x)(y) shouldBe f(g(x)(y))
+        }
 
-    "when g has 3 args, should return the composition with 3 args" {
-        val x = 1.2f
-        val y = 1.8
-        val z = true
-        val f: (Int) -> String = { i: Int -> str(i) }
-        val g: (Float) -> (Double) -> (Boolean) -> Int =
-            { { { 7 } } }
+        "when g has 3 args, should return the composition with 3 args" {
+            val x = 1.2f
+            val y = 1.8
+            val z = true
+            val f: (Int) -> String = { i: Int -> str(i) }
+            val g: (Float) -> (Double) -> (Boolean) -> Int = { { { 7 } } }
 
-        val fog: (Float) -> (Double) -> (Boolean) -> String =
-            compose(f, g)
+            val fog: (Float) -> (Double) -> (Boolean) -> String =
+                compose(f, g)
 
-        fog(x)(y)(z) shouldBe f(g(x)(y)(z))
+            fog(x)(y)(z) shouldBe f(g(x)(y)(z))
+        }
     }
 })
