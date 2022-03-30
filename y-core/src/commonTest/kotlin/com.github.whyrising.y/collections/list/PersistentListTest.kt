@@ -11,7 +11,6 @@ import com.github.whyrising.y.mocks.MockSeq
 import com.github.whyrising.y.mocks.User
 import com.github.whyrising.y.toPlist
 import com.github.whyrising.y.util.HASH_PRIME
-import com.github.whyrising.y.util.INIT_HASH_CODE
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.v
 import io.kotest.assertions.throwables.shouldThrow
@@ -194,19 +193,17 @@ class PersistentListTest : FreeSpec({
                 }
             val l = PersistentList(*integers.toTypedArray())
 
-            l.hashCode.value shouldBeExactly 0
             l.hashCode() shouldBeExactly expectedHash
-            l.hashCode.value shouldBeExactly expectedHash
+            l.hashCode shouldBeExactly expectedHash
 
             Empty.hashCode() shouldBeExactly 1
-            Empty.hashCode.value shouldBeExactly 1
+            Empty.hashCode shouldBeExactly 1
         }
 
         "hasheq()" {
             val list = l(1, 2, 3, 4, 5) as ASeq<Int>
             val expectedHash = Murmur3.hashOrdered(list)
 
-            list.hasheq shouldBeExactly INIT_HASH_CODE
             list.hasheq() shouldBeExactly expectedHash
             list.hasheq shouldBeExactly expectedHash
             l<Int>().hasheq() shouldBeExactly -2017569654

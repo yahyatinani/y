@@ -11,15 +11,21 @@ import com.github.whyrising.y.util.HASH_PRIME
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.equiv
 import com.github.whyrising.y.util.nth
-import kotlinx.atomicfu.AtomicInt
-import kotlinx.atomicfu.atomic
 
 abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
-    internal var hashCode: AtomicInt = atomic(0)
-        private set
+    internal val hashCode: Int by lazy {
+        var hash = 1
+        var seq = seq()
+        while (seq.count > 0) {
+            hash = (HASH_PRIME * hash) + seq.first().hashCode()
+            seq = seq.rest()
+        }
+        hash
+    }
 
-    internal var hasheq: Int = 0
-        private set
+    internal val hasheq: Int by lazy {
+        Murmur3.hashOrdered(this)
+    }
 
     override
     fun toString(): String = "(${fold("") { acc, e -> "$acc $e" }.trim()})"
@@ -57,27 +63,9 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
         equiv(e1, e2)
     }
 
-    override fun hashCode(): Int {
-        val cached = hashCode.value
-        if (cached == 0) {
-            var newVal = 1
-            var seq = seq()
-            while (seq.count > 0) {
-                newVal = (HASH_PRIME * newVal) + seq.first().hashCode()
-                seq = seq.rest()
-            }
-            if (hashCode.compareAndSet(cached, newVal))
-                return newVal
-        }
-        return cached
-    }
+    override fun hashCode(): Int = hashCode
 
-    override fun hasheq(): Int {
-        if (hasheq == 0)
-            hasheq = Murmur3.hashOrdered(this)
-
-        return hasheq
-    }
+    override fun hasheq(): Int = hasheq
 
     override fun seq(): ISeq<E> = this
 

@@ -17,7 +17,6 @@ import com.github.whyrising.y.mocks.User
 import com.github.whyrising.y.mocks.VectorMock
 import com.github.whyrising.y.toPlist
 import com.github.whyrising.y.util.HASH_PRIME
-import com.github.whyrising.y.util.INIT_HASH_CODE
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.hasheq
 import com.github.whyrising.y.v
@@ -42,8 +41,6 @@ import io.kotest.property.checkAll
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-
-const val SHIFT = 5
 
 class PersistentVectorTest : FreeSpec({
     "Node" - {
@@ -412,12 +409,11 @@ class PersistentVectorTest : FreeSpec({
                 }
                 val vec = PersistentVector(*list.toTypedArray())
 
-                vec.hashCode.value shouldBeExactly INIT_HASH_CODE
                 vec.hashCode() shouldBeExactly expectedHash
-                vec.hashCode.value shouldBeExactly expectedHash
+                vec.hashCode shouldBeExactly expectedHash
 
                 EmptyVector.hashCode() shouldBeExactly 1
-                EmptyVector.hashCode.value shouldBeExactly 1
+                EmptyVector.hashCode shouldBeExactly 1
             }
         }
 
@@ -504,17 +500,12 @@ class PersistentVectorTest : FreeSpec({
 
         "hasheq()" {
             val vec = PersistentVector(1, 2, 3, 4)
-
-            vec.hasheq shouldBeExactly 0
-
             val h = vec.fold(1) { hash: Int, i: Int ->
                 (HASH_PRIME * hash) + hasheq(i)
             }
             val expectedHash = Murmur3.mixCollHash(h, vec.count)
 
-            val hash = vec.hasheq()
-
-            hash shouldBeExactly expectedHash
+            vec.hasheq() shouldBeExactly expectedHash
             vec.hasheq shouldBeExactly expectedHash
         }
 

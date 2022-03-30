@@ -1,6 +1,7 @@
 package com.github.whyrising.y.collections.vector
 
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
+import com.github.whyrising.y.collections.concretions.vector.SHIFT
 import com.github.whyrising.y.collections.vector.PersistentVectorTest.Companion.assertArraysAreEquiv
 import com.github.whyrising.y.utils.runAction
 import io.kotest.assertions.throwables.shouldNotThrow

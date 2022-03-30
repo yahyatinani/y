@@ -41,7 +41,7 @@ class APersistentMapTest : FreeSpec({
             ("b".hashCode() xor 2.hashCode())
 
         map.hashCode() shouldBeExactly expHash
-        map.hashCode.value shouldBeExactly expHash
+        map.hashCode shouldBeExactly expHash
     }
 
     "hasheq()" {
@@ -49,12 +49,10 @@ class APersistentMapTest : FreeSpec({
         val expectedHash = Murmur3.hashUnordered(map)
         val emptyMap = m<String, Int>() as PersistentArrayMap
 
-        map.hasheq.value shouldBeExactly 0
-
         val hash = map.hasheq()
 
         hash shouldBeExactly expectedHash
-        map.hasheq.value shouldBeExactly expectedHash
+        map.hasheq shouldBeExactly expectedHash
 
         emptyMap.hasheq() shouldBeExactly -15128758
         emptyMap.hasheq() shouldBeExactly hashMap<String, Int>().hasheq()

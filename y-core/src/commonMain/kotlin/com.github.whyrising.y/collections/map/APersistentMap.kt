@@ -10,8 +10,6 @@ import com.github.whyrising.y.collections.vector.IPersistentVector
 import com.github.whyrising.y.seq
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.equiv
-import kotlinx.atomicfu.AtomicInt
-import kotlinx.atomicfu.atomic
 import kotlin.collections.Map.Entry
 
 abstract class APersistentMap<out K, out V> :
@@ -21,11 +19,21 @@ abstract class APersistentMap<out K, out V> :
     MapEquivalence,
     IHashEq {
 
-    internal var hashCode = atomic(0)
-        private set
+    @Suppress("UNCHECKED_CAST")
+    internal val hashCode: Int by lazy {
+        var hash = 0
+        var seq = seq() as ISeq<MapEntry<K, V>>
+        while (seq != Empty) {
+            val entry = seq.first()
+            hash += entry.key.hashCode() xor entry.value.hashCode()
+            seq = seq.rest()
+        }
+        hash
+    }
 
-    internal var hasheq: AtomicInt = atomic(0)
-        private set
+    internal val hasheq: Int by lazy {
+        Murmur3.hashUnordered(this)
+    }
 
     @Suppress("UNCHECKED_CAST")
     override fun toString(): String {
@@ -45,33 +53,9 @@ abstract class APersistentMap<out K, out V> :
         return s
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun hashCode(): Int {
-        val cached = hashCode.value
-        if (cached == 0) {
-            var seq = seq() as ISeq<MapEntry<K, V>>
-            var newVal = 0
-            while (seq != Empty) {
-                val entry = seq.first()
-                newVal += entry.key.hashCode() xor entry.value.hashCode()
-                seq = seq.rest()
-            }
-            if (hashCode.compareAndSet(cached, newVal))
-                return newVal
-        }
-        return cached
-    }
+    override fun hashCode(): Int = hashCode
 
-    override fun hasheq(): Int {
-        val cached = hasheq.value
-        if (cached == 0) {
-            val newVal = Murmur3.hashUnordered(this)
-            if (hasheq.compareAndSet(cached, newVal))
-                return newVal
-        }
-
-        return cached
-    }
+    override fun hasheq(): Int = hasheq
 
     @Suppress("UNCHECKED_CAST")
     override fun equals(other: Any?): Boolean {

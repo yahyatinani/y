@@ -240,10 +240,8 @@ class PersistentHashSetTest : FreeSpec({
             acc + s.hashCode()
         }
 
-        val hash = set.hashCode()
-
-        hash shouldBeExactly expectedHash
         set.hashCode() shouldBeExactly expectedHash
+        set.hashCode shouldBeExactly expectedHash
         hs<String>().hashCode() shouldBeExactly 0
     }
 

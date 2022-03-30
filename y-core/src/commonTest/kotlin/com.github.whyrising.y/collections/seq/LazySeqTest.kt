@@ -214,7 +214,7 @@ class LazySeqTest : FreeSpec({
         val f: () -> ISeq<Int>? = { chunkedSeq }
         val lazySeq = LazySeq<Int>(f)
 
-        LazySeq<Int> { null }.hashCode() shouldBeExactly Empty.hashCode.value
+        LazySeq<Int> { null }.hashCode() shouldBeExactly Empty.hashCode
         lazySeq.hashCode() shouldBeExactly chunkedSeq.hashCode()
 
         lazySeq.sVal.shouldBeNull()

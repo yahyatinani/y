@@ -9,8 +9,20 @@ import com.github.whyrising.y.util.Murmur3
 
 abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
     PersistentSet<E>, Set<E>, Collection<E>, IHashEq {
-    private var _hash = 0
-    private var _hashEq = 0
+
+    internal val hashCode: Int by lazy {
+        var seq = seq()
+        var hash = 0
+        while (seq.count != 0) {
+            hash += seq.first().hashCode()
+            seq = seq.rest()
+        }
+        hash
+    }
+
+    internal val hasheq: Int by lazy {
+        Murmur3.hashUnordered(this)
+    }
 
     override val count: Int = map.count
 
@@ -27,20 +39,7 @@ abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
         return "$str}"
     }
 
-    override fun hashCode(): Int {
-        var hash = _hash
-
-        if (hash == 0) {
-            var seq = seq()
-            while (seq.count != 0) {
-                hash += seq.first().hashCode()
-                seq = seq.rest()
-            }
-            _hash = hash
-        }
-
-        return hash
-    }
+    override fun hashCode(): Int = hashCode
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -55,16 +54,7 @@ abstract class APersistentSet<out E>(val map: IPersistentMap<E, E>) :
         return true
     }
 
-    override fun hasheq(): Int {
-        var cached = _hashEq
-
-        if (cached == 0) {
-            cached = Murmur3.hashUnordered(this)
-            _hashEq = cached
-        }
-
-        return cached
-    }
+    override fun hasheq(): Int = hasheq
 
     @Suppress("UNCHECKED_CAST")
     override fun equiv(other: Any?): Boolean {

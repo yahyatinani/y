@@ -14,12 +14,9 @@ import com.github.whyrising.y.collections.stack.IPersistentStack
 import com.github.whyrising.y.collections.vector.APersistentVector.Seq.Companion.emptySeq
 import com.github.whyrising.y.seq
 import com.github.whyrising.y.util.HASH_PRIME
-import com.github.whyrising.y.util.INIT_HASH_CODE
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.compare
 import com.github.whyrising.y.util.hasheq
-import kotlinx.atomicfu.AtomicInt
-import kotlinx.atomicfu.atomic
 
 abstract class APersistentVector<out E> :
     IPersistentVector<E>,
@@ -28,11 +25,23 @@ abstract class APersistentVector<out E> :
     Reversible<E>,
     IHashEq {
 
-    internal var hashCode: AtomicInt = atomic(0)
-        private set
+    internal val hashCode: Int by lazy {
+        var hash = 1
+        for (i in 0 until count)
+            hash = (31 * hash) + nth(i).hashCode()
+        hash
+    }
 
-    internal var hasheq: Int = INIT_HASH_CODE
-        private set
+    internal val hasheq: Int by lazy {
+        var hash = 1
+        var i = 0
+        while (i < count) {
+            hash = (HASH_PRIME * hash) + hasheq(nth(i))
+            i++
+        }
+        hash = Murmur3.mixCollHash(hash, i)
+        hash
+    }
 
     override fun toString(): String {
         var i = 0
@@ -55,38 +64,9 @@ abstract class APersistentVector<out E> :
         else -> emptySeq()
     }
 
-    override fun hashCode(): Int {
-        val cached = hashCode.value
-        if (cached == 0) {
-            var newVal = 1
-            var index = 0
-            while (index < count) {
-                newVal = (31 * newVal) + nth(index).hashCode()
-                index++
-            }
-            if (hashCode.compareAndSet(cached, newVal))
-                return newVal
-        }
+    override fun hashCode(): Int = hashCode
 
-        return cached
-    }
-
-    override fun hasheq(): Int {
-        var cached = hasheq
-        if (cached == INIT_HASH_CODE) {
-            cached = 1
-            var i = 0
-            while (i < count) {
-                cached = (HASH_PRIME * cached) + hasheq(nth(i))
-                i++
-            }
-
-            cached = Murmur3.mixCollHash(cached, i)
-            hasheq = cached
-        }
-
-        return cached
-    }
+    override fun hasheq(): Int = hasheq
 
     private fun compareWith(
         other: Any?,
