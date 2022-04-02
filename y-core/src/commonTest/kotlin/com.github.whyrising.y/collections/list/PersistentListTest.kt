@@ -212,7 +212,7 @@ class PersistentListTest : FreeSpec({
 
     "PersistentList.Empty" - {
 
-        "implementation of List<E>" - {
+        "implementation of List_E" - {
             "size should return 0" {
                 Empty.size shouldBeExactly 0
             }
@@ -366,7 +366,7 @@ class PersistentListTest : FreeSpec({
             seq shouldBeSameInstanceAs list
         }
 
-        "implementation of List<E>" - {
+        "implementation of List_E" - {
             "size()" {
                 val list = PersistentList(1, 2, 34, 4)
                 list.size shouldBeExactly 4
