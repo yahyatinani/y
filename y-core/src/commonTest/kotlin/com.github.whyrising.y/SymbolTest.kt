@@ -6,6 +6,8 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 
@@ -60,9 +62,9 @@ class SymbolTest : FreeSpec({
 
         (Symbol("A").compareTo(Symbol("A"))) shouldBeExactly 0
 
-        (Symbol("A").compareTo(Symbol("B"))) shouldBeExactly -1
+        (Symbol("A").compareTo(Symbol("B"))) shouldBeLessThan 0
 
-        (Symbol("B").compareTo(Symbol("A"))) shouldBeExactly 1
+        (Symbol("B").compareTo(Symbol("A"))) shouldBeGreaterThan 0
     }
 
     "invoke(map)" {
@@ -82,7 +84,7 @@ class SymbolTest : FreeSpec({
 
         Symbol("A")(map1, 1.unaryMinus())!! shouldBeExactly 1
         Symbol("B")(map1, -1)!! shouldBeExactly 2
-        Symbol("Z")<Int? >(map1, null).shouldBeNull()
+        Symbol("Z")<Int?>(map1, null).shouldBeNull()
 
         Symbol("A")(map2, -1)!! shouldBeExactly 1
         Symbol("B")(map2, -1)!! shouldBeExactly 2
