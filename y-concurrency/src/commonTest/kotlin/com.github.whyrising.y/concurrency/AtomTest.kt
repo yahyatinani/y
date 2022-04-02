@@ -1,24 +1,54 @@
 package com.github.whyrising.y.concurrency
 
 import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.test.Test
 
-class AtomTest {
+class AtomTest2 {
+    // TODO: 4/2/22 compareAndSet is failing on the JVM when run from FreeSpec.
     @Test
-    fun `state atomic ref should be initialized while object constructing`() {
+    fun compareAndSet() {
+        var isWatchCalled = false
+        val oldV = 10
+        val newV = 15
+        val atom = Atom(0)
+        atom.swap { oldV }
+        val k = ":watch"
+        val watch: (Any, IRef<Int>, Int, Int) -> Any =
+            { key, ref, oldVal, newVal ->
+                isWatchCalled = true
+
+                key shouldBeSameInstanceAs k
+                ref shouldBeSameInstanceAs atom
+                oldVal shouldBeExactly oldVal
+                newVal shouldBeExactly newV
+            }
+        atom.addWatch(k, watch)
+
+        atom.compareAndSet(oldV, newV) shouldBe true
+        atom.deref() shouldBeExactly newV
+        isWatchCalled.shouldBeTrue()
+    }
+}
+
+class AtomTest : FreeSpec({
+    "state atomic ref should be initialized while object constructing" {
         val n = 10
         val atom = Atom(n)
 
         atom.state shouldBeExactly n
     }
 
-    @Test
-    fun `deref() should return the value of internal state of the atom`() {
+    "deref() should return the value of internal state of the atom" {
         val n = 10
         val atom = Atom(n)
 
@@ -28,8 +58,7 @@ class AtomTest {
         value shouldBeExactly atom.state
     }
 
-    @Test
-    fun `swap() updates the value of atom to f(current-value-of-atom)`() {
+    "swap() updates the value of atom to f(current-value-of-atom)" {
         val n = 10
         val atom = Atom(n)
 
@@ -40,15 +69,13 @@ class AtomTest {
         newVal shouldBeExactly n + 1
     }
 
-    @Test
-    fun `validator property should be null after atom creation`() {
+    "validator property should be null after atom creation" {
         val ref: IRef<Int> = Atom(10)
 
         ref.validator.shouldBeNull()
     }
 
-    @Test
-    fun `set validator`() {
+    "set validator" {
         val ref: IRef<Int> = Atom(10)
         val vf: (Int) -> Boolean = { it > 5 }
 
@@ -57,8 +84,7 @@ class AtomTest {
         ref.validator shouldBeSameInstanceAs vf
     }
 
-    @Test
-    fun `when atom value doesn't pas validator fun, set should throw`() {
+    "when atom value doesn't pas validator fun, set should throw" {
         val ref: IRef<Int> = Atom(10)
         val vf: (Int) -> Boolean = { it > 15 }
 
@@ -70,8 +96,7 @@ class AtomTest {
         e.message shouldBe "Invalid reference state"
     }
 
-    @Test
-    fun `when validator fun throws, encapsulate into IllegalStateException`() {
+    "when validator fun throws, encapsulate into IllegalStateException" {
         val ref: IRef<Int> = Atom(10)
         val vf: (Int) -> Boolean = { throw Exception("mock") }
 
@@ -83,8 +108,7 @@ class AtomTest {
         e.message shouldBe "Invalid reference state"
     }
 
-    @Test
-    fun `swap(state) should throw when new value doesn't pass validation`() {
+    "swap(state) should throw when new value doesn't pass validation" {
         val atom = Atom(10)
         val vf: (Int) -> Boolean = { it > 5 }
         atom.validator = vf
@@ -96,8 +120,7 @@ class AtomTest {
         e.message shouldBe "Invalid reference state"
     }
 
-    @Test
-    fun `watches should be empty after creation of atom`() {
+    "watches should be empty after creation of atom" {
         val atom = Atom(10)
 
         val watches = atom.watches
@@ -105,8 +128,7 @@ class AtomTest {
         watches.count shouldBeExactly 0
     }
 
-    @Test
-    fun `addWatch(key, callback) should add a watch function to watches`() {
+    "addWatch(key, callback) should add a watch function to watches" {
         val atom: IRef<Int> = Atom(10)
         val callback: (Any, IRef<Int>, Int, Int) -> Any = { _, _, _, _ -> }
         val key = ":key"
@@ -118,8 +140,7 @@ class AtomTest {
         ref.watches.valAt(key) shouldBeSameInstanceAs callback
     }
 
-    @Test
-    fun `removeWatch(key, callback) should remove a watch from watches`() {
+    "removeWatch(key, callback) should remove a watch from watches" {
         val atom: IRef<Int> = Atom(10)
         val callback: (Any, IRef<Int>, Int, Int) -> Any = { _, _, _, _ -> }
         val key = ":key"
@@ -131,8 +152,7 @@ class AtomTest {
         ref.watches.count shouldBeExactly 0
     }
 
-    @Test
-    fun `notifyWatches(oldV, newV) should call every watchFn in watches`() {
+    "notifyWatches(oldV, newV) should call every watchFn in watches" {
         var isWatch1Called = false
         var isWatch2Called = false
         val oldV = 10
@@ -167,8 +187,7 @@ class AtomTest {
         isWatch2Called.shouldBeTrue()
     }
 
-    @Test
-    fun `swap(state) should notify watchers`() {
+    "swap(state) should notify watchers" {
         var isWatchCalled = false
         val atom = Atom(10)
         val k = ":watch"
@@ -191,8 +210,7 @@ class AtomTest {
         isWatchCalled.shouldBeTrue()
     }
 
-    @Test
-    fun `reset(newValue) should set atom to passed value`() {
+    "reset(newValue) should set atom to passed value" {
         var isWatchCalled = false
         val atom = Atom(10)
         val k = ":watch"
@@ -214,33 +232,7 @@ class AtomTest {
         isWatchCalled.shouldBeTrue()
     }
 
-    @Test
-    fun `compareAndSet(old,new)`() {
-        var isWatchCalled = false
-        val oldV = 10
-        val newV = 15
-        val atom = Atom(oldV)
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
-
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly oldVal
-                newVal shouldBeExactly newV
-            }
-        atom.addWatch(k, watch)
-
-        val isSet = atom.compareAndSet(oldV, newV)
-
-        atom.deref() shouldBeExactly newV
-        isSet.shouldBeTrue()
-        isWatchCalled.shouldBeTrue()
-    }
-
-    @Test
-    fun `swap(f, arg)`() {
+    "swap(f, arg)" {
         var isWatchCalled = false
         val oldV = 10
         val newV = 13
@@ -266,8 +258,7 @@ class AtomTest {
         isWatchCalled.shouldBeTrue()
     }
 
-    @Test
-    fun `swap(f, arg1, arg2)`() {
+    "swap(f, arg1, arg2)" {
         var isWatchCalled = false
         val oldV = 10
         val newV = 18
@@ -293,8 +284,7 @@ class AtomTest {
         isWatchCalled.shouldBeTrue()
     }
 
-    @Test
-    fun `swapVals(f) should mutate atom and return old and new value pair`() {
+    "swapVals(f) should mutate atom and return old and new value pair" {
         var isWatchCalled = false
         val oldV = 10
         val newV = 15
@@ -321,8 +311,7 @@ class AtomTest {
         isWatchCalled.shouldBeTrue()
     }
 
-    @Test
-    fun `swapVals(arg, f)`() {
+    "swapVals(arg, f)" {
         var isWatchCalled = false
         val oldV = 10
         val newV = 13
@@ -349,8 +338,7 @@ class AtomTest {
         isWatchCalled.shouldBeTrue()
     }
 
-    @Test
-    fun `swapVals(arg1, arg2, f)`() {
+    "swapVals(arg1, arg2, f)" {
         var isWatchCalled = false
         val oldV = 10
         val newV = 17
@@ -377,8 +365,7 @@ class AtomTest {
         isWatchCalled.shouldBeTrue()
     }
 
-    @Test
-    fun `resetVals(newValue)`() {
+    "resetVals(newValue)" {
         var isWatchCalled = false
         val atom = Atom(10)
         val k = ":watch"
@@ -401,8 +388,7 @@ class AtomTest {
         isWatchCalled.shouldBeTrue()
     }
 
-    @Test
-    fun `atom()`() {
+    "atom()" {
         val atom: Atom<Int> = atom(15)
 
         atom.swap { it * 2 }
@@ -410,12 +396,44 @@ class AtomTest {
         atom.deref() shouldBeExactly 30
     }
 
-    @Test
-    fun `invoke() should call deref()`() {
+    "invoke() should call deref()" {
         val atm: Atom<Int> = atom(15)
 
         atm.swap { it * 2 }
 
         atm() shouldBeExactly 30
+    }
+
+    "swap(f)" - {
+        """
+            should loop over and over everytime the atom value doesn't match
+            the expected value due to other threads activities
+        """ {
+            val atom = Atom(0)
+
+            val coroutinesCount = 10
+            val repeatCount = 10
+            withContext(Dispatchers.Default) {
+                runAction(coroutinesCount, repeatCount) {
+                    atom.swap { currentVal ->
+                        currentVal + 1
+                    }
+                }
+            }
+
+            atom.deref() shouldBeExactly coroutinesCount * repeatCount
+        }
+    }
+})
+
+suspend fun runAction(
+    n: Int = 100,
+    times: Int = 1000,
+    action: suspend () -> Unit
+) {
+    coroutineScope {
+        repeat(n) {
+            launch { repeat(times) { action() } }
+        }
     }
 }
