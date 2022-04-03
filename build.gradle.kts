@@ -47,9 +47,7 @@ allprojects {
         mavenLocal()
     }
 
-    apply(plugin = "kotlinx-serialization")
     apply(plugin = Plugins.Kotlinter.id)
-    apply(plugin = Plugins.Kotest.id)
 
     kotlinter {
         reporters = arrayOf("checkstyle", "plain")
@@ -69,12 +67,19 @@ allprojects {
             languageVersion = Deps.kotlinApiVersion
         }
     }
+}
+
+subprojects {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    apply(plugin = "kotlinx-serialization")
+    apply(plugin = Plugins.Kotest.id)
 
     tasks.withType<Test> {
-        useJUnitPlatform()
-        filter {
-            isFailOnNoMatchingTests = false
-        }
+        filter { isFailOnNoMatchingTests = false }
         testLogging {
             showExceptions = true
             showStandardStreams = true
@@ -87,9 +92,7 @@ allprojects {
             )
             exceptionFormat = TestExceptionFormat.FULL
         }
-    }.configureEach {
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2)
-            .takeIf { it > 0 } ?: 1
     }
 }
 

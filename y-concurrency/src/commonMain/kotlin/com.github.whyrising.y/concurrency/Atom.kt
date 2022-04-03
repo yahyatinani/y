@@ -108,11 +108,10 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
 
     fun compareAndSet(oldValue: T, newValue: T): Boolean {
         validate(newValue)
-        val b = _state.compareAndSet(oldValue, newValue)
-        if (b)
+        val ret = _state.compareAndSet(oldValue, newValue)
+        if (ret)
             notifyWatches(oldValue, newValue)
-
-        return b
+        return ret
     }
 
     override fun resetVals(newValue: T): Pair<T, T> {

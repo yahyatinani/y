@@ -33,6 +33,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
+                implementation(Deps.Kotlinx.Atomicfu.atomicfu)
+                implementation(Deps.Kotlinx.Serialization.json)
             }
         }
 
@@ -125,8 +127,10 @@ kotlin {
             languageSettings.optIn("kotlin.RequiresOptIn")
         }
     }
+
+    tasks.named<Test>("jvmTest") {
+        useJUnitPlatform()
+    }
 }
-
-
 
 apply(from = "../publish-y.gradle.kts")

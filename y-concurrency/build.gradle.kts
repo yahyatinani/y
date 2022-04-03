@@ -35,7 +35,6 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation(projects.yCore)
-                implementation(projects.yCollections)
                 implementation(Deps.Kotlinx.Atomicfu.atomicfu)
             }
         }
@@ -123,6 +122,10 @@ kotlin {
             languageSettings.optIn("kotlin.experimental.ExperimentalTypeInference")
             languageSettings.optIn("kotlin.RequiresOptIn")
         }
+    }
+
+    tasks.named<Test>("jvmTest") {
+        useJUnitPlatform()
     }
 }
 

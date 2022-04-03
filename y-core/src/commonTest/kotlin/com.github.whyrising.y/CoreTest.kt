@@ -1,11 +1,24 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.collections.ArrayChunk
+import com.github.whyrising.y.collections.PersistentQueue
+import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
+import com.github.whyrising.y.collections.concretions.map.MapEntry
+import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
+import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
+import com.github.whyrising.y.collections.concretions.vector.PersistentVector
+import com.github.whyrising.y.collections.map.IPersistentMap
+import com.github.whyrising.y.collections.seq.Seqable
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.doubles.shouldBeExactly
 import io.kotest.matchers.floats.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.longs.shouldBeExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
@@ -28,7 +41,7 @@ class CoreTest : FreeSpec({
         dec(1.2) shouldBeExactly 1.2.dec()
     }
 
-    "identity(x) should return x" {
+    "`identity` should return x" {
         identity(10) shouldBeExactly 10
         identity(10.1) shouldBeExactly 10.1
         identity("a") shouldBe "a"
@@ -37,7 +50,7 @@ class CoreTest : FreeSpec({
         identity(f) shouldBeSameInstanceAs f
     }
 
-    "str(varargs) should return the string value of the arg" {
+    "`str` should return the string value of the arg" {
         str() shouldBe ""
         str(null) shouldBe ""
         str(1) shouldBe "1"
@@ -83,7 +96,7 @@ class CoreTest : FreeSpec({
             f5(arg1, arg2, arg3, arg4, arg5, arg6)
     }
 
-    "complement(f) should return a function" {
+    "`complement` should return a function" {
         val f1 = { true }
         val f2 = { _: Int -> true }
         val f3 = { _: Int -> { _: Long -> true } }
@@ -111,53 +124,345 @@ class CoreTest : FreeSpec({
         complementF5(0)(0L)("")(1.2F) shouldBe false
     }
 
-    "compose" {
-        val f1: (Int) -> Int = ::identity
+    "compose" - {
+        "when it takes only one function f, it should return f" {
+            val f: (Int) -> Int = ::identity
 
-        compose<Int>() shouldBe ::identity
-        compose(f1) shouldBe f1
+            compose<Int>() shouldBe ::identity
+            compose(f) shouldBe f
+        }
+
+        "when g has no args, compose returns the composition with no args" {
+            val f: (Int) -> String = { i: Int -> str(i) }
+            val g: () -> Int = { 7 }
+
+            val fog: () -> String = compose(f, g)
+
+            fog() shouldBe f(g())
+        }
+
+        "when g has 1 arg, compose should return the composition with 1 arg" {
+            val f: (Int) -> String = { i: Int -> str(i) }
+            val g: (Float) -> Int = { 7 }
+
+            val fog: (Float) -> String = compose(f, g)
+
+            fog(1.2f) shouldBe f(g(1.2f))
+        }
+
+        "when g has 2 args, compose returns the composition with 2 args" {
+            val x = 1.2f
+            val y = 1.8
+            val f: (Int) -> String = { i: Int -> str(i) }
+            val g: (Float) -> (Double) -> Int = { { 7 } }
+
+            val fog: (Float) -> (Double) -> String = compose(f, g)
+
+            fog(x)(y) shouldBe f(g(x)(y))
+        }
+
+        "when g has 3 args, should return the composition with 3 args" {
+            val x = 1.2f
+            val y = 1.8
+            val z = true
+            val f: (Int) -> String = { i: Int -> str(i) }
+            val g: (Float) -> (Double) -> (Boolean) -> Int = { { { 7 } } }
+
+            val fog: (Float) -> (Double) -> (Boolean) -> String =
+                compose(f, g)
+
+            fog(x)(y)(z) shouldBe f(g(x)(y)(z))
+        }
     }
 
-    "when g has no args, compose returns the composition with no args" {
-        val f: (Int) -> String = { i: Int -> str(i) }
-        val g: () -> Int = { 7 }
+    "ISeq component1() component2()" {
+        val l = l(1, 2, 4)
+        val (first, rest) = l
 
-        val fog: () -> String = compose(f, g)
-
-        fog() shouldBe f(g())
+        first shouldBe l.first()
+        rest shouldBe l.rest()
     }
 
-    "when g has 1 arg, compose should return the composition with 1 arg" {
-        val f: (Int) -> String = { i: Int -> str(i) }
-        val g: (Float) -> Int = { 7 }
-
-        val fog: (Float) -> String = compose(f, g)
-
-        fog(1.2f) shouldBe f(g(1.2f))
+    "assoc(map, key, val)" {
+        assoc(null, ":a" to 15) shouldBe m(":a" to 15)
+        assoc(m(":a" to 15), ":b" to 20) shouldBe m(":a" to 15, ":b" to 20)
+        assoc(v(15, 56), 2 to 20) shouldBe v(15, 56, 20)
     }
 
-    "when g has 2 args, compose returns the composition with 2 args" {
-        val x = 1.2f
-        val y = 1.8
-        val f: (Int) -> String = { i: Int -> str(i) }
-        val g: (Float) -> (Double) -> Int = { { 7 } }
+    "assoc(map, key, val, kvs)" {
+        val kvs: Array<Pair<String, Int>> = listOf<Pair<String, Int>>()
+            .toTypedArray()
 
-        val fog: (Float) -> (Double) -> String = compose(f, g)
+        assoc(null, ":a" to 15, *kvs) shouldBe m(":a" to 15)
 
-        fog(x)(y) shouldBe f(g(x)(y))
+        assoc(null, ":a" to 15, ":b" to 20) shouldBe m(":a" to 15, ":b" to 20)
+        assoc(v(15, 56), 2 to 20, 3 to 45) shouldBe v(15, 56, 20, 45)
     }
 
-    "when g has 3 args, should return the composition with 3 args" {
-        val x = 1.2f
-        val y = 1.8
-        val z = true
-        val f: (Int) -> String = { i: Int -> str(i) }
-        val g: (Float) -> (Double) -> (Boolean) -> Int =
-            { { { 7 } } }
+    "assocIn(map, ks, v)" {
+        assocIn(null, l(":a"), 22) shouldBe m(":a" to 22)
+        assocIn(m(":a" to 11), l(":a"), 22) shouldBe m(":a" to 22)
+        assocIn(v(41, 5, 6, 3), l(2), 22) shouldBe v(41, 5, 22, 3)
+        assocIn(
+            m(":a" to m(":b" to 45)),
+            l(":a", ":b"),
+            22
+        ) shouldBe m(":a" to m(":b" to 22))
+        assocIn(
+            v(17, 21, v(3, 5, 6)),
+            l(2, 1),
+            22
+        ) shouldBe v(17, 21, v(3, 22, 6))
+        assocIn(
+            m(":a" to m(":b" to 45)),
+            l(":a", ":b"),
+            m(":c" to 74)
+        ) shouldBe m(":a" to m(":b" to m(":c" to 74)))
+    }
 
-        val fog: (Float) -> (Double) -> (Boolean) -> String =
-            compose(f, g)
+    "toPmap() should return an instance of PersistentArrayMap" {
+        val map = (1..8).associateWith { i -> "$i" }
 
-        fog(x)(y)(z) shouldBe f(g(x)(y)(z))
+        val pam: IPersistentMap<Int, String> = map.toPmap()
+
+        (pam is PersistentArrayMap<*, *>).shouldBeTrue()
+    }
+
+    "toPmap() should return an instance of PersistentHashMap" {
+        val map = (1..20).associateWith { "$it" }
+
+        val pam: IPersistentMap<Int, String> = map.toPmap()
+
+        (pam is PersistentHashMap<*, *>).shouldBeTrue()
+    }
+
+    "m()" {
+        val arrayMap: IPersistentMap<String, Int> = m("a" to 1)
+        val pairs = (1..20).map { Pair(it, "$it") }.toTypedArray()
+        val hashMap: IPersistentMap<Int, String> = m(*pairs)
+
+        m<Int, Int>() shouldBeSameInstanceAs PersistentArrayMap.EmptyArrayMap
+
+        (arrayMap is PersistentArrayMap<*, *>).shouldBeTrue()
+        arrayMap.count shouldBeExactly 1
+        arrayMap.containsKey("a").shouldBeTrue()
+
+        (hashMap is PersistentHashMap<*, *>).shouldBeTrue()
+        hashMap.count shouldBeExactly pairs.size
+        hashMap shouldContainAll (1..20).map { MapEntry(it, "$it") }
+
+        shouldThrowExactly<IllegalArgumentException> {
+            m("a" to 1, "b" to 2, "b" to 3)
+        }.message shouldBe "Duplicate key: b"
+
+        shouldThrowExactly<IllegalArgumentException> {
+            m(*pairs.plus(Pair(1, "1")))
+        }.message shouldBe "Duplicate key: 1"
+    }
+
+    "hashmap()" {
+        val map = hashMap("a" to 1, "b" to 2, "c" to 3)
+        val emptyMap = hashMap<String, Int>()
+
+        emptyMap shouldBeSameInstanceAs PersistentHashMap.EmptyHashMap
+        map.count shouldBeExactly 3
+        map("a") shouldBe 1
+        map("b") shouldBe 2
+        map("c") shouldBe 3
+
+        hashMap("b" to 2, "b" to 3) shouldBe hashMap("b" to 3)
+    }
+
+    "cons()" {
+        cons(1, null) shouldBe l(1)
+        cons(1, l(2, 3)) shouldBe l(1, 2, 3)
+        cons(1, listOf(2, 3)) shouldBe l(1, 2, 3)
+        cons(1, v(2, 3) as Seqable<*>) shouldBe l(1, 2, 3)
+        cons(1, mapOf(2 to 3)) shouldBe l(1, MapEntry(2, 3))
+        cons(1, intArrayOf(2, 3)) shouldBe l(1, 2, 3)
+        cons(1, arrayOf('2', 3)) shouldBe l(1, '2', 3)
+        cons(1, "abc") shouldBe l(1, 'a', 'b', 'c')
+    }
+
+    "v()" {
+        v<Int>() shouldBeSameInstanceAs PersistentVector.EmptyVector
+
+        v(1) shouldBe PersistentVector(1)
+
+        v(1, 2) shouldBe PersistentVector(1, 2)
+
+        v(1, 2, 3) shouldBe PersistentVector(1, 2, 3)
+
+        v(1, 2, 3, 4) shouldBe PersistentVector(1, 2, 3, 4)
+
+        v(1, 2, 3, 4, 5) shouldBe PersistentVector(1, 2, 3, 4, 5)
+
+        v(1, 2, 3, 4, 5, 6) shouldBe PersistentVector(1, 2, 3, 4, 5, 6)
+
+        v(1, 2, 3, 4, 5, 6, 7, 8) shouldBe
+            PersistentVector(1, 2, 3, 4, 5, 6, 7, 8)
+    }
+
+    "IPersistentVector componentN()" {
+        val (a, b, c, d, e, f) = v(1, 2, 3, 4, 5, 6)
+
+        a shouldBeExactly 1
+        b shouldBeExactly 2
+        c shouldBeExactly 3
+        d shouldBeExactly 4
+        e shouldBeExactly 5
+        f shouldBeExactly 6
+    }
+
+    "IPersistentVector get operator" {
+        val vec = v(1, 2, 3)
+
+        vec[0] shouldBeExactly 1
+        vec[1] shouldBeExactly 2
+        vec[2] shouldBeExactly 3
+    }
+
+    "IPersistentVector iterator()" {
+        val vec = v(1, 2, 3)
+
+        for ((i, n) in vec.withIndex())
+            n shouldBeExactly vec[i]
+    }
+
+    "IPersistentMap iterator()" {
+        val m = m(0 to 45, 1 to 55, 2 to 12)
+        var i = 0
+        for ((_, v) in m) {
+            v shouldBeExactly m[i]!!
+            i++
+        }
+    }
+
+    "IPersistentMap get operator" {
+        val m = m("a" to 1, "b" to 2, "c" to 3)
+
+        m["a"] shouldBe 1
+        m["b"] shouldBe 2
+        m["c"] shouldBe 3
+        m["d"].shouldBeNull()
+    }
+
+    "first()" {
+        first<Int>(l(1, 2, 3)) shouldBe 1
+        first<Int>(listOf(1, 2, 3)) shouldBe 1
+        first<Int>(v(1, 2, 3)) shouldBe 1
+        first<Int>(v<Int>()).shouldBeNull()
+        first<Int>(null).shouldBeNull()
+    }
+
+    "consChunk(chunk, rest) should return rest" {
+        val rest = l(1, 2)
+
+        val r = consChunk(ArrayChunk(arrayOf()), rest)
+
+        r shouldBeSameInstanceAs rest
+    }
+
+    "consChunk(chunk, rest) should return ChunkedSeq" {
+        val cs = consChunk(ArrayChunk(arrayOf(1, 2)), l(3, 4))
+
+        cs.count shouldBeExactly 4
+        cs.toString() shouldBe "(1 2 3 4)"
+    }
+
+    "spread()" {
+        spread(null).shouldBeNull()
+
+        spread(arrayOf(listOf(1))) shouldBe l(1)
+
+        spread(arrayOf(1, 2, 3, listOf(4))) shouldBe l(1, 2, 3, 4)
+    }
+
+    "isEvery(pred, coll)" {
+        isEvery<Int>({ true }, null).shouldBeTrue()
+
+        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 6)).shouldBeTrue()
+
+        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, 1)).shouldBeFalse()
+
+        isEvery<Int>({ it % 2 == 0 }, arrayOf(2, 4, null)).shouldBeFalse()
+    }
+
+    "conj() adds elements to a collection" {
+        conj(null, 2) shouldBe l(2)
+
+        conj(v(1), 2) shouldBe v(1, 2)
+
+        conj(v(1), 2, 3, 4) shouldBe v(1, 2, 3, 4)
+
+        conj(v(1), null, 3, 4) shouldBe v(1, null, 3, 4)
+
+        conj(null, 1, 3, 4) shouldBe v(4, 3, 1)
+    }
+
+    "concat()" {
+        val c = concat<Int>()
+
+        c.count shouldBeExactly 0
+        c.toString() shouldBe "()"
+    }
+
+    "concat(x)" {
+        val c = concat<Int>(l(1, 2))
+
+        c.count shouldBeExactly 2
+        c.toString() shouldBe "(1 2)"
+    }
+
+    "concat(x, y)" {
+        val c = concat<Int>(l(1, 2), l(3, 4))
+
+        c.count shouldBeExactly 4
+        c.toString() shouldBe "(1 2 3 4)"
+
+        concat<Int>(null, l(3, 4)).toString() shouldBe "(3 4)"
+
+        concat<Int>(l(1, 2), null).toString() shouldBe "(1 2)"
+    }
+
+    "concat(x, y) a ChunkedSeq" {
+        val chunk1 = ArrayChunk(arrayOf(1, 2))
+
+        val concatenation = concat<Int>(ChunkedSeq(chunk1), l(3, 4))
+
+        concatenation.count shouldBeExactly 4
+        concatenation.toString() shouldBe "(1 2 3 4)"
+    }
+
+    "concat(x, y, zs)" {
+        val concatenation = concat<Int>(l(1, 2), l(3, 4), l(5, 6))
+
+        concatenation.count shouldBeExactly 6
+        concatenation.toString() shouldBe "(1 2 3 4 5 6)"
+
+        concat<Int>(l(1, 2), l(3, 4), null).toString() shouldBe "(1 2 3 4)"
+
+        concat<Int>(null, l(3, 4), l(5, 6)).toString() shouldBe "(3 4 5 6)"
+
+        concat<Int>(l(1, 2), null, l(5, 6)).toString() shouldBe "(1 2 5 6)"
+
+        val ch1 = ArrayChunk(arrayOf(1, 2))
+        val ch2 = ArrayChunk(arrayOf(3, 4))
+        val concat = concat<Int>(ChunkedSeq(ch1), ChunkedSeq(ch2), l(5, 6))
+        concat.toString() shouldBe "(1 2 3 4 5 6)"
+
+        concat<Int>(l(1, 2), listOf(3, 4), listOf(5, 6)).toString() shouldBe
+            "(1 2 3 4 5 6)"
+
+        concat<Int>(listOf(1, 2), v(3, 4), listOf(5, 6)).toString() shouldBe
+            "(1 2 3 4 5 6)"
+    }
+
+    "q should return a PersistentQueue" {
+        q<Int>() shouldBeSameInstanceAs PersistentQueue<Int>()
+        q<Int>(null) shouldBeSameInstanceAs PersistentQueue<Int>()
+        q<Int>(l(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
+        q<Int>(v(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
+        q<Int>(listOf(1, 2)) shouldBe q<Int>().conj(1).conj(2)
     }
 })
