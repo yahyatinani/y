@@ -19,6 +19,7 @@ import com.github.whyrising.y.toPlist
 import com.github.whyrising.y.util.HASH_PRIME
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.hasheq
+import com.github.whyrising.y.utils.assertArraysAreEquiv
 import com.github.whyrising.y.v
 import com.github.whyrising.y.vec
 import io.kotest.assertions.throwables.shouldThrow
@@ -1310,13 +1311,11 @@ class PersistentVectorTest : FreeSpec({
 
     "Serialization" - {
         "serialize" {
-            val array = arrayOf(1, 2, 3, 4)
-            val encoded = Json.encodeToString(array)
-            val vec = PersistentVector(*array)
+            val expectedEncoding = Json.encodeToString(arrayOf(1, 2, 3, 4))
 
-            val encodeToString = Json.encodeToString(vec)
+            val s = Json.encodeToString(PersistentVector(1, 2, 3, 4))
 
-            encodeToString shouldBe encoded
+            s shouldBe expectedEncoding
         }
 
         "deserialize" {
@@ -1399,16 +1398,4 @@ class PersistentVectorTest : FreeSpec({
 
         vec<Long>(longArrayOf(1L, 2L)) shouldBe v(1L, 2L)
     }
-}) {
-    companion object {
-        internal fun assertArraysAreEquiv(a1: Array<Any?>, a2: Array<Any?>) {
-            a2.fold(0) { index: Int, i: Any? ->
-                val n = a1[index] as Int
-
-                n shouldBeExactly i as Int
-
-                index + 1
-            }
-        }
-    }
-}
+})

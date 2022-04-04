@@ -534,22 +534,20 @@ class PersistentListTest : FreeSpec({
 
     "Serialization" - {
         "serialize" {
-            val l = listOf(1, 2, 3, 4)
-            val encoded = Json.encodeToString(l)
-            val list = PersistentList(*l.toTypedArray())
+            val expectedEncoding = Json.encodeToString(listOf(1, 2, 3, 4))
 
-            val encodeToString = Json.encodeToString(list)
+            val encodeToString = Json.encodeToString(PersistentList(1, 2, 3, 4))
 
-            encodeToString shouldBe encoded
+            encodeToString shouldBe expectedEncoding
         }
 
         "deserialize" {
-            val l = listOf(1, 2, 3, 4)
-            val str = Json.encodeToString(l)
+            val str = Json.encodeToString(listOf(1, 2, 3, 4))
 
-            val list = Json.decodeFromString<PersistentList<Int>>(str)
-
-            list shouldBe PersistentList(*l.toTypedArray())
+            Json.decodeFromString<List<Int>>(str) shouldBe
+                PersistentList(1, 2, 3, 4)
+            Json.decodeFromString<PersistentList<Int>>(str) shouldBe
+                PersistentList(1, 2, 3, 4)
         }
 
         // TODO: 3/28/22 Fix this

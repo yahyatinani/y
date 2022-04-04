@@ -1,5 +1,6 @@
 package com.github.whyrising.y.utils
 
+import io.kotest.matchers.ints.shouldBeExactly
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -12,5 +13,15 @@ suspend fun runAction(
         repeat(n) {
             launch { repeat(times) { action() } }
         }
+    }
+}
+
+fun assertArraysAreEquiv(a1: Array<Any?>, a2: Array<Any?>) {
+    a2.fold(0) { index: Int, i: Any? ->
+        val n = a1[index] as Int
+
+        n shouldBeExactly i as Int
+
+        index + 1
     }
 }
