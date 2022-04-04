@@ -6,6 +6,7 @@ import com.github.whyrising.y.collections.Edit
 import com.github.whyrising.y.collections.InstaCount
 import com.github.whyrising.y.collections.concretions.list.ASeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList
+import com.github.whyrising.y.collections.concretions.serialization.PersistentVectorSerializer
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector.Node.EmptyNode
 import com.github.whyrising.y.collections.mutable.collection.IMutableCollection
 import com.github.whyrising.y.collections.mutable.collection.ITransientCollection
@@ -14,35 +15,15 @@ import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.vector.APersistentVector
 import com.github.whyrising.y.collections.vector.IPersistentVector
-import com.github.whyrising.y.vec
 import kotlinx.atomicfu.AtomicInt
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.reentrantLock
 import kotlinx.atomicfu.locks.withLock
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 
 internal const val SHIFT = 5
 internal const val BF = 32
-
-internal class PersistentVectorSerializer<E>(element: KSerializer<E>) :
-    KSerializer<PersistentVector<E>> {
-
-    internal val listSerializer = ListSerializer(element)
-
-    override val descriptor: SerialDescriptor = listSerializer.descriptor
-
-    override fun deserialize(decoder: Decoder): PersistentVector<E> =
-        vec(listSerializer.deserialize(decoder)) as PersistentVector<E>
-
-    override fun serialize(encoder: Encoder, value: PersistentVector<E>) =
-        listSerializer.serialize(encoder, value)
-}
 
 @Serializable(with = PersistentVectorSerializer::class)
 sealed class PersistentVector<out E>(

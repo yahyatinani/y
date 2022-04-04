@@ -39,9 +39,6 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.checkAll
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 class PersistentVectorTest : FreeSpec({
     "Node" - {
@@ -1307,34 +1304,6 @@ class PersistentVectorTest : FreeSpec({
                 subvec.pop() shouldBeSameInstanceAs EmptyVector
             }
         }
-    }
-
-    "Serialization" - {
-        "serialize" {
-            val expectedEncoding = Json.encodeToString(arrayOf(1, 2, 3, 4))
-
-            val s = Json.encodeToString(PersistentVector(1, 2, 3, 4))
-
-            s shouldBe expectedEncoding
-        }
-
-        "deserialize" {
-            val array = arrayOf(1, 2, 3, 4)
-            val str = Json.encodeToString(array)
-
-            val vec = Json.decodeFromString<PersistentVector<Int>>(str)
-
-            vec shouldBe PersistentList(*array)
-        }
-
-        // TODO: 3/28/22 Fix this
-//        "discriptor" {
-//            val element = serializer(Int::class)
-//            val serializer = PersistentVectorSerializer(element)
-//
-//            serializer.descriptor shouldBeSameInstanceAs
-//                serializer.listSerializer.descriptor
-//        }
     }
 
     "invoke(seq) seq length is grater than 32" {
