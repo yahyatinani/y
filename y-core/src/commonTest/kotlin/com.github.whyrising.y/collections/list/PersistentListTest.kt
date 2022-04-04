@@ -24,9 +24,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.property.checkAll
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 class PersistentListTest : FreeSpec({
     "PersistentList" - {
@@ -530,34 +527,6 @@ class PersistentListTest : FreeSpec({
                 }
             }
         }
-    }
-
-    "Serialization" - {
-        "serialize" {
-            val expectedEncoding = Json.encodeToString(listOf(1, 2, 3, 4))
-
-            val encodeToString = Json.encodeToString(PersistentList(1, 2, 3, 4))
-
-            encodeToString shouldBe expectedEncoding
-        }
-
-        "deserialize" {
-            val str = Json.encodeToString(listOf(1, 2, 3, 4))
-
-            Json.decodeFromString<List<Int>>(str) shouldBe
-                PersistentList(1, 2, 3, 4)
-            Json.decodeFromString<PersistentList<Int>>(str) shouldBe
-                PersistentList(1, 2, 3, 4)
-        }
-
-        // TODO: 3/28/22 Fix this
-//        "descriptor" {
-//            val element = serializer(Int::class.java)
-//            val serializer = PersistentListSerializer(element)
-//
-//            serializer.descriptor shouldBeSameInstanceAs
-//                serializer.listSerializer.descriptor
-//        }
     }
 
     "l(args)" - {
