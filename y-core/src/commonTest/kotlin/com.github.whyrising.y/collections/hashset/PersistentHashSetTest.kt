@@ -34,9 +34,6 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.set
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlin.random.Random
 
 class PersistentHashSetTest : FreeSpec({
@@ -470,30 +467,5 @@ class PersistentHashSetTest : FreeSpec({
             tSet("b") shouldBe "2"
             tSet("x") shouldBe null
         }
-    }
-
-    "Serialization" - {
-        "serialize" {
-            val hashSet = hs(1, 2, 3, 4) as PersistentHashSet<Int>
-
-            val encodeToString = Json.encodeToString(hashSet)
-
-            encodeToString shouldBe "[1,4,3,2]"
-        }
-
-        "deserialize" {
-            val set = Json.decodeFromString<PersistentHashSet<Int>>("[1,4,3,2]")
-
-            set shouldBe hs(1, 2, 3, 4)
-        }
-
-        // TODO: 3/28/22 Fix this
-//        "descriptor" {
-//            val element = serializer(Int::class.java)
-//            val serializer = PersistentHashSetSerializer(element)
-//
-//            serializer.descriptor shouldBeSameInstanceAs
-//                serializer.setSerializer.descriptor
-//        }
     }
 })
