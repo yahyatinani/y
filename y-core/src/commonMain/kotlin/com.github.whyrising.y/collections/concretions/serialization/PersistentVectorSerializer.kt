@@ -1,11 +1,11 @@
 package com.github.whyrising.y.collections.concretions.serialization
 
 import com.github.whyrising.y.collections.concretions.vector.PersistentVector
+import com.github.whyrising.y.v
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.encodeCollection
@@ -22,26 +22,13 @@ class PersistentVectorSerializer<E>(private val eSerializer: KSerializer<E>) :
         ListSerializer(eSerializer).descriptor
     )
 
-    @OptIn(ExperimentalSerializationApi::class)
-    override fun deserialize(decoder: Decoder): PersistentVector<E> {
-        var ret = PersistentVector<E>()
-        val compositeDecoder = decoder.beginStructure(descriptor)
-        if (compositeDecoder.decodeSequentially()) TODO()
-        else while (true) {
-            when (val index = compositeDecoder.decodeElementIndex(descriptor)) {
-                CompositeDecoder.DECODE_DONE -> break
-                else -> ret = ret.conj(
-                    compositeDecoder.decodeSerializableElement(
-                        descriptor,
-                        index,
-                        eSerializer
-                    )
-                )
-            }
-        }
-        compositeDecoder.endStructure(descriptor)
-        return ret
-    }
+    override fun deserialize(decoder: Decoder): PersistentVector<E> =
+        deserializePersistentCollection(
+            decoder,
+            descriptor,
+            eSerializer,
+            v()
+        ) as PersistentVector<E>
 
     override fun serialize(encoder: Encoder, value: PersistentVector<E>) {
         val size = value.count

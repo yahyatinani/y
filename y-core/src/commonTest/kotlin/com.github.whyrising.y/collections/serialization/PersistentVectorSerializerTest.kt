@@ -14,6 +14,16 @@ import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalSerializationApi::class)
 class PersistentVectorSerializerTest : FreeSpec({
+    "serialName" {
+        PERSISTENT_VECTOR_NAME shouldBe PersistentVector::class.qualifiedName
+    }
+
+    "descriptor" {
+        val serializer = PersistentVectorSerializer(Int.serializer())
+
+        serializer.descriptor.serialName shouldBe PERSISTENT_VECTOR_NAME
+    }
+
     "serialize" {
         val expectedEncoding = Json.encodeToString(arrayOf(1, 2, 3, 4))
 
@@ -28,12 +38,5 @@ class PersistentVectorSerializerTest : FreeSpec({
         val vec = Json.decodeFromString<PersistentVector<Int>>(serializedArray)
 
         vec shouldBe v(1, 2, 3, 4)
-    }
-
-    "descriptor" {
-        val e = Int.serializer()
-        val serializer = PersistentVectorSerializer(e)
-
-        serializer.descriptor.serialName shouldBe PERSISTENT_VECTOR_NAME
     }
 })
