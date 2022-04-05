@@ -347,19 +347,15 @@ fun <E> v(
 
 fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
 
-fun <E> hashSet(vararg e: E): PersistentHashSet<E> =
-    PersistentHashSet.create(*e)
+fun <E> hashSet(vararg e: E) = PersistentHashSet.create(*e)
 
-fun <E> hashSet(seq: ISeq<E>): PersistentHashSet<E> =
-    PersistentHashSet.create(seq)
+fun <E> hashSet(seq: ISeq<E>) = PersistentHashSet.create(seq)
 
 fun <E> hs(): PersistentSet<E> = PersistentHashSet.EmptyHashSet
 
-fun <E> hs(vararg e: E): PersistentSet<E> =
-    PersistentHashSet.createWithCheck(*e)
+fun <E> hs(vararg e: E) = PersistentHashSet.createWithCheck(*e)
 
-fun <E> Set<E>.toPhashSet(): PersistentHashSet<E> =
-    PersistentHashSet.create(this)
+fun <E> Set<E>.toPhashSet() = PersistentHashSet.create(this)
 
 fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V? =
     getFrom<K, V>(map, key, default)
