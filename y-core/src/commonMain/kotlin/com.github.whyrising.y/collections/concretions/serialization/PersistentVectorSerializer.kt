@@ -26,9 +26,14 @@ class PersistentVectorSerializer<E>(private val eSerializer: KSerializer<E>) :
         deserializePersistentCollection(
             decoder,
             descriptor,
-            eSerializer,
-            v()
-        ) as PersistentVector<E>
+            v<E>()
+        ) { compositeDecoder, index, _ ->
+            compositeDecoder.decodeSerializableElement(
+                descriptor,
+                index,
+                eSerializer
+            )
+        } as PersistentVector<E>
 
     override fun serialize(encoder: Encoder, value: PersistentVector<E>) {
         val size = value.count

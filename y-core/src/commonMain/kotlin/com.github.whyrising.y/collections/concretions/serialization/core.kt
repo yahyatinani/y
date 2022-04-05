@@ -2,7 +2,6 @@ package com.github.whyrising.y.collections.concretions.serialization
 
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
@@ -11,8 +10,8 @@ import kotlinx.serialization.encoding.Decoder
 fun <E> deserializePersistentCollection(
     decoder: Decoder,
     descriptor: SerialDescriptor,
-    elementSerializer: KSerializer<E>,
-    coll: IPersistentCollection<E>
+    coll: IPersistentCollection<E>,
+    decodeElement: (CompositeDecoder, index: Int, IPersistentCollection<E>) -> E
 ): IPersistentCollection<E> {
     tailrec fun decode(
         acc: IPersistentCollection<E>,
@@ -22,13 +21,7 @@ fun <E> deserializePersistentCollection(
         else -> when (val i = compositeDecoder.decodeElementIndex(descriptor)) {
             CompositeDecoder.DECODE_DONE -> acc
             else -> decode(
-                acc.conj(
-                    compositeDecoder.decodeSerializableElement(
-                        descriptor,
-                        i,
-                        elementSerializer
-                    )
-                ),
+                acc.conj(decodeElement(compositeDecoder, i, acc)),
                 compositeDecoder
             )
         }

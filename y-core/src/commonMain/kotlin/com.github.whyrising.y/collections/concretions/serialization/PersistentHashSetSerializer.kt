@@ -26,9 +26,14 @@ internal class PersistentHashSetSerializer<E>(
         deserializePersistentCollection(
             decoder,
             descriptor,
-            eSerializer,
-            hs()
-        ) as PersistentHashSet<E>
+            hs<E>()
+        ) { compositeDecoder, index, _ ->
+            compositeDecoder.decodeSerializableElement(
+                descriptor,
+                index,
+                eSerializer
+            )
+        } as PersistentHashSet<E>
 
     override fun serialize(encoder: Encoder, value: PersistentHashSet<E>) {
         val size = value.count

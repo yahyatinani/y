@@ -10,7 +10,6 @@ import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.TransientLeanMap
 import com.github.whyrising.y.l
 import com.github.whyrising.y.m
-import com.github.whyrising.y.toPmap
 import com.github.whyrising.y.utils.runAction
 import com.github.whyrising.y.v
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -30,9 +29,6 @@ import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -957,59 +953,5 @@ class PersistentArrayMapTest : FreeSpec({
         "hashCode()" {
             m<String, Int>().hashCode() shouldBeExactly 0
         }
-    }
-
-    "Serialization" - {
-//        val serialModule = SerializersModule {
-//            polymorphic(IPersistentMap::class) {
-//                val serializer = PersistentArrayMapSerializer(
-//                    PolymorphicSerializer(Any::class),
-//                    Int.serializer(),
-//                ) as KSerializer<PersistentArrayMap<*, *>>
-//
-//                val serializer1 = PersistentArrayMap.serializer(
-//                    PolymorphicSerializer(String::class),
-//                    PolymorphicSerializer(Int::class)
-//                ) as KSerializer<PersistentArrayMap<*, *>>
-//
-//
-//                subclass(PersistentArrayMap::class, serializer1)
-// //        val clazz: KClass<PersistentArrayMap<*, *>> =
-// // PersistentArrayMap::class
-// //        subclass(clazz)
-//            }
-//        }
-
-//        val format = Json { serializersModule = serialModule }
-        "serialize" {
-            val m = mapOf("a" to 1, "b" to 2, "c" to 3)
-            val expected = Json.encodeToString(m)
-
-            val map = m("a" to 1, "b" to 2, "c" to 3)
-                as PersistentArrayMap<String, Int>
-
-            Json.encodeToString(map) shouldBe expected
-        }
-
-        "deserialize" {
-            val m = mapOf("a" to 1, "b" to 2, "c" to 3)
-            val str = Json.encodeToString(m)
-            val expected = m.toPmap()
-
-            val map =
-                Json.decodeFromString<PersistentArrayMap<String, Int>>(str)
-
-            map shouldBe expected
-        }
-
-        // TODO: 3/28/22 Fix this
-//        "discriptor" {
-//            val kSerial = serializer(String::class.java)
-//            val vSerial = serializer(Int::class.java)
-//            val serializer = PersistentArrayMapSerializer(kSerial, vSerial)
-//
-//            serializer.descriptor shouldBeSameInstanceAs
-//                serializer.mapSerializer.descriptor
-//        }
     }
 })
