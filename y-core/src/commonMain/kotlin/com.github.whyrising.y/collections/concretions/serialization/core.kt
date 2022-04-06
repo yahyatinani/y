@@ -1,7 +1,11 @@
 package com.github.whyrising.y.collections.concretions.serialization
 
+import com.github.whyrising.y.collections.concretions.map.MapEntry
+import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
@@ -34,4 +38,39 @@ fun <E> deserializePersistentCollection(
     }
     compositeDecoder.endStructure(descriptor)
     return ret
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+inline fun <K, V> decodeToMapEntry(
+    compositeDecoder: CompositeDecoder,
+    descriptor: SerialDescriptor,
+    keySerializer: KSerializer<K>,
+    valueSerializer: KSerializer<V>,
+    index: Int,
+    map: IPersistentMap<K, V>
+): MapEntry<K, V> {
+    val key: K = compositeDecoder.decodeSerializableElement(
+        descriptor,
+        index,
+        keySerializer
+    )
+    val vIndex = compositeDecoder.decodeElementIndex(descriptor).also {
+        require(it == index + 1) {
+            "Value must follow key in a map, index for key: $index, " +
+                "returned index for value: $it"
+        }
+    }
+    val value: V = if (map.containsKey(key) &&
+        valueSerializer.descriptor.kind !is PrimitiveKind
+    ) compositeDecoder.decodeSerializableElement(
+        descriptor,
+        vIndex,
+        valueSerializer,
+        map.valAt(key)
+    ) else compositeDecoder.decodeSerializableElement(
+        descriptor,
+        vIndex,
+        valueSerializer
+    )
+    return MapEntry(key, value)
 }

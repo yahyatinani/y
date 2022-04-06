@@ -14,7 +14,6 @@ import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.Node
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeSeq
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.TransientLeanMap
 import com.github.whyrising.y.hashMap
-import com.github.whyrising.y.toPmap
 import com.github.whyrising.y.util.hasheq
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
@@ -30,9 +29,6 @@ import io.kotest.property.arbitrary.set
 import io.kotest.property.arbitrary.string
 import io.kotest.property.checkAll
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlin.random.Random
 
 @ExperimentalSerializationApi
@@ -292,36 +288,5 @@ class LeanMapTest : FreeSpec({
 
             keyIter.next() shouldBe 1
         }
-    }
-
-    "Serialization" - {
-        "serialize" {
-            val m = mapOf("a" to 1, "b" to 2, "c" to 3)
-            val expected = Json.encodeToString(m)
-
-            val hashmap = hashMap("a" to 1, "b" to 2, "c" to 3)
-
-            Json.encodeToString(hashmap) shouldBe expected
-        }
-
-        "deserialize" {
-            val m = mapOf("a" to 1, "b" to 2, "c" to 3)
-            val str = Json.encodeToString(m)
-            val expected = m.toPmap()
-
-            val map = Json.decodeFromString<PersistentHashMap<String, Int>>(str)
-
-            map shouldBe expected
-        }
-
-        // TODO: 3/28/22 Fix this
-//        "discriptor" {
-//            val keySerial = serializer(String::class.java)
-//            val valueSerial = serializer(Int::class.java)
-//            val serializer = PersistentHashMapSerializer(keySerial, valueSerial)
-//
-//            serializer.descriptor shouldBeSameInstanceAs
-//                serializer.mapSerializer.descriptor
-//        }
     }
 })
