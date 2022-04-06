@@ -29,7 +29,6 @@ import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @ExperimentalKotest
@@ -602,8 +601,8 @@ class PersistentArrayMapTest : FreeSpec({
             }
 
             "dissoc(key)" {
-                continually(Duration.seconds(10)) {
-                    val initial = m<Int, String>() as PersistentArrayMap
+                continually(10.seconds) {
+                    val initial = m<Int, String>()
                     val transientMap = l.fold(initial) { map, entry ->
                         map.assoc(
                             entry.key,

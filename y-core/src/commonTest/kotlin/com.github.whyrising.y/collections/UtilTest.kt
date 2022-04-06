@@ -3,7 +3,6 @@ package com.github.whyrising.y.collections
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.Cons
 import com.github.whyrising.y.collections.concretions.list.PersistentList
-import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet.TransientHashSet
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.seq.LazySeq
@@ -35,10 +34,9 @@ class UtilTest : FreeSpec({
     "get(map,key)" - {
         "assertions" {
             val arrayMap =
-                m(":a" to 5, ":b" to 6, ":c" to 3) as PersistentArrayMap
+                m(":a" to 5, ":b" to 6, ":c" to 3)
             val transientHashSet = TransientHashSet(arrayMap.asTransient())
 
-            get(mapOf(":a" to 1, ":b" to 2, ":c" to 3), ":a") shouldBe 1
             get(m(":a" to 1, ":b" to 2, ":c" to 3), ":a") shouldBe 1
             get(v(5, 6, 9, 3), 0) shouldBe 5
             get(hashSet(54, 69, 36), 54) shouldBe 54
@@ -53,10 +51,9 @@ class UtilTest : FreeSpec({
 
         "get(map, key) should return null" {
             val arrayMap =
-                m(":a" to 5, ":b" to 6, ":c" to 3) as PersistentArrayMap
+                m(":a" to 5, ":b" to 6, ":c" to 3)
             val transientHashSet = TransientHashSet(arrayMap.asTransient())
 
-            get(mapOf(":a" to 1, ":b" to 2, ":c" to 3), ":x").shouldBeNull()
             get(m(":a" to 1, ":b" to 2, ":c" to 3), ":x").shouldBeNull()
             get(v(5, 6, 9, 3), 10).shouldBeNull()
             get(hashSet(54, 69, 36), 66).shouldBeNull()
@@ -66,10 +63,9 @@ class UtilTest : FreeSpec({
 
         "get(map, key) should return default" {
             val arrayMap =
-                m(":a" to 5, ":b" to 6, ":c" to 3) as PersistentArrayMap
+                m(":a" to 5, ":b" to 6, ":c" to 3)
             val transientHashSet = TransientHashSet(arrayMap.asTransient())
 
-            get(mapOf(":a" to 1, ":b" to 2, ":c" to 3), ":x", -1) shouldBe -1
             get(m(":a" to 1, ":b" to 2, ":c" to 3), ":x", -1) shouldBe -1
             get(v(5, 6, 9, 3), 10, -1) shouldBe -1
             get(hashSet(54, 69, 36), 66, -1) shouldBe -1

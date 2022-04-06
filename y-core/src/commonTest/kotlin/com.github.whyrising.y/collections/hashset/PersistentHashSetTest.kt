@@ -1,6 +1,5 @@
 package com.github.whyrising.y.collections.hashset
 
-import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap.Companion.createWithCheck
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.EmptyHashMap
@@ -370,8 +369,8 @@ class PersistentHashSetTest : FreeSpec({
 
     "TransientHashSet" - {
         "count should return the count of the inner transient map" {
-            val tmap1 = (m<Int, Int>() as PersistentArrayMap).asTransient()
-            val tmap2 = (m("a" to "1") as PersistentArrayMap).asTransient()
+            val tmap1 = m<Int, Int>().asTransient()
+            val tmap2 = m("a" to "1").asTransient()
 
             val tSet1 = TransientHashSet(tmap1)
             val tSet2: TransientHashSet<String> = TransientHashSet(tmap2)
@@ -382,7 +381,6 @@ class PersistentHashSetTest : FreeSpec({
 
         "contains(key)" {
             val map = m("a" to "1", "b" to "2", "c" to "3", null to null)
-                as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
 
             tSet.contains("a").shouldBeTrue()
@@ -411,7 +409,6 @@ class PersistentHashSetTest : FreeSpec({
 
         "get(key)" {
             val map = m("a" to "1", "b" to "2", "c" to "3", null to null)
-                as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
 
             tSet["a"] shouldBe "1"
@@ -438,7 +435,6 @@ class PersistentHashSetTest : FreeSpec({
         @Suppress("UNCHECKED_CAST")
         "persistent() should return a PersistentHashSet" {
             val map = m("a" to "1", "b" to "2", "c" to "3")
-                as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
 
             val set = tSet.persistent() as PersistentHashSet<String>
@@ -449,7 +445,6 @@ class PersistentHashSetTest : FreeSpec({
 
         "invoke(key, default)" {
             val map = m("a" to "1", "b" to "2", "c" to "3")
-                as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
             val default = "notFound"
 
@@ -460,7 +455,6 @@ class PersistentHashSetTest : FreeSpec({
 
         "invoke(key)" {
             val map = m("a" to "1", "b" to "2", "c" to "3")
-                as PersistentArrayMap
             val tSet = TransientHashSet(map.asTransient())
 
             tSet("a") shouldBe "1"
