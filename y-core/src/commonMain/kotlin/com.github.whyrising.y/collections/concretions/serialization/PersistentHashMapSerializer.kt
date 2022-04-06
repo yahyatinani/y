@@ -24,8 +24,8 @@ internal class PersistentHashMapSerializer<K, V>(
     )
 
     @Suppress("UNCHECKED_CAST")
-    override fun deserialize(decoder: Decoder): PersistentHashMap<K, V> {
-        return deserializePersistentCollection(
+    override fun deserialize(decoder: Decoder): PersistentHashMap<K, V> =
+        deserializePersistentCollection(
             decoder,
             descriptor,
             PersistentHashMap.EmptyHashMap
@@ -39,9 +39,7 @@ internal class PersistentHashMapSerializer<K, V>(
                 map as PersistentHashMap<K, V>
             )
         } as PersistentHashMap<K, V>
-    }
 
     override fun serialize(encoder: Encoder, value: PersistentHashMap<K, V>) =
         mapSerializer.serialize(encoder, value)
-
 }

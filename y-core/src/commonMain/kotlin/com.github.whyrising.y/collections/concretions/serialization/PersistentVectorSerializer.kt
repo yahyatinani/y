@@ -8,7 +8,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.encodeCollection
 
 internal const val PERSISTENT_VECTOR_NAME =
     "com.github.whyrising.y.collections.concretions.vector.PersistentVector"
@@ -16,10 +15,12 @@ internal const val PERSISTENT_VECTOR_NAME =
 class PersistentVectorSerializer<E>(private val eSerializer: KSerializer<E>) :
     KSerializer<PersistentVector<E>> {
 
+    private val listSerializer = ListSerializer(eSerializer)
+
     @OptIn(ExperimentalSerializationApi::class)
     override val descriptor: SerialDescriptor = SerialDescriptor(
         PERSISTENT_VECTOR_NAME,
-        ListSerializer(eSerializer).descriptor
+        listSerializer.descriptor
     )
 
     override fun deserialize(decoder: Decoder): PersistentVector<E> =
@@ -35,17 +36,6 @@ class PersistentVectorSerializer<E>(private val eSerializer: KSerializer<E>) :
             )
         } as PersistentVector<E>
 
-    override fun serialize(encoder: Encoder, value: PersistentVector<E>) {
-        val size = value.count
-        encoder.encodeCollection(descriptor, size) {
-            val iterator = value.iterator()
-            for (index in 0 until size)
-                encodeSerializableElement(
-                    descriptor,
-                    index,
-                    eSerializer,
-                    iterator.next()
-                )
-        }
-    }
+    override fun serialize(encoder: Encoder, value: PersistentVector<E>) =
+        listSerializer.serialize(encoder, value)
 }

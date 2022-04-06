@@ -8,7 +8,6 @@ import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.encodeCollection
 
 internal const val PERSISTENT_HASH_SET_NAME =
     "com.github.whyrising.y.collections.concretions.set.PersistentHashSet"
@@ -16,10 +15,12 @@ internal const val PERSISTENT_HASH_SET_NAME =
 internal class PersistentHashSetSerializer<E>(
     private val eSerializer: KSerializer<E>
 ) : KSerializer<PersistentHashSet<E>> {
+    private val setSerializer = SetSerializer(eSerializer)
+
     @OptIn(ExperimentalSerializationApi::class)
     override val descriptor: SerialDescriptor = SerialDescriptor(
         PERSISTENT_HASH_SET_NAME,
-        SetSerializer(eSerializer).descriptor
+        setSerializer.descriptor
     )
 
     override fun deserialize(decoder: Decoder): PersistentHashSet<E> =
@@ -35,17 +36,6 @@ internal class PersistentHashSetSerializer<E>(
             )
         } as PersistentHashSet<E>
 
-    override fun serialize(encoder: Encoder, value: PersistentHashSet<E>) {
-        val size = value.count
-        encoder.encodeCollection(descriptor, size) {
-            val iterator = value.iterator()
-            for (index in 0 until size)
-                encodeSerializableElement(
-                    descriptor,
-                    index,
-                    eSerializer,
-                    iterator.next()
-                )
-        }
-    }
+    override fun serialize(encoder: Encoder, value: PersistentHashSet<E>) =
+        setSerializer.serialize(encoder, value)
 }
