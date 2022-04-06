@@ -19,6 +19,7 @@ import com.github.whyrising.y.toPlist
 import com.github.whyrising.y.util.HASH_PRIME
 import com.github.whyrising.y.util.Murmur3
 import com.github.whyrising.y.util.hasheq
+import com.github.whyrising.y.utils.assertArraysAreEquiv
 import com.github.whyrising.y.v
 import com.github.whyrising.y.vec
 import io.kotest.assertions.throwables.shouldThrow
@@ -38,9 +39,6 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.checkAll
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 class PersistentVectorTest : FreeSpec({
     "Node" - {
@@ -1308,36 +1306,6 @@ class PersistentVectorTest : FreeSpec({
         }
     }
 
-    "Serialization" - {
-        "serialize" {
-            val array = arrayOf(1, 2, 3, 4)
-            val encoded = Json.encodeToString(array)
-            val vec = PersistentVector(*array)
-
-            val encodeToString = Json.encodeToString(vec)
-
-            encodeToString shouldBe encoded
-        }
-
-        "deserialize" {
-            val array = arrayOf(1, 2, 3, 4)
-            val str = Json.encodeToString(array)
-
-            val vec = Json.decodeFromString<PersistentVector<Int>>(str)
-
-            vec shouldBe PersistentList(*array)
-        }
-
-        // TODO: 3/28/22 Fix this
-//        "discriptor" {
-//            val element = serializer(Int::class)
-//            val serializer = PersistentVectorSerializer(element)
-//
-//            serializer.descriptor shouldBeSameInstanceAs
-//                serializer.listSerializer.descriptor
-//        }
-    }
-
     "invoke(seq) seq length is grater than 32" {
         val l: ISeq<Int> = (1..39).toList().toPlist()
 
@@ -1399,16 +1367,4 @@ class PersistentVectorTest : FreeSpec({
 
         vec<Long>(longArrayOf(1L, 2L)) shouldBe v(1L, 2L)
     }
-}) {
-    companion object {
-        internal fun assertArraysAreEquiv(a1: Array<Any?>, a2: Array<Any?>) {
-            a2.fold(0) { index: Int, i: Any? ->
-                val n = a1[index] as Int
-
-                n shouldBeExactly i as Int
-
-                index + 1
-            }
-        }
-    }
-}
+})

@@ -1,32 +1,13 @@
 package com.github.whyrising.y.collections.concretions.list
 
 import com.github.whyrising.y.collections.InstaCount
+import com.github.whyrising.y.collections.concretions.serialization.PersistentListSerializer
 import com.github.whyrising.y.collections.list.IPersistentList
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.stack.IPersistentStack
-import com.github.whyrising.y.toPlist
 import com.github.whyrising.y.util.Murmur3
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-
-internal class PersistentListSerializer<E>(element: KSerializer<E>) :
-    KSerializer<PersistentList<E>> {
-
-    internal val listSerializer = ListSerializer(element)
-
-    override val descriptor: SerialDescriptor = listSerializer.descriptor
-
-    override fun deserialize(decoder: Decoder): PersistentList<E> =
-        listSerializer.deserialize(decoder).toPlist()
-
-    override fun serialize(encoder: Encoder, value: PersistentList<E>) =
-        listSerializer.serialize(encoder, value)
-}
 
 @Serializable(with = PersistentListSerializer::class)
 sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {

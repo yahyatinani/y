@@ -36,7 +36,7 @@ class APersistentMapTest : FreeSpec({
 
     "hashCode()" {
         val array = arrayOf("a" to 1, "b" to 2)
-        val map = m(*array) as PersistentArrayMap
+        val map = m(*array)
         val expHash = ("a".hashCode() xor 1.hashCode()) +
             ("b".hashCode() xor 2.hashCode())
 
@@ -45,9 +45,9 @@ class APersistentMapTest : FreeSpec({
     }
 
     "hasheq()" {
-        val map = m("a" to 1, "b" to 2, "c" to 3) as PersistentArrayMap
+        val map = m("a" to 1, "b" to 2, "c" to 3)
         val expectedHash = Murmur3.hashUnordered(map)
-        val emptyMap = m<String, Int>() as PersistentArrayMap
+        val emptyMap = m<String, Int>()
 
         val hash = map.hasheq()
 
@@ -75,7 +75,7 @@ class APersistentMapTest : FreeSpec({
 
         (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 10)).shouldBeFalse()
 
-        (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 2L)).shouldBeFalse()
+        (m("a" to 1, "b" to 2).equals(m("a" to 1, "b" to 2L))).shouldBeFalse()
     }
 
     @Suppress("UNCHECKED_CAST")

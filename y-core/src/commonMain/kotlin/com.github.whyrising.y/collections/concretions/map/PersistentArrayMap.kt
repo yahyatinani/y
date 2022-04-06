@@ -2,6 +2,7 @@ package com.github.whyrising.y.collections.concretions.map
 
 import com.github.whyrising.y.collections.concretions.list.ASeq
 import com.github.whyrising.y.collections.concretions.list.PersistentList
+import com.github.whyrising.y.collections.concretions.serialization.PersistentArrayMapSerializer
 import com.github.whyrising.y.collections.map.APersistentMap
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.map.IPersistentMap
@@ -11,39 +12,17 @@ import com.github.whyrising.y.collections.mutable.map.ATransientMap
 import com.github.whyrising.y.collections.mutable.map.TransientMap
 import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
-import com.github.whyrising.y.toPmap
 import com.github.whyrising.y.util.equiv
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.reentrantLock
 import kotlinx.atomicfu.locks.withLock
 import kotlinx.atomicfu.update
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import kotlin.collections.Map.Entry
 import kotlin.math.max
 
 const val HASHTABLE_THRESHOLD = 16
-
-internal class PersistentArrayMapSerializer<K, V>(
-    keySerializer: KSerializer<K>,
-    valueSerializer: KSerializer<V>
-) : KSerializer<PersistentArrayMap<K, V>> {
-    internal val mapSerializer = MapSerializer(keySerializer, valueSerializer)
-
-    override val descriptor: SerialDescriptor = mapSerializer.descriptor
-
-    override fun deserialize(decoder: Decoder): PersistentArrayMap<K, V> =
-        mapSerializer.deserialize(decoder).toPmap() as PersistentArrayMap<K, V>
-
-    override fun serialize(encoder: Encoder, value: PersistentArrayMap<K, V>) {
-        return mapSerializer.serialize(encoder, value)
-    }
-}
 
 @Serializable(PersistentArrayMapSerializer::class)
 class PersistentArrayMap<out K, out V> internal constructor(

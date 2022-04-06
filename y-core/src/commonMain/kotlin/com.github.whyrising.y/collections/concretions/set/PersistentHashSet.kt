@@ -1,6 +1,7 @@
 package com.github.whyrising.y.collections.concretions.set
 
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
+import com.github.whyrising.y.collections.concretions.serialization.PersistentHashSetSerializer
 import com.github.whyrising.y.collections.map.IPersistentMap
 import com.github.whyrising.y.collections.mutable.collection.IMutableCollection
 import com.github.whyrising.y.collections.mutable.collection.ITransientCollection
@@ -11,33 +12,13 @@ import com.github.whyrising.y.collections.seq.IPersistentCollection
 import com.github.whyrising.y.collections.seq.ISeq
 import com.github.whyrising.y.collections.set.APersistentSet
 import com.github.whyrising.y.collections.set.PersistentSet
-import com.github.whyrising.y.toPhashSet
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.SetSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-
-internal class PersistentHashSetSerializer<E>(element: KSerializer<E>) :
-    KSerializer<PersistentHashSet<E>> {
-
-    internal val setSerializer = SetSerializer(element)
-
-    override val descriptor: SerialDescriptor = setSerializer.descriptor
-
-    override fun deserialize(decoder: Decoder): PersistentHashSet<E> =
-        setSerializer.deserialize(decoder).toPhashSet()
-
-    override fun serialize(encoder: Encoder, value: PersistentHashSet<E>) =
-        setSerializer.serialize(encoder, value)
-}
 
 @Serializable(with = PersistentHashSetSerializer::class)
 sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
     APersistentSet<E>(map), IMutableCollection<E> {
 
-    override fun conj(e: @UnsafeVariance E): PersistentSet<E> = when {
+    override fun conj(e: @UnsafeVariance E): PersistentHashSet<E> = when {
         contains(e) -> this
         else -> HashSet(map.assoc(e, e))
     }

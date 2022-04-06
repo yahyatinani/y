@@ -3,7 +3,7 @@ import org.gradle.api.JavaVersion
 object Deps {
     val jvmTarget = JavaVersion.VERSION_1_8.toString()
     const val kotlinApiVersion = "1.6"
-    const val kotlinVersion = "1.6.10"
+    const val kotlinVersion = "1.6.20"
 
     object Kotlinx {
         const val group = "org.jetbrains.kotlinx"
@@ -28,7 +28,7 @@ object Deps {
     }
 
     object Kotest {
-        const val version = "5.2.1"
+        const val version = "5.2.2"
         const val runnerJvm = "io.kotest:kotest-runner-junit5-jvm:$version"
         const val assertions = "io.kotest:kotest-assertions-core:$version"
         const val propertyTest = "io.kotest:kotest-property:$version"

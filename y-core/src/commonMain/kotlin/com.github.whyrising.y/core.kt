@@ -11,7 +11,6 @@ import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.Cons
 import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
-import com.github.whyrising.y.collections.concretions.map.HASHTABLE_THRESHOLD
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet
@@ -276,11 +275,9 @@ fun <E> vec(coll: Any?): IPersistentVector<E> = when (coll) {
 fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V> =
     PersistentArrayMap.create(this)
 
-fun <K, V> m(vararg kvs: Pair<K, V>): IPersistentMap<K, V> = when {
+fun <K, V> m(vararg kvs: Pair<K, V>): PersistentArrayMap<K, V> = when {
     kvs.isEmpty() -> PersistentArrayMap.EmptyArrayMap
-    kvs.size * 2 <= HASHTABLE_THRESHOLD ->
-        PersistentArrayMap.createWithCheck(*kvs)
-    else -> PersistentHashMap.createWithCheck(*kvs)
+    else -> PersistentArrayMap.createWithCheck(*kvs)
 }
 
 fun <K, V> hashMap(vararg kvs: Pair<K, V>): PersistentHashMap<K, V> = when {
@@ -347,24 +344,17 @@ fun <E> v(
 
 fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
 
-fun <E> hashSet(vararg e: E): PersistentHashSet<E> =
-    PersistentHashSet.create(*e)
+fun <E> hashSet(vararg e: E) = PersistentHashSet.create(*e)
 
-fun <E> hashSet(seq: ISeq<E>): PersistentHashSet<E> =
-    PersistentHashSet.create(seq)
+fun <E> hashSet(seq: ISeq<E>) = PersistentHashSet.create(seq)
 
 fun <E> hs(): PersistentSet<E> = PersistentHashSet.EmptyHashSet
 
-fun <E> hs(vararg e: E): PersistentSet<E> =
-    PersistentHashSet.createWithCheck(*e)
+fun <E> hs(vararg e: E) = PersistentHashSet.createWithCheck(*e)
 
-fun <E> Set<E>.toPhashSet(): PersistentHashSet<E> =
-    PersistentHashSet.create(this)
+fun <E> Set<E>.toPhashSet() = PersistentHashSet.create(this)
 
 fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V? =
-    getFrom<K, V>(map, key, default)
-
-fun <K, V> get(map: Map<K, V>?, key: K, default: V? = null): V? =
     getFrom<K, V>(map, key, default)
 
 fun <E> get(map: PersistentSet<E>?, key: E, default: E? = null): E? =

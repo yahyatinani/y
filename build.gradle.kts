@@ -24,7 +24,7 @@ plugins {
     signing
     kotlin(Plugins.Kotlinx.Serialization.id) version Deps.kotlinVersion
     id(Plugins.Kotlinter.id) version Plugins.Kotlinter.version
-    id(Plugins.Kotest.id) version Plugins.Kotest.version
+    id(Plugins.Kotest.id) version "5.2.1"
 }
 
 tasks { javadoc }

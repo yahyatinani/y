@@ -1,6 +1,16 @@
 Changelog
 ========
 
+## v0.1.0
+
+#### Fixed
+* All tests now run on all targeted platforms.
+
+#### Updated
+* `y-collections` module merged into `y-core` module, resulting in only two
+modules total: `y-core` and `y-concurrency`.
+
+
 ## v0.0.10
 
 #### Fixed:
@@ -14,7 +24,6 @@ Changelog
 
 * `PersistentQueue.equals(other)`
 * `PersistentQueue.equiv(other)`
-
 
 
 ## v0.0.8

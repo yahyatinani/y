@@ -6,6 +6,7 @@ import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.BitMapIndexedNode.EmptyBitMapIndexedNode
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator.EmptyNodeIterator
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap.NodeIterator.NodeIter
+import com.github.whyrising.y.collections.concretions.serialization.PersistentHashMapSerializer
 import com.github.whyrising.y.collections.map.APersistentMap
 import com.github.whyrising.y.collections.map.IMapEntry
 import com.github.whyrising.y.collections.map.IPersistentMap
@@ -20,29 +21,7 @@ import com.github.whyrising.y.util.equiv
 import com.github.whyrising.y.util.hasheq
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-
-internal class PersistentHashMapSerializer<K, V>(
-    keySerializer: KSerializer<K>,
-    valueSerializer: KSerializer<V>
-) : KSerializer<PersistentHashMap<K, V>> {
-    internal val mapSerializer = MapSerializer(keySerializer, valueSerializer)
-
-    override val descriptor: SerialDescriptor = mapSerializer.descriptor
-
-    override fun deserialize(decoder: Decoder): PersistentHashMap<K, V> =
-        PersistentHashMap.create(mapSerializer.deserialize(decoder))
-            as PersistentHashMap<K, V>
-
-    override fun serialize(encoder: Encoder, value: PersistentHashMap<K, V>) {
-        return mapSerializer.serialize(encoder, value)
-    }
-}
 
 @Serializable(with = PersistentHashMapSerializer::class)
 sealed class PersistentHashMap<out K, out V>(

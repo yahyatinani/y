@@ -13,7 +13,6 @@ import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.doubles.shouldBeExactly
 import io.kotest.matchers.floats.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeExactly
@@ -246,10 +245,6 @@ class CoreTest : FreeSpec({
         (arrayMap is PersistentArrayMap<*, *>).shouldBeTrue()
         arrayMap.count shouldBeExactly 1
         arrayMap.containsKey("a").shouldBeTrue()
-
-        (hashMap is PersistentHashMap<*, *>).shouldBeTrue()
-        hashMap.count shouldBeExactly pairs.size
-        hashMap shouldContainAll (1..20).map { MapEntry(it, "$it") }
 
         shouldThrowExactly<IllegalArgumentException> {
             m("a" to 1, "b" to 2, "b" to 3)
