@@ -298,49 +298,23 @@ fun <E> consChunk(chunk: Chunk<E>, rest: ISeq<E>): ISeq<E> =
         else -> ChunkedSeq(chunk, rest)
     }
 
-fun <E> v(): IPersistentVector<E> = PersistentVector()
+fun <E> v(): PersistentVector<E> = PersistentVector()
 
-fun <E> v(a: E): IPersistentVector<E> = PersistentVector(a)
+fun <E> v(a: E): PersistentVector<E> = PersistentVector(a)
 
-fun <E> v(a: E, b: E): IPersistentVector<E> = PersistentVector(a, b)
+fun <E> v(a: E, b: E): PersistentVector<E> = PersistentVector(a, b)
 
-fun <E> v(a: E, b: E, c: E): IPersistentVector<E> = PersistentVector(a, b, c)
+fun <E> v(a: E, b: E, c: E): PersistentVector<E> = PersistentVector(a, b, c)
 
-fun <E> v(a: E, b: E, c: E, d: E): IPersistentVector<E> =
-    PersistentVector(a, b, c, d)
+fun <E> v(a: E, b: E, c: E, d: E) = PersistentVector(a, b, c, d)
 
-fun <E> v(a: E, b: E, c: E, d: E, e: E): IPersistentVector<E> =
-    PersistentVector(a, b, c, d, e)
+fun <E> v(a: E, b: E, c: E, d: E, e: E) = PersistentVector(a, b, c, d, e)
 
-fun <E> v(a: E, b: E, c: E, d: E, e: E, f: E): IPersistentVector<E> =
+fun <E> v(a: E, b: E, c: E, d: E, e: E, f: E): PersistentVector<E> =
     PersistentVector(a, b, c, d, e, f)
 
-fun <E> v(
-    a: E,
-    b: E,
-    c: E,
-    d: E,
-    e: E,
-    f: E,
-    vararg args: E
-): IPersistentVector<E> = PersistentVector(
-    cons(
-        a,
-        cons(
-            b,
-            cons(
-                c,
-                cons(
-                    d,
-                    cons(
-                        e,
-                        cons(f, args)
-                    )
-                )
-            )
-        )
-    )
-)
+fun <E> v(a: E, b: E, c: E, d: E, e: E, f: E, vararg args: E) =
+    PersistentVector(cons(a, cons(b, cons(c, cons(d, cons(e, cons(f, args)))))))
 
 fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
 
@@ -486,6 +460,7 @@ internal fun spread(arglist: Any?): ISeq<Any?>? {
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 fun <T> isEvery(pred: (T) -> Boolean, coll: Any?): Boolean {
     val s = seq<Any?>(coll) ?: return true
 
