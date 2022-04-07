@@ -12,6 +12,7 @@ import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
 import com.github.whyrising.y.collections.concretions.list.Cons
 import com.github.whyrising.y.collections.concretions.list.PersistentList
 import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
+import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
 import com.github.whyrising.y.collections.concretions.set.PersistentHashSet
@@ -232,6 +233,32 @@ fun <E> seq(coll: Any?): ISeq<E>? = when (coll) {
         "Don't know how to create ISeq from: ${coll::class.simpleName}"
     )
 }
+
+fun <E> Iterable<E>.seq(): ISeq<E> = seq(this)!!
+
+fun <E> Array<E>.seq(): ISeq<E> = seq(this)!!
+
+fun <E> Sequence<E>.seq(): ISeq<E> = seq(this)!!
+
+fun CharSequence.seq(): ISeq<Char> = seq(this)!!
+
+fun ShortArray.seq(): ISeq<Short> = seq(this)!!
+
+fun IntArray.seq(): ISeq<Int> = seq(this)!!
+
+fun FloatArray.seq(): ISeq<Float> = seq(this)!!
+
+fun DoubleArray.seq(): ISeq<Double> = seq(this)!!
+
+fun LongArray.seq(): ISeq<Long> = seq(this)!!
+
+fun ByteArray.seq(): ISeq<Byte> = seq(this)!!
+
+fun CharArray.seq(): ISeq<Char> = seq(this)!!
+
+fun BooleanArray.seq(): ISeq<Boolean> = seq(this)!!
+
+fun <K, V> Map<K, V>.seq(): ISeq<MapEntry<K, V>> = seq(this)!!
 
 fun <E> l(): PersistentList<E> = Empty
 
