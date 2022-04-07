@@ -4,22 +4,30 @@ Changelog
 ## v0.1.0
 
 #### Added
+
 * `fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R>`
 
 #### Fixed
+
 * All tests now run on all targeted platforms.
 
 #### Updated
-* `y-collections` module merged into `y-core` module, resulting in only two
-modules total: `y-core` and `y-concurrency`.
 
+* `y-collections` module merged into `y-core` module, resulting in only two
+  modules total: `y-core` and `y-concurrency`.
+* Reimplement deserializing of the following collections serializers to improve
+  performance drastically:
+    * PersistentVector
+    * PersistentArrayMap
+    * PersistentHashMap
+    * PersistentHashSet
 
 ## v0.0.10
 
 #### Fixed:
 
-* `PersistentQueue.pop()` should return the empty queue when only one element in the queue.
-
+* `PersistentQueue.pop()` should return the empty queue when only one element in
+  the queue.
 
 ## v0.0.9
 
@@ -28,18 +36,17 @@ modules total: `y-core` and `y-concurrency`.
 * `PersistentQueue.equals(other)`
 * `PersistentQueue.equiv(other)`
 
-
 ## v0.0.8
 
 #### Added:
 
 * `class PersistentQueue<E>`
 
-  * Utility functions to create the queue:
+    * Utility functions to create the queue:
 
-    * ```kotlin
-      fun <E> q(): PersistentQueue<E> // returns an empty queue
-      fun <E> q(coll: Any?): PersistentQueue<E>
+        * ```kotlin
+      fun <E> q(): PersistentQueue<E> // returns an empty queue fun <E> q(coll:
+      Any?): PersistentQueue<E>
       ```
 
 ## v0.0.7
@@ -52,19 +59,19 @@ modules total: `y-core` and `y-concurrency`.
 
 * concat function:
 
-  * ```kotlin
-    fun <E> concat(): LazySeq<E>
+    * ```kotlin
+  fun <E> concat(): LazySeq<E>
     ```
 
-  * ```kotlin
+    * ```kotlin
     fun <E> concat(x: Any?): LazySeq<E> 
     ```
 
-  * ```kotlin
-    fun <E> concat(x: Any?, y: Any?): LazySeq<E>
+    * ```kotlin
+  fun <E> concat(x: Any?, y: Any?): LazySeq<E>
     ```
 
-  * ```kotlin
+    * ```kotlin
     fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E>
     ```
 
@@ -99,7 +106,7 @@ modules total: `y-core` and `y-concurrency`.
 * ```kotlin
   fun nextChunks()
   ```
-  
+
 * ```kotlin
   inline fun <E> lazySeq(crossinline body: () -> Any?): LazySeq<E>
   ```
@@ -107,15 +114,13 @@ modules total: `y-core` and `y-concurrency`.
 #### Updated:
 
 * `ISeq<E>` interface:
-  * Add `fun next(): ISeq<E>?`
-
-
+    * Add `fun next(): ISeq<E>?`
 
 ## v0.0.6
 
 * #### Performance/Optimization:
 
-  * Reimplement `PersistentArrayMap<K, V>`.
+    * Reimplement `PersistentArrayMap<K, V>`.
 
 ## v0.0.5
 
@@ -124,7 +129,7 @@ modules total: `y-core` and `y-concurrency`.
 * ```kotlin
   fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V?
   ```
-  
+
 * ```kotlin
   fun <K, V> getFrom(map: Any?, key: K, default: V? = null): V?
   ```
@@ -140,7 +145,7 @@ modules total: `y-core` and `y-concurrency`.
       vararg kvs: Pair<K, V>
   ):Associative<K, V>
   ```
-  
+
 * ```kotlin
   fun <E> ISeq<E>.component1(): E
   ```
@@ -148,7 +153,7 @@ modules total: `y-core` and `y-concurrency`.
 * ```kotlin
   fun <E> ISeq<E>.component2(): ISeq<E>
   ```
-  
+
 * ```kotlin
   fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V>
   ```
@@ -166,9 +171,11 @@ modules total: `y-core` and `y-concurrency`.
 #### Updated:
 
 * APIs:
-  * `m(pairs)` now returns `IPersistentMap<K, V>` instead of `PersistentArrayMap<K, V>`.
-  * v(args) now returns `IPersistentVector<E>` instead of `PersistentVector<E>`.
-  * `toSeq()` became `seq()` and moved to core.
+    * `m(pairs)` now returns `IPersistentMap<K, V>` instead
+      of `PersistentArrayMap<K, V>`.
+    * v(args) now returns `IPersistentVector<E>` instead
+      of `PersistentVector<E>`.
+    * `toSeq()` became `seq()` and moved to core.
 
 #### Removed:
 
@@ -179,7 +186,7 @@ modules total: `y-core` and `y-concurrency`.
 * ```kotlin
   Map<K, V>.toPhashMap()
   ```
-  
+
 * ```kotlin
   fun <E> List.toPVector(): IPersistentVector<E>
   ```
@@ -202,7 +209,7 @@ modules total: `y-core` and `y-concurrency`.
 * **y-concurrency** module:
     * Atom<T>
     * Functions:
-      * atom(x:T): Atom<T>
+        * atom(x:T): Atom<T>
 
 #### Updated:
 
@@ -215,6 +222,7 @@ modules total: `y-core` and `y-concurrency`.
 ## v0.0.2.1
 
 #### Fixed:
+
 * Calling toString() on a Keyword in Native caused a InvalidMutabilityException
 
 ## v0.0.2
@@ -223,73 +231,76 @@ modules total: `y-core` and `y-concurrency`.
 
 - **y-collections** module:
 
-  - <u>Data structures:</u>
+    - <u>Data structures:</u>
 
-    - PersistentList
-    - PersistentVector
-    - PersistentArrayMap
-    - PersistentHashMap
-    - PersistentHashSet
-    - Seq
-    - LazySeq
-    - ArrayChunk
-    - Keyword
+        - PersistentList
+        - PersistentVector
+        - PersistentArrayMap
+        - PersistentHashMap
+        - PersistentHashSet
+        - Seq
+        - LazySeq
+        - ArrayChunk
+        - Keyword
 
-  - <u>Functions :</u>
+    - <u>Functions :</u>
 
-    - ```kotlin
+        - ```kotlin
       List<E>.toPlist() : PersistentList<E>
       ```
 
-    - ```kotlin
+        - ```kotlin
       l(vararg elements: E) : PersistentList<E>
       ```
 
-    - ```kotlin
+        - ```kotlin
       Map<K, V>.toPArrayMap() : PersistentArrayMap<K, V>
       ```
 
-    - ```kotlin
+        - ```kotlin
       m(vararg pairs: Pair<K, V>) : PersistentArrayMap<K, V>
       ```
 
-    - ```kotlin
+        - ```kotlin
       hashMap(vararg pairs: Pair<K, V>) : PersistentHashMap<K, V>
       ```
 
-    - ```kotlin
+        - ```kotlin
       Map<K, V>.toPhashMap() : PersistentHashMap<K, V>
       ```
 
-    - ```kotlin
+        - ```kotlin
       Set<E>.toPhashSet() : PersistentHashSet<E>
       ```
 
-    - ```kotlin
+        - ```kotlin
       hs(vararg e: E) : PersistentHashSet<E>
       ```
 
-    - ```kotlin
+        - ```kotlin
       v(vararg elements: E): PersistentVector<E>
       ```
 
-    - ```kotlin
+        - ```kotlin
       List<E>.toPvector(): PersistentVector<E>
       ```
 
-    - ```
-      lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> 
+        - ```
+      lazyChunkedSeq(iterator: Iterator<E>): ISeq<E>
       ```
 
-    - ```kotlin
+        - ```kotlin
       k(name: String): Keyword
       ```
 
 #### Updated:
 
-- The project was Kotlin/JVM only, now it is Kotlin Multiplatform that targets the JVM and Native (no Javascript support)
+- The project was Kotlin/JVM only, now it is Kotlin Multiplatform that targets
+  the JVM and Native (no Javascript support)
 
-- **y-common** module became **y-core** module because *y-core* can depend on other modules while *y-common* is a shared module that contains only code that is ,well, common between other modules.
+- **y-common** module became **y-core** module because *y-core* can depend on
+  other modules while *y-common* is a shared module that contains only code that
+  is ,well, common between other modules.
 
 #### Removed:
 
@@ -297,35 +308,35 @@ modules total: `y-core` and `y-concurrency`.
 
 - <u>Functions :</u>
 
-  - ```kotlin
-    assertCondition(value: T, msg: String, p: (T) -> Boolean)
+    - ```kotlin
+  assertCondition(value: T, msg: String, p: (T) -> Boolean)
     ```
 
-  - ```kotlin
+    - ```kotlin
     assertCondition(value: T, p: (T) -> Boolean)
     ```
 
-  - ```kotlin
-    assertTrue
+    - ```kotlin
+  assertTrue
     ```
 
-  - ```kotlin
+    - ```kotlin
     assertFalse
     ```
 
-  - ```kotlin
-    assertNotNull
+    - ```kotlin
+  assertNotNull
     ```
 
-  - ```kotlin
+    - ```kotlin
     assertPositive
     ```
 
-  - ```kotlin
-    assertInRange
+    - ```kotlin
+  assertInRange
     ```
 
-  - ```kotlin
+    - ```kotlin
     assertPositiveOrZero
     ```
 
@@ -335,70 +346,70 @@ modules total: `y-core` and `y-concurrency`.
 
 - ##### y-common module (kotlin/JVM):
 
-  - <u>Functions:</u> 
+    - <u>Functions:</u>
 
-    - ```kotlin
+        - ```kotlin
       identity(x: T)
       ```
 
-    - ```kotlin
+        - ```kotlin
       inc(x)
       ```
 
-    - ```kotlin
+        - ```kotlin
       dec(x)
       ```
 
-    - ```kotlin
+        - ```kotlin
       str(x)
       ```
 
-    - ```kotlin
+        - ```kotlin
       curry(f)
       ```
 
-    - ```kotlin
+        - ```kotlin
       complement(f)
       ```
 
-    - ```kotlin
+        - ```kotlin
       compose(f,g)
       ```
 
-    - ```kotlin
+        - ```kotlin
       assertCondition(value: T, msg: String, p: (T) -> Boolean)
       ```
 
-    - ```kotlin
+        - ```kotlin
       assertCondition(value: T, p: (T) -> Boolean)
       ```
 
-    - ```kotlin
+        - ```kotlin
       assertTrue
       ```
 
-    - ```kotlin
+        - ```kotlin
       assertFalse
       ```
 
-    - ```kotlin
+        - ```kotlin
       assertNotNull
       ```
 
-    - ```kotlin
+        - ```kotlin
       assertPositive
       ```
 
-    - ```kotlin
+        - ```kotlin
       assertInRange
       ```
 
-    - ```kotlin
+        - ```kotlin
       assertPositiveOrZero
       ```
 
-  - <u>Monads:</u>
+    - <u>Monads:</u>
 
-    - Either
-    - Option
-    - Result
+        - Either
+        - Option
+        - Result
