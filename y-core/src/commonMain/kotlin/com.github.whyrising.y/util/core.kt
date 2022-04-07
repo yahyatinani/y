@@ -11,7 +11,6 @@ import com.github.whyrising.y.collections.seq.LazySeq
 import com.github.whyrising.y.collections.seq.Sequential
 import com.github.whyrising.y.seq
 
-internal const val INIT_HASH_CODE = 0
 internal const val HASH_PRIME = 31
 internal const val CHUNK_SIZE = 32
 
@@ -65,22 +64,18 @@ fun equals(o1: Any?, o2: Any?): Boolean = when {
     else -> o1 != null && o1 == o2
 }
 
-fun <E> lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> {
-    if (iterator.hasNext()) {
-        return LazySeq {
-            val array = arrayOfNulls<Any?>(CHUNK_SIZE)
-
-            var i = 0
-            while (iterator.hasNext() && i < CHUNK_SIZE)
-                array[i++] = iterator.next()
-
-            return@LazySeq ChunkedSeq(
-                ArrayChunk(array as Array<*>, 0, i),
-                lazyChunkedSeq(iterator)
-            )
-        }
+fun <E> lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> = when {
+    iterator.hasNext() -> LazySeq {
+        val array = arrayOfNulls<Any?>(CHUNK_SIZE)
+        var i = 0
+        while (iterator.hasNext() && i < CHUNK_SIZE)
+            array[i++] = iterator.next()
+        ChunkedSeq(
+            ArrayChunk(array as Array<*>, 0, i),
+            lazyChunkedSeq(iterator)
+        )
     }
-    return Empty
+    else -> Empty
 }
 
 fun compareNumbers(x: Number, y: Number): Int {

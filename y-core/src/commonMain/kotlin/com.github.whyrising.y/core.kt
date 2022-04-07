@@ -1,5 +1,6 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.ArraySeq
 import com.github.whyrising.y.collections.Chunk
 import com.github.whyrising.y.collections.PersistentQueue
@@ -197,6 +198,14 @@ inline fun <T1, T2, T3, R2, R> compose(
     }
 }
 
+/**
+ * @param coll should be an [Iterable] or a [Seqable] of elements of the given
+ * type [E].
+ *
+ * @return an [ISeq] on the given [coll]. If [coll] is null or empty,
+ * it returns null.
+ * @throws IllegalArgumentException if [coll] is not sequable.
+ */
 @Suppress("UNCHECKED_CAST")
 fun <E> seq(coll: Any?): ISeq<E>? = when (coll) {
     null, Empty -> null
@@ -292,55 +301,28 @@ fun <E> cons(x: E, coll: Any?): ISeq<E> = when (coll) {
     else -> Cons(x, seq<E>(coll) as ISeq<E>)
 }
 
-fun <E> consChunk(chunk: Chunk<E>, rest: ISeq<E>): ISeq<E> =
-    when (chunk.count) {
-        0 -> rest
-        else -> ChunkedSeq(chunk, rest)
-    }
+fun <E> consChunk(chunk: Chunk<E>, rest: ISeq<E>) = when (chunk.count) {
+    0 -> rest
+    else -> ChunkedSeq(chunk, rest)
+}
 
-fun <E> v(): IPersistentVector<E> = PersistentVector()
+fun <E> v(): PersistentVector<E> = PersistentVector()
 
-fun <E> v(a: E): IPersistentVector<E> = PersistentVector(a)
+fun <E> v(a: E): PersistentVector<E> = PersistentVector(a)
 
-fun <E> v(a: E, b: E): IPersistentVector<E> = PersistentVector(a, b)
+fun <E> v(a: E, b: E): PersistentVector<E> = PersistentVector(a, b)
 
-fun <E> v(a: E, b: E, c: E): IPersistentVector<E> = PersistentVector(a, b, c)
+fun <E> v(a: E, b: E, c: E): PersistentVector<E> = PersistentVector(a, b, c)
 
-fun <E> v(a: E, b: E, c: E, d: E): IPersistentVector<E> =
-    PersistentVector(a, b, c, d)
+fun <E> v(a: E, b: E, c: E, d: E) = PersistentVector(a, b, c, d)
 
-fun <E> v(a: E, b: E, c: E, d: E, e: E): IPersistentVector<E> =
-    PersistentVector(a, b, c, d, e)
+fun <E> v(a: E, b: E, c: E, d: E, e: E) = PersistentVector(a, b, c, d, e)
 
-fun <E> v(a: E, b: E, c: E, d: E, e: E, f: E): IPersistentVector<E> =
+fun <E> v(a: E, b: E, c: E, d: E, e: E, f: E): PersistentVector<E> =
     PersistentVector(a, b, c, d, e, f)
 
-fun <E> v(
-    a: E,
-    b: E,
-    c: E,
-    d: E,
-    e: E,
-    f: E,
-    vararg args: E
-): IPersistentVector<E> = PersistentVector(
-    cons(
-        a,
-        cons(
-            b,
-            cons(
-                c,
-                cons(
-                    d,
-                    cons(
-                        e,
-                        cons(f, args)
-                    )
-                )
-            )
-        )
-    )
-)
+fun <E> v(a: E, b: E, c: E, d: E, e: E, f: E, vararg args: E) =
+    PersistentVector(cons(a, cons(b, cons(c, cons(d, cons(e, cons(f, args)))))))
 
 fun <E> hashSet(): PersistentHashSet<E> = PersistentHashSet.EmptyHashSet
 
@@ -486,6 +468,7 @@ internal fun spread(arglist: Any?): ISeq<Any?>? {
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 fun <T> isEvery(pred: (T) -> Boolean, coll: Any?): Boolean {
     val s = seq<Any?>(coll) ?: return true
 
@@ -569,4 +552,81 @@ fun <E> q(coll: Any?): PersistentQueue<E> {
     }
 
     return q
+}
+
+internal fun <T> chunkBuffer(capacity: Int, end: Int, f: (index: Int) -> T):
+    Array<Any?> {
+    val buffer = arrayOfNulls<Any?>(capacity)
+    for (i in 0 until end)
+        buffer[i] = f(i)
+    return buffer
+}
+
+/**
+ * @param coll should be an [Iterable] or a [Seqable] of elements of type [T].
+ * @param f that takes the elements of [coll] as arguments.
+ * @return a [LazySeq] consisting of the result of applying [f] to each element
+ * in the given [coll]. */
+@Suppress("UNCHECKED_CAST")
+fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
+    when (val seq = seq<T>(coll)) {
+        null -> null
+        is IChunkedSeq<*> -> {
+            seq as IChunkedSeq<T>
+            val firstChunk = seq.firstChunk()
+            val count = firstChunk.count
+            val buffer = chunkBuffer(capacity = count, end = count) { index ->
+                f(firstChunk.nth(index))
+            }
+            consChunk(ArrayChunk(buffer), map(seq.restChunks(), f))
+        }
+        else -> cons(f(seq.first()), map(seq.rest(), f))
+    }
+}
+
+/**
+ * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
+ * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
+ * @param f takes 1st argument form [c1] and the 2nd from [c2].
+ * @return a [LazySeq] consisting of the result of applying [f] to the set of
+ * first items of [c1] and [c2], followed by applying [f] to the set of second
+ * items in [c1] and [c2], until one or both of the collections are exhausted.
+ * If the collections didn't have the same size, the remaining items in either
+ * of them are ignored.
+ */
+fun <T1, T2, R> map(c1: Any?, c2: Any?, f: (T1, T2) -> R): LazySeq<R> =
+    lazySeq {
+        val seq1 = seq<T1>(c1)
+        val seq2 = seq<T2>(c2)
+        if (seq1 == null || seq2 == null) return@lazySeq null
+
+        cons(f(seq1.first(), seq2.first()), map(seq1.rest(), seq2.rest(), f))
+    }
+
+/**
+ * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
+ * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
+ * @param c3 should be an [Iterable] or a [Seqable] of elements of type [T3].
+ * @param f takes 1st argument form [c1] and the 2nd from [c2] and 3rd from [c3]
+ * @return a [LazySeq] consisting of the result of applying [f] to the set of
+ * first items of [c1], [c2], and [c3], followed by applying [f] to the set of
+ * second items in [c1], [c2], and [c3], until one or all of the collections
+ * are exhausted.
+ * If the collections didn't have the same size, the remaining items in either
+ * of them are ignored.
+ */
+fun <T1, T2, T3, R> map(
+    c1: Any?,
+    c2: Any?,
+    c3: Any?,
+    f: (T1, T2, T3) -> R
+): LazySeq<R> = lazySeq {
+    val seq1 = seq<T1>(c1)
+    val seq2 = seq<T2>(c2)
+    val seq3 = seq<T3>(c3)
+    if (seq1 == null || seq2 == null || seq3 == null) return@lazySeq null
+    cons(
+        f(seq1.first(), seq2.first(), seq3.first()),
+        map(seq1.rest(), seq2.rest(), seq3.rest(), f)
+    )
 }

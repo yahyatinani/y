@@ -3,6 +3,7 @@ package com.github.whyrising.y
 import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.PersistentQueue
 import com.github.whyrising.y.collections.concretions.list.ChunkedSeq
+import com.github.whyrising.y.collections.concretions.list.PersistentList.Empty
 import com.github.whyrising.y.collections.concretions.map.MapEntry
 import com.github.whyrising.y.collections.concretions.map.PersistentArrayMap
 import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
@@ -238,7 +239,6 @@ class CoreTest : FreeSpec({
     "m()" {
         val arrayMap: IPersistentMap<String, Int> = m("a" to 1)
         val pairs = (1..20).map { Pair(it, "$it") }.toTypedArray()
-        val hashMap: IPersistentMap<Int, String> = m(*pairs)
 
         m<Int, Int>() shouldBeSameInstanceAs PersistentArrayMap.EmptyArrayMap
 
@@ -459,5 +459,53 @@ class CoreTest : FreeSpec({
         q<Int>(l(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
         q<Int>(v(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
         q<Int>(listOf(1, 2)) shouldBe q<Int>().conj(1).conj(2)
+    }
+
+    "map()" - {
+        "mapping f to one collection" {
+            map<Int, String>(l<Int>()) { "${it * 2}" } shouldBe Empty
+            map<Int, String>(l(1, 3, 2)) { "${it * 2}" } shouldBe
+                l("2", "6", "4")
+            map<Int, String>(listOf(1, 3)) { "${it * 3}" } shouldBe l("3", "9")
+            var i = 0
+            val lazySeq = map<Int, String>(listOf(1, 3, 4, 2)) {
+                i++ // to prove laziness, f is applied as the element is needed
+                "${it * 2}"
+            }
+            lazySeq.first() shouldBe "2"
+            i shouldBeExactly 1
+        }
+
+        "mapping f to two collections" {
+            map<Int, Int, Int>(l(3, 5), l(4, 2)) { i, j ->
+                i + j
+            } shouldBe l(7, 7)
+
+            map<Int, Int, Int>(l(3, 5), l(4)) { i, j ->
+                i + j
+            } shouldBe l(7)
+
+            map<Int, Float, String>(l(3, 5), l(4.1f, 2.3f)) { i, j ->
+                "${i + j}"
+            } shouldBe l("7.1", "7.3")
+        }
+
+        "mapping f to three collections" {
+            map<Int, Int, Int, Int>(l(3, 5), l(4, 2), l(1, 1)) { i, j, k ->
+                i + j + k
+            } shouldBe l(8, 8)
+
+            map<Int, Int, Int, Int>(l(3, 5), l(4), l(1, 1)) { i, j, k ->
+                i + j + k
+            } shouldBe l(8)
+
+            map<Int, Float, Boolean, String>(
+                l(3, 5),
+                l(4.1f, 2.3f),
+                l(true, false)
+            ) { i, j, k ->
+                "${i + j}$k"
+            } shouldBe l("7.1true", "7.3false")
+        }
     }
 })
