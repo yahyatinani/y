@@ -14,4 +14,9 @@ object Plugins {
         const val id = "io.kotest.multiplatform"
         const val version = Deps.Kotest.version
     }
+
+    object Kover {
+        const val id = "org.jetbrains.kotlinx.kover"
+        const val version = "0.5.0"
+    }
 }

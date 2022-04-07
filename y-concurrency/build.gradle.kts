@@ -123,10 +123,6 @@ kotlin {
             languageSettings.optIn("kotlin.RequiresOptIn")
         }
     }
-
-    tasks.named<Test>("jvmTest") {
-        useJUnitPlatform()
-    }
 }
 
 apply(from = "../publish-y.gradle.kts")

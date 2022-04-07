@@ -31,14 +31,27 @@ jobs:
       - name: Check Kotlinter
         run: ./gradlew lintKotlin
 
+      # ubuntu
       - name: Run ubuntu tests
         if: matrix.os == 'ubuntu-latest'
         run: ./gradlew check --scan
 
+      - name: Upload coverage reports
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v2
+        with:
+          files: build/reports/kover/merged-report/result.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
+
+      # windows
       - name: Run windows tests
         if: matrix.os == 'windows-latest'
         run: ./gradlew mingwX64Test --scan
 
+      # macOS
       - name: Run macOS tests
         if: matrix.os == 'macos-latest'
         run: ./gradlew macosX64Test macosArm64TestKlibrary --scan
@@ -55,6 +68,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: ./gradlew iosArm32TestKlibrary iosArm64TestKlibrary iosSimulatorArm64TestKlibrary iosX64Test --scan
 
+      # failure build report
       - name: Bundle the build report (when failure)
         if: failure()
         run: find . -type d -name 'reports' | zip -@ -r build-reports.zip

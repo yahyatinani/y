@@ -25,9 +25,35 @@ plugins {
     kotlin(Plugins.Kotlinx.Serialization.id) version Deps.kotlinVersion
     id(Plugins.Kotlinter.id) version Plugins.Kotlinter.version
     id(Plugins.Kotest.id) version "5.2.1"
+    id(Plugins.Kover.id) version Plugins.Kover.version
 }
 
 tasks { javadoc }
+
+kover {
+    disabledProjects = setOf("buildSrc")
+    instrumentAndroidPackage = false
+}
+
+tasks.koverMergedHtmlReport {
+    isEnabled = true
+    htmlReportDir.set(
+        layout.buildDirectory.dir("reports/kover/merged-report/html-result")
+    )
+}
+
+tasks.koverMergedXmlReport {
+    isEnabled = true
+    xmlReportFile.set(
+        layout.buildDirectory.file("reports/kover/merged-report/result.xml")
+    )
+}
+
+tasks.koverCollectReports {
+    outputDir.set(
+        layout.buildDirectory.dir("reports/kover/all-modules-reports")
+    )
+}
 
 kotlin {
     targets {
@@ -67,18 +93,10 @@ allprojects {
             languageVersion = Deps.kotlinApiVersion
         }
     }
-}
-
-subprojects {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-    }
-
-    apply(plugin = "kotlinx-serialization")
-    apply(plugin = Plugins.Kotest.id)
 
     tasks.withType<Test> {
+        useJUnitPlatform()
+
         filter { isFailOnNoMatchingTests = false }
         testLogging {
             showExceptions = true
@@ -96,9 +114,14 @@ subprojects {
     }
 }
 
-val testReport = tasks.register<TestReport>("testReport") {
-    destinationDir = file("$buildDir/reports/tests/all")
-    reportOn(subprojects.mapNotNull { it.tasks.findByPath("test") })
+subprojects {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    apply(plugin = "kotlinx-serialization")
+    apply(plugin = Plugins.Kotest.id)
 }
 
 val extension = extensions.getByName("publishing") as PublishingExtension

@@ -30,6 +30,15 @@ jobs:
       - name: Run tests
         run: ./gradlew check --scan
 
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v2
+        with:
+          files: build/reports/kover/merged-report/result.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
+
       - name: publish snapshots
         run: ./gradlew publish
 
