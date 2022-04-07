@@ -3,6 +3,9 @@ Changelog
 
 ## v0.1.0
 
+#### Added
+* `fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R>`
+
 #### Fixed
 * All tests now run on all targeted platforms.
 

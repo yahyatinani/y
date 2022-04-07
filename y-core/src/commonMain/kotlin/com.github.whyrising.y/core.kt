@@ -1,5 +1,6 @@
 package com.github.whyrising.y
 
+import com.github.whyrising.y.collections.ArrayChunk
 import com.github.whyrising.y.collections.ArraySeq
 import com.github.whyrising.y.collections.Chunk
 import com.github.whyrising.y.collections.PersistentQueue
@@ -292,11 +293,10 @@ fun <E> cons(x: E, coll: Any?): ISeq<E> = when (coll) {
     else -> Cons(x, seq<E>(coll) as ISeq<E>)
 }
 
-fun <E> consChunk(chunk: Chunk<E>, rest: ISeq<E>): ISeq<E> =
-    when (chunk.count) {
-        0 -> rest
-        else -> ChunkedSeq(chunk, rest)
-    }
+fun <E> consChunk(chunk: Chunk<E>, rest: ISeq<E>) = when (chunk.count) {
+    0 -> rest
+    else -> ChunkedSeq(chunk, rest)
+}
 
 fun <E> v(): PersistentVector<E> = PersistentVector()
 
@@ -544,4 +544,32 @@ fun <E> q(coll: Any?): PersistentQueue<E> {
     }
 
     return q
+}
+
+internal fun <T> chunkBuffer(capacity: Int, end: Int, f: (index: Int) -> T):
+    Array<Any?> {
+    val buffer = arrayOfNulls<Any?>(capacity)
+    for (i in 0 until end)
+        buffer[i] = f(i)
+    return buffer
+}
+
+/**
+ * @return a [LazySeq] consisting of the result of applying [f] to each
+ * element in the given [coll]. */
+@Suppress("UNCHECKED_CAST")
+fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
+    when (val seq = seq<T>(coll)) {
+        null -> null
+        is IChunkedSeq<*> -> {
+            seq as IChunkedSeq<T>
+            val firstChunk = seq.firstChunk()
+            val count = firstChunk.count
+            val buffer = chunkBuffer(capacity = count, end = count) { index ->
+                f(firstChunk.nth(index))
+            }
+            consChunk(ArrayChunk(buffer), map(seq.restChunks(), f))
+        }
+        else -> cons(f(seq.first()), map(seq.rest(), f))
+    }
 }
