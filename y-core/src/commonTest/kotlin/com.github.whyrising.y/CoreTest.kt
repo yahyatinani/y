@@ -508,4 +508,21 @@ class CoreTest : FreeSpec({
             } shouldBe l("7.1true", "7.3false")
         }
     }
+
+    "Collections.seq()" {
+        listOf(1, 2, 3, 4).seq() shouldBe l(1, 2, 3, 4)
+        arrayOf(1, 2, 3, 4).seq() shouldBe l(1, 2, 3, 4)
+        arrayListOf(1, 2, 3, 4).seq() shouldBe l(1, 2, 3, 4)
+        sequenceOf(1, 2, 3, 4).seq() shouldBe l(1, 2, 3, 4)
+        "abcd".seq() shouldBe l('a', 'b', 'c', 'd')
+        shortArrayOf(1, 2, 3, 4).seq() shouldBe l(1, 2, 3, 4)
+        intArrayOf(1, 2, 3, 4).seq() shouldBe l(1, 2, 3, 4)
+        floatArrayOf(1f, 2f, 3f, 4f).seq() shouldBe l(1f, 2f, 3f, 4f)
+        doubleArrayOf(1.1, 2.4).seq() shouldBe l(1.1, 2.4)
+        longArrayOf(1, 2, 3, 4).seq() shouldBe l(1, 2, 3, 4)
+        byteArrayOf(1, 2, 3, 4).seq() shouldBe l<Byte>(1, 2, 3, 4)
+        charArrayOf('a', 'b', 'c', 'd').seq() shouldBe l('a', 'b', 'c', 'd')
+        booleanArrayOf(true, false).seq() shouldBe l(true, false)
+        mapOf(1 to 2, 3 to 4).seq() shouldBe l(MapEntry(1, 2), MapEntry(3, 4))
+    }
 })
