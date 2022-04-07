@@ -598,8 +598,35 @@ fun <T1, T2, R> map(c1: Any?, c2: Any?, f: (T1, T2) -> R): LazySeq<R> =
     lazySeq {
         val seq1 = seq<T1>(c1)
         val seq2 = seq<T2>(c2)
-        if (seq1 == null) return@lazySeq null
-        if (seq2 == null) return@lazySeq null
+        if (seq1 == null || seq2 == null) return@lazySeq null
 
         cons(f(seq1.first(), seq2.first()), map(seq1.rest(), seq2.rest(), f))
     }
+
+/**
+ * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
+ * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
+ * @param c3 should be an [Iterable] or a [Seqable] of elements of type [T3].
+ * @param f takes 1st argument form [c1] and the 2nd from [c2] and 3rd from [c3]
+ * @return a [LazySeq] consisting of the result of applying [f] to the set of
+ * first items of [c1], [c2], and [c3], followed by applying [f] to the set of
+ * second items in [c1], [c2], and [c3], until one or all of the collections
+ * are exhausted.
+ * If the collections didn't have the same size, the remaining items in either
+ * of them are ignored.
+ */
+fun <T1, T2, T3, R> map(
+    c1: Any?,
+    c2: Any?,
+    c3: Any?,
+    f: (T1, T2, T3) -> R
+): LazySeq<R> = lazySeq {
+    val seq1 = seq<T1>(c1)
+    val seq2 = seq<T2>(c2)
+    val seq3 = seq<T3>(c3)
+    if (seq1 == null || seq2 == null || seq3 == null) return@lazySeq null
+    cons(
+        f(seq1.first(), seq2.first(), seq3.first()),
+        map(seq1.rest(), seq2.rest(), seq3.rest(), f)
+    )
+}

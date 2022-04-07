@@ -481,9 +481,31 @@ class CoreTest : FreeSpec({
                 i + j
             } shouldBe l(7, 7)
 
+            map<Int, Int, Int>(l(3, 5), l(4)) { i, j ->
+                i + j
+            } shouldBe l(7)
+
             map<Int, Float, String>(l(3, 5), l(4.1f, 2.3f)) { i, j ->
                 "${i + j}"
             } shouldBe l("7.1", "7.3")
+        }
+
+        "mapping f to three collections" {
+            map<Int, Int, Int, Int>(l(3, 5), l(4, 2), l(1, 1)) { i, j, k ->
+                i + j + k
+            } shouldBe l(8, 8)
+
+            map<Int, Int, Int, Int>(l(3, 5), l(4), l(1, 1)) { i, j, k ->
+                i + j + k
+            } shouldBe l(8)
+
+            map<Int, Float, Boolean, String>(
+                l(3, 5),
+                l(4.1f, 2.3f),
+                l(true, false)
+            ) { i, j, k ->
+                "${i + j}$k"
+            } shouldBe l("7.1true", "7.3false")
         }
     }
 })
