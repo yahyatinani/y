@@ -206,7 +206,7 @@ class PersistentHashSetTest : FreeSpec({
 
     "hs(...elements)" {
         val array = arrayOf(1, 2, 3, 4, 5)
-        val set = hs(*array) as PersistentHashSet<Int>
+        val set = hs(*array)
 
         set.count shouldBeExactly array.size
         set.shouldContainAll(*array)
@@ -231,7 +231,7 @@ class PersistentHashSetTest : FreeSpec({
     }
 
     "hashcode()" {
-        val set = hs("a", "b", "c") as PersistentHashSet<String>
+        val set = hs("a", "b", "c")
         val expectedHash = set.fold(0) { acc: Int, s: String ->
             acc + s.hashCode()
         }
@@ -277,7 +277,7 @@ class PersistentHashSetTest : FreeSpec({
     }
 
     "hasheq()" {
-        val set = hs("a", "b", "c") as PersistentHashSet<String>
+        val set = hs("a", "b", "c")
         val expected = Murmur3.hashUnordered(set)
 
         set.hasheq() shouldBeExactly expected
@@ -285,7 +285,7 @@ class PersistentHashSetTest : FreeSpec({
     }
 
     "invoke(key)" {
-        val set = hs("a", "b", "c") as PersistentHashSet<String>
+        val set = hs("a", "b", "c")
 
         set("a") shouldBe "a"
         set("b") shouldBe "b"
