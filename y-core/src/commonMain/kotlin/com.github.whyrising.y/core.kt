@@ -198,6 +198,14 @@ inline fun <T1, T2, T3, R2, R> compose(
     }
 }
 
+/**
+ * @param coll should be an [Iterable] or a [Seqable] of elements of the given
+ * type [E].
+ *
+ * @return an [ISeq] on the given [coll]. If [coll] is null or empty,
+ * it returns null.
+ * @throws IllegalArgumentException if [coll] is not sequable.
+ */
 @Suppress("UNCHECKED_CAST")
 fun <E> seq(coll: Any?): ISeq<E>? = when (coll) {
     null, Empty -> null
@@ -555,8 +563,10 @@ internal fun <T> chunkBuffer(capacity: Int, end: Int, f: (index: Int) -> T):
 }
 
 /**
- * @return a [LazySeq] consisting of the result of applying [f] to each
- * element in the given [coll]. */
+ * @param coll should be an [Iterable] or a [Seqable] of elements of type [T].
+ * @param f that takes the elements of [coll] as arguments.
+ * @return a [LazySeq] consisting of the result of applying [f] to each element
+ * in the given [coll]. */
 @Suppress("UNCHECKED_CAST")
 fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
     when (val seq = seq<T>(coll)) {
@@ -573,3 +583,23 @@ fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
         else -> cons(f(seq.first()), map(seq.rest(), f))
     }
 }
+
+/**
+ * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
+ * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
+ * @param f takes 1st argument form [c1] and the 2nd from [c2].
+ * @return a [LazySeq] consisting of the result of applying [f] to the set of
+ * first items of [c1] and [c2], followed by applying [f] to the set of second
+ * items in [c1] and [c2], until one or both of the collections are exhausted.
+ * If the collections didn't have the same size, the remaining items in either
+ * of them are ignored.
+ */
+fun <T1, T2, R> map(c1: Any?, c2: Any?, f: (T1, T2) -> R): LazySeq<R> =
+    lazySeq {
+        val seq1 = seq<T1>(c1)
+        val seq2 = seq<T2>(c2)
+        if (seq1 == null) return@lazySeq null
+        if (seq2 == null) return@lazySeq null
+
+        cons(f(seq1.first(), seq2.first()), map(seq1.rest(), seq2.rest(), f))
+    }

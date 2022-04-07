@@ -461,16 +461,29 @@ class CoreTest : FreeSpec({
         q<Int>(listOf(1, 2)) shouldBe q<Int>().conj(1).conj(2)
     }
 
-    "map()" {
-        map<Int, String>(l<Int>()) { "${it * 2}" } shouldBe Empty
-        map<Int, String>(l(1, 3, 2)) { "${it * 2}" } shouldBe l("2", "6", "4")
-        map<Int, String>(listOf(1, 3)) { "${it * 3}" } shouldBe l("3", "9")
-        var i = 0
-        val lazySeq = map<Int, String>(listOf(1, 3, 4, 2)) {
-            i++ // to prove laziness, f is applied as the element is needed
-            "${it * 2}"
+    "map()" - {
+        "mapping f to one collection" {
+            map<Int, String>(l<Int>()) { "${it * 2}" } shouldBe Empty
+            map<Int, String>(l(1, 3, 2)) { "${it * 2}" } shouldBe
+                l("2", "6", "4")
+            map<Int, String>(listOf(1, 3)) { "${it * 3}" } shouldBe l("3", "9")
+            var i = 0
+            val lazySeq = map<Int, String>(listOf(1, 3, 4, 2)) {
+                i++ // to prove laziness, f is applied as the element is needed
+                "${it * 2}"
+            }
+            lazySeq.first() shouldBe "2"
+            i shouldBeExactly 1
         }
-        lazySeq.first() shouldBe "2"
-        i shouldBeExactly 1
+
+        "mapping f to two collections" {
+            map<Int, Int, Int>(l(3, 5), l(4, 2)) { i, j ->
+                i + j
+            } shouldBe l(7, 7)
+
+            map<Int, Float, String>(l(3, 5), l(4.1f, 2.3f)) { i, j ->
+                "${i + j}"
+            } shouldBe l("7.1", "7.3")
+        }
     }
 })
