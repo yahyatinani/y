@@ -5,7 +5,36 @@ Changelog
 
 #### Added
 
-* `fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R>`
+* ```kotlin
+  fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R>
+  ```
+* ```kotlin
+  fun <E> Iterable<E>.seq(): ISeq<E>
+    
+  fun <E> Array<E>.seq(): ISeq<E>
+    
+  fun <E> Sequence<E>.seq(): ISeq<E>
+    
+  fun CharSequence.seq(): ISeq<Char>
+    
+  fun ShortArray.seq(): ISeq<Short>
+    
+  fun IntArray.seq(): ISeq<Int>
+    
+  fun FloatArray.seq(): ISeq<Float>
+    
+  fun DoubleArray.seq(): ISeq<Double>
+    
+  fun LongArray.seq(): ISeq<Long>
+    
+  fun ByteArray.seq(): ISeq<Byte>
+    
+  fun CharArray.seq(): ISeq<Char>
+    
+  fun BooleanArray.seq(): ISeq<Boolean>
+    
+  fun <K, V> Map<K, V>.seq(): ISeq<MapEntry<K, V>>
+  ```
 
 #### Fixed
 
@@ -13,6 +42,7 @@ Changelog
 
 #### Updated
 
+* Update to Kotlin `1.6.20`
 * `y-collections` module merged into `y-core` module, resulting in only two
   modules total: `y-core` and `y-concurrency`.
 * Reimplement deserializing of the following collections serializers to improve
@@ -45,9 +75,9 @@ Changelog
     * Utility functions to create the queue:
 
         * ```kotlin
-      fun <E> q(): PersistentQueue<E> // returns an empty queue fun <E> q(coll:
-      Any?): PersistentQueue<E>
-      ```
+          // returns an empty queue fun <E> q(coll:Any?): PersistentQueue<E>
+          fun <E> q(): PersistentQueue<E>
+          ```
 
 ## v0.0.7
 
@@ -60,20 +90,20 @@ Changelog
 * concat function:
 
     * ```kotlin
-  fun <E> concat(): LazySeq<E>
-    ```
+      fun <E> concat(): LazySeq<E>
+      ```
 
     * ```kotlin
-    fun <E> concat(x: Any?): LazySeq<E> 
-    ```
+      fun <E> concat(x: Any?): LazySeq<E> 
+      ```
 
     * ```kotlin
-  fun <E> concat(x: Any?, y: Any?): LazySeq<E>
-    ```
+      fun <E> concat(x: Any?, y: Any?): LazySeq<E>
+      ```
 
     * ```kotlin
-    fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E>
-    ```
+      fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E>
+      ```
 
 * ```kotlin
   fun <T> conj(
@@ -88,7 +118,9 @@ Changelog
   ```
 
 * ```kotlin
-  fun IPersistentVector<E>.component1()...IPersistentVector<E>.component6()
+  fun IPersistentVector<E>.component1()
+  //...
+  fun IPersistentVector<E>.component6()
   ```
 
 * ```kotlin
@@ -246,52 +278,52 @@ Changelog
     - <u>Functions :</u>
 
         - ```kotlin
-      List<E>.toPlist() : PersistentList<E>
-      ```
+          fun <E> List<E>.toPlist(): PersistentList<E>
+          ```
 
         - ```kotlin
-      l(vararg elements: E) : PersistentList<E>
-      ```
+          fun l(vararg elements: E): PersistentList<E>
+          ```
 
         - ```kotlin
-      Map<K, V>.toPArrayMap() : PersistentArrayMap<K, V>
-      ```
+          fun Map<K, V>.toPArrayMap(): PersistentArrayMap<K, V>
+          ```
 
         - ```kotlin
-      m(vararg pairs: Pair<K, V>) : PersistentArrayMap<K, V>
-      ```
+          fun m(vararg pairs: Pair<K, V>): PersistentArrayMap<K, V>
+          ```
 
         - ```kotlin
-      hashMap(vararg pairs: Pair<K, V>) : PersistentHashMap<K, V>
-      ```
+          fun hashMap(vararg pairs: Pair<K, V>): PersistentHashMap<K, V>
+          ```
 
         - ```kotlin
-      Map<K, V>.toPhashMap() : PersistentHashMap<K, V>
-      ```
+          fun Map<K, V>.toPhashMap(): PersistentHashMap<K, V>
+          ```
 
         - ```kotlin
-      Set<E>.toPhashSet() : PersistentHashSet<E>
-      ```
+          fun Set<E>.toPhashSet(): PersistentHashSet<E>
+          ```
 
         - ```kotlin
-      hs(vararg e: E) : PersistentHashSet<E>
-      ```
+          fun hs(vararg e: E): PersistentHashSet<E>
+          ```
 
         - ```kotlin
-      v(vararg elements: E): PersistentVector<E>
-      ```
+          fun v(vararg elements: E): PersistentVector<E>
+          ```
 
         - ```kotlin
-      List<E>.toPvector(): PersistentVector<E>
-      ```
-
-        - ```
-      lazyChunkedSeq(iterator: Iterator<E>): ISeq<E>
-      ```
+          fun List<E>.toPvector(): PersistentVector<E>
+          ```
 
         - ```kotlin
-      k(name: String): Keyword
-      ```
+          fun lazyChunkedSeq(iterator: Iterator<E>): ISeq<E>
+          ```
+
+        - ```kotlin
+          fun k(name: String): Keyword
+          ```
 
 #### Updated:
 
@@ -309,36 +341,36 @@ Changelog
 - <u>Functions :</u>
 
     - ```kotlin
-  assertCondition(value: T, msg: String, p: (T) -> Boolean)
-    ```
+      assertCondition(value: T, msg: String, p: (T) -> Boolean)
+      ```
 
     - ```kotlin
-    assertCondition(value: T, p: (T) -> Boolean)
-    ```
+      assertCondition(value: T, p: (T) -> Boolean)
+      ```
 
     - ```kotlin
-  assertTrue
-    ```
+      assertTrue
+      ```
 
     - ```kotlin
-    assertFalse
-    ```
+      assertFalse
+      ```
 
     - ```kotlin
-  assertNotNull
-    ```
+      assertNotNull
+      ```
 
     - ```kotlin
-    assertPositive
-    ```
+      assertPositive
+      ```
 
     - ```kotlin
-  assertInRange
-    ```
+      assertInRange
+      ```
 
     - ```kotlin
-    assertPositiveOrZero
-    ```
+      assertPositiveOrZero
+      ```
 
 ## v0.0.1
 
@@ -349,67 +381,66 @@ Changelog
     - <u>Functions:</u>
 
         - ```kotlin
-      identity(x: T)
-      ```
+          identity(x: T)
+          ```
 
         - ```kotlin
-      inc(x)
-      ```
+          inc(x)
+          ```
 
         - ```kotlin
-      dec(x)
-      ```
+          dec(x)
+          ```
 
         - ```kotlin
-      str(x)
-      ```
+          str(x)
+          ```
 
         - ```kotlin
-      curry(f)
-      ```
+          curry(f)
+          ```
 
         - ```kotlin
-      complement(f)
-      ```
+          complement(f)
+          ```
 
         - ```kotlin
-      compose(f,g)
-      ```
+          compose(f,g)
+          ```
 
         - ```kotlin
-      assertCondition(value: T, msg: String, p: (T) -> Boolean)
-      ```
+          assertCondition(value: T, msg: String, p: (T) -> Boolean)
+          ```
 
         - ```kotlin
-      assertCondition(value: T, p: (T) -> Boolean)
-      ```
+          fun assertCondition(value: T, p: (T) -> Boolean)
+          ```
 
         - ```kotlin
-      assertTrue
-      ```
+          assertTrue
+          ```
 
         - ```kotlin
-      assertFalse
-      ```
+          assertFalse
+          ```
 
         - ```kotlin
-      assertNotNull
-      ```
+          assertNotNull
+          ```
 
         - ```kotlin
-      assertPositive
-      ```
+          assertPositive
+          ```
 
         - ```kotlin
-      assertInRange
-      ```
+          assertInRange
+          ```
 
         - ```kotlin
-      assertPositiveOrZero
-      ```
+          assertPositiveOrZero
+          ```
 
     - <u>Monads:</u>
-
         - Either
         - Option
         - Result
