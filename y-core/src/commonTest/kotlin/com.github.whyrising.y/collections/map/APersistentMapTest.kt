@@ -172,7 +172,7 @@ class APersistentMapTest : FreeSpec({
 
     "invoke() operator" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = m(*array) as PersistentArrayMap
+        val map = m(*array)
 
         "invoke(key, default)" {
             map("a", -1) shouldBe 1
@@ -186,7 +186,7 @@ class APersistentMapTest : FreeSpec({
     }
 
     "KeySeq" - {
-        val map = m("a" to 1, "b" to 2, "c" to 3) as PersistentArrayMap
+        val map = m("a" to 1, "b" to 2, "c" to 3)
 
         "KeySeq should be a seq" {
             val keySeq: ISeq<String> = KeySeq(map)
@@ -246,7 +246,7 @@ class APersistentMapTest : FreeSpec({
     }
 
     "ValSeq" - {
-        val map = m("a" to 1, "b" to 2, "c" to 3) as PersistentArrayMap
+        val map = m("a" to 1, "b" to 2, "c" to 3)
 
         "ValSeq should be a seq" {
             val valSeq: ISeq<Int> = ValSeq(map)
@@ -307,8 +307,8 @@ class APersistentMapTest : FreeSpec({
 
     "Map implementation" - {
         val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
-        val map = m(*array) as PersistentArrayMap
-        val emptyMap = m<String, Int>() as PersistentArrayMap
+        val map = m(*array)
+        val emptyMap = m<String, Int>()
 
         "size()" {
             map.size shouldBeExactly array.size
