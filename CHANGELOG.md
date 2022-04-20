@@ -1,6 +1,17 @@
 Changelog
 ========
 
+## v0.1.1
+
+#### Fixed
+
+* Fix missing Atomicfu dependency in projects that use y library by exposing it
+  as api.
+
+#### Updated
+
+* Update to kotlin 1.6.21.
+
 ## v0.1.0
 
 #### Added
