@@ -120,6 +120,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
     override fun containsKey(key: @UnsafeVariance K): Boolean =
         keyExists(indexOf(key))
 
+    @Suppress("UNCHECKED_CAST")
     override fun entryAt(
         key: @UnsafeVariance K
     ): IMapEntry<K, V>? = indexOf(key).let { index ->
@@ -132,6 +133,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun valAt(
         key: @UnsafeVariance K,
         default: @UnsafeVariance V?
@@ -170,6 +172,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
 
         override fun hasNext(): Boolean = index <= array.size - 2
 
+        @Suppress("UNCHECKED_CAST")
         override fun next(): R = when {
             index > array.size - 2 -> throw NoSuchElementException()
             else -> {
@@ -187,6 +190,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
 
         override val count: Int = (array.size - index) / 2
 
+        @Suppress("UNCHECKED_CAST")
         override fun first(): MapEntry<K, V> = MapEntry(
             array[index] as K,
             array[index + 1] as V
@@ -293,6 +297,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
             return PersistentArrayMap(ar)
         }
 
+        @Suppress("UNCHECKED_CAST")
         override fun doValAt(
             key: @UnsafeVariance K,
             default: @UnsafeVariance V?
