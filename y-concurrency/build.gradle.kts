@@ -35,7 +35,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation(projects.yCore)
-                implementation(Deps.Kotlinx.Atomicfu.atomicfu)
+                api(Deps.Kotlinx.Atomicfu.atomicfu)
             }
         }
 
