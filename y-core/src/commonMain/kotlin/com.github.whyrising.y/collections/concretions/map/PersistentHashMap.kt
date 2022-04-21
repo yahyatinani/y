@@ -197,7 +197,7 @@ sealed class PersistentHashMap<out K, out V>(
             private val _null = Any()
             private var nextEntry: R = _null as R
 
-            val nodes = arrayOfNulls<Node<K, V>>(7)
+            private val nodes = arrayOfNulls<Node<K, V>>(7)
             private val cursorLengths = arrayOfNulls<Int>(7)
 
             var array: Array<Any?> = _node.array
@@ -300,7 +300,7 @@ sealed class PersistentHashMap<out K, out V>(
         )
 
         private
-        val _root = atomic<Node<@UnsafeVariance K, @UnsafeVariance V>?>(root)
+        val _root = atomic(root)
         private val _count = atomic(count)
 
         internal val root by _root
@@ -1020,6 +1020,7 @@ sealed class PersistentHashMap<out K, out V>(
         internal
         operator fun <K, V> invoke(): PersistentHashMap<K, V> = EmptyHashMap
 
+        @Suppress("UNCHECKED_CAST")
         internal fun <K, V> createWithCheck(
             array: Array<Any?>
         ): PersistentHashMap<K, V> {
@@ -1072,8 +1073,10 @@ sealed class PersistentHashMap<out K, out V>(
             return ret.persistent() as PersistentHashMap<K, V>
         }
 
-        internal
-        fun <K, V> create(array: Array<Any?>): PersistentHashMap<K, V> {
+        @Suppress("UNCHECKED_CAST")
+        internal fun <K, V> create(
+            array: Array<Any?>
+        ): PersistentHashMap<K, V> {
             var ret: TransientMap<K, V> = EmptyHashMap.asTransient()
 
             for (i in array.indices step 2)

@@ -41,7 +41,7 @@ fun <E> deserializePersistentCollection(
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-inline fun <K, V> decodeToMapEntry(
+fun <K, V> decodeToMapEntry(
     compositeDecoder: CompositeDecoder,
     descriptor: SerialDescriptor,
     keySerializer: KSerializer<K>,
