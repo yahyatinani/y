@@ -1,9 +1,9 @@
 package com.github.whyrising.y.concurrency
 
-import com.github.whyrising.y.collections.concretions.map.MapEntry
-import com.github.whyrising.y.collections.concretions.map.PersistentHashMap
-import com.github.whyrising.y.collections.map.IPersistentMap
-import com.github.whyrising.y.collections.seq.ISeq
+import com.github.whyrising.y.core.collections.IPersistentMap
+import com.github.whyrising.y.core.collections.ISeq
+import com.github.whyrising.y.core.collections.MapEntry
+import com.github.whyrising.y.core.collections.PersistentHashMap
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.reentrantLock

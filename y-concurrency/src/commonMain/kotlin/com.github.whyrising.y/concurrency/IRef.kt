@@ -1,6 +1,6 @@
 package com.github.whyrising.y.concurrency
 
-import com.github.whyrising.y.collections.map.IPersistentMap
+import com.github.whyrising.y.core.collections.IPersistentMap
 
 interface IRef<T> : IDeref<T> {
     var validator: ((T) -> Boolean)?

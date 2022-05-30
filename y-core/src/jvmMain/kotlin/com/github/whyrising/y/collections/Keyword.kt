@@ -1,8 +1,10 @@
 package com.github.whyrising.y.collections
 
-import com.github.whyrising.y.Symbol
 import com.github.whyrising.y.collections.utils.clearCache
-import com.github.whyrising.y.getFrom
+import com.github.whyrising.y.core.Symbol
+import com.github.whyrising.y.core.collections.IHashEq
+import com.github.whyrising.y.core.collections.Named
+import com.github.whyrising.y.core.getFrom
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -17,78 +19,75 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
 object KeywordSerializer : KSerializer<Keyword> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("Keyword", PrimitiveKind.STRING)
+  override val descriptor: SerialDescriptor =
+    PrimitiveSerialDescriptor("Keyword", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: Keyword) =
-        encoder.encodeString(value.name)
+  override fun serialize(encoder: Encoder, value: Keyword) =
+    encoder.encodeString(value.name)
 
-    override fun deserialize(decoder: Decoder): Keyword =
-        k(decoder.decodeString())
+  override fun deserialize(decoder: Decoder): Keyword =
+    k(decoder.decodeString())
 }
 
 @Serializable(KeywordSerializer::class)
-class Keyword private constructor(
-    internal val symbol: Symbol
-) : Named, Comparable<Keyword>, IHashEq {
-    val str: String by lazy { ":${symbol.name}" }
+class Keyword private constructor(internal val symbol: Symbol) : Named,
+  Comparable<Keyword>, IHashEq {
+  val str: String by lazy { ":${symbol.name}" }
 
-    @Transient
-    internal val hashEq: Int = symbol.hasheq() + MAGIC
+  @Transient
+  internal val hashEq: Int = symbol.hasheq() + MAGIC
 
-    override val name: String = symbol.name
+  override val name: String = symbol.name
 
-    override fun toString(): String = str
+  override fun toString(): String = str
 
-    override fun hasheq(): Int = hashEq
+  override fun hasheq(): Int = hashEq
 
-    override fun hashCode(): Int = symbol.hashCode() + MAGIC
+  override fun hashCode(): Int = symbol.hashCode() + MAGIC
 
-    override fun equals(other: Any?): Boolean = when {
-        this === other -> true
-        other !is Keyword -> false
-        else -> this.symbol == other.symbol
+  override fun equals(other: Any?): Boolean = when {
+    this === other -> true
+    other !is Keyword -> false
+    else -> this.symbol == other.symbol
+  }
+
+  override fun compareTo(other: Keyword): Int = symbol.compareTo(other.symbol)
+
+  operator fun <V> invoke(map: Any, default: V? = null): V? =
+    getFrom(map, this, default)
+
+  companion object {
+    const val MAGIC = -0x61c88647
+
+    internal val cache: ConcurrentHashMap<Symbol, Reference<Keyword>> =
+      ConcurrentHashMap<Symbol, Reference<Keyword>>()
+
+    private val rq = ReferenceQueue<Keyword>()
+
+    internal operator fun invoke(sym: Symbol): Keyword {
+      var previousRef: Reference<Keyword>? = cache[sym]
+
+      if (previousRef == null) {
+        clearCache(rq, cache)
+        val keyword = Keyword(sym)
+        previousRef = cache.putIfAbsent(sym, WeakReference(keyword, rq))
+
+        if (previousRef == null)
+          return keyword
+      }
+
+      val previousKey: Keyword? = previousRef.get()
+
+      if (previousKey != null)
+        return previousKey
+
+      // if key got garbage collected, remove from cache, do over
+      cache.remove(sym, previousRef)
+      return invoke(sym)
     }
 
-    override fun compareTo(other: Keyword): Int = symbol.compareTo(other.symbol)
-
-    operator fun <V> invoke(
-        map: Any,
-        default: V? = null
-    ): V? = getFrom(map, this, default)
-
-    companion object {
-        const val MAGIC = -0x61c88647
-
-        internal val cache: ConcurrentHashMap<Symbol, Reference<Keyword>> =
-            ConcurrentHashMap<Symbol, Reference<Keyword>>()
-
-        private val rq = ReferenceQueue<Keyword>()
-
-        internal operator fun invoke(sym: Symbol): Keyword {
-            var previousRef: Reference<Keyword>? = cache[sym]
-
-            if (previousRef == null) {
-                clearCache(rq, cache)
-                val keyword = Keyword(sym)
-                previousRef = cache.putIfAbsent(sym, WeakReference(keyword, rq))
-
-                if (previousRef == null)
-                    return keyword
-            }
-
-            val previousKey: Keyword? = previousRef.get()
-
-            if (previousKey != null)
-                return previousKey
-
-            // if key got garbage collected, remove from cache, do over
-            cache.remove(sym, previousRef)
-            return invoke(sym)
-        }
-
-        internal operator fun invoke(name: String) = invoke(Symbol(name))
-    }
+    internal operator fun invoke(name: String) = invoke(Symbol(name))
+  }
 }
 
 fun k(name: String): Keyword = Keyword.invoke(name)
