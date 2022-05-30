@@ -48,110 +48,110 @@ package com.github.whyrising.y.core.util
  * @author Kurt Alfred Kluever
  */
 object Murmur3 {
-    private const val seed: Int = 0
-    private const val C1 = -0x3361d2af
-    private const val C2 = 0x1b873593
+  private const val seed: Int = 0
+  private const val C1 = -0x3361d2af
+  private const val C2 = 0x1b873593
 
-    private fun fmix(h1: Int, length: Int): Int {
-        var temp = h1 xor length
-        temp = temp xor (temp ushr 16)
-        temp *= -0x7a143595
-        temp = temp xor (temp ushr 13)
-        temp *= -0x3d4d51cb
-        temp = temp xor (temp ushr 16)
+  private fun fmix(h1: Int, length: Int): Int {
+    var temp = h1 xor length
+    temp = temp xor (temp ushr 16)
+    temp *= -0x7a143595
+    temp = temp xor (temp ushr 13)
+    temp *= -0x3d4d51cb
+    temp = temp xor (temp ushr 16)
 
-        return temp
+    return temp
+  }
+
+  private fun mixK1(k1: Int): Int {
+    var temp = k1 * C1
+    temp = temp.rotateLeft(15)
+    temp *= C2
+
+    return temp
+  }
+
+  private fun mixH1(h1: Int, k1: Int): Int {
+    var temp = h1 xor k1
+    temp = temp.rotateLeft(13)
+    temp = temp * 5 + -0x19ab949c
+
+    return temp
+  }
+
+  fun hashInt(x: Int): Int {
+    if (x == 0) return 0
+
+    val k1 = mixK1(x)
+    val h1 = mixH1(seed, k1)
+
+    return fmix(h1, 4)
+  }
+
+  fun hashLong(x: Long): Int {
+    if (x == 0L) return 0
+
+    val low = x.toInt()
+    val high = (x ushr 32).toInt()
+
+    var k1 = mixK1(low)
+    var h1 = mixH1(seed, k1)
+
+    k1 = mixK1(high)
+    h1 = mixH1(h1, k1)
+
+    return fmix(h1, 8)
+  }
+
+  fun hashUnencodedChars(input: CharSequence): Int {
+    var h1 = seed
+
+    // step through the CharSequence 2 chars at a time
+    var i = 1
+    while (i < input.length) {
+      var k1 = input[i - 1].code or (input[i].code shl 16)
+      k1 = mixK1(k1)
+      h1 = mixH1(h1, k1)
+      i += 2
     }
 
-    private fun mixK1(k1: Int): Int {
-        var temp = k1 * C1
-        temp = temp.rotateLeft(15)
-        temp *= C2
-
-        return temp
+    // deal with any remaining characters
+    if (input.length and 1 == 1) {
+      var k1 = input[input.length - 1].code
+      k1 = mixK1(k1)
+      h1 = h1 xor k1
     }
 
-    private fun mixH1(h1: Int, k1: Int): Int {
-        var temp = h1 xor k1
-        temp = temp.rotateLeft(13)
-        temp = temp * 5 + -0x19ab949c
+    return fmix(h1, 2 * input.length)
+  }
 
-        return temp
+  fun mixCollHash(hash: Int, count: Int): Int {
+    var h1 = seed
+    val k1 = mixK1(hash)
+    h1 = mixH1(h1, k1)
+
+    return fmix(h1, count)
+  }
+
+  fun <E> hashOrdered(xs: Iterable<E>): Int {
+    var n = 0
+    var hash = 1
+    for (x in xs) {
+      hash = 31 * hash + hasheq(x)
+      ++n
     }
 
-    fun hashInt(x: Int): Int {
-        if (x == 0) return 0
+    return mixCollHash(hash, n)
+  }
 
-        val k1 = mixK1(x)
-        val h1 = mixH1(seed, k1)
-
-        return fmix(h1, 4)
+  fun <E> hashUnordered(xs: Iterable<E>): Int {
+    var hash = 0
+    var n = 0
+    for (x in xs) {
+      hash += hasheq(x)
+      ++n
     }
 
-    fun hashLong(x: Long): Int {
-        if (x == 0L) return 0
-
-        val low = x.toInt()
-        val high = (x ushr 32).toInt()
-
-        var k1 = mixK1(low)
-        var h1 = mixH1(seed, k1)
-
-        k1 = mixK1(high)
-        h1 = mixH1(h1, k1)
-
-        return fmix(h1, 8)
-    }
-
-    fun hashUnencodedChars(input: CharSequence): Int {
-        var h1 = seed
-
-        // step through the CharSequence 2 chars at a time
-        var i = 1
-        while (i < input.length) {
-            var k1 = input[i - 1].code or (input[i].code shl 16)
-            k1 = mixK1(k1)
-            h1 = mixH1(h1, k1)
-            i += 2
-        }
-
-        // deal with any remaining characters
-        if (input.length and 1 == 1) {
-            var k1 = input[input.length - 1].code
-            k1 = mixK1(k1)
-            h1 = h1 xor k1
-        }
-
-        return fmix(h1, 2 * input.length)
-    }
-
-    fun mixCollHash(hash: Int, count: Int): Int {
-        var h1 = seed
-        val k1 = mixK1(hash)
-        h1 = mixH1(h1, k1)
-
-        return fmix(h1, count)
-    }
-
-    fun <E> hashOrdered(xs: Iterable<E>): Int {
-        var n = 0
-        var hash = 1
-        for (x in xs) {
-            hash = 31 * hash + hasheq(x)
-            ++n
-        }
-
-        return mixCollHash(hash, n)
-    }
-
-    fun <E> hashUnordered(xs: Iterable<E>): Int {
-        var hash = 0
-        var n = 0
-        for (x in xs) {
-            hash += hasheq(x)
-            ++n
-        }
-
-        return mixCollHash(hash, n)
-    }
+    return mixCollHash(hash, n)
+  }
 }
