@@ -305,17 +305,21 @@ class PersistentArrayMap<out K, out V> internal constructor(
       else -> equiv(key1, key2)
     }
 
+    internal fun <K, V> createWithCheck(
+      vararg kvs: Any?
+    ): PersistentArrayMap<K, V> {
+      for (i in kvs.indices step 2)
+        for (j in i + 2 until kvs.size step 2)
+          if (areKeysEqual(kvs[i], kvs[j]))
+            throw IllegalArgumentException("Duplicate key: ${kvs[i]}")
+
+      return PersistentArrayMap(kvs as Array<Any?>)
+    }
+
     @Suppress("UNCHECKED_CAST")
     internal fun <K, V> createWithCheck(
       vararg pairs: Pair<K, V>
     ): PersistentArrayMap<K, V> {
-      for (i in pairs.indices)
-        for (j in i + 1 until pairs.size)
-          if (areKeysEqual(pairs[i].first, pairs[j].first))
-            throw IllegalArgumentException(
-              "Duplicate key: ${pairs[i].first}"
-            )
-
       val entries = arrayOfNulls<Any?>(pairs.size * 2)
       var i = 0
       for ((f, s) in pairs) {
@@ -324,7 +328,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
         i += 2
       }
 
-      return PersistentArrayMap(entries)
+      return createWithCheck(*entries)
     }
 
     internal fun <K, V> create(map: Map<K, V>): IPersistentMap<K, V> {
