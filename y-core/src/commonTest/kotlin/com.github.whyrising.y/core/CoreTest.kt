@@ -4,6 +4,7 @@ import com.github.whyrising.y.core.collections.ChunkedSeq
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.MapEntry
 import com.github.whyrising.y.core.collections.PersistentArrayMap
+import com.github.whyrising.y.core.collections.PersistentArrayMap.Companion.EmptyArrayMap
 import com.github.whyrising.y.core.collections.PersistentHashMap
 import com.github.whyrising.y.core.collections.PersistentList.Empty
 import com.github.whyrising.y.core.collections.PersistentQueue
@@ -235,11 +236,11 @@ class CoreTest : FreeSpec({
     (pam is PersistentHashMap<*, *>).shouldBeTrue()
   }
 
-  "m()" {
+  "m(vararg pairs)" {
     val arrayMap: IPersistentMap<String, Int> = m("a" to 1)
     val pairs = (1..20).map { Pair(it, "$it") }.toTypedArray()
 
-    m<Int, Int>() shouldBeSameInstanceAs PersistentArrayMap.EmptyArrayMap
+    m<Int, Int>() shouldBeSameInstanceAs EmptyArrayMap
 
     (arrayMap is PersistentArrayMap<*, *>).shouldBeTrue()
     arrayMap.count shouldBeExactly 1
@@ -534,5 +535,61 @@ class CoreTest : FreeSpec({
     charArrayOf('a', 'b', 'c', 'd').seq() shouldBe l('a', 'b', 'c', 'd')
     booleanArrayOf(true, false).seq() shouldBe l(true, false)
     mapOf(1 to 2, 3 to 4).seq() shouldBe l(MapEntry(1, 2), MapEntry(3, 4))
+  }
+
+  "m(vararg array)" - {
+    "when array empty, return empty an map" {
+      com.github.whyrising.y.core.util.m<String, Int>() shouldBeSameInstanceAs
+        EmptyArrayMap
+    }
+
+    "when array size <= HASHTABLE_THRESHOLD, return PersistentArrayMap" {
+      com.github.whyrising.y.core.util.m<String, Int>("a", 1) shouldBe
+        m("a" to 1)
+
+      com.github.whyrising.y.core.util.m<String, Int>(
+        "a", 1,
+        "b", 1,
+        "c", 1,
+        "d", 1,
+        "e", 1,
+        "f", 1,
+        "g", 1,
+        "h", 1
+      ) shouldBe m(
+        "a" to 1,
+        "b" to 1,
+        "c" to 1,
+        "d" to 1,
+        "e" to 1,
+        "f" to 1,
+        "g" to 1,
+        "h" to 1
+      )
+    }
+
+    "when array size is > HASHTABLE_THRESHOLD, return PersistentHashMap" {
+      com.github.whyrising.y.core.util.m<String, Int>(
+        "a", 1,
+        "b", 1,
+        "c", 1,
+        "d", 1,
+        "e", 1,
+        "f", 1,
+        "g", 1,
+        "h", 1,
+        "i", 1,
+      ) shouldBe hashMap(
+        "a" to 1,
+        "b" to 1,
+        "c" to 1,
+        "d" to 1,
+        "e" to 1,
+        "f" to 1,
+        "g" to 1,
+        "h" to 1,
+        "i" to 1,
+      )
+    }
   }
 })

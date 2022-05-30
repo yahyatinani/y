@@ -2,11 +2,15 @@ package com.github.whyrising.y.core.util
 
 import com.github.whyrising.y.core.collections.ArrayChunk
 import com.github.whyrising.y.core.collections.ChunkedSeq
+import com.github.whyrising.y.core.collections.HASHTABLE_THRESHOLD
 import com.github.whyrising.y.core.collections.IHashEq
 import com.github.whyrising.y.core.collections.IPersistentCollection
+import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.ISeq
 import com.github.whyrising.y.core.collections.InstaCount
 import com.github.whyrising.y.core.collections.LazySeq
+import com.github.whyrising.y.core.collections.PersistentArrayMap
+import com.github.whyrising.y.core.collections.PersistentHashMap
 import com.github.whyrising.y.core.collections.PersistentList.Empty
 import com.github.whyrising.y.core.collections.Sequential
 import com.github.whyrising.y.core.seq
@@ -143,4 +147,10 @@ fun hashCombine(seed: Int, hash: Int): Int =
 fun count(a: Any?): Int = when (a) {
   is InstaCount -> a.count
   else -> TODO("Not yet implemented")
+}
+
+fun <K, V> m(vararg a: Any?): IPersistentMap<K, V> = when {
+  a.isEmpty() -> PersistentArrayMap.EmptyArrayMap
+  a.size <= HASHTABLE_THRESHOLD -> PersistentArrayMap.createWithCheck(*a)
+  else -> PersistentHashMap.createWithCheck(a as Array<Any?>)
 }
