@@ -1,6 +1,14 @@
 Changelog
 ========
 
+## v0.2.0
+
+#### Updated
+
+* Moved code in `y-core` from `com.github.whyrising.y` to
+  `com.github.whyrising.y.core`
+* Move all collections code to com.github.whyrising.y.core.collections
+
 ## v0.1.1
 
 #### Fixed
