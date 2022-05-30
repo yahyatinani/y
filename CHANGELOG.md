@@ -3,6 +3,10 @@ Changelog
 
 ## v0.2.0
 
+#### Added
+
+* `com.github.whyrising.y.core.util.m<K,V>(vararg a:Any?)`
+
 #### Updated
 
 * Moved code in `y-core` from `com.github.whyrising.y` to
