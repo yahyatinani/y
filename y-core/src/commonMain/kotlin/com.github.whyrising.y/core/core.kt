@@ -657,3 +657,5 @@ fun <T1, T2, T3, R> map(
     map(seq1.rest(), seq2.rest(), seq3.rest(), f)
   )
 }
+
+fun s(name: String): Symbol = Symbol(name)

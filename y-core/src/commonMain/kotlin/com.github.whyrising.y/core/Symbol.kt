@@ -5,7 +5,7 @@ import com.github.whyrising.y.core.collections.Named
 import com.github.whyrising.y.core.util.Murmur3
 import com.github.whyrising.y.core.util.hashCombine
 
-internal class Symbol(override val name: String) : Named, IHashEq,
+class Symbol(override val name: String) : Named, IHashEq,
   Comparable<Symbol> {
   val str: String by lazy { name }
 
@@ -35,5 +35,3 @@ internal class Symbol(override val name: String) : Named, IHashEq,
     default: V? = null
   ): V? = getFrom(map, this, default)
 }
-
-internal fun s(name: String): Symbol = Symbol(name)

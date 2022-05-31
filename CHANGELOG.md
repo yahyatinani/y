@@ -10,8 +10,9 @@ Changelog
 #### Updated
 
 * Moved code in `y-core` from `com.github.whyrising.y` to
-  `com.github.whyrising.y.core`
-* Move all collections code to com.github.whyrising.y.core.collections
+  `com.github.whyrising.y.core`.
+* Move all collections code to com.github.whyrising.y.core.collections.
+* Make `Symbol` and `fun s(name: String): Symbol` public.
 
 ## v0.1.1
 
