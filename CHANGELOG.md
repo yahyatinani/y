@@ -1,6 +1,19 @@
 Changelog
 ========
 
+## v0.2.0
+
+#### Added
+
+* `com.github.whyrising.y.core.util.m<K,V>(vararg a:Any?)`
+
+#### Updated
+
+* Moved code in `y-core` from `com.github.whyrising.y` to
+  `com.github.whyrising.y.core`.
+* Move all collections code to com.github.whyrising.y.core.collections.
+* Make `Symbol` and `fun s(name: String): Symbol` public.
+
 ## v0.1.1
 
 #### Fixed

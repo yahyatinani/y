@@ -1,132 +1,132 @@
 plugins {
-    kotlin("multiplatform")
-    java
-    `java-library`
+  kotlin("multiplatform")
+  java
+  `java-library`
 }
 
 kotlin {
-    targets {
-        jvm()
+  targets {
+    jvm()
 
-        linuxX64()
+    linuxX64()
 
-        mingwX64()
+    mingwX64()
 
-        macosX64()
-        macosArm64()
+    macosX64()
+    macosArm64()
 
-        tvos()
-        tvosSimulatorArm64()
+    tvos()
+    tvosSimulatorArm64()
 
-        watchosArm32()
-        watchosArm64()
-        watchosX86()
-        watchosX64()
-        watchosSimulatorArm64()
+    watchosArm32()
+    watchosArm64()
+    watchosX86()
+    watchosX64()
+    watchosSimulatorArm64()
 
-        iosX64()
-        iosArm64()
-        iosArm32()
-        iosSimulatorArm64()
+    iosX64()
+    iosArm64()
+    iosArm32()
+    iosSimulatorArm64()
+  }
+  sourceSets {
+    val commonMain by getting {
+      dependencies {
+        implementation(kotlin("stdlib-common"))
+        api(Deps.Kotlinx.Atomicfu.atomicfu)
+        implementation(Deps.Kotlinx.Serialization.json)
+      }
     }
-    sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(kotlin("stdlib-common"))
-                api(Deps.Kotlinx.Atomicfu.atomicfu)
-                implementation(Deps.Kotlinx.Serialization.json)
-            }
-        }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(Deps.Kotest.framework)
-                implementation(Deps.Kotest.assertions)
-                implementation(Deps.Kotest.propertyTest)
-            }
-        }
-
-        val jvmMain by getting {
-            dependsOn(commonMain)
-        }
-
-        val jvmTest by getting {
-            dependencies {
-                implementation(Deps.Kotest.runnerJvm)
-            }
-        }
-
-        val nativeMain by creating {
-            dependsOn(commonMain)
-        }
-
-        val macosX64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val macosArm64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val mingwX64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val linuxX64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val iosX64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val iosArm64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val iosArm32Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val iosSimulatorArm64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val watchosArm32Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val watchosArm64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val watchosX86Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val watchosX64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val watchosSimulatorArm64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        val tvosMain by getting {
-            dependsOn(nativeMain)
-        }
-
-        val tvosSimulatorArm64Main by getting {
-            dependsOn(nativeMain)
-        }
-
-        all {
-            languageSettings.optIn("kotlin.time.ExperimentalTime")
-            languageSettings.optIn("kotlin.experimental.ExperimentalTypeInference")
-            languageSettings.optIn("kotlin.RequiresOptIn")
-        }
+    val commonTest by getting {
+      dependencies {
+        implementation(kotlin("test"))
+        implementation(Deps.Kotest.framework)
+        implementation(Deps.Kotest.assertions)
+        implementation(Deps.Kotest.propertyTest)
+      }
     }
+
+    val jvmMain by getting {
+      dependsOn(commonMain)
+    }
+
+    val jvmTest by getting {
+      dependencies {
+        implementation(Deps.Kotest.runnerJvm)
+      }
+    }
+
+    val nativeMain by creating {
+      dependsOn(commonMain)
+    }
+
+    val macosX64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val macosArm64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val mingwX64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val linuxX64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val iosX64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val iosArm64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val iosArm32Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val iosSimulatorArm64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val watchosArm32Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val watchosArm64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val watchosX86Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val watchosX64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val watchosSimulatorArm64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    val tvosMain by getting {
+      dependsOn(nativeMain)
+    }
+
+    val tvosSimulatorArm64Main by getting {
+      dependsOn(nativeMain)
+    }
+
+    all {
+      languageSettings.optIn("kotlin.time.ExperimentalTime")
+      languageSettings.optIn("kotlin.experimental.ExperimentalTypeInference")
+      languageSettings.optIn("kotlin.RequiresOptIn")
+    }
+  }
 }
 
 apply(from = "../publish-y.gradle.kts")
