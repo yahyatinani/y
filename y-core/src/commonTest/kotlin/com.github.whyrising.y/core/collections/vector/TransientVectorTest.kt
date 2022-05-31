@@ -143,7 +143,7 @@ class TransientVectorTest : FreeSpec({
     }
   }
 
-  "conj(e:E)" - {
+  "conj(e)" - {
 
     "when called on an invalidated transient, it should throw" {
       val tempTv =
