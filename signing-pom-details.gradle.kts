@@ -55,8 +55,8 @@ publishing {
 
         licenses {
           license {
-            name.set("The Apache License, Version 2.0")
-            url.set("https://opensource.org/licenses/Apache-2.0")
+            name.set("Eclipse Public License - v 1.0")
+            url.set("https://opensource.org/licenses/EPL-1.0")
           }
         }
 
