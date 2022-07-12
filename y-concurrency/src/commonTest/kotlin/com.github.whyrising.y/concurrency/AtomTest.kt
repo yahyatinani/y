@@ -14,426 +14,426 @@ import kotlinx.coroutines.withContext
 import kotlin.test.Test
 
 class AtomTest2 {
-    // TODO: 4/2/22 compareAndSet is failing on the JVM when run from FreeSpec.
-    @Test
-    fun compareAndSet() {
-        var isWatchCalled = false
-        val oldV = 10
-        val newV = 15
-        val atom = Atom(0)
-        atom.swap { oldV }
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
+  // TODO: 4/2/22 compareAndSet is failing on the JVM when run from FreeSpec.
+  @Test
+  fun compareAndSet() {
+    var isWatchCalled = false
+    val oldV = 10
+    val newV = 15
+    val atom = Atom(0)
+    atom.swap { oldV }
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly oldVal
-                newVal shouldBeExactly newV
-            }
-        atom.addWatch(k, watch)
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly oldVal
+        newVal shouldBeExactly newV
+      }
+    atom.addWatch(k, watch)
 
-        atom.compareAndSet(oldV, newV) shouldBe true
-        atom.deref() shouldBeExactly newV
-        isWatchCalled.shouldBeTrue()
-    }
+    atom.compareAndSet(oldV, newV) shouldBe true
+    atom.deref() shouldBeExactly newV
+    isWatchCalled.shouldBeTrue()
+  }
 }
 
 class AtomTest : FreeSpec({
-    "state atomic ref should be initialized while object constructing" {
-        val n = 10
-        val atom = Atom(n)
+  "state atomic ref should be initialized while object constructing" {
+    val n = 10
+    val atom = Atom(n)
 
-        atom.state shouldBeExactly n
+    atom.state shouldBeExactly n
+  }
+
+  "deref() should return the value of internal state of the atom" {
+    val n = 10
+    val atom = Atom(n)
+
+    val value = atom.deref()
+
+    value shouldBeExactly n
+    value shouldBeExactly atom.state
+  }
+
+  "swap() updates the value of atom to f(current-value-of-atom)" {
+    val n = 10
+    val atom = Atom(n)
+
+    val newVal = atom.swap { currentVal ->
+      currentVal + 1
     }
 
-    "deref() should return the value of internal state of the atom" {
-        val n = 10
-        val atom = Atom(n)
+    newVal shouldBeExactly n + 1
+  }
 
-        val value = atom.deref()
+  "validator property should be null after atom creation" {
+    val ref: IRef<Int> = Atom(10)
 
-        value shouldBeExactly n
-        value shouldBeExactly atom.state
+    ref.validator.shouldBeNull()
+  }
+
+  "set validator" {
+    val ref: IRef<Int> = Atom(10)
+    val vf: (Int) -> Boolean = { it > 5 }
+
+    ref.validator = vf
+
+    ref.validator shouldBeSameInstanceAs vf
+  }
+
+  "when atom value doesn't pas validator fun, set should throw" {
+    val ref: IRef<Int> = Atom(10)
+    val vf: (Int) -> Boolean = { it > 15 }
+
+    val e = shouldThrowExactly<IllegalStateException> {
+      ref.validator = vf
+      vf
     }
 
-    "swap() updates the value of atom to f(current-value-of-atom)" {
-        val n = 10
-        val atom = Atom(n)
+    e.message shouldBe "Invalid reference state"
+  }
 
-        val newVal = atom.swap { currentVal ->
-            currentVal + 1
-        }
+  "when validator fun throws, encapsulate into IllegalStateException" {
+    val ref: IRef<Int> = Atom(10)
+    val vf: (Int) -> Boolean = { throw Exception("mock") }
 
-        newVal shouldBeExactly n + 1
+    val e = shouldThrowExactly<IllegalStateException> {
+      ref.validator = vf
+      vf
     }
 
-    "validator property should be null after atom creation" {
-        val ref: IRef<Int> = Atom(10)
+    e.message shouldBe "Invalid reference state"
+  }
 
-        ref.validator.shouldBeNull()
+  "swap(state) should throw when new value doesn't pass validation" {
+    val atom = Atom(10)
+    val vf: (Int) -> Boolean = { it > 5 }
+    atom.validator = vf
+
+    val e = shouldThrowExactly<IllegalStateException> {
+      atom.swap { it - 5 }
     }
 
-    "set validator" {
-        val ref: IRef<Int> = Atom(10)
-        val vf: (Int) -> Boolean = { it > 5 }
+    e.message shouldBe "Invalid reference state"
+  }
 
-        ref.validator = vf
+  "watches should be empty after creation of atom" {
+    val atom = Atom(10)
 
-        ref.validator shouldBeSameInstanceAs vf
-    }
+    val watches = atom.watches
 
-    "when atom value doesn't pas validator fun, set should throw" {
-        val ref: IRef<Int> = Atom(10)
-        val vf: (Int) -> Boolean = { it > 15 }
+    watches.count shouldBeExactly 0
+  }
 
-        val e = shouldThrowExactly<IllegalStateException> {
-            ref.validator = vf
-            vf
-        }
+  "addWatch(key, callback) should add a watch function to watches" {
+    val atom: IRef<Int> = Atom(10)
+    val callback: (Any, IRef<Int>, Int, Int) -> Any = { _, _, _, _ -> }
+    val key = ":key"
 
-        e.message shouldBe "Invalid reference state"
-    }
+    val ref = atom.addWatch(key, callback)
 
-    "when validator fun throws, encapsulate into IllegalStateException" {
-        val ref: IRef<Int> = Atom(10)
-        val vf: (Int) -> Boolean = { throw Exception("mock") }
+    ref shouldBeSameInstanceAs atom
+    ref.watches.count shouldBeExactly 1
+    ref.watches.valAt(key) shouldBeSameInstanceAs callback
+  }
 
-        val e = shouldThrowExactly<IllegalStateException> {
-            ref.validator = vf
-            vf
-        }
+  "removeWatch(key, callback) should remove a watch from watches" {
+    val atom: IRef<Int> = Atom(10)
+    val callback: (Any, IRef<Int>, Int, Int) -> Any = { _, _, _, _ -> }
+    val key = ":key"
+    atom.addWatch(key, callback)
 
-        e.message shouldBe "Invalid reference state"
-    }
+    val ref = atom.removeWatch(key)
 
-    "swap(state) should throw when new value doesn't pass validation" {
-        val atom = Atom(10)
-        val vf: (Int) -> Boolean = { it > 5 }
-        atom.validator = vf
+    ref shouldBeSameInstanceAs atom
+    ref.watches.count shouldBeExactly 0
+  }
 
-        val e = shouldThrowExactly<IllegalStateException> {
-            atom.swap { it - 5 }
-        }
+  "notifyWatches(oldV, newV) should call every watchFn in watches" {
+    var isWatch1Called = false
+    var isWatch2Called = false
+    val oldV = 10
+    val newV = 20
+    val k1 = ":watch1"
+    val k2 = ":watch2"
+    val atom: IRef<Int> = Atom(oldV)
+    val watch1: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatch1Called = true
 
-        e.message shouldBe "Invalid reference state"
-    }
-
-    "watches should be empty after creation of atom" {
-        val atom = Atom(10)
-
-        val watches = atom.watches
-
-        watches.count shouldBeExactly 0
-    }
-
-    "addWatch(key, callback) should add a watch function to watches" {
-        val atom: IRef<Int> = Atom(10)
-        val callback: (Any, IRef<Int>, Int, Int) -> Any = { _, _, _, _ -> }
-        val key = ":key"
-
-        val ref = atom.addWatch(key, callback)
-
+        key shouldBeSameInstanceAs k1
         ref shouldBeSameInstanceAs atom
-        ref.watches.count shouldBeExactly 1
-        ref.watches.valAt(key) shouldBeSameInstanceAs callback
-    }
+        oldVal shouldBeExactly oldV
+        newVal shouldBeExactly newV
+      }
+    val watch2: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatch2Called = true
 
-    "removeWatch(key, callback) should remove a watch from watches" {
-        val atom: IRef<Int> = Atom(10)
-        val callback: (Any, IRef<Int>, Int, Int) -> Any = { _, _, _, _ -> }
-        val key = ":key"
-        atom.addWatch(key, callback)
-
-        val ref = atom.removeWatch(key)
-
+        key shouldBeSameInstanceAs k2
         ref shouldBeSameInstanceAs atom
-        ref.watches.count shouldBeExactly 0
-    }
+        oldVal shouldBeExactly oldV
+        newVal shouldBeExactly newV
+      }
+    atom.addWatch(k1, watch1)
+    atom.addWatch(k2, watch2)
 
-    "notifyWatches(oldV, newV) should call every watchFn in watches" {
-        var isWatch1Called = false
-        var isWatch2Called = false
-        val oldV = 10
-        val newV = 20
-        val k1 = ":watch1"
-        val k2 = ":watch2"
-        val atom: IRef<Int> = Atom(oldV)
-        val watch1: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatch1Called = true
+    (atom as ARef<Int>).notifyWatches(oldV, newV)
 
-                key shouldBeSameInstanceAs k1
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly oldV
-                newVal shouldBeExactly newV
-            }
-        val watch2: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatch2Called = true
+    isWatch1Called.shouldBeTrue()
+    isWatch2Called.shouldBeTrue()
+  }
 
-                key shouldBeSameInstanceAs k2
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly oldV
-                newVal shouldBeExactly newV
-            }
-        atom.addWatch(k1, watch1)
-        atom.addWatch(k2, watch2)
+  "swap(state) should notify watchers" {
+    var isWatchCalled = false
+    val atom = Atom(10)
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-        (atom as ARef<Int>).notifyWatches(oldV, newV)
-
-        isWatch1Called.shouldBeTrue()
-        isWatch2Called.shouldBeTrue()
-    }
-
-    "swap(state) should notify watchers" {
-        var isWatchCalled = false
-        val atom = Atom(10)
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
-
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly 10
-                newVal shouldBeExactly 11
-            }
-        atom.addWatch(k, watch)
-
-        val newVal = atom.swap { currentVal ->
-            currentVal + 1
-        }
-
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly 10
         newVal shouldBeExactly 11
-        isWatchCalled.shouldBeTrue()
+      }
+    atom.addWatch(k, watch)
+
+    val newVal = atom.swap { currentVal ->
+      currentVal + 1
     }
 
-    "reset(newValue) should set atom to passed value" {
-        var isWatchCalled = false
-        val atom = Atom(10)
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
+    newVal shouldBeExactly 11
+    isWatchCalled.shouldBeTrue()
+  }
 
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly 10
-                newVal shouldBeExactly 15
-            }
-        atom.addWatch(k, watch)
+  "reset(newValue) should set atom to passed value" {
+    var isWatchCalled = false
+    val atom = Atom(10)
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-        val newValue = atom.reset(15)
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly 10
+        newVal shouldBeExactly 15
+      }
+    atom.addWatch(k, watch)
 
-        atom.deref() shouldBeExactly 15
-        newValue shouldBeExactly 15
-        isWatchCalled.shouldBeTrue()
-    }
+    val newValue = atom.reset(15)
 
-    "swap(f, arg)" {
-        var isWatchCalled = false
-        val oldV = 10
-        val newV = 13
-        val atom = Atom(oldV)
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
+    atom.deref() shouldBeExactly 15
+    newValue shouldBeExactly 15
+    isWatchCalled.shouldBeTrue()
+  }
 
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly oldV
-                newVal shouldBeExactly newV
-            }
-        atom.addWatch(k, watch)
+  "swap(f, arg)" {
+    var isWatchCalled = false
+    val oldV = 10
+    val newV = 13
+    val atom = Atom(oldV)
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-        val newVal = atom.swap(3) { currentVal, arg ->
-            currentVal + arg
-        }
-
-        atom.deref() shouldBeExactly newV
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly oldV
         newVal shouldBeExactly newV
-        isWatchCalled.shouldBeTrue()
+      }
+    atom.addWatch(k, watch)
+
+    val newVal = atom.swap(3) { currentVal, arg ->
+      currentVal + arg
     }
 
-    "swap(f, arg1, arg2)" {
-        var isWatchCalled = false
-        val oldV = 10
-        val newV = 18
-        val atom = Atom(oldV)
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
+    atom.deref() shouldBeExactly newV
+    newVal shouldBeExactly newV
+    isWatchCalled.shouldBeTrue()
+  }
 
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly oldV
-                newVal shouldBeExactly newV
-            }
-        atom.addWatch(k, watch)
+  "swap(f, arg1, arg2)" {
+    var isWatchCalled = false
+    val oldV = 10
+    val newV = 18
+    val atom = Atom(oldV)
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-        val newVal = atom.swap(3, 5) { currentVal, arg1, arg2 ->
-            currentVal + arg1 + arg2
-        }
-
-        atom.deref() shouldBeExactly newV
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly oldV
         newVal shouldBeExactly newV
-        isWatchCalled.shouldBeTrue()
+      }
+    atom.addWatch(k, watch)
+
+    val newVal = atom.swap(3, 5) { currentVal, arg1, arg2 ->
+      currentVal + arg1 + arg2
     }
 
-    "swapVals(f) should mutate atom and return old and new value pair" {
-        var isWatchCalled = false
-        val oldV = 10
-        val newV = 15
-        val atom = Atom(oldV)
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
+    atom.deref() shouldBeExactly newV
+    newVal shouldBeExactly newV
+    isWatchCalled.shouldBeTrue()
+  }
 
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly oldV
-                newVal shouldBeExactly newV
-            }
-        atom.addWatch(k, watch)
+  "swapVals(f) should mutate atom and return old and new value pair" {
+    var isWatchCalled = false
+    val oldV = 10
+    val newV = 15
+    val atom = Atom(oldV)
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-        val pair = atom.swapVals { currentVal ->
-            currentVal + 5
-        }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly oldV
+        newVal shouldBeExactly newV
+      }
+    atom.addWatch(k, watch)
 
-        atom.deref() shouldBeExactly newV
-        pair.first shouldBeExactly oldV
-        pair.second shouldBeExactly newV
-        isWatchCalled.shouldBeTrue()
+    val pair = atom.swapVals { currentVal ->
+      currentVal + 5
     }
 
-    "swapVals(arg, f)" {
-        var isWatchCalled = false
-        val oldV = 10
-        val newV = 13
-        val atom = Atom(oldV)
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
+    atom.deref() shouldBeExactly newV
+    pair.first shouldBeExactly oldV
+    pair.second shouldBeExactly newV
+    isWatchCalled.shouldBeTrue()
+  }
 
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly oldV
-                newVal shouldBeExactly newV
-            }
-        atom.addWatch(k, watch)
+  "swapVals(arg, f)" {
+    var isWatchCalled = false
+    val oldV = 10
+    val newV = 13
+    val atom = Atom(oldV)
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-        val pair = atom.swapVals(3) { arg, currentVal ->
-            currentVal + arg
-        }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly oldV
+        newVal shouldBeExactly newV
+      }
+    atom.addWatch(k, watch)
 
-        atom.deref() shouldBeExactly newV
-        pair.first shouldBeExactly oldV
-        pair.second shouldBeExactly newV
-        isWatchCalled.shouldBeTrue()
+    val pair = atom.swapVals(3) { arg, currentVal ->
+      currentVal + arg
     }
 
-    "swapVals(arg1, arg2, f)" {
-        var isWatchCalled = false
-        val oldV = 10
-        val newV = 17
-        val atom = Atom(oldV)
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
+    atom.deref() shouldBeExactly newV
+    pair.first shouldBeExactly oldV
+    pair.second shouldBeExactly newV
+    isWatchCalled.shouldBeTrue()
+  }
 
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly oldV
-                newVal shouldBeExactly newV
-            }
-        atom.addWatch(k, watch)
+  "swapVals(arg1, arg2, f)" {
+    var isWatchCalled = false
+    val oldV = 10
+    val newV = 17
+    val atom = Atom(oldV)
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-        val pair = atom.swapVals(3, 4) { arg1, arg2, currentVal ->
-            currentVal + arg1 + arg2
-        }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly oldV
+        newVal shouldBeExactly newV
+      }
+    atom.addWatch(k, watch)
 
-        atom.deref() shouldBeExactly newV
-        pair.first shouldBeExactly oldV
-        pair.second shouldBeExactly newV
-        isWatchCalled.shouldBeTrue()
+    val pair = atom.swapVals(3, 4) { arg1, arg2, currentVal ->
+      currentVal + arg1 + arg2
     }
 
-    "resetVals(newValue)" {
-        var isWatchCalled = false
-        val atom = Atom(10)
-        val k = ":watch"
-        val watch: (Any, IRef<Int>, Int, Int) -> Any =
-            { key, ref, oldVal, newVal ->
-                isWatchCalled = true
+    atom.deref() shouldBeExactly newV
+    pair.first shouldBeExactly oldV
+    pair.second shouldBeExactly newV
+    isWatchCalled.shouldBeTrue()
+  }
 
-                key shouldBeSameInstanceAs k
-                ref shouldBeSameInstanceAs atom
-                oldVal shouldBeExactly 10
-                newVal shouldBeExactly 15
-            }
-        atom.addWatch(k, watch)
+  "resetVals(newValue)" {
+    var isWatchCalled = false
+    val atom = Atom(10)
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-        val pair = atom.resetVals(15)
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly 10
+        newVal shouldBeExactly 15
+      }
+    atom.addWatch(k, watch)
 
-        atom.deref() shouldBeExactly 15
-        pair.first shouldBeExactly 10
-        pair.second shouldBeExactly 15
-        isWatchCalled.shouldBeTrue()
-    }
+    val pair = atom.resetVals(15)
 
-    "atom()" {
-        val atom: Atom<Int> = atom(15)
+    atom.deref() shouldBeExactly 15
+    pair.first shouldBeExactly 10
+    pair.second shouldBeExactly 15
+    isWatchCalled.shouldBeTrue()
+  }
 
-        atom.swap { it * 2 }
+  "atom()" {
+    val atom: Atom<Int> = atom(15)
 
-        atom.deref() shouldBeExactly 30
-    }
+    atom.swap { it * 2 }
 
-    "invoke() should call deref()" {
-        val atm: Atom<Int> = atom(15)
+    atom.deref() shouldBeExactly 30
+  }
 
-        atm.swap { it * 2 }
+  "invoke() should call deref()" {
+    val atm: Atom<Int> = atom(15)
 
-        atm() shouldBeExactly 30
-    }
+    atm.swap { it * 2 }
 
-    "swap(f)" - {
-        """
+    atm() shouldBeExactly 30
+  }
+
+  "swap(f)" - {
+    """
             should loop over and over everytime the atom value doesn't match
             the expected value due to other threads activities
         """ {
-            val atom = Atom(0)
+      val atom = Atom(0)
 
-            val coroutinesCount = 10
-            val repeatCount = 10
-            withContext(Dispatchers.Default) {
-                runAction(coroutinesCount, repeatCount) {
-                    atom.swap { currentVal ->
-                        currentVal + 1
-                    }
-                }
-            }
-
-            atom.deref() shouldBeExactly coroutinesCount * repeatCount
+      val coroutinesCount = 10
+      val repeatCount = 10
+      withContext(Dispatchers.Default) {
+        runAction(coroutinesCount, repeatCount) {
+          atom.swap { currentVal ->
+            currentVal + 1
+          }
         }
+      }
+
+      atom.deref() shouldBeExactly coroutinesCount * repeatCount
     }
+  }
 })
 
 suspend fun runAction(
-    n: Int = 100,
-    times: Int = 1000,
-    action: suspend () -> Unit
+  n: Int = 100,
+  times: Int = 1000,
+  action: suspend () -> Unit
 ) {
-    coroutineScope {
-        repeat(n) {
-            launch { repeat(times) { action() } }
-        }
+  coroutineScope {
+    repeat(n) {
+      launch { repeat(times) { action() } }
     }
+  }
 }

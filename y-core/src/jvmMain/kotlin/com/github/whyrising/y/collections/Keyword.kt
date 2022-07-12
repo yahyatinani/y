@@ -30,8 +30,10 @@ object KeywordSerializer : KSerializer<Keyword> {
 }
 
 @Serializable(KeywordSerializer::class)
-class Keyword private constructor(internal val symbol: Symbol) : Named,
-  Comparable<Keyword>, IHashEq {
+class Keyword private constructor(internal val symbol: Symbol) :
+  Named,
+  Comparable<Keyword>,
+  IHashEq {
   val str: String by lazy { ":${symbol.name}" }
 
   @Transient

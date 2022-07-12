@@ -1,0 +1,31 @@
+plugins {
+  id 'y.multiplatform-library-conventions'
+  alias(deps.plugins.kotest)
+  alias(deps.plugins.kotlinx.serialization)
+}
+
+kotlin {
+  sourceSets {
+    commonMain {
+      dependencies {
+        api deps.kotlinx.atomicfu
+        implementation deps.kotlinx.serialization.json
+      }
+    }
+
+    commonTest {
+      dependencies {
+        implementation deps.kotlin.test
+        implementation deps.kotest.engine
+        implementation deps.kotest.assertions
+        implementation deps.kotest.property
+      }
+    }
+
+    jvmTest {
+      dependencies {
+        implementation deps.kotest.jvm.runner
+      }
+    }
+  }
+}

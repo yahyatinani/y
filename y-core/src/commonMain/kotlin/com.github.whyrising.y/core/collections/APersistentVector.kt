@@ -8,7 +8,8 @@ import com.github.whyrising.y.core.util.Murmur3
 import com.github.whyrising.y.core.util.compare
 import com.github.whyrising.y.core.util.hasheq
 
-abstract class APersistentVector<out E> : IPersistentVector<E>,
+abstract class APersistentVector<out E> :
+  IPersistentVector<E>,
   Comparable<IPersistentVector<@UnsafeVariance E>>,
   RandomAccess,
   Reversible<E>,

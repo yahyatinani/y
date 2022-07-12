@@ -13,7 +13,6 @@ buildscript {
     classpath(Deps.Kotlinx.Atomicfu.gradlePlugin)
   }
 }
-
 apply(plugin = "kotlinx-atomicfu")
 
 plugins {

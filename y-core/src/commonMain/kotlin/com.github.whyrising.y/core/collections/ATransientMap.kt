@@ -2,7 +2,8 @@ package com.github.whyrising.y.core.collections
 
 import com.github.whyrising.y.core.seq
 
-abstract class ATransientMap<out K, out V> : TransientMap<K, V>,
+abstract class ATransientMap<out K, out V> :
+  TransientMap<K, V>,
   TransientAssociative2<K, V> {
 
   internal abstract fun ensureEditable()

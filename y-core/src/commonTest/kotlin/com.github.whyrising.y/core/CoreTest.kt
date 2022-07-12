@@ -356,7 +356,8 @@ class CoreTest : FreeSpec({
     val r = consChunk(
       com.github.whyrising.y.core.collections.ArrayChunk(
         arrayOf()
-      ), rest
+      ),
+      rest
     )
 
     r shouldBeSameInstanceAs rest
@@ -366,7 +367,8 @@ class CoreTest : FreeSpec({
     val cs = consChunk(
       com.github.whyrising.y.core.collections.ArrayChunk(
         arrayOf(1, 2)
-      ), l(3, 4)
+      ),
+      l(3, 4)
     )
 
     cs.count shouldBeExactly 4

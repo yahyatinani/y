@@ -5,7 +5,9 @@ import com.github.whyrising.y.core.collections.Named
 import com.github.whyrising.y.core.util.Murmur3
 import com.github.whyrising.y.core.util.hashCombine
 
-class Symbol(override val name: String) : Named, IHashEq,
+class Symbol(override val name: String) :
+  Named,
+  IHashEq,
   Comparable<Symbol> {
   val str: String by lazy { name }
 
