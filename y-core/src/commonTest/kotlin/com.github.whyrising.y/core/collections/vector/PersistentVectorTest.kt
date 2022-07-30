@@ -75,8 +75,9 @@ class PersistentVectorTest : FreeSpec({
           val vec = PersistentVector(*list.toTypedArray())
           val tail = vec.tail
 
-          if (vec.count == 0)
+          if (vec.count == 0) {
             vec shouldBeSameInstanceAs EmptyVector
+          }
           vec.shift shouldBeExactly SHIFT
           vec.count shouldBeExactly list.size
           vec.root shouldBeSameInstanceAs Node.EmptyNode

@@ -79,8 +79,9 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
       var i = 1
       var s = rest()
       while (s !is Empty) {
-        if (s is InstaCount)
+        if (s is InstaCount) {
           return i + s.count
+        }
         s = s.rest()
         i++
       }

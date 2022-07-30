@@ -74,14 +74,16 @@ class Keyword private constructor(internal val symbol: Symbol) :
         val keyword = Keyword(sym)
         previousRef = cache.putIfAbsent(sym, WeakReference(keyword, rq))
 
-        if (previousRef == null)
+        if (previousRef == null) {
           return keyword
+        }
       }
 
       val previousKey: Keyword? = previousRef.get()
 
-      if (previousKey != null)
+      if (previousKey != null) {
         return previousKey
+      }
 
       // if key got garbage collected, remove from cache, do over
       cache.remove(sym, previousRef)

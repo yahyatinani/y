@@ -15,8 +15,9 @@ fun <K, V> clearCache(
 
     for (e: Map.Entry<K, Reference<V>> in cache.entries) {
       val v = e.value
-      if (v.get() == null)
+      if (v.get() == null) {
         cache.remove(e.key, v)
+      }
     }
   }
 }

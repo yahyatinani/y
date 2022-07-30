@@ -70,23 +70,26 @@ abstract class APersistentVector<out E> :
 
         var i = 0
         while (i < count) {
-          if (!areEqual(nth(i), other.nth(i)))
+          if (!areEqual(nth(i), other.nth(i))) {
             return false
+          }
           i++
         }
 
         return true
       }
       other is List<*> -> {
-        if (other.size != count)
+        if (other.size != count) {
           return false
+        }
 
         val i1 = iterator()
         val i2 = other.iterator()
 
         while (i1.hasNext())
-          if (!areEqual(i1.next(), i2.next()))
+          if (!areEqual(i1.next(), i2.next())) {
             return false
+          }
 
         return true
       }
@@ -97,8 +100,9 @@ abstract class APersistentVector<out E> :
 
         var i = 0
         while (i < count) {
-          if (seq == null || !areEqual(nth(i), seq.first()))
+          if (seq == null || !areEqual(nth(i), seq.first())) {
             return false
+          }
           seq = seq.next()
           i++
         }
@@ -198,8 +202,9 @@ abstract class APersistentVector<out E> :
     var seq: ISeq<E>? = seq()
     var i = 0
     while (seq != null) {
-      if (com.github.whyrising.y.core.util.equiv(element, nth(i)))
+      if (com.github.whyrising.y.core.util.equiv(element, nth(i))) {
         return true
+      }
       seq = seq.next()
       i++
     }
@@ -209,8 +214,9 @@ abstract class APersistentVector<out E> :
 
   override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean {
     for (e in elements)
-      if (!contains(e))
+      if (!contains(e)) {
         return false
+      }
 
     return true
   }
@@ -220,8 +226,9 @@ abstract class APersistentVector<out E> :
   override fun indexOf(element: @UnsafeVariance E): Int {
     var i = 0
     while (i < count) {
-      if (com.github.whyrising.y.core.util.equiv(nth(i), element))
+      if (com.github.whyrising.y.core.util.equiv(nth(i), element)) {
         return i
+      }
       i++
     }
 
@@ -244,8 +251,9 @@ abstract class APersistentVector<out E> :
   override fun lastIndexOf(element: @UnsafeVariance E): Int {
     var i = count - 1
     while (i >= 0) {
-      if (com.github.whyrising.y.core.util.equiv(nth(i), element))
+      if (com.github.whyrising.y.core.util.equiv(nth(i), element)) {
         return i
+      }
       i--
     }
 

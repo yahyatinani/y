@@ -295,7 +295,12 @@ class BitMapIndexedNodeTest : FreeSpec({
       val node = BitMapIndexedNode<String, Int>()
 
       val newNode = node.assoc(
-        edit, shift, keyHash, key, value, leafFlag
+        edit,
+        shift,
+        keyHash,
+        key,
+        value,
+        leafFlag
       ) as BitMapIndexedNode<String, Int>
       val newArray = newNode.array
 
@@ -357,11 +362,21 @@ class BitMapIndexedNodeTest : FreeSpec({
           val leafFlag = Box(null)
           val node: Node<Number, String> =
             BitMapIndexedNode<Number, String>().assoc(
-              edit, shift, hasheq(4), 4, "4", leafFlag
+              edit,
+              shift,
+              hasheq(4),
+              4,
+              "4",
+              leafFlag
             )
 
           val newNode: Node<Number, String> = node.assoc(
-            edit, shift, hasheq(4L), 4L, "1", leafFlag
+            edit,
+            shift,
+            hasheq(4L),
+            4L,
+            "1",
+            leafFlag
           )
 
           newNode shouldBeSameInstanceAs node
@@ -416,13 +431,23 @@ class BitMapIndexedNodeTest : FreeSpec({
         while (i < 36) {
           val key = "$i"
           node = node.assoc(
-            edit, shift, hasheq(key), key, i, leafFlag
+            edit,
+            shift,
+            hasheq(key),
+            key,
+            i,
+            leafFlag
           )
           i += 1
         }
 
         val newNode = node.assoc(
-          edit, shift, hasheq("36"), "36", 36, leafFlag
+          edit,
+          shift,
+          hasheq("36"),
+          "36",
+          36,
+          leafFlag
         )
         val newArray = newNode.array
         val subNode = newArray[24] as BitMapIndexedNode<String, Int>
@@ -444,7 +469,12 @@ class BitMapIndexedNodeTest : FreeSpec({
         while (i < 424) {
           val key = "$i"
           node = node.assoc(
-            edit, shift, hasheq(key), key, i, leafFlag
+            edit,
+            shift,
+            hasheq(key),
+            key,
+            i,
+            leafFlag
           )
           i += 2
         }
@@ -454,7 +484,12 @@ class BitMapIndexedNodeTest : FreeSpec({
           ).array
 
         val newNode = node.assoc(
-          edit, shift, hasheq("424"), "424", 424, leafFlag
+          edit,
+          shift,
+          hasheq("424"),
+          "424",
+          424,
+          leafFlag
         )
         val newArray = (
           (newNode.array[5] as BitMapIndexedNode<String, Int>)
@@ -598,7 +633,11 @@ class BitMapIndexedNodeTest : FreeSpec({
       }
 
       val newNode: Node<String, Int> = n.without(
-        edit, shift, hasheq(key), key, removedLeaf
+        edit,
+        shift,
+        hasheq(key),
+        key,
+        removedLeaf
       )
 
       newNode shouldBeSameInstanceAs n
@@ -617,7 +656,11 @@ class BitMapIndexedNodeTest : FreeSpec({
           .assoc(edit, shift, hasheq(key), key, 15, leafFlag)
 
         val newNode = n.without(
-          edit, shift, hasheq(delKey), delKey, removedLeaf
+          edit,
+          shift,
+          hasheq(delKey),
+          delKey,
+          removedLeaf
         )
 
         newNode shouldBeSameInstanceAs n
@@ -638,13 +681,22 @@ class BitMapIndexedNodeTest : FreeSpec({
           while (i < 20) {
             val k = "$i"
             n = n.assoc(
-              edit, shift, hasheq(k), k, i, leafFlag
+              edit,
+              shift,
+              hasheq(k),
+              k,
+              i,
+              leafFlag
             ) as BitMapIndexedNode<String, Int>
             i += 2
           }
 
           val newNode = n.without(
-            edit, shift, hash, key, removedLeaf
+            edit,
+            shift,
+            hash,
+            key,
+            removedLeaf
           ) as BitMapIndexedNode<String, Int>
 
           newNode.array.size shouldBeExactly n.array.size - 2
@@ -669,18 +721,31 @@ class BitMapIndexedNodeTest : FreeSpec({
           while (i < 4) {
             val k = "$i"
             n = n.assoc(
-              edit, shift, hasheq(k), k, i, leafFlag
+              edit,
+              shift,
+              hasheq(k),
+              k,
+              i,
+              leafFlag
             ) as BitMapIndexedNode<String, Int>
             i += 2
           }
 
           val newNode1 = n.without(
-            edit, shift, keyHash1, key1, removedLeaf1
+            edit,
+            shift,
+            keyHash1,
+            key1,
+            removedLeaf1
           ) as BitMapIndexedNode<String, Int>
           val bitpos1 = PersistentHashMap.bitpos(keyHash1, shift)
 
           val newNode2 = n.without(
-            edit, shift, keyHash2, key2, removedLeaf2
+            edit,
+            shift,
+            keyHash2,
+            key2,
+            removedLeaf2
           ) as BitMapIndexedNode<String, Int>
           val bitpos2 = PersistentHashMap.bitpos(keyHash2, shift)
 
@@ -716,13 +781,22 @@ class BitMapIndexedNodeTest : FreeSpec({
         while (i < 20) {
           val k = "$i"
           n = n.assoc(
-            edit, shift, hasheq(k), k, i, leafFlag
+            edit,
+            shift,
+            hasheq(k),
+            k,
+            i,
+            leafFlag
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }
 
         val newNode = n.without(
-          edit, shift, keyHash, key, removedLeaf
+          edit,
+          shift,
+          keyHash,
+          key,
+          removedLeaf
         ) as BitMapIndexedNode<String, Int>
 
         newNode.array[2] shouldBe "12"
@@ -748,14 +822,23 @@ class BitMapIndexedNodeTest : FreeSpec({
         while (i < 100) {
           val k = "$i"
           n = n.assoc(
-            edit, shift, hasheq(k), k, i, leafFlag
+            edit,
+            shift,
+            hasheq(k),
+            k,
+            i,
+            leafFlag
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }
         val subNode = n.array[35] as BitMapIndexedNode<String, Int>
 
         val newNode = n.without(
-          edit, shift, keyHash, key, removedLeaf
+          edit,
+          shift,
+          keyHash,
+          key,
+          removedLeaf
         ) as BitMapIndexedNode<String, Int>
         val newSubNode = newNode.array[35]
           as BitMapIndexedNode<String, Int>
@@ -780,13 +863,22 @@ class BitMapIndexedNodeTest : FreeSpec({
         while (i < 2000) {
           val k = "$i"
           n = n.assoc(
-            edit, shift, hasheq(k), k, i, leafFlag
+            edit,
+            shift,
+            hasheq(k),
+            k,
+            i,
+            leafFlag
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }
 
         val newNode = n.without(
-          edit, shift, keyHash, key, removedLeaf
+          edit,
+          shift,
+          keyHash,
+          key,
+          removedLeaf
         ) as BitMapIndexedNode<String, Int>
 
         val newSubNode = newNode.array[10]
@@ -809,13 +901,22 @@ class BitMapIndexedNodeTest : FreeSpec({
         while (i < 2000) {
           val k = "$i"
           n = n.assoc(
-            edit, shift, hasheq(k), k, i, leafFlag
+            edit,
+            shift,
+            hasheq(k),
+            k,
+            i,
+            leafFlag
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }
 
         val newNode = n.without(
-          edit, shift, keyHash, key, removedLeaf
+          edit,
+          shift,
+          keyHash,
+          key,
+          removedLeaf
         ) as BitMapIndexedNode<String, Int>
 
         newNode shouldBeSameInstanceAs n
@@ -833,7 +934,12 @@ class BitMapIndexedNodeTest : FreeSpec({
       while (i < 20) {
         val k = "$i"
         n = n.assoc(
-          edit, shift, hasheq(k), k, i, leafFlag
+          edit,
+          shift,
+          hasheq(k),
+          k,
+          i,
+          leafFlag
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -852,7 +958,12 @@ class BitMapIndexedNodeTest : FreeSpec({
       while (i < 20) {
         val k = "$i"
         n = n.assoc(
-          edit, shift, hasheq(k), k, i, leafFlag
+          edit,
+          shift,
+          hasheq(k),
+          k,
+          i,
+          leafFlag
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -867,7 +978,12 @@ class BitMapIndexedNodeTest : FreeSpec({
       val leafFlag = Box(null)
       val k = 1L
       val n = BitMapIndexedNode<Any, String>().assoc(
-        edit, shift, hasheq(k), k, "1L", leafFlag
+        edit,
+        shift,
+        hasheq(k),
+        k,
+        "1L",
+        leafFlag
       ) as BitMapIndexedNode<Any, String>
 
       n.find(shift, hasheq(1), 1, "notFound") shouldBe "1L"
@@ -884,7 +1000,12 @@ class BitMapIndexedNodeTest : FreeSpec({
       while (i < 20) {
         val k = "$i"
         n = n.assoc(
-          edit, shift, hasheq(k), k, i, leafFlag
+          edit,
+          shift,
+          hasheq(k),
+          k,
+          i,
+          leafFlag
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -901,7 +1022,12 @@ class BitMapIndexedNodeTest : FreeSpec({
       while (i < 20) {
         val k = "$i"
         n = n.assoc(
-          edit, shift, hasheq(k), k, i, leafFlag
+          edit,
+          shift,
+          hasheq(k),
+          k,
+          i,
+          leafFlag
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -923,7 +1049,12 @@ class BitMapIndexedNodeTest : FreeSpec({
       while (i < 20) {
         val k = "$i"
         n = n.assoc(
-          edit, shift, hasheq(k), k, i, leafFlag
+          edit,
+          shift,
+          hasheq(k),
+          k,
+          i,
+          leafFlag
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -964,7 +1095,12 @@ class BitMapIndexedNodeTest : FreeSpec({
         while (i < 1000) {
           val k = "$i"
           indexedNode = indexedNode.assoc(
-            edit, shift, hasheq(k), k, i, leafFlag
+            edit,
+            shift,
+            hasheq(k),
+            k,
+            i,
+            leafFlag
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }

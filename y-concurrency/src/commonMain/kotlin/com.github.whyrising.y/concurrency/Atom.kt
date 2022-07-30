@@ -109,8 +109,9 @@ class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
   fun compareAndSet(oldValue: T, newValue: T): Boolean {
     validate(newValue)
     val ret = _state.compareAndSet(oldValue, newValue)
-    if (ret)
+    if (ret) {
       notifyWatches(oldValue, newValue)
+    }
     return ret
   }
 

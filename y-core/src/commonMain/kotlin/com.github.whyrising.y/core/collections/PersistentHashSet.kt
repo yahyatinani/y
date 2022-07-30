@@ -88,8 +88,9 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
       for (i in e.indices) {
         transient = transient.conj(e[i]) as TransientSet<E>
 
-        if (transient.count != i + 1)
+        if (transient.count != i + 1) {
           throw IllegalArgumentException("Duplicate key: ${e[i]}")
+        }
       }
 
       return transient.persistent() as PersistentHashSet

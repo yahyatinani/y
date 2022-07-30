@@ -580,7 +580,7 @@ class CoreTest : FreeSpec({
         "f", 1,
         "g", 1,
         "h", 1,
-        "i", 1,
+        "i", 1
       ) shouldBe hashMap(
         "a" to 1,
         "b" to 1,
@@ -590,7 +590,7 @@ class CoreTest : FreeSpec({
         "f" to 1,
         "g" to 1,
         "h" to 1,
-        "i" to 1,
+        "i" to 1
       )
     }
   }

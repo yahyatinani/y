@@ -21,7 +21,12 @@ sealed class PersistentHashMap<out K, out V>(
   ): IPersistentMap<K, V> {
     val addedLeaf = Box(null)
     val newRoot = (root ?: EmptyBitMapIndexedNode).assoc(
-      Edit(null), 0, hasheq(key), key, value, addedLeaf
+      Edit(null),
+      0,
+      hasheq(key),
+      key,
+      value,
+      addedLeaf
     )
 
     if (newRoot == this.root) return this
@@ -79,7 +84,11 @@ sealed class PersistentHashMap<out K, out V>(
 
     override fun dissoc(key: @UnsafeVariance K): IPersistentMap<K, V> {
       val newRoot = _root.without(
-        Edit(null), 0, hasheq(key), key, Box(null)
+        Edit(null),
+        0,
+        hasheq(key),
+        key,
+        Box(null)
       )
 
       if (newRoot == _root) return this
@@ -157,7 +166,7 @@ sealed class PersistentHashMap<out K, out V>(
     fun find(
       shift: Int,
       keyHash: Int,
-      key: @UnsafeVariance K,
+      key: @UnsafeVariance K
     ): IMapEntry<K, V>?
 
     fun nodeSeq(): ISeq<MapEntry<K, V>>
@@ -235,7 +244,8 @@ sealed class PersistentHashMap<out K, out V>(
                 dataLength = n.dataArity() - 1
                 val k = 2 * dataIndex
                 nextEntry = _f(
-                  array[k] as K, array[k + 1] as V
+                  array[k] as K,
+                  array[k + 1] as V
                 )
 
                 return true
@@ -279,7 +289,10 @@ sealed class PersistentHashMap<out K, out V>(
   ) : ATransientMap<K, V>() {
 
     internal constructor(map: PersistentHashMap<K, V>) : this(
-      Edit(Any()), map.root, map.count, Box(null)
+      Edit(Any()),
+      map.root,
+      map.count,
+      Box(null)
     )
 
     private val _root = atomic(root)
@@ -302,7 +315,12 @@ sealed class PersistentHashMap<out K, out V>(
     ): TransientMap<K, V> {
       leafFlag.value = null
       val node = (_root.value ?: EmptyBitMapIndexedNode).assoc(
-        edit, 0, hasheq(key), key, value, leafFlag
+        edit,
+        0,
+        hasheq(key),
+        key,
+        value,
+        leafFlag
       )
 
       _root.update {
@@ -321,7 +339,11 @@ sealed class PersistentHashMap<out K, out V>(
       leafFlag.value = null
 
       val node = (_root.value ?: EmptyBitMapIndexedNode).without(
-        edit, 0, hasheq(key), key, leafFlag
+        edit,
+        0,
+        hasheq(key),
+        key,
+        leafFlag
       )
 
       _root.update {
@@ -360,7 +382,7 @@ sealed class PersistentHashMap<out K, out V>(
     val nodes: Array<Node<@UnsafeVariance K, @UnsafeVariance V>?>,
     val cursorLengths: Array<Int>,
     val dataIndex: Int,
-    val dataLength: Int,
+    val dataLength: Int
   ) : ASeq<MapEntry<K, V>>() {
 
     @Suppress("UNCHECKED_CAST")
@@ -369,7 +391,12 @@ sealed class PersistentHashMap<out K, out V>(
 
     override fun next(): ISeq<MapEntry<K, V>>? = when (
       val seq = createNodeSeq(
-        array, lvl, nodes, cursorLengths, dataIndex, dataLength
+        array,
+        lvl,
+        nodes,
+        cursorLengths,
+        dataIndex,
+        dataLength
       )
     ) {
       PersistentList.Empty -> null
@@ -394,7 +421,10 @@ sealed class PersistentHashMap<out K, out V>(
       value: @UnsafeVariance V
     ): Node<K, V> {
       if (shift > 32 && currentHash == newHash) return HashCollisionNode(
-        edit, currentHash, 2, arrayOf(currentKey, currentValue, key, value)
+        edit,
+        currentHash,
+        2,
+        arrayOf(currentKey, currentValue, key, value)
       )
       else {
         val currentMask = mask(currentHash, shift)
@@ -413,7 +443,10 @@ sealed class PersistentHashMap<out K, out V>(
               value
             )
             return BMIN(
-              edit, 0, bitpos(currentHash, shift), arrayOf(subNode)
+              edit,
+              0,
+              bitpos(currentHash, shift),
+              arrayOf(subNode)
             )
           }
           else -> return BMIN(
@@ -421,7 +454,10 @@ sealed class PersistentHashMap<out K, out V>(
             bitpos(currentHash, shift) or bitpos(newHash, shift),
             0,
             if (currentMask < newMask) arrayOf(
-              currentKey, currentValue, key, value
+              currentKey,
+              currentValue,
+              key,
+              value
             )
             else arrayOf(key, value, currentKey, currentValue)
           )
@@ -445,7 +481,10 @@ sealed class PersistentHashMap<out K, out V>(
       array.copyInto(newArray, newIdx + 1, endIndex, array.size)
 
       return BMIN(
-        edit, datamap xor bitpos, nodemap or bitpos, newArray
+        edit,
+        datamap xor bitpos,
+        nodemap or bitpos,
+        newArray
       )
     }
 
@@ -483,7 +522,9 @@ sealed class PersistentHashMap<out K, out V>(
           val currentKey = array[keyIdx] as K
 
           if (equiv(currentKey, key)) return updateArrayByIndex(
-            keyIdx + 1, value, edit
+            keyIdx + 1,
+            value,
+            edit
           )
 
           val currentValue = array[keyIdx + 1] as V
@@ -507,7 +548,12 @@ sealed class PersistentHashMap<out K, out V>(
           val subNode = array[nodeIdx] as BitMapIndexedNode<K, V>
 
           val newNode = subNode.assoc(
-            edit, shift + 5, keyHash, key, value, leafFlag
+            edit,
+            shift + 5,
+            keyHash,
+            key,
+            value,
+            leafFlag
           )
 
           if (subNode == newNode) return this
@@ -584,10 +630,16 @@ sealed class PersistentHashMap<out K, out V>(
 
             return when (bmnIndex) {
               0 -> BMIN(
-                edit, newDatamap, 0, arrayOf(array[2], array[3])
+                edit,
+                newDatamap,
+                0,
+                arrayOf(array[2], array[3])
               )
               else -> BMIN(
-                edit, newDatamap, 0, arrayOf(array[0], array[1])
+                edit,
+                newDatamap,
+                0,
+                arrayOf(array[0], array[1])
               )
             }
           }
@@ -600,7 +652,11 @@ sealed class PersistentHashMap<out K, out V>(
 
         val subNode = array[nodeIndex] as Node<K, V>
         val newSubNode = subNode.without(
-          edit, shift + 5, keyHash, key, removedLeaf
+          edit,
+          shift + 5,
+          keyHash,
+          key,
+          removedLeaf
         )
 
         when {
@@ -649,7 +705,10 @@ sealed class PersistentHashMap<out K, out V>(
         }
         (nodemap and bitpos) != 0 -> {
           (array[nodeIndexBy(bitpos)] as Node<K, V>).find(
-            shift + 5, keyHash, key, default
+            shift + 5,
+            keyHash,
+            key,
+            default
           )
         }
         else -> default
@@ -673,7 +732,9 @@ sealed class PersistentHashMap<out K, out V>(
         }
         (nodemap and bitpos) != 0 -> {
           (array[nodeIndexBy(bitpos)] as Node<K, V>).find(
-            shift + 5, keyHash, key
+            shift + 5,
+            keyHash,
+            key
           )
         }
         else -> null
@@ -689,13 +750,21 @@ sealed class PersistentHashMap<out K, out V>(
       return when (datamap) {
         0 -> createNodeSeq(array, 0, nodes, cursorLengths, 0, 0)
         else -> NodeSeq(
-          array, 0, nodes, cursorLengths, 0, dataArity() - 1
+          array,
+          0,
+          nodes,
+          cursorLengths,
+          0,
+          dataArity() - 1
         )
       }
     }
 
     object EmptyBitMapIndexedNode : BitMapIndexedNode<Nothing, Nothing>(
-      Edit(null), 0, 0, emptyArray()
+      Edit(null),
+      0,
+      0,
+      emptyArray()
     )
 
     internal class BMIN<out K, out V>(
@@ -786,7 +855,10 @@ sealed class PersistentHashMap<out K, out V>(
           val newNode = when (this.edit) {
             edit -> this
             else -> HashCollisionNode(
-              edit, this.hash, this.count, this.array.copyOf()
+              edit,
+              this.hash,
+              this.count,
+              this.array.copyOf()
             )
           }
           newNode.mutableAssoc(index, key, value, leafFlag)
@@ -831,7 +903,10 @@ sealed class PersistentHashMap<out K, out V>(
           )
         }
         else -> HashCollisionNode(
-          edit, keyHash, count - 1, removePair(index)
+          edit,
+          keyHash,
+          count - 1,
+          removePair(index)
         )
       }
     }
@@ -916,7 +991,12 @@ sealed class PersistentHashMap<out K, out V>(
       var level = lvl
       when {
         dataIndex < dataLength -> return NodeSeq(
-          array, level, nodes, cursorLengths, dataIndex + 1, dataLength
+          array,
+          level,
+          nodes,
+          cursorLengths,
+          dataIndex + 1,
+          dataLength
         )
         else -> {
           while (level >= 0) {
@@ -966,8 +1046,9 @@ sealed class PersistentHashMap<out K, out V>(
       for (i in array.indices step 2) {
         ret = ret.assoc(array[i] as K, array[i + 1] as V)
 
-        if (ret.count != i / 2 + 1)
+        if (ret.count != i / 2 + 1) {
           throw IllegalArgumentException("Duplicate key: ${array[i]}")
+        }
       }
 
       return ret.persistent() as PersistentHashMap<K, V>
@@ -983,8 +1064,9 @@ sealed class PersistentHashMap<out K, out V>(
 
         ret = ret.assoc(key, value)
 
-        if (ret.count != (i + 1))
+        if (ret.count != (i + 1)) {
           throw IllegalArgumentException("Duplicate key: $key")
+        }
       }
 
       return ret.persistent() as PersistentHashMap<K, V>

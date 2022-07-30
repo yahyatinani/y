@@ -30,8 +30,9 @@ abstract class ARef<T> : IRef<T> {
       throw invalidReferenceState(e)
     }
 
-    if (!isValid)
+    if (!isValid) {
       throw invalidReferenceState()
+    }
   }
 
   fun validate(value: T) {

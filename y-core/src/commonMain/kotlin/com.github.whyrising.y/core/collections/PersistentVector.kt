@@ -224,7 +224,10 @@ sealed class PersistentVector<out E>(
   }
 
   internal object EmptyVector : PersistentVector<Nothing>(
-    0, SHIFT, EmptyNode, arrayOfNulls(0)
+    0,
+    SHIFT,
+    EmptyNode,
+    arrayOfNulls(0)
   ) {
     override fun toString(): String = "[]"
   }
@@ -251,7 +254,8 @@ sealed class PersistentVector<out E>(
 
     @Suppress("UNCHECKED_CAST")
     override fun firstChunk(): Chunk<E> = ArrayChunk(
-      node as Array<E>, offset
+      node as Array<E>,
+      offset
     )
 
     override fun restChunks(): ISeq<E> = when {
@@ -402,7 +406,10 @@ sealed class PersistentVector<out E>(
 
       operator fun <E> invoke(vec: PersistentVector<E>): TransientVector<E> =
         TransientVector(
-          vec.count, vec.shift, editableRoot(vec.root), maximizeTail(vec.tail)
+          vec.count,
+          vec.shift,
+          editableRoot(vec.root),
+          maximizeTail(vec.tail)
         )
     }
   }

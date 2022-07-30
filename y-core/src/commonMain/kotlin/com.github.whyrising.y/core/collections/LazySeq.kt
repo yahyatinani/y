@@ -38,8 +38,9 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
         f = null
       }
 
-      if (sVal != null)
+      if (sVal != null) {
         return sVal!!
+      }
 
       return seq
     }
@@ -75,8 +76,9 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
 
   override fun next(): ISeq<E>? {
     seq()
-    if (seq is Empty)
+    if (seq is Empty) {
       return null
+    }
     return seq.next()
   }
 
@@ -132,8 +134,9 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
   override fun contains(element: @UnsafeVariance E): Boolean {
     var s: ISeq<E>? = seq()
     while (s != null) {
-      if (equiv(s.first(), element))
+      if (equiv(s.first(), element)) {
         return true
+      }
       s = s.next()
     }
 

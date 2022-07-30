@@ -28,8 +28,9 @@ class ArraySeq<out E> internal constructor(
       array.isEmpty() -> -1
       else -> {
         for (j in i until array.size)
-          if (equalz(array[j], element))
+          if (equalz(array[j], element)) {
             return j - i
+          }
         -1
       }
     }
@@ -39,12 +40,14 @@ class ArraySeq<out E> internal constructor(
     if (array.isNotEmpty()) {
       if (element == null) {
         for (j in array.size - 1 downTo i)
-          if (array[j] == null)
+          if (array[j] == null) {
             return j - i
+          }
       } else {
         for (j in array.size - 1 downTo i)
-          if (equalz(array[j], element))
+          if (equalz(array[j], element)) {
             return j - i
+          }
       }
     }
     return -1
@@ -83,16 +86,18 @@ class ArraySeq<out E> internal constructor(
 
     override fun indexOf(element: Short): Int {
       for (j in i until array.size)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
 
     override fun lastIndexOf(element: Short): Int {
       for (j in array.size - 1 downTo i)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
@@ -122,16 +127,18 @@ class ArraySeq<out E> internal constructor(
 
     override fun indexOf(element: Int): Int {
       for (j in i until array.size)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
 
     override fun lastIndexOf(element: Int): Int {
       for (j in array.size - 1 downTo i)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
@@ -166,16 +173,18 @@ class ArraySeq<out E> internal constructor(
 
     override fun indexOf(element: Float): Int {
       for (j in i until array.size)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
 
     override fun lastIndexOf(element: Float): Int {
       for (j in array.size - 1 downTo i)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
@@ -210,16 +219,18 @@ class ArraySeq<out E> internal constructor(
 
     override fun indexOf(element: Double): Int {
       for (j in i until array.size)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
 
     override fun lastIndexOf(element: Double): Int {
       for (j in array.size - 1 downTo i)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
@@ -254,16 +265,18 @@ class ArraySeq<out E> internal constructor(
 
     override fun indexOf(element: Long): Int {
       for (j in i until array.size)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
 
     override fun lastIndexOf(element: Long): Int {
       for (j in array.size - 1 downTo i)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
@@ -298,16 +311,18 @@ class ArraySeq<out E> internal constructor(
 
     override fun indexOf(element: Byte): Int {
       for (j in i until array.size)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
 
     override fun lastIndexOf(element: Byte): Int {
       for (j in array.size - 1 downTo i)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
@@ -342,16 +357,18 @@ class ArraySeq<out E> internal constructor(
 
     override fun indexOf(element: Char): Int {
       for (j in i until array.size)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
 
     override fun lastIndexOf(element: Char): Int {
       for (j in array.size - 1 downTo i)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
@@ -386,16 +403,18 @@ class ArraySeq<out E> internal constructor(
 
     override fun indexOf(element: Boolean): Int {
       for (j in i until array.size)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }
 
     override fun lastIndexOf(element: Boolean): Int {
       for (j in array.size - 1 downTo i)
-        if (array[j] == element)
+        if (array[j] == element) {
           return j - i
+        }
 
       return -1
     }

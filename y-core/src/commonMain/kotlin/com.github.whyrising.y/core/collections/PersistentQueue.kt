@@ -26,8 +26,9 @@ class PersistentQueue<out E> private constructor(
     var str = ""
     var s: ISeq<E>? = seq()
     while (s != null && s !is Empty) {
-      if (str.isNotEmpty())
+      if (str.isNotEmpty()) {
         str += " "
+      }
       str += "${s.first()}"
       s = s.next()
     }
@@ -35,14 +36,16 @@ class PersistentQueue<out E> private constructor(
   }
 
   override fun equiv(other: Any?): Boolean {
-    if (other !is Sequential)
+    if (other !is Sequential) {
       return false
+    }
 
     var ms = seq<Any?>(other)
     var s: ISeq<E>? = seq(seq())
     while (s != null) {
-      if (ms == null || !equiv(s.first(), ms.first()))
+      if (ms == null || !equiv(s.first(), ms.first())) {
         return false
+      }
 
       s = s.next()
       ms = ms.next()
@@ -52,14 +55,16 @@ class PersistentQueue<out E> private constructor(
   }
 
   override fun equals(other: Any?): Boolean {
-    if (other !is Sequential)
+    if (other !is Sequential) {
       return false
+    }
 
     var ms = seq<Any?>(other)
     var s: ISeq<E>? = seq(seq())
     while (s != null) {
-      if (ms == null || s.first() != ms.first())
+      if (ms == null || s.first() != ms.first()) {
         return false
+      }
 
       s = s.next()
       ms = ms.next()
@@ -126,8 +131,9 @@ class PersistentQueue<out E> private constructor(
     var s: ISeq<E>? = seq()
 
     while (s != null && s !is Empty) {
-      if (equiv(s.first(), element))
+      if (equiv(s.first(), element)) {
         return true
+      }
       s = s.next()
     }
 
