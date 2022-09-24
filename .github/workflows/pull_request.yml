@@ -38,9 +38,11 @@ jobs:
       - name: Run tests
         run: ./gradlew ${{ matrix.target }} --scan
 
+      - name: Generate Kover reports
+        run: ./gradlew koverMergedReport
+
       - name: Upload coverage reports
-        if: matrix.os == 'ubuntu-latest'
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           files: build/reports/kover/merged-report/result.xml
           flags: unittests
