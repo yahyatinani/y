@@ -11,8 +11,14 @@ on:
       - main
 
 jobs:
-  linux_tests:
+  linux:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - jvmTest publishJvmPublicationToDeployRepository publishKotlinMultiplatformPublicationToDeployRepository
+          - linuxX64Test publishLinuxX64PublicationToDeployRepository
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
@@ -27,20 +33,20 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
 
-      - name: Run tests
-        run: ./gradlew check --scan
+      - name: Run tests then publish snapshot
+        run: ./gradlew ${{ matrix.target }} --scan
+
+      - name: Generate Kover reports
+        uses: ./gradlew koverMergedReport
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           files: build/reports/kover/merged-report/result.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: true
           verbose: true
-
-      - name: publish snapshots
-        run: ./gradlew publish
 
       - name: Bundle the build report (when failure)
         if: failure()
