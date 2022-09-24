@@ -1,13 +1,13 @@
 [versions]
 kotlin = "1.7.10"
 ktlint = "0.46.1"
-kover = "0.5.1"
-kotest = "5.4.1"
+kover = "0.6.0"
+kotest = "5.4.2"
 datetime = "0.4.0"
 atomicfu = "0.18.3"
 coroutines = "1.6.4"
-serialization = "1.4.0-RC"
-spotless = "6.9.0"
+serialization = "1.4.0"
+spotless = "6.11.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
