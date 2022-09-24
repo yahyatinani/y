@@ -40,13 +40,11 @@ koverMerged {
 
   xmlReport {
     onCheck.set(true)
-    // set to true to run koverMergedXmlReport task during the execution of the check task (if it exists) of the current project
     reportFile.set(layout.buildDirectory.file("reports/kover/merged-report/result.xml"))
   }
 
   htmlReport {
     onCheck.set(true)
-    // set to true to run koverMergedHtmlReport task during the execution of the check task (if it exists) of the current project
-    reportDir.set(layout.buildDirectory.dir("reports/kover/merged-report/html-result")) // change report directory
+    reportDir.set(layout.buildDirectory.dir("reports/kover/merged-report/html-result"))
   }
 }
