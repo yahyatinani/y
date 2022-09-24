@@ -41,6 +41,7 @@ sealed class PersistentHashMap<out K, out V>(
     containsKey(key) -> throw RuntimeException(
       "The key $key is already present."
     )
+
     else -> assoc(key, value)
   }
 
@@ -174,12 +175,12 @@ sealed class PersistentHashMap<out K, out V>(
 
   internal sealed class NodeIterator<K, V, R>(
     val node: Node<K, V>?,
-    val f: (k: K, v: V) -> R
+    val f: ((k: K, v: V) -> R)?
   ) : Iterator<R> {
 
     object EmptyNodeIterator : NodeIterator<Nothing, Nothing, Nothing>(
       null,
-      { _, _ -> throw RuntimeException() }
+      null
     ) {
       override fun hasNext(): Boolean = false
 
@@ -273,6 +274,7 @@ sealed class PersistentHashMap<out K, out V>(
 
             r
           }
+
           advance() -> next()
           else -> throw NoSuchElementException()
         }
@@ -449,6 +451,7 @@ sealed class PersistentHashMap<out K, out V>(
               arrayOf(subNode)
             )
           }
+
           else -> return BMIN(
             edit,
             bitpos(currentHash, shift) or bitpos(newHash, shift),
@@ -543,6 +546,7 @@ sealed class PersistentHashMap<out K, out V>(
 
           return putNewNode(edit, bitpos, subNode)
         }
+
         (nodemap and bitpos) != 0 -> {
           val nodeIdx = nodeIndexBy(bitpos)
           val subNode = array[nodeIdx] as BitMapIndexedNode<K, V>
@@ -560,6 +564,7 @@ sealed class PersistentHashMap<out K, out V>(
 
           return updateArrayByIndex(nodeIdx, newNode, edit)
         }
+
         else -> {
           val arraySize = array.size
           val index = (2 * bitmapNodeIndex(datamap, bitpos))
@@ -635,6 +640,7 @@ sealed class PersistentHashMap<out K, out V>(
                 0,
                 arrayOf(array[2], array[3])
               )
+
               else -> BMIN(
                 edit,
                 newDatamap,
@@ -665,6 +671,7 @@ sealed class PersistentHashMap<out K, out V>(
               (datamap == 0) && nodemap.countOneBits() == 1 -> newSubNode
               else -> copyAndInlinePair(edit, bitpos, newSubNode)
             }
+
             else -> updateArrayByIndex(nodeIndex, newSubNode, edit)
           }
         }
@@ -703,6 +710,7 @@ sealed class PersistentHashMap<out K, out V>(
             else -> default
           }
         }
+
         (nodemap and bitpos) != 0 -> {
           (array[nodeIndexBy(bitpos)] as Node<K, V>).find(
             shift + 5,
@@ -711,6 +719,7 @@ sealed class PersistentHashMap<out K, out V>(
             default
           )
         }
+
         else -> default
       }
     }
@@ -730,6 +739,7 @@ sealed class PersistentHashMap<out K, out V>(
             else -> null
           }
         }
+
         (nodemap and bitpos) != 0 -> {
           (array[nodeIndexBy(bitpos)] as Node<K, V>).find(
             shift + 5,
@@ -737,6 +747,7 @@ sealed class PersistentHashMap<out K, out V>(
             key
           )
         }
+
         else -> null
       }
     }
@@ -808,6 +819,7 @@ sealed class PersistentHashMap<out K, out V>(
           array = newArray
           count++
         }
+
         else -> if (value != array[index + 1]) array[index + 1] = value
       }
 
@@ -829,10 +841,12 @@ sealed class PersistentHashMap<out K, out V>(
 
         HashCollisionNode(this.edit, hash, count + 1, newArray)
       }
+
       else -> when (value) {
         array[index + 1] -> {
           this
         }
+
         else -> {
           val newArray = array.copyOf()
           newArray[index + 1] = value
@@ -863,6 +877,7 @@ sealed class PersistentHashMap<out K, out V>(
           }
           newNode.mutableAssoc(index, key, value, leafFlag)
         }
+
         else -> persistentAssoc(index, key, value, leafFlag)
       }
     }
@@ -902,6 +917,7 @@ sealed class PersistentHashMap<out K, out V>(
             removedLeaf
           )
         }
+
         else -> HashCollisionNode(
           edit,
           keyHash,
@@ -998,6 +1014,7 @@ sealed class PersistentHashMap<out K, out V>(
           dataIndex + 1,
           dataLength
         )
+
         else -> {
           while (level >= 0) {
             when (val nodeIndex = cursorLengths[level]) {
