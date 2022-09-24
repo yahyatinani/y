@@ -1,6 +1,7 @@
 plugins {
   id 'y.multiplatform-library-conventions'
   alias(deps.plugins.kotest)
+  alias(deps.plugins.kotlinx.kover)
 }
 
 kotlin {
