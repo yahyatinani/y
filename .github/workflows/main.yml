@@ -37,7 +37,7 @@ jobs:
         run: ./gradlew ${{ matrix.target }} --scan
 
       - name: Generate Kover reports
-        uses: ./gradlew koverMergedReport
+        run: ./gradlew koverMergedReport
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
