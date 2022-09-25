@@ -514,10 +514,12 @@ class ArraySeqTest : FreeSpec({
       FloatArraySeq(floatArrayOf(15F, 2F, 5F), 0)
         .indexOf(2F) shouldBeExactly 1
 
-      (FloatArraySeq(
-        floatArrayOf(15F, 2F, 5F),
-        0
-      ).rest() as FloatArraySeq)
+      (
+        FloatArraySeq(
+          floatArrayOf(15F, 2F, 5F),
+          0
+        ).rest() as FloatArraySeq
+        )
         .indexOf(2F) shouldBeExactly 0
     }
 
@@ -533,10 +535,12 @@ class ArraySeqTest : FreeSpec({
       FloatArraySeq(floatArrayOf(5F, 5F, 3F), 0)
         .lastIndexOf(5F) shouldBeExactly 1
 
-      (FloatArraySeq(
-        floatArrayOf(5F, 5F, 5F, 3F),
-        0
-      ).rest() as FloatArraySeq)
+      (
+        FloatArraySeq(
+          floatArrayOf(5F, 5F, 5F, 3F),
+          0
+        ).rest() as FloatArraySeq
+        )
         .lastIndexOf(5F) shouldBeExactly 1
 
       FloatArraySeq(floatArrayOf(5F, 5F, 3F), 0)

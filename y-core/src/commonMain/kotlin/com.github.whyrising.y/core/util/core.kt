@@ -129,8 +129,9 @@ fun hasheq(x: Any?): Int = when (x) {
 fun <E> nth(seq: Sequential, index: Int): E {
   val s = seq<E>(seq)
 
-  if (index >= s!!.count || index < 0)
+  if (index >= s!!.count || index < 0) {
     throw IndexOutOfBoundsException("index = $index")
+  }
 
   tailrec fun get(_index: Int, e: E, rest: ISeq<E>): E {
     if (_index == index) return e

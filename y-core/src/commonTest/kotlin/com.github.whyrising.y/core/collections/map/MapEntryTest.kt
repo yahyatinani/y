@@ -1,9 +1,12 @@
 package com.github.whyrising.y.core.collections.map
 
+import com.github.whyrising.y.core.collections.APersistentVector
 import com.github.whyrising.y.core.collections.IMapEntry
 import com.github.whyrising.y.core.collections.MapEntry
+import com.github.whyrising.y.core.collections.PersistentList
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.collections.PersistentVector.EmptyVector
+import com.github.whyrising.y.core.l
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -88,5 +91,20 @@ class MapEntryTest : FreeSpec({
 
     r.count shouldBeExactly 1
     r[0] shouldBe "a"
+  }
+
+  "seq()" - {
+    "it should return a APersistentVector.Seq" {
+      val entry = MapEntry("a", 1)
+
+      val s = entry.seq() as APersistentVector.Seq
+
+      s.count shouldBeExactly 2
+      s.first() shouldBe "a"
+      s.rest() shouldBe l(1)
+      s.rest().rest() shouldBe PersistentList.Empty
+      s.next() shouldBe l(1)
+      s.next()?.next() shouldBe null
+    }
   }
 })

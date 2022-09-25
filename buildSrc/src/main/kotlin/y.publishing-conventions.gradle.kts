@@ -1,11 +1,27 @@
-apply(plugin = "maven-publish")
-apply(plugin = "signing")
+import com.github.whyrising.y.Ci
 
-fun Project.publishing(action: PublishingExtension.() -> Unit) =
-  configure(action)
+plugins {
+  signing
+  `java-library`
+  `maven-publish`
+}
 
-fun Project.signing(configure: SigningExtension.() -> Unit): Unit =
-  configure(configure)
+val javadoc = tasks.named("javadoc")
+
+val javadocJar by tasks.creating(Jar::class) {
+  group = JavaBasePlugin.DOCUMENTATION_GROUP
+  description = "Assembles java doc to jar"
+  archiveClassifier.set("javadoc")
+  from(javadoc)
+}
+
+publishing {
+  publications.withType<MavenPublication>().forEach {
+    it.apply {
+      artifact(javadocJar)
+    }
+  }
+}
 
 val ossrhUsername: String by project
 val ossrhPassword: String by project
@@ -17,12 +33,12 @@ val publications: PublicationContainer =
 
 signing {
   useGpgCmd()
-  if (signingKey != null && signingPassword != null) {
+  if (signingKey != null && signingPassword != null)
     @Suppress("UnstableApiUsage")
     useInMemoryPgpKeys(signingKey, signingPassword)
-  }
 
-  if (Ci.isRelease()) sign(publications)
+  if (Ci.isRelease)
+    sign(publications)
 }
 
 publishing {
@@ -34,7 +50,10 @@ publishing {
 
       name = "deploy"
 
-      url = if (Ci.isRelease()) releasesUrl else snapshotsUrl
+      url = when {
+        Ci.isRelease -> releasesUrl
+        else -> snapshotsUrl
+      }
 
       credentials {
         username = System.getenv("OSSRH_USERNAME") ?: ossrhUsername
@@ -49,7 +68,7 @@ publishing {
         val devUrl = "https://github.com/whyrising"
         val libUrl = "$devUrl/y"
 
-        name.set("Y")
+        name.set("y")
         description.set("Functional Programming Library In Kotlin")
         url.set(libUrl)
 

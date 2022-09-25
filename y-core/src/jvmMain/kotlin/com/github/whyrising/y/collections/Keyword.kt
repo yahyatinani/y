@@ -30,8 +30,10 @@ object KeywordSerializer : KSerializer<Keyword> {
 }
 
 @Serializable(KeywordSerializer::class)
-class Keyword private constructor(internal val symbol: Symbol) : Named,
-  Comparable<Keyword>, IHashEq {
+class Keyword private constructor(internal val symbol: Symbol) :
+  Named,
+  Comparable<Keyword>,
+  IHashEq {
   val str: String by lazy { ":${symbol.name}" }
 
   @Transient
@@ -72,14 +74,16 @@ class Keyword private constructor(internal val symbol: Symbol) : Named,
         val keyword = Keyword(sym)
         previousRef = cache.putIfAbsent(sym, WeakReference(keyword, rq))
 
-        if (previousRef == null)
+        if (previousRef == null) {
           return keyword
+        }
       }
 
       val previousKey: Keyword? = previousRef.get()
 
-      if (previousKey != null)
+      if (previousKey != null) {
         return previousKey
+      }
 
       // if key got garbage collected, remove from cache, do over
       cache.remove(sym, previousRef)

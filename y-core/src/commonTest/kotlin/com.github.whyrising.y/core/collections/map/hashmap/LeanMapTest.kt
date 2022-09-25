@@ -215,10 +215,10 @@ class LeanMapTest : FreeSpec({
 
       val iter = emptyMap.iterator() as EmptyNodeIterator
 
+      iter.f.shouldBeNull()
+      iter.node.shouldBeNull()
       iter.hasNext().shouldBeFalse()
-      shouldThrowExactly<NoSuchElementException> {
-        iter.next()
-      }
+      shouldThrowExactly<NoSuchElementException> { iter.next() }
     }
 
     @Suppress("UNCHECKED_CAST")

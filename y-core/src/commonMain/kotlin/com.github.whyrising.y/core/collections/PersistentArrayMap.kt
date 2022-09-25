@@ -45,14 +45,16 @@ class PersistentArrayMap<out K, out V> internal constructor(
         newPairs[index + 1] = value
       }
       else -> {
-        if (array.size >= HASHTABLE_THRESHOLD)
+        if (array.size >= HASHTABLE_THRESHOLD) {
           return PersistentHashMap.create<K, V>(array)
             .assoc(key, value)
+        }
 
         newPairs = arrayOfNulls(array.size + 2)
 
-        if (array.isNotEmpty())
+        if (array.isNotEmpty()) {
           array.copyInto(newPairs, 0, 0, array.size)
+        }
 
         newPairs[newPairs.size - 2] = key
         newPairs[newPairs.size - 1] = value
@@ -68,17 +70,20 @@ class PersistentArrayMap<out K, out V> internal constructor(
   ): IPersistentMap<K, V> {
     val index: Int = indexOf(key)
 
-    if (keyExists(index))
+    if (keyExists(index)) {
       throw RuntimeException("The key $key is already present.")
+    }
 
-    if (count >= HASHTABLE_THRESHOLD)
+    if (count >= HASHTABLE_THRESHOLD) {
       return PersistentHashMap.createWithCheck<K, V>(array)
         .assocNew(key, value)
+    }
 
     val newPairs: Array<Any?> = arrayOfNulls(array.size + 2)
 
-    if (array.isNotEmpty())
+    if (array.isNotEmpty()) {
       array.copyInto(newPairs, 2, 0, array.size)
+    }
 
     newPairs[0] = key
     newPairs[1] = value
@@ -92,8 +97,9 @@ class PersistentArrayMap<out K, out V> internal constructor(
         keyExists(index) -> {
           val newSize = array.size - 2
 
-          if (newSize == 0)
+          if (newSize == 0) {
             return EmptyArrayMap
+          }
 
           val newPairs: Array<Any?> = arrayOfNulls(newSize)
           array.copyInto(newPairs, 0, 0, index)
@@ -211,10 +217,11 @@ class PersistentArrayMap<out K, out V> internal constructor(
       get() = length / 2
 
     override fun ensureEditable() {
-      if (_edit.value == null)
+      if (_edit.value == null) {
         throw IllegalStateException(
           "Transient used after persistent() call."
         )
+      }
     }
 
     private fun indexOf(key: @UnsafeVariance K): Int {
@@ -237,8 +244,9 @@ class PersistentArrayMap<out K, out V> internal constructor(
         val index = indexOf(key)
         when {
           index >= 0 -> {
-            if (array[index + 1] != value)
+            if (array[index + 1] != value) {
               array[index + 1] = value
+            }
           }
           length >= array.size -> {
             return PersistentHashMap.create<K, V>(array)
@@ -310,8 +318,9 @@ class PersistentArrayMap<out K, out V> internal constructor(
     ): PersistentArrayMap<K, V> {
       for (i in kvs.indices step 2)
         for (j in i + 2 until kvs.size step 2)
-          if (areKeysEqual(kvs[i], kvs[j]))
+          if (areKeysEqual(kvs[i], kvs[j])) {
             throw IllegalArgumentException("Duplicate key: ${kvs[i]}")
+          }
 
       return PersistentArrayMap(kvs as Array<Any?>)
     }

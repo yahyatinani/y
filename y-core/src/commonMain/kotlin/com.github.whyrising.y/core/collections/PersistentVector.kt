@@ -19,8 +19,10 @@ sealed class PersistentVector<out E>(
   internal val tail: Array<Any?>
 ) : APersistentVector<E>(), IMutableCollection<E> {
 
-  override
-  fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E> {
+  override fun assocN(
+    index: Int,
+    value: @UnsafeVariance E
+  ): IPersistentVector<E> {
     @Suppress("UNCHECKED_CAST")
     fun assoc(level: Int, node: Node<E>): Node<E> {
       val copy: Node<E> = Node(node.edit, node.array.copyOf())
@@ -132,8 +134,7 @@ sealed class PersistentVector<out E>(
     (((count - 2) ushr level) and 0x01f).let { subIndex ->
       when {
         level > SHIFT -> {
-          val newChild =
-            popTail(level - SHIFT, node.array[subIndex] as Node<E>)
+          val newChild = popTail(level - SHIFT, node.array[subIndex] as Node<E>)
 
           when {
             newChild == null && subIndex == 0 -> null
@@ -219,8 +220,7 @@ sealed class PersistentVector<out E>(
   ) {
     constructor(edit: Edit) : this(edit, arrayOfNulls(BF))
 
-    internal object EmptyNode :
-      Node<Nothing>(Edit(null), arrayOfNulls(BF))
+    internal object EmptyNode : Node<Nothing>(Edit(null), arrayOfNulls(BF))
   }
 
   internal object EmptyVector : PersistentVector<Nothing>(
@@ -259,8 +259,11 @@ sealed class PersistentVector<out E>(
     )
 
     override fun restChunks(): ISeq<E> = when {
-      index + node.size < vector.size ->
-        ChunkedSeq(vector, index + node.size, 0)
+      index + node.size < vector.size -> ChunkedSeq(
+        vector,
+        index + node.size,
+        0
+      )
       else -> PersistentList.Empty
     }
 
@@ -294,10 +297,9 @@ sealed class PersistentVector<out E>(
     private val _tail: AtomicRef<Array<Any?>> = atomic(tail)
 
     fun ensureEditable() {
-      if (root.edit.value == null)
-        throw IllegalStateException(
-          "Transient used after persistent() call"
-        )
+      if (root.edit.value == null) throw IllegalStateException(
+        "Transient used after persistent() call"
+      )
     }
 
     override val count: Int
@@ -306,11 +308,9 @@ sealed class PersistentVector<out E>(
         return _count.value
       }
 
-    val shift: Int
-      by _shift
+    val shift: Int by _shift
 
-    val root: Node<E>
-      by _root
+    val root: Node<E> by _root
 
     internal var tail: Array<Any?>
       get() = _tail.value
@@ -330,8 +330,7 @@ sealed class PersistentVector<out E>(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private
-    fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
+    private fun pushTail(level: Int, parent: Node<E>, tail: Node<E>): Node<E> {
       val subIndex = ((count - 1) ushr level) and 0x01f
 
       val rootNode = ensureEditable(parent)
@@ -405,8 +404,7 @@ sealed class PersistentVector<out E>(
         return tail.copyInto(maxTail, 0, 0, tail.size)
       }
 
-      operator
-      fun <E> invoke(vec: PersistentVector<E>): TransientVector<E> =
+      operator fun <E> invoke(vec: PersistentVector<E>): TransientVector<E> =
         TransientVector(
           vec.count,
           vec.shift,
@@ -429,8 +427,7 @@ sealed class PersistentVector<out E>(
         }
         else -> {
           var ret: TransientVector<E> = EmptyVector.asTransient()
-          for (item in args)
-            ret = ret.conj(item)
+          for (item in args) ret = ret.conj(item)
           ret.persistent()
         }
       }
@@ -468,8 +465,7 @@ sealed class PersistentVector<out E>(
 
       return when {
         size == 0 -> EmptyVector
-        size <= BF ->
-          Vector(size, SHIFT, EmptyNode, list.toTypedArray())
+        size <= BF -> Vector(size, SHIFT, EmptyNode, list.toTypedArray())
         else -> {
           val empty: TransientVector<E> = EmptyVector.asTransient()
 
@@ -480,14 +476,12 @@ sealed class PersistentVector<out E>(
 
     @Suppress("UNCHECKED_CAST")
     internal fun <E> create(list: Iterable<E>): PersistentVector<E> {
-      if (list is ArrayList<E>)
-        return create(list)
+      if (list is ArrayList<E>) return create(list)
 
       val iter: Iterator<*> = list.iterator()
 
       var ret: TransientVector<E> = EmptyVector.asTransient()
-      while (iter.hasNext())
-        ret = ret.conj(iter.next() as E)
+      while (iter.hasNext()) ret = ret.conj(iter.next() as E)
 
       return ret.persistent()
     }

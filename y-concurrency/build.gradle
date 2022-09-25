@@ -1,0 +1,32 @@
+plugins {
+  id 'y.multiplatform-library-conventions'
+  alias(deps.plugins.kotest)
+  alias(deps.plugins.kotlinx.kover)
+}
+
+kotlin {
+  sourceSets {
+    commonMain {
+      dependencies {
+        implementation project(":y-core")
+        api deps.kotlinx.atomicfu
+      }
+    }
+
+    commonTest {
+      dependencies {
+        implementation deps.kotlin.test
+        implementation deps.kotest.engine
+        implementation deps.kotest.assertions
+        implementation deps.kotlinx.coroutines.test
+      }
+    }
+
+    jvmTest {
+      dependencies {
+        implementation deps.kotlinx.coroutines.test
+        implementation deps.kotest.jvm.runner
+      }
+    }
+  }
+}

@@ -64,8 +64,9 @@ abstract class APersistentMap<out K, out V> :
           val key = entry.key
           val keyFound = map.containsKey(key)
 
-          if (!keyFound || entry.value != map.getValue(key))
+          if (!keyFound || entry.value != map.getValue(key)) {
             return false
+          }
 
           seq = seq.rest()
         }
@@ -92,11 +93,12 @@ abstract class APersistentMap<out K, out V> :
       for (i in 0 until seq.count) {
         val entry = seq.first()
 
-        if (entry !is Entry<*, *>)
+        if (entry !is Entry<*, *>) {
           throw IllegalArgumentException(
             "All elements of the seq must be of type Map.Entry " +
               "to conj: $entry"
           )
+        }
 
         result = result.assoc(entry.key as K, entry.value as V)
         seq = seq.rest()
@@ -123,8 +125,9 @@ abstract class APersistentMap<out K, out V> :
           val key = entry.key
           val keyFound = map.containsKey(key)
 
-          if (!keyFound || !equiv(entry.value, map.getValue(key)))
+          if (!keyFound || !equiv(entry.value, map.getValue(key))) {
             return false
+          }
 
           seq = seq.rest()
         }

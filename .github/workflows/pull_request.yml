@@ -9,36 +9,40 @@ on:
       - '**/*.yml'
 
 jobs:
-  build:
+  test_linux:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ macos-latest, windows-latest, ubuntu-latest ]
-
-    runs-on: ${{matrix.os}}
+        target:
+          - jvmTest
+          - linuxX64Test
 
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
 
-      - name: Prepare Java
+      - name: Setup JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '8'
 
       - uses: gradle/gradle-build-action@v2
 
-      - name: Check Kotlinter
-        run: ./gradlew lintKotlin
+      - name: Spotless check
+        run: ./gradlew spotlessCheck
 
-      # ubuntu
-      - name: Run ubuntu tests
-        if: matrix.os == 'ubuntu-latest'
-        run: ./gradlew check --scan
+      - name: Run tests
+        run: ./gradlew ${{ matrix.target }} --scan
+
+      - name: Generate Kover reports
+        run: ./gradlew koverMergedReport
 
       - name: Upload coverage reports
-        if: matrix.os == 'ubuntu-latest'
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           files: build/reports/kover/merged-report/result.xml
           flags: unittests
@@ -46,29 +50,88 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
-      # windows
-      - name: Run windows tests
-        if: matrix.os == 'windows-latest'
-        run: ./gradlew mingwX64Test --scan
+      - name: Bundle the build report (when failure)
+        if: failure()
+        run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
 
-      # macOS
-      - name: Run macOS tests
-        if: matrix.os == 'macos-latest'
-        run: ./gradlew macosX64Test macosArm64TestKlibrary --scan
+      - name: Upload the build report (when failure)
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: error-report
+          path: build-reports.zip
 
-      - name: Run watchOS tests
-        if: matrix.os == 'macos-latest'
-        run: ./gradlew watchosArm32TestKlibrary watchosArm64TestKlibrary watchosSimulatorArm64TestKlibrary watchosX86Test watchosX64Test --scan
+  test_mac:
+    runs-on: macos-11
+    strategy:
+      matrix:
+        target:
+          - macosX64Test
+          - macosArm64Test
+          - iosX64Test
+          - iosSimulatorArm64Test
+          - iosArm64TestKlibrary
+          - iosArm32TestKlibrary
+          - tvosX64Test
+          - tvosArm64TestKlibrary
+          - watchosArm32TestKlibrary
+          - watchosArm64TestKlibrary
+          - watchosX86Test
+          - watchosX64Test
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
 
-      - name: Run tvOS tests
-        if: matrix.os == 'macos-latest'
-        run: ./gradlew tvosArm64TestKlibrary tvosSimulatorArm64TestKlibrary tvosX64Test --scan
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
 
-      - name: Run iOS tests
-        if: matrix.os == 'macos-latest'
-        run: ./gradlew iosArm32TestKlibrary iosArm64TestKlibrary iosSimulatorArm64TestKlibrary iosX64Test --scan
+      - uses: gradle/gradle-build-action@v2
 
-      # failure build report
+      - name: Run tests
+        run: ./gradlew ${{ matrix.target }} --scan
+
+      - name: Bundle the build report (when failure)
+        if: failure()
+        run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
+
+      - name: Upload the build report (when failure)
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: error-report
+          path: build-reports.zip
+
+  test_windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        target:
+          - mingwX64Test
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+
+      - uses: gradle/gradle-build-action@v2
+
+      - name: Run tests
+        run: ./gradlew ${{ matrix.target }} --scan
+
       - name: Bundle the build report (when failure)
         if: failure()
         run: find . -type d -name 'reports' | zip -@ -r build-reports.zip

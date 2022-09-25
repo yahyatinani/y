@@ -16,7 +16,7 @@ fun <E> deserializePersistentCollection(
 ): IPersistentCollection<E> {
   tailrec fun decode(
     acc: IPersistentCollection<E>,
-    compositeDecoder: CompositeDecoder,
+    compositeDecoder: CompositeDecoder
   ): IPersistentCollection<E> = when {
     compositeDecoder.decodeSequentially() -> TODO()
     else -> when (val i = compositeDecoder.decodeElementIndex(descriptor)) {

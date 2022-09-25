@@ -1,3 +1,5 @@
+package com.github.whyrising.y
+
 object Ci {
   private const val snapshotBase = "0.2.0"
 
@@ -10,7 +12,9 @@ object Ci {
 
   private fun releaseVersion() = System.getenv("RELEASE_VERSION")
 
-  fun isRelease() = releaseVersion() != null
+  val isRelease get() = releaseVersion() != null
 
-  fun publishVersion() = releaseVersion() ?: snapshotVersion()
+  val publishVersion get() = releaseVersion() ?: snapshotVersion()
+
+  const val JVM_ONLY = "jvmOnly"
 }
