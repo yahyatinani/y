@@ -18,6 +18,7 @@ kotlin {
         implementation deps.kotlin.test
         implementation deps.kotest.engine
         implementation deps.kotest.assertions
+        implementation deps.kotlinx.coroutines.test
       }
     }
 

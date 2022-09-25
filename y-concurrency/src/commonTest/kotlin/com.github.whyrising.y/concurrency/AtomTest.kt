@@ -1,6 +1,7 @@
 package com.github.whyrising.y.concurrency
 
 import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.assertions.timing.continually
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
@@ -8,9 +9,11 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import kotlin.time.Duration.Companion.seconds
 
 class AtomTest : FreeSpec({
   "state atomic ref should be initialized while object constructing" {
@@ -210,20 +213,17 @@ class AtomTest : FreeSpec({
     val newV = 13
     val atom = Atom(oldV)
     val k = ":watch"
-    val watch: (Any, IRef<Int>, Int, Int) -> Any =
-      { key, ref, oldVal, newVal ->
-        isWatchCalled = true
+    val watch: (Any, IRef<Int>, Int, Int) -> Any = { key, ref, oldVal, newVal ->
+      isWatchCalled = true
 
-        key shouldBeSameInstanceAs k
-        ref shouldBeSameInstanceAs atom
-        oldVal shouldBeExactly oldV
-        newVal shouldBeExactly newV
-      }
+      key shouldBeSameInstanceAs k
+      ref shouldBeSameInstanceAs atom
+      oldVal shouldBeExactly oldV
+      newVal shouldBeExactly newV
+    }
     atom.addWatch(k, watch)
 
-    val newVal = atom.swap(3) { currentVal, arg ->
-      currentVal + arg
-    }
+    val newVal = atom.swap(3) { currentVal, arg -> currentVal + arg }
 
     atom.deref() shouldBeExactly newV
     newVal shouldBeExactly newV
@@ -273,9 +273,7 @@ class AtomTest : FreeSpec({
       }
     atom.addWatch(k, watch)
 
-    val pair = atom.swapVals { currentVal ->
-      currentVal + 5
-    }
+    val pair = atom.swapVals { currentVal -> currentVal + 5 }
 
     atom.deref() shouldBeExactly newV
     pair.first shouldBeExactly oldV
@@ -300,9 +298,7 @@ class AtomTest : FreeSpec({
       }
     atom.addWatch(k, watch)
 
-    val pair = atom.swapVals(3) { arg, currentVal ->
-      currentVal + arg
-    }
+    val pair = atom.swapVals(3) { arg, currentVal -> currentVal + arg }
 
     atom.deref() shouldBeExactly newV
     pair.first shouldBeExactly oldV
@@ -376,36 +372,140 @@ class AtomTest : FreeSpec({
     atm() shouldBeExactly 30
   }
 
-  "swap(f)" - {
-    """
-            should loop over and over everytime the atom value doesn't match
-            the expected value due to other threads activities
-        """ {
-      val atom = Atom(0)
+  "Atom concurrency tests" - {
+    """ should loop over and over everytime the atom value doesn't match
+        the expected value due to other threads activities
+    """ {
+      continually(5.seconds) {
+        runTest {
+          val atom = Atom(0)
+          val coroutinesCount = 100
+          val repeatCount = 103
 
-      val coroutinesCount = 10
-      val repeatCount = 10
-      withContext(Dispatchers.Default) {
-        runAction(coroutinesCount, repeatCount) {
-          atom.swap { currentVal ->
-            currentVal + 1
+          val job = runParallelWork(coroutinesCount, repeatCount) {
+            atom.swap { currentVal -> currentVal.inc() }
           }
+
+          job.join()
+
+          advanceUntilIdle()
+
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount
         }
       }
+    }
 
-      atom.deref() shouldBeExactly coroutinesCount * repeatCount
+    "swap(arg ,f)" {
+      continually(5.seconds) {
+        runTest {
+          val atom = Atom(0)
+          val coroutinesCount = 100
+          val repeatCount = 103
+
+          val job = runParallelWork(coroutinesCount, repeatCount) {
+            atom.swap(3) { currentVal, arg -> currentVal + arg }
+          }
+
+          job.join()
+          advanceUntilIdle()
+
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 3
+        }
+      }
+    }
+
+    "swap(arg1, arg2, f)" {
+      continually(5.seconds) {
+        runTest {
+          val atom = Atom(0)
+          val coroutinesCount = 100
+          val repeatCount = 103
+
+          val job = runParallelWork(coroutinesCount, repeatCount) {
+            atom.swap(3, 5) { currentVal, arg1, arg2 ->
+              currentVal + arg1 + arg2
+            }
+          }
+
+          job.join()
+          advanceUntilIdle()
+
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 8
+        }
+      }
+    }
+
+    "swapVals(f)" {
+      continually(5.seconds) {
+        runTest {
+          val atom = Atom(0)
+          val coroutinesCount = 100
+          val repeatCount = 103
+
+          val job = runParallelWork(coroutinesCount, repeatCount) {
+            atom.swapVals { currentVal -> currentVal + 5 }
+          }
+
+          job.join()
+          advanceUntilIdle()
+
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 5
+        }
+      }
+    }
+
+    "swapVals(arg, f)" {
+      continually(5.seconds) {
+        runTest {
+          val atom = Atom(0)
+          val coroutinesCount = 100
+          val repeatCount = 103
+
+          val job = runParallelWork(coroutinesCount, repeatCount) {
+            atom.swapVals(3) { arg, currentVal -> currentVal + arg }
+          }
+
+          job.join()
+          advanceUntilIdle()
+
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 3
+        }
+      }
+    }
+
+    "swapVals(arg1, arg2, f)" {
+      continually(5.seconds) {
+        runTest {
+          val atom = Atom(0)
+          val coroutinesCount = 100
+          val repeatCount = 103
+
+          val job = runParallelWork(coroutinesCount, repeatCount) {
+            atom.swapVals(3, 4) { arg1, arg2, currentVal ->
+              currentVal + arg1 + arg2
+            }
+          }
+
+          job.join()
+          advanceUntilIdle()
+
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 7
+        }
+      }
     }
   }
 })
 
-suspend fun runAction(
-  n: Int = 100,
-  times: Int = 1000,
-  action: suspend () -> Unit
-) {
-  coroutineScope {
-    repeat(n) {
-      launch { repeat(times) { action() } }
+private fun TestScope.runParallelWork(
+  coroutinesCount: Int,
+  repeatCount: Int,
+  action: () -> Unit
+) = launch(Dispatchers.Default) {
+  repeat(coroutinesCount) {
+    launch {
+      repeat(repeatCount) {
+        action()
+      }
     }
   }
 }
