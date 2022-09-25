@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
 class AtomTest : FreeSpec({
@@ -494,7 +495,31 @@ class AtomTest : FreeSpec({
       }
     }
   }
-})
+}) {
+  @Test
+  fun compareAndSet() {
+    var isWatchCalled = false
+    val oldV = 10
+    val newV = 15
+    val atom = Atom(0)
+    atom.swap { oldV }
+    val k = ":watch"
+    val watch: (Any, IRef<Int>, Int, Int) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
+
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBeExactly oldVal
+        newVal shouldBeExactly newV
+      }
+    atom.addWatch(k, watch)
+
+    atom.compareAndSet(oldV, newV) shouldBe true
+    atom.deref() shouldBeExactly newV
+    isWatchCalled.shouldBeTrue()
+  }
+}
 
 private fun TestScope.runParallelWork(
   coroutinesCount: Int,
