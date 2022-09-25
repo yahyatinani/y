@@ -3,6 +3,7 @@ package com.github.whyrising.y.core.collections.map
 import com.github.whyrising.y.core.collections.APersistentVector
 import com.github.whyrising.y.core.collections.IMapEntry
 import com.github.whyrising.y.core.collections.MapEntry
+import com.github.whyrising.y.core.collections.PersistentList
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.collections.PersistentVector.EmptyVector
 import com.github.whyrising.y.core.l
@@ -98,8 +99,12 @@ class MapEntryTest : FreeSpec({
 
       val s = entry.seq() as APersistentVector.Seq
 
+      s.count shouldBeExactly 2
       s.first() shouldBe "a"
       s.rest() shouldBe l(1)
+      s.rest().rest() shouldBe PersistentList.Empty
+      s.next() shouldBe l(1)
+      s.next()?.next() shouldBe null
     }
   }
 })
