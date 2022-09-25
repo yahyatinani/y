@@ -463,8 +463,10 @@ fun <K, V> getIn(m: Map<K, V>, ks: ISeq<K>, default: V? = null): V? {
     return when {
       kz.count > 0 -> {
         val mm = getFrom<Any?, Any?>(m, kz.first(), token)
-        if (mm === token) return default
-        getIn(mm, kz.rest())
+        when {
+          mm === token -> default
+          else -> getIn(mm, kz.rest())
+        }
       }
 
       else -> m as V?
