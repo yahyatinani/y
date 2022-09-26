@@ -487,7 +487,7 @@ operator fun <E> IPersistentVector<E>.component5(): E = this.nth(4)
 
 operator fun <E> IPersistentVector<E>.component6(): E = this.nth(5)
 
-operator fun <K, V> IPersistentMap<K, V>.get(key: K): V? = this.valAt(key)
+operator fun <K, V> Associative<K, V>.get(key: K): V? = this.valAt(key)
 
 fun <E> first(x: Any?): E? = when (val seq = seq<E>(x)) {
   null -> null
