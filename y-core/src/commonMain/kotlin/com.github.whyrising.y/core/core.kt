@@ -215,6 +215,7 @@ fun <E> seq(coll: Any?): ISeq<E>? = when (coll) {
     is Empty -> null
     else -> seq as ISeq<E>
   }
+
   is Seqable<*> -> coll.seq() as ISeq<E>
   is Iterable<*> -> lazyChunkedSeq(coll.iterator() as Iterator<E>)
   is Sequence<*> -> lazyChunkedSeq(coll.iterator() as Iterator<E>)
@@ -282,27 +283,35 @@ fun <E> vec(coll: Any?): IPersistentVector<E> = when (coll) {
   is ShortArray -> {
     PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
   }
+
   is IntArray -> {
     PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
   }
+
   is FloatArray -> {
     PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
   }
+
   is DoubleArray -> {
     PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
   }
+
   is LongArray -> {
     PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
   }
+
   is ByteArray -> {
     PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
   }
+
   is CharArray -> {
     PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
   }
+
   is BooleanArray -> {
     PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
   }
+
   else -> throw IllegalArgumentException(
     "${coll::class} can't be turned into a vec."
   )
@@ -380,14 +389,17 @@ fun <K, V> getFrom(map: Any?, key: K, default: V? = null): V? = when (map) {
     map.contains(key) -> map[key] as V?
     else -> default
   }
+
   is PersistentSet<*> -> when {
     map.contains(key) -> map[key] as V?
     else -> default
   }
+
   is TransientSet<*> -> when {
     map.contains(key) -> map[key] as V?
     else -> default
   }
+
   else -> {
     val message = "`$map` is not associative."
     throw IllegalArgumentException(message)
@@ -420,6 +432,7 @@ tailrec fun <K, V> assoc(
 
       assoc(m, kvs[0], *rest)
     }
+
     else -> m
   }
 }
@@ -439,8 +452,27 @@ fun <K, V> assocIn(
       )
       assoc(map, k to m) as Associative<K, V>
     }
+
     else -> assoc(map, k to v)
   }
+}
+
+fun <K, V> getIn(m: Map<K, V>, ks: ISeq<K>, default: V? = null): V? {
+  val token = Any()
+  tailrec fun getIn(m: Any?, kz: ISeq<K>): V? {
+    return when {
+      kz.count > 0 -> {
+        val mm = getFrom<Any?, Any?>(m, kz.first(), token)
+        when {
+          mm === token -> default
+          else -> getIn(mm, kz.rest())
+        }
+      }
+
+      else -> m as V?
+    }
+  }
+  return getIn(m, ks)
 }
 
 operator fun <E> IPersistentVector<E>.component1(): E = this.nth(0)
@@ -540,6 +572,7 @@ fun <E> concat(x: Any?, y: Any?): LazySeq<E> = lazySeq {
       is IChunkedSeq<*> -> {
         consChunk(s.firstChunk(), concat(nextChunks(s), y))
       }
+
       else -> cons(s.first(), concat<E>(s.next(), y))
     }
   }
@@ -553,10 +586,12 @@ fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
         null -> null
         else -> cat(argsSeq.first(), argsSeq.rest())
       }
+
       else -> when (xys) {
         is IChunkedSeq<*> -> {
           consChunk(xys.firstChunk(), cat(xys.restChunks(), zzs))
         }
+
         else -> cons(xys.first(), cat(xys.rest(), zzs))
       }
     }
@@ -607,6 +642,7 @@ fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
       }
       consChunk(ArrayChunk(buffer), map(seq.restChunks(), f))
     }
+
     else -> cons(f(seq.first()), map(seq.rest(), f))
   }
 }
