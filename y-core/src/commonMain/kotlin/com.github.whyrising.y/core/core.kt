@@ -400,10 +400,7 @@ fun <K, V> getFrom(map: Any?, key: K, default: V? = null): V? = when (map) {
     else -> default
   }
 
-  else -> {
-    val message = "`$map` is not associative."
-    throw IllegalArgumentException(message)
-  }
+  else -> null
 }
 
 fun <K, V> assoc(

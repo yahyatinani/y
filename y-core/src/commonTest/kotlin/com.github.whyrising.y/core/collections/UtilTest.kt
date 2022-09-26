@@ -38,10 +38,7 @@ class UtilTest : FreeSpec({
       get(transientHashSet, ":a") shouldBe 5
       getFrom<Any, Int>(m(":a" to 15, ":b" to 74), ":a") shouldBe 15
       getFrom<Any, Int>(null, ":a").shouldBeNull()
-
-      shouldThrowExactly<IllegalArgumentException> {
-        getFrom<Any, Int>(listOf(1, 5, 3), ":a")
-      }.message shouldBe "`[1, 5, 3]` is not associative."
+      getFrom<Any, Int>(listOf(1, 5, 3), ":a") shouldBe null
     }
 
     "get(map, key) should return null" {
