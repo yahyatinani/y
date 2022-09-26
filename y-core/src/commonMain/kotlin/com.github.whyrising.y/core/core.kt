@@ -454,9 +454,9 @@ fun <K, V> assocIn(
   }
 }
 
-fun <K, V> getIn(m: Map<K, V>, ks: ISeq<K>, default: V? = null): V? {
+fun <V> getIn(m: Any?, ks: ISeq<*>, default: V? = null): V? {
   val token = Any()
-  tailrec fun getIn(m: Any?, kz: ISeq<K>): V? {
+  tailrec fun getIn(m: Any?, kz: ISeq<*>): V? {
     return when {
       kz.count > 0 -> {
         val mm = getFrom<Any?, Any?>(m, kz.first(), token)

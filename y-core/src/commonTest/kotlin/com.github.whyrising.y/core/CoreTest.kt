@@ -596,10 +596,11 @@ class CoreTest : FreeSpec({
   }
 
   "getIn()" {
-    getIn(mapOf("a" to 1), l("a")) shouldBe 1
-    getIn(mapOf("a" to 1), l("z")) shouldBe null
-    getIn(mapOf("a" to m("b" to 2)), l("a", "b")) shouldBe 2
-    getIn(mapOf("a" to m("b" to 2)), l("a", "e")) shouldBe null
+    getIn<Any?>(mapOf("a" to 1), l("a")) shouldBe 1
+    getIn<Any?>(mapOf("a" to 1), l("z")) shouldBe null
+    getIn<Any?>("not-map", l("z")) shouldBe null
+    getIn<Any?>(mapOf("a" to m("b" to 2)), l("a", "b")) shouldBe 2
+    getIn<Any?>(mapOf("a" to m("b" to 2)), l("a", "e")) shouldBe null
     getIn(m("a" to m("b" to 2)), l("a", "e"), -1) shouldBe -1
   }
 
