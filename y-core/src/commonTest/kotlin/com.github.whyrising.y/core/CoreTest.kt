@@ -602,4 +602,9 @@ class CoreTest : FreeSpec({
     getIn(mapOf("a" to m("b" to 2)), l("a", "e")) shouldBe null
     getIn(m("a" to m("b" to 2)), l("a", "e"), -1) shouldBe -1
   }
+
+  "Associative.get(k) op" {
+    m("a" to 2).assoc("b", 56)["b"] shouldBe 56
+    (m("a" to 2) as IPersistentMap<*, *>)["a"] shouldBe 2
+  }
 })
