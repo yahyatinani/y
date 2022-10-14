@@ -1,12 +1,7 @@
 package com.github.whyrising.y.core.collections
 
-import com.github.whyrising.y.core.collections.PersistentHashSet.TransientHashSet
-import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.getFrom
-import com.github.whyrising.y.core.hashSet
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.lazySeq
-import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.mocks.HashEqMock
 import com.github.whyrising.y.core.seq
 import com.github.whyrising.y.core.util.Category
@@ -26,46 +21,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
 class UtilTest : FreeSpec({
-  "get(map,key)" - {
-    "assertions" {
-      val arrayMap =
-        m(":a" to 5, ":b" to 6, ":c" to 3)
-      val transientHashSet = TransientHashSet(arrayMap.asTransient())
-
-      get(m(":a" to 1, ":b" to 2, ":c" to 3), ":a") shouldBe 1
-      get(v(5, 6, 9, 3), 0) shouldBe 5
-      get(hashSet(54, 69, 36), 54) shouldBe 54
-      get(transientHashSet, ":a") shouldBe 5
-      getFrom<Any, Int>(m(":a" to 15, ":b" to 74), ":a") shouldBe 15
-      getFrom<Any, Int>(null, ":a").shouldBeNull()
-      getFrom<Any, Int>(listOf(1, 5, 3), ":a") shouldBe null
-    }
-
-    "get(map, key) should return null" {
-      val arrayMap =
-        m(":a" to 5, ":b" to 6, ":c" to 3)
-      val transientHashSet = TransientHashSet(arrayMap.asTransient())
-
-      get(m(":a" to 1, ":b" to 2, ":c" to 3), ":x").shouldBeNull()
-      get(v(5, 6, 9, 3), 10).shouldBeNull()
-      get(hashSet(54, 69, 36), 66).shouldBeNull()
-      get(transientHashSet, ":x").shouldBeNull()
-      getFrom<Any, Int>(m(":a" to 15, ":b" to 74), ":x").shouldBeNull()
-    }
-
-    "get(map, key) should return default" {
-      val arrayMap =
-        m(":a" to 5, ":b" to 6, ":c" to 3)
-      val transientHashSet = TransientHashSet(arrayMap.asTransient())
-
-      get(m(":a" to 1, ":b" to 2, ":c" to 3), ":x", -1) shouldBe -1
-      get(v(5, 6, 9, 3), 10, -1) shouldBe -1
-      get(hashSet(54, 69, 36), 66, -1) shouldBe -1
-      get(transientHashSet, ":x", -1) shouldBe -1
-      getFrom<Any, Int>(m(":a" to 15, ":b" to 74), ":x", -1) shouldBe -1
-    }
-  }
-
   class UnsupportedNumber : Number() {
     override fun toByte(): Byte = 0
 

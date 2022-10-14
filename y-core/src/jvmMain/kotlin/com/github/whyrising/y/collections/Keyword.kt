@@ -4,7 +4,7 @@ import com.github.whyrising.y.collections.utils.clearCache
 import com.github.whyrising.y.core.Symbol
 import com.github.whyrising.y.core.collections.IHashEq
 import com.github.whyrising.y.core.collections.Named
-import com.github.whyrising.y.core.getFrom
+import com.github.whyrising.y.core.get
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -56,7 +56,7 @@ class Keyword private constructor(internal val symbol: Symbol) :
   override fun compareTo(other: Keyword): Int = symbol.compareTo(other.symbol)
 
   operator fun <V> invoke(map: Any, default: V? = null): V? =
-    getFrom(map, this, default)
+    get(map, this, default)
 
   companion object {
     const val MAGIC = -0x61c88647

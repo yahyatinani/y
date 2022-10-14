@@ -372,17 +372,8 @@ fun <E> hs(vararg e: E) = PersistentHashSet.createWithCheck(*e)
 
 fun <E> Set<E>.toPhashSet() = PersistentHashSet.create(this)
 
-fun <K, V> get(map: ILookup<K, V>?, key: K, default: V? = null): V? =
-  getFrom<K, V>(map, key, default)
-
-fun <E> get(map: PersistentSet<E>?, key: E, default: E? = null): E? =
-  getFrom<E, E>(map, key, default)
-
-fun <E> get(map: TransientSet<E>?, key: E, default: E? = null): E? =
-  getFrom<E, E>(map, key, default)
-
 @Suppress("UNCHECKED_CAST")
-fun <K, V> getFrom(map: Any?, key: K, default: V? = null): V? = when (map) {
+fun <V> get(map: Any?, key: Any?, default: V? = null): V? = when (map) {
   null -> null
   is ILookup<*, *> -> map.valAt(key, default) as V?
   is Map<*, *> -> when {
@@ -443,7 +434,7 @@ fun <K, V> assocIn(
   when {
     ks.count > 1 -> {
       val m = assocIn(
-        getFrom<K, Associative<K, V>>(map, k),
+        get<Associative<K, V>>(map, k),
         kz,
         v
       )
@@ -459,7 +450,7 @@ fun <V> getIn(m: Any?, ks: ISeq<*>, default: V? = null): V? {
   tailrec fun getIn(m: Any?, kz: ISeq<*>): V? {
     return when {
       kz.count > 0 -> {
-        val mm = getFrom<Any?, Any?>(m, kz.first(), token)
+        val mm = get(m, kz.first(), token)
         when {
           mm === token -> default
           else -> getIn(mm, kz.rest())

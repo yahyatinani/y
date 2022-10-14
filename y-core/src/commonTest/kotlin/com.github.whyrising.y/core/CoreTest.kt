@@ -6,6 +6,7 @@ import com.github.whyrising.y.core.collections.MapEntry
 import com.github.whyrising.y.core.collections.PersistentArrayMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap.Companion.EmptyArrayMap
 import com.github.whyrising.y.core.collections.PersistentHashMap
+import com.github.whyrising.y.core.collections.PersistentHashSet.TransientHashSet
 import com.github.whyrising.y.core.collections.PersistentList.Empty
 import com.github.whyrising.y.core.collections.PersistentQueue
 import com.github.whyrising.y.core.collections.PersistentVector
@@ -607,5 +608,42 @@ class CoreTest : FreeSpec({
   "Associative.get(k) op" {
     m("a" to 2).assoc("b", 56)["b"] shouldBe 56
     (m("a" to 2) as IPersistentMap<*, *>)["a"] shouldBe 2
+  }
+
+  "get(map,key)" - {
+    "assertions" {
+      val m = m(":a" to 5, ":b" to 6, ":c" to 3)
+
+      get<Int>(m(":a" to 1, ":b" to 2, ":c" to 3), ":a") shouldBe 1
+      get<Int>(v(5, 6, 9, 3), 0) shouldBe 5
+      get<Int>(hashSet(54, 69, 36), 54) shouldBe 54
+      get<Int>(TransientHashSet(m.asTransient()), ":a") shouldBe 5
+      get<String>(m(1 to "d"), 1) shouldBe "d"
+      get<Int>(m(":a" to 15, ":b" to 74), ":a") shouldBe 15
+      get<Int>(null, ":a").shouldBeNull()
+      get<Int>(listOf(1, 5, 3), ":a") shouldBe null
+    }
+
+    "get(map, key) should return null" {
+      val m = m(":a" to 5, ":b" to 6, ":c" to 3)
+
+      get<Int?>(m(":a" to 1, ":b" to 2, ":c" to 3), ":x").shouldBeNull()
+      get<Int?>(v(5, 6, 9, 3), 10).shouldBeNull()
+      get<Int?>(hashSet(54, 69, 36), 66).shouldBeNull()
+      get<Int?>(TransientHashSet(m.asTransient()), ":x")
+        .shouldBeNull()
+      get<Int?>(m(":a" to 15, ":b" to 74), ":x").shouldBeNull()
+    }
+
+    "get(map, key) should return default" {
+      val m = m(":a" to 5, ":b" to 6, ":c" to 3)
+      val transientHashSet = TransientHashSet(m.asTransient())
+
+      get(m(":a" to 1, ":b" to 2, ":c" to 3), ":x", -1) shouldBe -1
+      get(v(5, 6, 9, 3), 10, -1) shouldBe -1
+      get(hashSet(54, 69, 36), 66, -1) shouldBe -1
+      get(transientHashSet, ":x", -1) shouldBe -1
+      get(m(":a" to 15, ":b" to 74), ":x", -1) shouldBe -1
+    }
   }
 })
