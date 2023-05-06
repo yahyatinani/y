@@ -56,3 +56,4 @@ gradle-app.setting
 *.hprof
 
 .idea/
+local.properties
