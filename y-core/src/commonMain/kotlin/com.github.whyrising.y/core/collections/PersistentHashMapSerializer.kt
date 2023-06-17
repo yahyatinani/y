@@ -12,14 +12,14 @@ const val PERSISTENT_HASH_MAP_NAME =
 
 internal class PersistentHashMapSerializer<K, V>(
   private val keySerializer: KSerializer<K>,
-  private val valueSerializer: KSerializer<V>
+  private val valueSerializer: KSerializer<V>,
 ) : KSerializer<PersistentHashMap<K, V>> {
   private val mapSerializer = MapSerializer(keySerializer, valueSerializer)
 
   @OptIn(ExperimentalSerializationApi::class)
   override val descriptor: SerialDescriptor = SerialDescriptor(
     PERSISTENT_HASH_MAP_NAME,
-    mapSerializer.descriptor
+    mapSerializer.descriptor,
   )
 
   @Suppress("UNCHECKED_CAST")
@@ -27,7 +27,7 @@ internal class PersistentHashMapSerializer<K, V>(
     deserializePersistentCollection(
       decoder,
       descriptor,
-      PersistentHashMap.EmptyHashMap
+      PersistentHashMap.EmptyHashMap,
     ) { compositeDecoder, index, map ->
       decodeToMapEntry(
         compositeDecoder,
@@ -35,7 +35,7 @@ internal class PersistentHashMapSerializer<K, V>(
         keySerializer,
         valueSerializer,
         index,
-        map as PersistentHashMap<K, V>
+        map as PersistentHashMap<K, V>,
       )
     } as PersistentHashMap<K, V>
 

@@ -13,14 +13,14 @@ const val PERSISTENT_ARRAY_MAP_NAME =
 
 internal class PersistentArrayMapSerializer<K, V>(
   private val keySerializer: KSerializer<K>,
-  private val valueSerializer: KSerializer<V>
+  private val valueSerializer: KSerializer<V>,
 ) : KSerializer<PersistentArrayMap<K, V>> {
   private val mapSerializer = MapSerializer(keySerializer, valueSerializer)
 
   @OptIn(ExperimentalSerializationApi::class)
   override val descriptor: SerialDescriptor = SerialDescriptor(
     PERSISTENT_ARRAY_MAP_NAME,
-    mapSerializer.descriptor
+    mapSerializer.descriptor,
   )
 
   @Suppress("UNCHECKED_CAST")
@@ -28,7 +28,7 @@ internal class PersistentArrayMapSerializer<K, V>(
     deserializePersistentCollection(
       decoder,
       descriptor,
-      EmptyArrayMap
+      EmptyArrayMap,
     ) { compositeDecoder, index, map ->
       decodeToMapEntry(
         compositeDecoder,
@@ -36,7 +36,7 @@ internal class PersistentArrayMapSerializer<K, V>(
         keySerializer,
         valueSerializer,
         index,
-        map as PersistentArrayMap<K, V>
+        map as PersistentArrayMap<K, V>,
       )
     } as PersistentArrayMap<K, V>
 

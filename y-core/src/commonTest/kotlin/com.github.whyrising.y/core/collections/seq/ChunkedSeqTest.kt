@@ -39,15 +39,15 @@ class ChunkedSeqTest : FreeSpec({
         arrayOf(
           1,
           2,
-          3
-        )
+          3,
+        ),
       )
       val chunk2 = com.github.whyrising.y.core.collections.ArrayChunk(
         arrayOf(
           4,
           5,
-          6
-        )
+          6,
+        ),
       )
 
       val seq = ChunkedSeq(chunk2)
@@ -63,8 +63,8 @@ class ChunkedSeqTest : FreeSpec({
         arrayOf(
           1,
           2,
-          3
-        )
+          3,
+        ),
       )
 
       val chunkedSeq = ChunkedSeq(chunk)
@@ -93,15 +93,15 @@ class ChunkedSeqTest : FreeSpec({
         arrayOf(
           1,
           2,
-          3
-        )
+          3,
+        ),
       )
       val chunk2 = com.github.whyrising.y.core.collections.ArrayChunk(
         arrayOf(
           4,
           5,
-          6
-        )
+          6,
+        ),
       )
 
       val seq = ChunkedSeq(chunk2)

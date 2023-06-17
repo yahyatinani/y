@@ -14,7 +14,7 @@ const val HASHTABLE_THRESHOLD = 16
 
 @Serializable(PersistentArrayMapSerializer::class)
 class PersistentArrayMap<out K, out V> internal constructor(
-  internal val array: Array<Any?>
+  internal val array: Array<Any?>,
 ) : APersistentMap<K, V>(), MapIterable<K, V>, IMutableCollection<Any?> {
 
   @Suppress("UNCHECKED_CAST")
@@ -32,7 +32,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
 
   override fun assoc(
     key: @UnsafeVariance K,
-    value: @UnsafeVariance V
+    value: @UnsafeVariance V,
   ): IPersistentMap<K, V> {
     val index: Int = indexOf(key)
     val newPairs: Array<Any?>
@@ -66,7 +66,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
 
   override fun assocNew(
     key: @UnsafeVariance K,
-    value: @UnsafeVariance V
+    value: @UnsafeVariance V,
   ): IPersistentMap<K, V> {
     val index: Int = indexOf(key)
 
@@ -116,12 +116,12 @@ class PersistentArrayMap<out K, out V> internal constructor(
 
   @Suppress("UNCHECKED_CAST")
   override fun entryAt(
-    key: @UnsafeVariance K
+    key: @UnsafeVariance K,
   ): IMapEntry<K, V>? = indexOf(key).let { index ->
     when {
       keyExists(index) -> MapEntry(
         array[index] as K,
-        array[index + 1] as V
+        array[index + 1] as V,
       )
       else -> null
     }
@@ -130,7 +130,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
   @Suppress("UNCHECKED_CAST")
   override fun valAt(
     key: @UnsafeVariance K,
-    default: @UnsafeVariance V?
+    default: @UnsafeVariance V?,
   ): V? = indexOf(key).let { index ->
     when {
       keyExists(index) -> array[index + 1] as V
@@ -159,7 +159,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
 
   internal class Iter<K, V, R>(
     private val array: Array<Any?>,
-    val f: (k: K, v: V) -> R
+    val f: (k: K, v: V) -> R,
   ) : Iterator<R> {
 
     var index = 0
@@ -179,7 +179,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
 
   internal class Seq<out K, out V>(
     private val array: Array<Any?>,
-    val index: Int
+    val index: Int,
   ) : ASeq<MapEntry<K, V>>() {
 
     override val count: Int = (array.size - index) / 2
@@ -187,7 +187,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
     @Suppress("UNCHECKED_CAST")
     override fun first(): MapEntry<K, V> = MapEntry(
       array[index] as K,
-      array[index + 1] as V
+      array[index + 1] as V,
     )
 
     override fun next(): ISeq<MapEntry<K, V>>? = when {
@@ -199,7 +199,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
   internal class TransientArrayMap<out K, out V> private constructor(
     internal val array: Array<Any?>,
     edit: Any?,
-    length: Int
+    length: Int,
   ) : ATransientMap<K, V>() {
     private val _edit: AtomicRef<Any?> = atomic(edit)
     private val _length = atomic(length)
@@ -207,7 +207,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
     constructor(array: Array<Any?>) : this(
       array.copyOf(max(HASHTABLE_THRESHOLD, array.size)),
       Any(),
-      length = array.size
+      length = array.size,
     )
 
     val edit by _edit
@@ -219,7 +219,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
     override fun ensureEditable() {
       if (_edit.value == null) {
         throw IllegalStateException(
-          "Transient used after persistent() call."
+          "Transient used after persistent() call.",
         )
       }
     }
@@ -236,7 +236,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
     @Suppress("UNCHECKED_CAST")
     override fun doAssoc(
       key: @UnsafeVariance K,
-      value: @UnsafeVariance V
+      value: @UnsafeVariance V,
     ): TransientMap<K, V> {
       lock.withLock {
         ensureEditable()
@@ -295,7 +295,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
     @Suppress("UNCHECKED_CAST")
     override fun doValAt(
       key: @UnsafeVariance K,
-      default: @UnsafeVariance V?
+      default: @UnsafeVariance V?,
     ): V? = indexOf(key).let { index ->
       when {
         index >= 0 -> array[index + 1] as V
@@ -314,7 +314,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
     }
 
     internal fun <K, V> createWithCheck(
-      vararg kvs: Any?
+      vararg kvs: Any?,
     ): PersistentArrayMap<K, V> {
       for (i in kvs.indices step 2)
         for (j in i + 2 until kvs.size step 2)
@@ -327,7 +327,7 @@ class PersistentArrayMap<out K, out V> internal constructor(
 
     @Suppress("UNCHECKED_CAST")
     internal fun <K, V> createWithCheck(
-      vararg pairs: Pair<K, V>
+      vararg pairs: Pair<K, V>,
     ): PersistentArrayMap<K, V> {
       val entries = arrayOfNulls<Any?>(pairs.size * 2)
       var i = 0

@@ -207,17 +207,17 @@ class CoreTest : FreeSpec({
     assocIn(
       m(":a" to m(":b" to 45)),
       l(":a", ":b"),
-      22
+      22,
     ) shouldBe m(":a" to m(":b" to 22))
     assocIn(
       v(17, 21, v(3, 5, 6)),
       l(2, 1),
-      22
+      22,
     ) shouldBe v(17, 21, v(3, 22, 6))
     assocIn(
       m(":a" to m(":b" to 45)),
       l(":a", ":b"),
-      m(":c" to 74)
+      m(":c" to 74),
     ) shouldBe m(":a" to m(":b" to m(":c" to 74)))
   }
 
@@ -356,9 +356,9 @@ class CoreTest : FreeSpec({
 
     val r = consChunk(
       com.github.whyrising.y.core.collections.ArrayChunk(
-        arrayOf()
+        arrayOf(),
       ),
-      rest
+      rest,
     )
 
     r shouldBeSameInstanceAs rest
@@ -367,9 +367,9 @@ class CoreTest : FreeSpec({
   "consChunk(chunk, rest) should return ChunkedSeq" {
     val cs = consChunk(
       com.github.whyrising.y.core.collections.ArrayChunk(
-        arrayOf(1, 2)
+        arrayOf(1, 2),
       ),
-      l(3, 4)
+      l(3, 4),
     )
 
     cs.count shouldBeExactly 4
@@ -516,7 +516,7 @@ class CoreTest : FreeSpec({
       map<Int, Float, Boolean, String>(
         l(3, 5),
         l(4.1f, 2.3f),
-        l(true, false)
+        l(true, false),
       ) { i, j, k ->
         "${i + j}$k"
       } shouldBe l("7.1true", "7.3false")
@@ -558,7 +558,7 @@ class CoreTest : FreeSpec({
         "e", 1,
         "f", 1,
         "g", 1,
-        "h", 1
+        "h", 1,
       ) shouldBe m(
         "a" to 1,
         "b" to 1,
@@ -567,7 +567,7 @@ class CoreTest : FreeSpec({
         "e" to 1,
         "f" to 1,
         "g" to 1,
-        "h" to 1
+        "h" to 1,
       )
     }
 
@@ -581,7 +581,7 @@ class CoreTest : FreeSpec({
         "f", 1,
         "g", 1,
         "h", 1,
-        "i", 1
+        "i", 1,
       ) shouldBe hashMap(
         "a" to 1,
         "b" to 1,
@@ -591,7 +591,7 @@ class CoreTest : FreeSpec({
         "f" to 1,
         "g" to 1,
         "h" to 1,
-        "i" to 1
+        "i" to 1,
       )
     }
   }

@@ -13,10 +13,10 @@ class VectorMock<out E>(val vec: PersistentVector<E>) : IPersistentVector<E> {
     TODO("Not yet implemented")
   }
 
-  override
-  fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E> {
-    TODO("Not yet implemented")
-  }
+  override fun assocN(
+    index: Int,
+    value: @UnsafeVariance E,
+  ): IPersistentVector<E> = TODO("Not yet implemented")
 
   override fun conj(e: @UnsafeVariance E): IPersistentVector<E> {
     TODO("Not yet implemented")
@@ -34,8 +34,7 @@ class VectorMock<out E>(val vec: PersistentVector<E>) : IPersistentVector<E> {
     TODO("Not yet implemented")
   }
 
-  override
-  fun assoc(key: Int, value: @UnsafeVariance E): IPersistentVector<E> {
+  override fun assoc(key: Int, value: @UnsafeVariance E): IPersistentVector<E> {
     TODO("Not yet implemented")
   }
 

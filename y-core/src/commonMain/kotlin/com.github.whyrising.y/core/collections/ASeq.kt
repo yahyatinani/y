@@ -26,7 +26,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
 
   private fun compareWith(
     other: Any?,
-    areEqual: (e1: E, e2: Any?) -> Boolean
+    areEqual: (e1: E, e2: Any?) -> Boolean,
   ): Boolean {
     when {
       this === other -> return true
@@ -38,7 +38,9 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
           if (
             otherSeq == null ||
             !areEqual(thisSeq.first(), otherSeq.first())
-          ) return false
+          ) {
+            return false
+          }
 
           thisSeq = thisSeq.next()
           otherSeq = otherSeq.next()

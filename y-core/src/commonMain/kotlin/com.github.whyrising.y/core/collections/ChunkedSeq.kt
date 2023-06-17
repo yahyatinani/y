@@ -4,7 +4,7 @@ import com.github.whyrising.y.core.collections.PersistentList.Empty
 
 class ChunkedSeq<out E>(
   private val firstChunk: Chunk<E>,
-  internal val restChunks: ISeq<E>
+  internal val restChunks: ISeq<E>,
 ) : ASeq<E>(), IChunkedSeq<E> {
 
   constructor(firstChunk: ArrayChunk<E>) : this(firstChunk, Empty)

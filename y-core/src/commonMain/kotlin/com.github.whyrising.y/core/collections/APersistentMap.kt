@@ -82,10 +82,12 @@ abstract class APersistentMap<out K, out V> :
     is Entry<*, *> -> assoc(e.key as K, e.value as V)
     is IPersistentVector<*> -> when {
       e.count != 2 -> throw IllegalArgumentException(
-        "Vector $e count should be 2 to conj in a map"
+        "Vector $e count should be 2 to conj in a map",
       )
+
       else -> assoc(e.nth(0) as K, e.nth(1) as V)
     }
+
     else -> {
       var result: IPersistentMap<K, V> = this
       var seq = seq<Any?>(e) as ISeq<Any?>
@@ -96,7 +98,7 @@ abstract class APersistentMap<out K, out V> :
         if (entry !is Entry<*, *>) {
           throw IllegalArgumentException(
             "All elements of the seq must be of type Map.Entry " +
-              "to conj: $entry"
+              "to conj: $entry",
           )
         }
 
@@ -115,6 +117,7 @@ abstract class APersistentMap<out K, out V> :
       other !is Map<*, *> -> return false
       other is IPersistentMap<*, *> &&
         other !is MapEquivalence -> return false
+
       count != other.size -> return false
       else -> {
         var seq = seq()
@@ -203,7 +206,7 @@ abstract class APersistentMap<out K, out V> :
 
       @Suppress("USELESS_IS_CHECK")
       override fun contains(
-        element: Entry<@UnsafeVariance K, @UnsafeVariance V>
+        element: Entry<@UnsafeVariance K, @UnsafeVariance V>,
       ): Boolean = when (element) {
         !is Entry<K, V> -> false
         else -> {
@@ -220,23 +223,20 @@ abstract class APersistentMap<out K, out V> :
 
   protected val makeMapEntry: (
     @UnsafeVariance K,
-    @UnsafeVariance V
+    @UnsafeVariance V,
   ) -> MapEntry<K, V> = { k, v ->
     MapEntry(k, v)
   }
 
-  protected val makeKey: (@UnsafeVariance K, @UnsafeVariance V) -> K = { k, _ ->
-    k
-  }
+  protected val makeKey: (@UnsafeVariance K, @UnsafeVariance V) -> K =
+    { k, _ -> k }
 
-  protected
-  val makeValue: (@UnsafeVariance K, @UnsafeVariance V) -> V = { _, v ->
-    v
-  }
+  protected val makeValue: (@UnsafeVariance K, @UnsafeVariance V) -> V =
+    { _, v -> v }
 
   internal class KeySeq<out K, out V> private constructor(
     internal val _seq: ISeq<K>,
-    val map: Iterable<Entry<K, V>>?
+    val map: Iterable<Entry<K, V>>?,
   ) : ASeq<K>() {
 
     @Suppress("UNCHECKED_CAST")
@@ -266,15 +266,14 @@ abstract class APersistentMap<out K, out V> :
 
     companion object {
       @Suppress("UNCHECKED_CAST")
-      operator
-      fun <K, V> invoke(map: IPersistentMap<K, V>): KeySeq<K, V> =
+      operator fun <K, V> invoke(map: IPersistentMap<K, V>): KeySeq<K, V> =
         KeySeq(map.seq() as ISeq<K>, map)
     }
   }
 
   internal class ValSeq<out K, out V> private constructor(
     internal val _seq: ISeq<V>,
-    val map: Iterable<Entry<K, V>>?
+    val map: Iterable<Entry<K, V>>?,
   ) : ASeq<V>() {
 
     @Suppress("UNCHECKED_CAST")
@@ -303,8 +302,7 @@ abstract class APersistentMap<out K, out V> :
 
     companion object {
       @Suppress("UNCHECKED_CAST")
-      operator
-      fun <K, V> invoke(map: IPersistentMap<K, V>): ValSeq<K, V> =
+      operator fun <K, V> invoke(map: IPersistentMap<K, V>): ValSeq<K, V> =
         ValSeq(map.seq() as ISeq<V>, map)
     }
   }

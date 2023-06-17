@@ -42,8 +42,8 @@ class LazySeqTest : FreeSpec({
         arrayOf(
           1,
           2,
-          3
-        )
+          3,
+        ),
       )
       val chunkedSeq = ChunkedSeq(chunk)
       val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -62,8 +62,8 @@ class LazySeqTest : FreeSpec({
         arrayOf(
           1,
           2,
-          3
-        )
+          3,
+        ),
       )
       val chunkedSeq = ChunkedSeq(chunk)
       val lazySeq = LazySeq<Int> { chunkedSeq }
@@ -90,8 +90,8 @@ class LazySeqTest : FreeSpec({
         arrayOf(
           1,
           2,
-          3
-        )
+          3,
+        ),
       )
       val chunkedSeq = ChunkedSeq(chunk)
       val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -117,8 +117,8 @@ class LazySeqTest : FreeSpec({
         arrayOf(
           1,
           2,
-          3
-        )
+          3,
+        ),
       )
       val chunkedSeq = ChunkedSeq(chunk)
       val f: () -> ISeq<Int>? = {
@@ -145,8 +145,8 @@ class LazySeqTest : FreeSpec({
     val lazySeq = LazySeq<Int> {
       ChunkedSeq(
         ArrayChunk(
-          arrayOf(1, 2, 3)
-        )
+          arrayOf(1, 2, 3),
+        ),
       )
     }
 
@@ -203,8 +203,8 @@ class LazySeqTest : FreeSpec({
       arrayOf(
         45,
         89,
-        36
-      )
+        36,
+      ),
     )
     val chunkedSeq = ChunkedSeq(chunk)
     val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -223,8 +223,8 @@ class LazySeqTest : FreeSpec({
       arrayOf(
         45,
         89,
-        36
-      )
+        36,
+      ),
     )
     val chunkedSeq = ChunkedSeq(chunk)
     val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -246,8 +246,8 @@ class LazySeqTest : FreeSpec({
       arrayOf(
         45,
         89,
-        36
-      )
+        36,
+      ),
     )
     val chunkedSeq = ChunkedSeq(chunk)
     val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -267,8 +267,8 @@ class LazySeqTest : FreeSpec({
       arrayOf(
         45,
         89,
-        36
-      )
+        36,
+      ),
     )
     val chunkedSeq = ChunkedSeq(chunk)
     val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -287,8 +287,8 @@ class LazySeqTest : FreeSpec({
       arrayOf(
         45,
         89,
-        36
-      )
+        36,
+      ),
     )
     val chunkedSeq = ChunkedSeq(chunk)
     val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -308,8 +308,8 @@ class LazySeqTest : FreeSpec({
       arrayOf(
         45,
         89,
-        36
-      )
+        36,
+      ),
     )
     val chunkedSeq = ChunkedSeq(chunk)
     val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -326,8 +326,8 @@ class LazySeqTest : FreeSpec({
       arrayOf(
         45,
         89,
-        36
-      )
+        36,
+      ),
     )
     val chunkedSeq = ChunkedSeq(chunk)
     val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -344,8 +344,8 @@ class LazySeqTest : FreeSpec({
       arrayOf(
         45,
         89,
-        36
-      )
+        36,
+      ),
     )
 
     LazySeq<Int> { ChunkedSeq(chunk) }.toString() shouldBe "(45 89 36)"
@@ -358,8 +358,8 @@ class LazySeqTest : FreeSpec({
         arrayOf(
           45,
           89,
-          36
-        )
+          36,
+        ),
       )
       val chunkedSeq = ChunkedSeq(chunk)
       val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -375,8 +375,8 @@ class LazySeqTest : FreeSpec({
         arrayOf(
           45,
           89,
-          36
-        )
+          36,
+        ),
       )
       val chunkedSeq = ChunkedSeq(chunk)
       val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -390,8 +390,8 @@ class LazySeqTest : FreeSpec({
         arrayOf(
           45,
           89,
-          36
-        )
+          36,
+        ),
       )
       val chunkedSeq = ChunkedSeq(chunk)
       val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -410,8 +410,8 @@ class LazySeqTest : FreeSpec({
         arrayOf(
           45,
           89,
-          36
-        )
+          36,
+        ),
       )
       val chunkedSeq = ChunkedSeq(chunk)
       val f: () -> ISeq<Int>? = { chunkedSeq }
@@ -431,8 +431,8 @@ class LazySeqTest : FreeSpec({
         arrayOf(
           45,
           89,
-          36
-        )
+          36,
+        ),
       )
       val chunkedSeq = ChunkedSeq(chunk)
       val f: () -> ISeq<Int>? = { chunkedSeq }

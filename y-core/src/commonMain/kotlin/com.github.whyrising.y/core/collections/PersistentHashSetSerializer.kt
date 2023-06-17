@@ -12,26 +12,26 @@ internal const val PERSISTENT_HASH_SET_NAME =
   "com.github.whyrising.y.core.collections.PersistentHashSet"
 
 internal class PersistentHashSetSerializer<E>(
-  private val eSerializer: KSerializer<E>
+  private val eSerializer: KSerializer<E>,
 ) : KSerializer<PersistentHashSet<E>> {
   private val setSerializer = SetSerializer(eSerializer)
 
   @OptIn(ExperimentalSerializationApi::class)
   override val descriptor: SerialDescriptor = SerialDescriptor(
     PERSISTENT_HASH_SET_NAME,
-    setSerializer.descriptor
+    setSerializer.descriptor,
   )
 
   override fun deserialize(decoder: Decoder): PersistentHashSet<E> =
     deserializePersistentCollection(
       decoder,
       descriptor,
-      hs<E>()
+      hs<E>(),
     ) { compositeDecoder, index, _ ->
       compositeDecoder.decodeSerializableElement(
         descriptor,
         index,
-        eSerializer
+        eSerializer,
       )
     } as PersistentHashSet<E>
 

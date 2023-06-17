@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '8'
+          java-version: '11'
 
       - uses: gradle/gradle-build-action@v2
 
@@ -39,15 +39,15 @@ jobs:
         run: ./gradlew ${{ matrix.target }} --scan
 
       - name: Generate Kover reports
-        run: ./gradlew koverMergedReport
+        run: ./gradlew koverXmlReport
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         with:
-          files: build/reports/kover/merged-report/result.xml
+          files: build/reports/kover/report.xml
           flags: unittests
           name: codecov-umbrella
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           verbose: true
 
       - name: Bundle the build report (when failure)
@@ -71,12 +71,10 @@ jobs:
           - iosX64Test
           - iosSimulatorArm64Test
           - iosArm64TestKlibrary
-          - iosArm32TestKlibrary
           - tvosX64Test
           - tvosArm64TestKlibrary
           - watchosArm32TestKlibrary
           - watchosArm64TestKlibrary
-          - watchosX86Test
           - watchosX64Test
     steps:
       - name: Checkout the repo
@@ -89,7 +87,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '8'
+          java-version: '11'
 
       - uses: gradle/gradle-build-action@v2
 
@@ -125,7 +123,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '8'
+          java-version: '11'
 
       - uses: gradle/gradle-build-action@v2
 

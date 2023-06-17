@@ -10,7 +10,7 @@ abstract class ATransientMap<out K, out V> :
 
   internal abstract fun doAssoc(
     key: @UnsafeVariance K,
-    value: @UnsafeVariance V
+    value: @UnsafeVariance V,
   ): TransientMap<K, V>
 
   internal abstract fun doDissoc(key: @UnsafeVariance K): TransientMap<K, V>
@@ -19,14 +19,14 @@ abstract class ATransientMap<out K, out V> :
 
   internal abstract fun doValAt(
     key: @UnsafeVariance K,
-    default: @UnsafeVariance V?
+    default: @UnsafeVariance V?,
   ): V?
 
   internal abstract val doCount: Int
 
   override fun assoc(
     key: @UnsafeVariance K,
-    value: @UnsafeVariance V
+    value: @UnsafeVariance V,
   ): TransientMap<K, V> = ensureEditable().let {
     return doAssoc(key, value)
   }
@@ -45,7 +45,7 @@ abstract class ATransientMap<out K, out V> :
 
   private fun throwAllElementsMustBeEntry(entry: Any?): Unit =
     throw IllegalArgumentException(
-      "All elements of the seq must be of type Map.Entry to conj: $entry"
+      "All elements of the seq must be of type Map.Entry to conj: $entry",
     )
 
   @Suppress("UNCHECKED_CAST")
@@ -55,7 +55,7 @@ abstract class ATransientMap<out K, out V> :
       is Map.Entry<*, *> -> return assoc(e.key as K, e.value as V)
       is IPersistentVector<*> -> return when {
         e.count != 2 -> throw IllegalArgumentException(
-          "Vector $e count must be 2 to conj in a map."
+          "Vector $e count must be 2 to conj in a map.",
         )
         else -> assoc(e.nth(0) as K, e.nth(1) as V)
       }
@@ -109,7 +109,7 @@ abstract class ATransientMap<out K, out V> :
 
   operator fun invoke(
     key: @UnsafeVariance K,
-    default: @UnsafeVariance V?
+    default: @UnsafeVariance V?,
   ): V? = valAt(key, default)
 
   operator fun invoke(key: @UnsafeVariance K): V? = valAt(key)

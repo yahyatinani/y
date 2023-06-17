@@ -32,7 +32,7 @@ import kotlin.jvm.JvmName
 fun <T> identity(x: T): T = x
 
 class NotANumberError(x: Any) : RuntimeException(
-  "Either `$x` is not a number or this type is not supported."
+  "Either `$x` is not a number or this type is not supported.",
 )
 
 @Suppress("UNCHECKED_CAST")
@@ -76,7 +76,7 @@ fun <T1, T2, T3, T> str(x: T1, y: T2, z: T3, vararg args: T): String =
   }.let { "${str(x, y, z)}$it" }
 
 inline fun <T1, T2, R> curry(
-  crossinline f: (T1, T2) -> R
+  crossinline f: (T1, T2) -> R,
 ): (T1) -> (T2) -> R = { t1: T1 ->
   { t2: T2 ->
     f(t1, t2)
@@ -84,7 +84,7 @@ inline fun <T1, T2, R> curry(
 }
 
 inline fun <T1, T2, T3, R> curry(
-  crossinline f: (T1, T2, T3) -> R
+  crossinline f: (T1, T2, T3) -> R,
 ): (T1) -> (T2) -> (T3) -> R =
   { t1: T1 ->
     { t2: T2 ->
@@ -93,7 +93,7 @@ inline fun <T1, T2, T3, R> curry(
   }
 
 inline fun <T1, T2, T3, T4, R> curry(
-  crossinline f: (T1, T2, T3, T4) -> R
+  crossinline f: (T1, T2, T3, T4) -> R,
 ): (T1) -> (T2) -> (T3) -> (T4) -> R =
   { t1: T1 ->
     { t2: T2 ->
@@ -106,7 +106,7 @@ inline fun <T1, T2, T3, T4, R> curry(
   }
 
 inline fun <T1, T2, T3, T4, T5, R> curry(
-  crossinline f: (T1, T2, T3, T4, T5) -> R
+  crossinline f: (T1, T2, T3, T4, T5) -> R,
 ): (T1) -> (T2) -> (T3) -> (T4) -> (T5) -> R =
   { t1: T1 ->
     { t2: T2 ->
@@ -121,7 +121,7 @@ inline fun <T1, T2, T3, T4, T5, R> curry(
   }
 
 inline fun <T1, T2, T3, T4, T5, T6, R> curry(
-  crossinline f: (T1, T2, T3, T4, T5, T6) -> R
+  crossinline f: (T1, T2, T3, T4, T5, T6) -> R,
 ): (T1) -> (T2) -> (T3) -> (T4) -> (T5) -> (T6) -> R =
   { t1: T1 ->
     { t2: T2 ->
@@ -142,12 +142,12 @@ inline fun <T> complement(crossinline f: (T) -> Boolean): (T) -> Boolean =
 
 @JvmName("complementY")
 inline fun <T1, T2> complement(
-  crossinline f: (T1) -> (T2) -> Boolean
+  crossinline f: (T1) -> (T2) -> Boolean,
 ): (T1) -> (T2) -> Boolean = { t1: T1 -> { t2: T2 -> !f(t1)(t2) } }
 
 @JvmName("complementY1")
 inline fun <T1, T2, T3> complement(
-  crossinline f: (T1) -> (T2) -> (T3) -> Boolean
+  crossinline f: (T1) -> (T2) -> (T3) -> Boolean,
 ): (T1) -> (T2) -> (T3) -> Boolean = { t1: T1 ->
   { t2: T2 ->
     { t3: T3 ->
@@ -158,7 +158,7 @@ inline fun <T1, T2, T3> complement(
 
 @JvmName("complementY2")
 inline fun <T1, T2, T3, T4> complement(
-  crossinline f: (T1) -> (T2) -> (T3) -> (T4) -> Boolean
+  crossinline f: (T1) -> (T2) -> (T3) -> (T4) -> Boolean,
 ): (T1) -> (T2) -> (T3) -> (T4) -> Boolean = { t1: T1 ->
   { t2: T2 ->
     { t3: T3 ->
@@ -173,24 +173,24 @@ fun <T> compose(f: T): T = f
 
 inline fun <R2, R> compose(
   crossinline f: (R2) -> R,
-  crossinline g: () -> R2
+  crossinline g: () -> R2,
 ): () -> R = { f(g()) }
 
 inline fun <T1, R2, R> compose(
   crossinline f: (R2) -> R,
-  crossinline g: (T1) -> R2
+  crossinline g: (T1) -> R2,
 ): (T1) -> R = { t1: T1 -> f(g(t1)) }
 
 @JvmName("composeY1")
 inline fun <T1, T2, R2, R> compose(
   crossinline f: (R2) -> R,
-  crossinline g: (T1) -> (T2) -> R2
+  crossinline g: (T1) -> (T2) -> R2,
 ): (T1) -> (T2) -> R = { t1: T1 -> { t2: T2 -> f(g(t1)(t2)) } }
 
 @JvmName("composeY2")
 inline fun <T1, T2, T3, R2, R> compose(
   crossinline f: (R2) -> R,
-  crossinline g: (T1) -> (T2) -> (T3) -> R2
+  crossinline g: (T1) -> (T2) -> (T3) -> R2,
 ): (T1) -> (T2) -> (T3) -> R = { t1: T1 ->
   { t2: T2 ->
     { t3: T3 ->
@@ -231,7 +231,7 @@ fun <E> seq(coll: Any?): ISeq<E>? = when (coll) {
   is CharSequence -> StringSeq(coll) as ISeq<E>
   is Map<*, *> -> seq(coll.entries)
   else -> throw IllegalArgumentException(
-    "Don't know how to create ISeq from: ${coll::class.simpleName}"
+    "Don't know how to create ISeq from: ${coll::class.simpleName}",
   )
 }
 
@@ -313,7 +313,7 @@ fun <E> vec(coll: Any?): IPersistentVector<E> = when (coll) {
   }
 
   else -> throw IllegalArgumentException(
-    "${coll::class} can't be turned into a vec."
+    "${coll::class} can't be turned into a vec.",
   )
 }
 
@@ -396,7 +396,7 @@ fun <V> get(map: Any?, key: Any?, default: V? = null): V? = when (map) {
 
 fun <K, V> assoc(
   map: Associative<K, V>?,
-  kv: Pair<K, V>
+  kv: Pair<K, V>,
 ): Associative<K, V> = when (map) {
   null -> PersistentArrayMap.createWithCheck(kv)
   else -> map.assoc(kv.first, kv.second)
@@ -406,7 +406,7 @@ fun <K, V> assoc(
 tailrec fun <K, V> assoc(
   map: Associative<K, V>?,
   kv: Pair<K, V>,
-  vararg kvs: Pair<K, V>
+  vararg kvs: Pair<K, V>,
 ): Associative<K, V> {
   val m = assoc(map, kv)
   return when {
@@ -415,7 +415,7 @@ tailrec fun <K, V> assoc(
         arrayOfNulls(kvs.size - 1),
         0,
         1,
-        kvs.size
+        kvs.size,
       ) as Array<out Pair<K, V>>
 
       assoc(m, kvs[0], *rest)
@@ -429,14 +429,14 @@ tailrec fun <K, V> assoc(
 fun <K, V> assocIn(
   map: Associative<K, V>?,
   ks: ISeq<K>,
-  v: V
+  v: V,
 ): Associative<K, V> = ks.let { (k, kz) ->
   when {
     ks.count > 1 -> {
       val m = assocIn(
         get<Associative<K, V>>(map, k),
         kz,
-        v
+        v,
       )
       assoc(map, k to m) as Associative<K, V>
     }
@@ -536,11 +536,11 @@ fun <T> conj(coll: IPersistentCollection<T>?, x: T): IPersistentCollection<T> {
 fun <T> conj(
   coll: IPersistentCollection<T>?,
   x: T,
-  vararg xs: T
+  vararg xs: T,
 ): IPersistentCollection<T> {
   tailrec fun conj(
     coll: IPersistentCollection<T>,
-    s: ISeq<T>?
+    s: ISeq<T>?,
   ): IPersistentCollection<T> = when (s) {
     null -> coll
     else -> conj(coll.conj(s.first()), s.next())
@@ -670,7 +670,7 @@ fun <T1, T2, T3, R> map(
   c1: Any?,
   c2: Any?,
   c3: Any?,
-  f: (T1, T2, T3) -> R
+  f: (T1, T2, T3) -> R,
 ): LazySeq<R> = lazySeq {
   val seq1 = seq<T1>(c1)
   val seq2 = seq<T2>(c2)
@@ -678,7 +678,7 @@ fun <T1, T2, T3, R> map(
   if (seq1 == null || seq2 == null || seq3 == null) return@lazySeq null
   cons(
     f(seq1.first(), seq2.first(), seq3.first()),
-    map(seq1.rest(), seq2.rest(), seq3.rest(), f)
+    map(seq1.rest(), seq2.rest(), seq3.rest(), f),
   )
 }
 

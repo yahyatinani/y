@@ -9,16 +9,16 @@ import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.reentrantLock
 import kotlinx.atomicfu.locks.withLock
 
-abstract class ARef<T> : IRef<T> {
+abstract class ARef : IRef {
   private val lock = reentrantLock()
-  private val _validator: AtomicRef<((T) -> Boolean)?> = atomic(null)
+  private val _validator: AtomicRef<((Any?) -> Boolean)?> = atomic(null)
 
-  private
-  val _watches = atomic<IPersistentMap<Any, (Any, IRef<T>, T, T) -> Any>>(
-    PersistentHashMap.EmptyHashMap
-  )
+  private val _watches =
+    atomic<IPersistentMap<Any, (Any, IRef, Any?, Any?) -> Any>>(
+      PersistentHashMap.EmptyHashMap,
+    )
 
-  private fun validate(vf: ((T) -> Boolean)?, value: T) {
+  private fun validate(vf: ((Any?) -> Boolean)?, value: Any?) {
     if (vf == null) return
 
     fun invalidReferenceState(cause: Throwable? = null) =
@@ -35,31 +35,31 @@ abstract class ARef<T> : IRef<T> {
     }
   }
 
-  fun validate(value: T) {
+  fun validate(value: Any?) {
     validate(_validator.value, value)
   }
 
-  override var validator: ((T) -> Boolean)?
+  override var validator: ((Any?) -> Boolean)?
     get() = _validator.value
     set(vf) {
       validate(vf, deref())
       _validator.value = vf
     }
 
-  override val watches: IPersistentMap<Any, (Any, IRef<T>, T, T) -> Any?> by
-  _watches
+  override val watches: IPersistentMap<Any, (Any, IRef, Any?, Any?) -> Any?> by
+    _watches
 
   override fun addWatch(
     key: Any,
-    callback: (Any, IRef<T>, T, T) -> Any
-  ): IRef<T> {
+    callback: (Any, IRef, Any?, Any?) -> Any,
+  ): IRef {
     lock.withLock {
       _watches.value = _watches.value.assoc(key, callback)
       return this
     }
   }
 
-  override fun removeWatch(key: Any): IRef<T> {
+  override fun removeWatch(key: Any): IRef {
     lock.withLock {
       _watches.value = _watches.value.dissoc(key)
       return this
@@ -67,11 +67,11 @@ abstract class ARef<T> : IRef<T> {
   }
 
   @Suppress("UNCHECKED_CAST")
-  fun notifyWatches(oldVal: T, newVal: T) {
+  fun notifyWatches(oldVal: Any?, newVal: Any?) {
     val ws = _watches.value
     if (ws.count <= 0) return
 
-    var s = ws.seq() as ISeq<MapEntry<Any, (Any, IRef<T>, T, T) -> Any>>?
+    var s = ws.seq() as ISeq<MapEntry<Any, (Any, IRef, Any?, Any?) -> Any>>?
     while (s != null) {
       val e = s.first()
       val f = e.value

@@ -241,7 +241,7 @@ class LeanMapTest : FreeSpec({
           iter.node shouldBeSameInstanceAs map.root
           iter._f(a[0].first, a[0].second) shouldBe MapEntry(
             a[0].first,
-            a[0].second
+            a[0].second,
           )
         }
 

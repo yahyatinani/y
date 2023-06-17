@@ -2,7 +2,7 @@ package com.github.whyrising.y.core.collections
 
 class StringSeq internal constructor(
   val s: CharSequence,
-  val i: Int
+  val i: Int,
 ) : ASeq<Char>(), IndexedSeq {
   override fun first(): Char = s[i]
 
