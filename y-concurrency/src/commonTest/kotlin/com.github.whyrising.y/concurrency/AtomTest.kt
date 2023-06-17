@@ -493,12 +493,9 @@ class AtomTest : FreeSpec({
 
   "compareAndSet" - {
     "returns false because current value is not identical to oldValue" {
-      val oldV = 10
-      val newV = 15
-      val atom = atom(0)
-      atom.reset(oldV)
+      val atom = atom(10)
 
-      atom.compareAndSet(oldV, newV).shouldBeFalse()
+      atom.compareAndSet(10, 15).shouldBeFalse()
     }
 
     "returns true because current value is identical to oldValue" {
@@ -525,7 +522,6 @@ class AtomTest : FreeSpec({
   }
 })
 
-@OptIn(ExperimentalCoroutinesApi::class)
 private fun TestScope.runParallelWork(
   coroutinesCount: Int,
   repeatCount: Int,
