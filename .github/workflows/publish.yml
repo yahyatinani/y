@@ -100,9 +100,6 @@ jobs:
       - name: publish watchosX64 release
         run: ./gradlew publishWatchosX64PublicationToDeployRepository
 
-      - name: publish watchosX86 release
-        run: ./gradlew publishWatchosX86PublicationToDeployRepository
-
       - name: publish watchosArm32 release
         run: ./gradlew publishWatchosArm32PublicationToDeployRepository
 
@@ -135,9 +132,6 @@ jobs:
 
       - name: publish iosArm64 release
         run: ./gradlew publishIosArm64PublicationToDeployRepository
-
-      - name: publish iosArm32 release
-        run: ./gradlew publishIosArm32PublicationToDeployRepository
 
       - name: publish iosSimulatorArm64 release
         run: ./gradlew publishIosSimulatorArm64PublicationToDeployRepository
