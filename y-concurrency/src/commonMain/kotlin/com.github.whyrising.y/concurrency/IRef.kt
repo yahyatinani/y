@@ -9,7 +9,7 @@ interface IRef : IDeref {
 
   fun addWatch(
     key: Any,
-    callback: (key: Any, ref: IRef, oldVal: Any?, newVal: Any?) -> Any
+    callback: (key: Any, ref: IRef, oldVal: Any?, newVal: Any?) -> Any,
   ): IRef
 
   fun removeWatch(key: Any): IRef

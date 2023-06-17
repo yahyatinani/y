@@ -53,7 +53,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         currentHash,
         currentKey,
         currentValue,
-        leafFlag
+        leafFlag,
       ) as BitMapIndexedNode<String, Int>
 
       val newKey = "8"
@@ -70,7 +70,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         currentValue,
         newHash,
         newKey,
-        newValue
+        newValue,
       ) as BitMapIndexedNode<String, Int>
       val array = subNode.array
 
@@ -99,7 +99,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         currentHash,
         currentKey,
         currentValue,
-        leafFlag
+        leafFlag,
       ) as BitMapIndexedNode<String, Int>
 
       val newKey = "18"
@@ -116,7 +116,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         currentValue,
         newHash,
         newKey,
-        newValue
+        newValue,
       ) as BitMapIndexedNode<String, Int>
       val array = subNode.array
 
@@ -144,7 +144,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         currentHash,
         currentKey,
         currentValue,
-        leafFlag
+        leafFlag,
       ) as BitMapIndexedNode<String, Int>
 
       val newShift = 15
@@ -163,7 +163,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         currentValue,
         newHash,
         newKey,
-        newValue
+        newValue,
       ) as BitMapIndexedNode<String, Int>
       val array = node.array
       val subNode = array[0] as BitMapIndexedNode<String, Int>
@@ -199,7 +199,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         currentHash,
         currentKey,
         currentValue,
-        leafFlag
+        leafFlag,
       ) as BitMapIndexedNode<String, Int>
 
       val newKey = "J2RCvlt3yJ"
@@ -214,7 +214,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         currentValue,
         newHash,
         newKey,
-        newValue
+        newValue,
       ) as HashCollisionNode<String, Int>
       val array = collisionNode.array
 
@@ -300,7 +300,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         keyHash,
         key,
         value,
-        leafFlag
+        leafFlag,
       ) as BitMapIndexedNode<String, Int>
       val newArray = newNode.array
 
@@ -367,7 +367,7 @@ class BitMapIndexedNodeTest : FreeSpec({
               hasheq(4),
               4,
               "4",
-              leafFlag
+              leafFlag,
             )
 
           val newNode: Node<Number, String> = node.assoc(
@@ -376,7 +376,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(4L),
             4L,
             "1",
-            leafFlag
+            leafFlag,
           )
 
           newNode shouldBeSameInstanceAs node
@@ -394,7 +394,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(4),
             4,
             "4",
-            leafFlag
+            leafFlag,
           ) as BitMapIndexedNode<Number, String>
 
           val newNode = node.assoc(
@@ -403,7 +403,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(4L),
             4L,
             "1",
-            leafFlag
+            leafFlag,
           ) as BitMapIndexedNode<String, Int>
 
           node.array.size shouldBeExactly 2
@@ -436,7 +436,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(key),
             key,
             i,
-            leafFlag
+            leafFlag,
           )
           i += 1
         }
@@ -447,7 +447,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           hasheq("36"),
           "36",
           36,
-          leafFlag
+          leafFlag,
         )
         val newArray = newNode.array
         val subNode = newArray[24] as BitMapIndexedNode<String, Int>
@@ -474,7 +474,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(key),
             key,
             i,
-            leafFlag
+            leafFlag,
           )
           i += 2
         }
@@ -489,7 +489,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           hasheq("424"),
           "424",
           424,
-          leafFlag
+          leafFlag,
         )
         val newArray = (
           (newNode.array[5] as BitMapIndexedNode<String, Int>)
@@ -637,7 +637,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         shift,
         hasheq(key),
         key,
-        removedLeaf
+        removedLeaf,
       )
 
       newNode shouldBeSameInstanceAs n
@@ -660,7 +660,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           shift,
           hasheq(delKey),
           delKey,
-          removedLeaf
+          removedLeaf,
         )
 
         newNode shouldBeSameInstanceAs n
@@ -686,7 +686,7 @@ class BitMapIndexedNodeTest : FreeSpec({
               hasheq(k),
               k,
               i,
-              leafFlag
+              leafFlag,
             ) as BitMapIndexedNode<String, Int>
             i += 2
           }
@@ -696,7 +696,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             shift,
             hash,
             key,
-            removedLeaf
+            removedLeaf,
           ) as BitMapIndexedNode<String, Int>
 
           newNode.array.size shouldBeExactly n.array.size - 2
@@ -726,7 +726,7 @@ class BitMapIndexedNodeTest : FreeSpec({
               hasheq(k),
               k,
               i,
-              leafFlag
+              leafFlag,
             ) as BitMapIndexedNode<String, Int>
             i += 2
           }
@@ -736,7 +736,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             shift,
             keyHash1,
             key1,
-            removedLeaf1
+            removedLeaf1,
           ) as BitMapIndexedNode<String, Int>
           val bitpos1 = PersistentHashMap.bitpos(keyHash1, shift)
 
@@ -745,7 +745,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             shift,
             keyHash2,
             key2,
-            removedLeaf2
+            removedLeaf2,
           ) as BitMapIndexedNode<String, Int>
           val bitpos2 = PersistentHashMap.bitpos(keyHash2, shift)
 
@@ -786,7 +786,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(k),
             k,
             i,
-            leafFlag
+            leafFlag,
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }
@@ -796,7 +796,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           shift,
           keyHash,
           key,
-          removedLeaf
+          removedLeaf,
         ) as BitMapIndexedNode<String, Int>
 
         newNode.array[2] shouldBe "12"
@@ -827,7 +827,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(k),
             k,
             i,
-            leafFlag
+            leafFlag,
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }
@@ -838,7 +838,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           shift,
           keyHash,
           key,
-          removedLeaf
+          removedLeaf,
         ) as BitMapIndexedNode<String, Int>
         val newSubNode = newNode.array[35]
           as BitMapIndexedNode<String, Int>
@@ -868,7 +868,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(k),
             k,
             i,
-            leafFlag
+            leafFlag,
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }
@@ -878,7 +878,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           shift,
           keyHash,
           key,
-          removedLeaf
+          removedLeaf,
         ) as BitMapIndexedNode<String, Int>
 
         val newSubNode = newNode.array[10]
@@ -906,7 +906,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(k),
             k,
             i,
-            leafFlag
+            leafFlag,
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }
@@ -916,7 +916,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           shift,
           keyHash,
           key,
-          removedLeaf
+          removedLeaf,
         ) as BitMapIndexedNode<String, Int>
 
         newNode shouldBeSameInstanceAs n
@@ -939,7 +939,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           hasheq(k),
           k,
           i,
-          leafFlag
+          leafFlag,
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -963,7 +963,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           hasheq(k),
           k,
           i,
-          leafFlag
+          leafFlag,
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -983,7 +983,7 @@ class BitMapIndexedNodeTest : FreeSpec({
         hasheq(k),
         k,
         "1L",
-        leafFlag
+        leafFlag,
       ) as BitMapIndexedNode<Any, String>
 
       n.find(shift, hasheq(1), 1, "notFound") shouldBe "1L"
@@ -1005,7 +1005,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           hasheq(k),
           k,
           i,
-          leafFlag
+          leafFlag,
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -1027,7 +1027,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           hasheq(k),
           k,
           i,
-          leafFlag
+          leafFlag,
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -1054,7 +1054,7 @@ class BitMapIndexedNodeTest : FreeSpec({
           hasheq(k),
           k,
           i,
-          leafFlag
+          leafFlag,
         ) as BitMapIndexedNode<String, Int>
         i += 2
       }
@@ -1100,7 +1100,7 @@ class BitMapIndexedNodeTest : FreeSpec({
             hasheq(k),
             k,
             i,
-            leafFlag
+            leafFlag,
           ) as BitMapIndexedNode<String, Int>
           i += 2
         }

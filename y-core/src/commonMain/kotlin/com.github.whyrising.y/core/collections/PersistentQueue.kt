@@ -14,7 +14,7 @@ import kotlinx.serialization.Transient
 class PersistentQueue<out E> private constructor(
   override val count: Int,
   val front: ISeq<E>,
-  val back: PersistentVector<E>
+  val back: PersistentVector<E>,
 ) : IPersistentList<E>, Collection<E>, InstaCount, IHashEq {
   @Transient
   private var _hash by atomic(0)
@@ -167,7 +167,7 @@ class PersistentQueue<out E> private constructor(
 
   class Seq<E>(
     private val front: ISeq<E>,
-    private val back: ISeq<E>
+    private val back: ISeq<E>,
   ) : ASeq<E>() {
     override val count: Int
       get() = count(front) + count(back)

@@ -529,7 +529,7 @@ class AtomTest : FreeSpec({
 private fun TestScope.runParallelWork(
   coroutinesCount: Int,
   repeatCount: Int,
-  action: () -> Unit
+  action: () -> Unit,
 ) = launch(Dispatchers.Default) {
   repeat(coroutinesCount) {
     launch {

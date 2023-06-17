@@ -4,7 +4,7 @@ import com.github.whyrising.y.core.collections.PersistentList.Empty
 
 class Cons<out E>(
   private val _first: E,
-  private val _rest: ISeq<E>
+  private val _rest: ISeq<E>,
 ) : ASeq<E>() {
 
   override fun first(): E = _first

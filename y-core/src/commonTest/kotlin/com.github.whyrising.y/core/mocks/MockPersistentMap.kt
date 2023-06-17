@@ -7,7 +7,7 @@ import com.github.whyrising.y.core.collections.ISeq
 import com.github.whyrising.y.core.collections.PersistentArrayMap
 
 class MockPersistentMap<K, V> private constructor(
-  private val map: PersistentArrayMap<K, V>
+  private val map: PersistentArrayMap<K, V>,
 ) : IPersistentMap<K, V>, Map<K, V> {
 
   override fun assoc(key: K, value: V): IPersistentMap<K, V> =
@@ -38,8 +38,9 @@ class MockPersistentMap<K, V> private constructor(
 
   companion object {
     @Suppress("UNCHECKED_CAST")
-    operator
-    fun <K, V> invoke(vararg pairs: Pair<K, V>): MockPersistentMap<K, V> =
+    operator fun <K, V> invoke(
+      vararg pairs: Pair<K, V>,
+    ): MockPersistentMap<K, V> =
       MockPersistentMap(PersistentArrayMap.createWithCheck(*pairs))
   }
 

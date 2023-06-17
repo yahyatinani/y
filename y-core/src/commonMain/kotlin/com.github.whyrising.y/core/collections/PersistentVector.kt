@@ -16,12 +16,12 @@ sealed class PersistentVector<out E>(
   override val count: Int,
   internal val shift: Int,
   internal val root: Node<E>,
-  internal val tail: Array<Any?>
+  internal val tail: Array<Any?>,
 ) : APersistentVector<E>(), IMutableCollection<E> {
 
   override fun assocN(
     index: Int,
-    value: @UnsafeVariance E
+    value: @UnsafeVariance E,
   ): IPersistentVector<E> {
     @Suppress("UNCHECKED_CAST")
     fun assoc(level: Int, node: Node<E>): Node<E> {
@@ -61,10 +61,13 @@ sealed class PersistentVector<out E>(
     val rootNode = Node<E>(parent.edit, parent.array.copyOf())
     val subIndex = ((count - 1) ushr level) and 0x01f
 
-    val nodeToInsert: Node<E> = if (level == SHIFT) tail
-    else when (val child = parent.array[subIndex]) {
-      null -> newPath(root.edit, level - 5, tail)
-      else -> pushTail(level - SHIFT, child as Node<E>, tail)
+    val nodeToInsert: Node<E> = if (level == SHIFT) {
+      tail
+    } else {
+      when (val child = parent.array[subIndex]) {
+        null -> newPath(root.edit, level - 5, tail)
+        else -> pushTail(level - SHIFT, child as Node<E>, tail)
+      }
     }
 
     rootNode.array[subIndex] = nodeToInsert
@@ -216,7 +219,7 @@ sealed class PersistentVector<out E>(
 
   open class Node<out T>(
     val edit: Edit,
-    val array: Array<Any?>
+    val array: Array<Any?>,
   ) {
     constructor(edit: Edit) : this(edit, arrayOfNulls(BF))
 
@@ -227,7 +230,7 @@ sealed class PersistentVector<out E>(
     0,
     SHIFT,
     EmptyNode,
-    arrayOfNulls(0)
+    arrayOfNulls(0),
   ) {
     override fun toString(): String = "[]"
   }
@@ -236,33 +239,33 @@ sealed class PersistentVector<out E>(
     _count: Int,
     _shift: Int,
     _root: Node<E>,
-    _tail: Array<Any?>
+    _tail: Array<Any?>,
   ) : PersistentVector<E>(_count, _shift, _root, _tail)
 
   internal class ChunkedSeq<out E>(
     val vector: PersistentVector<E>,
     val index: Int,
     val offset: Int,
-    val node: Array<Any?> = vector.leafArrayBy(index)
+    val node: Array<Any?> = vector.leafArrayBy(index),
   ) : ASeq<E>(), IChunkedSeq<E>, InstaCount {
     constructor(
       vector: PersistentVector<E>,
       node: Array<Any?>,
       index: Int,
-      offset: Int
+      offset: Int,
     ) : this(vector, index, offset, node)
 
     @Suppress("UNCHECKED_CAST")
     override fun firstChunk(): Chunk<E> = ArrayChunk(
       node as Array<E>,
-      offset
+      offset,
     )
 
     override fun restChunks(): ISeq<E> = when {
       index + node.size < vector.size -> ChunkedSeq(
         vector,
         index + node.size,
-        0
+        0,
       )
       else -> PersistentList.Empty
     }
@@ -288,7 +291,7 @@ sealed class PersistentVector<out E>(
     size: Int,
     shift: Int,
     root: Node<E>,
-    tail: Array<Any?>
+    tail: Array<Any?>,
   ) : InstaCount, ITransientCollection<E> {
 
     private val _count: AtomicInt = atomic(size)
@@ -297,9 +300,11 @@ sealed class PersistentVector<out E>(
     private val _tail: AtomicRef<Array<Any?>> = atomic(tail)
 
     fun ensureEditable() {
-      if (root.edit.value == null) throw IllegalStateException(
-        "Transient used after persistent() call"
-      )
+      if (root.edit.value == null) {
+        throw IllegalStateException(
+          "Transient used after persistent() call",
+        )
+      }
     }
 
     override val count: Int
@@ -335,10 +340,13 @@ sealed class PersistentVector<out E>(
 
       val rootNode = ensureEditable(parent)
 
-      val nodeToInsert: Node<E> = if (level == SHIFT) tail
-      else when (val child = rootNode.array[subIndex]) {
-        null -> newPath(root.edit, level - 5, tail)
-        else -> pushTail(level - SHIFT, child as Node<E>, tail)
+      val nodeToInsert: Node<E> = if (level == SHIFT) {
+        tail
+      } else {
+        when (val child = rootNode.array[subIndex]) {
+          null -> newPath(root.edit, level - 5, tail)
+          else -> pushTail(level - SHIFT, child as Node<E>, tail)
+        }
       }
 
       rootNode.array[subIndex] = nodeToInsert
@@ -409,7 +417,7 @@ sealed class PersistentVector<out E>(
           vec.count,
           vec.shift,
           editableRoot(vec.root),
-          maximizeTail(vec.tail)
+          maximizeTail(vec.tail),
         )
     }
   }
@@ -494,7 +502,7 @@ sealed class PersistentVector<out E>(
     private tailrec fun <E> newPath(
       edit: Edit,
       level: Int,
-      node: Node<E>
+      node: Node<E>,
     ): Node<E> {
       if (level == 0) return node
 

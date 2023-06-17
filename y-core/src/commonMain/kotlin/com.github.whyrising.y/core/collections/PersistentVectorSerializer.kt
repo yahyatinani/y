@@ -18,19 +18,19 @@ class PersistentVectorSerializer<E>(private val eSerializer: KSerializer<E>) :
   @OptIn(ExperimentalSerializationApi::class)
   override val descriptor: SerialDescriptor = SerialDescriptor(
     PERSISTENT_VECTOR_NAME,
-    listSerializer.descriptor
+    listSerializer.descriptor,
   )
 
   override fun deserialize(decoder: Decoder): PersistentVector<E> =
     deserializePersistentCollection(
       decoder,
       descriptor,
-      PersistentVector<E>()
+      PersistentVector<E>(),
     ) { compositeDecoder, index, _ ->
       compositeDecoder.decodeSerializableElement(
         descriptor,
         index,
-        eSerializer
+        eSerializer,
       )
     } as PersistentVector<E>
 

@@ -20,7 +20,7 @@ internal const val CHUNK_SIZE = 32
 
 enum class Category {
   INTEGER,
-  FLOATING
+  FLOATING,
 }
 
 fun category(n: Number): Category = when (n) {
@@ -31,7 +31,7 @@ fun category(n: Number): Category = when (n) {
   is Float -> Category.FLOATING
   is Double -> Category.FLOATING
   else -> throw IllegalStateException(
-    "The category of the number: $n is not supported"
+    "The category of the number: $n is not supported",
   )
 }
 
@@ -43,7 +43,7 @@ fun ops(n: Number): Ops = when (n) {
   is Float -> DoubleOps
   is Double -> DoubleOps
   else -> throw IllegalStateException(
-    "The Ops of the number: $n is not supported"
+    "The Ops of the number: $n is not supported",
   )
 }
 
@@ -76,7 +76,7 @@ fun <E> lazyChunkedSeq(iterator: Iterator<E>): ISeq<E> = when {
       array[i++] = iterator.next()
     ChunkedSeq(
       ArrayChunk(array as Array<*>, 0, i),
-      lazyChunkedSeq(iterator)
+      lazyChunkedSeq(iterator),
     )
   }
   else -> Empty

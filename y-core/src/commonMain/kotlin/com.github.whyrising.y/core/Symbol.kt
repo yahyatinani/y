@@ -34,6 +34,6 @@ class Symbol(override val name: String) :
 
   operator fun <V> invoke(
     map: Any,
-    default: V? = null
+    default: V? = null,
   ): V? = get(map, this, default)
 }

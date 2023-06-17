@@ -60,7 +60,7 @@ abstract class APersistentVector<out E> :
 
   private fun compareWith(
     other: Any?,
-    areEqual: (e1: E, e2: Any?) -> Boolean
+    areEqual: (e1: E, e2: Any?) -> Boolean,
   ): Boolean {
     when {
       other == null -> return false
@@ -78,6 +78,7 @@ abstract class APersistentVector<out E> :
 
         return true
       }
+
       other is List<*> -> {
         if (other.size != count) {
           return false
@@ -93,6 +94,7 @@ abstract class APersistentVector<out E> :
 
         return true
       }
+
       else -> {
         if (other !is Sequential) return false
 
@@ -147,7 +149,7 @@ abstract class APersistentVector<out E> :
 
   override fun assoc(
     key: Int,
-    value: @UnsafeVariance E
+    value: @UnsafeVariance E,
   ): IPersistentVector<E> = assocN(key, value)
 
   override fun subvec(start: Int, end: Int): IPersistentVector<E> =
@@ -295,7 +297,7 @@ abstract class APersistentVector<out E> :
 
   class Seq<out E>(
     private val pv: IPersistentVector<E>,
-    override val index: Int = 0
+    override val index: Int = 0,
   ) : ASeq<E>(), IndexedSeq {
 
     override fun first(): E = pv.nth(index)
@@ -327,30 +329,33 @@ abstract class APersistentVector<out E> :
   internal class SubVector<out E> private constructor(
     internal val vec: IPersistentVector<E>,
     internal val start: Int,
-    internal val end: Int
+    internal val end: Int,
   ) : APersistentVector<E>() {
 
     override fun nth(index: Int): E = (start + index).let {
       when {
         index < 0 -> throw IndexOutOfBoundsException(
-          "The index should be >= 0: $index"
+          "The index should be >= 0: $index",
         )
+
         it >= end -> throw IndexOutOfBoundsException()
         else -> return vec.nth(it)
       }
     }
 
-    override
-    fun assocN(index: Int, value: @UnsafeVariance E): IPersistentVector<E> =
-      (start + index).let {
-        when {
-          it > end -> throw IndexOutOfBoundsException(
-            "Index $index is out of bounds."
-          )
-          it == end -> conj(value)
-          else -> SubVector(vec.assocN(it, value), start, end)
-        }
+    override fun assocN(
+      index: Int,
+      value: @UnsafeVariance E,
+    ): IPersistentVector<E> = (start + index).let {
+      when {
+        it > end -> throw IndexOutOfBoundsException(
+          "Index $index is out of bounds.",
+        )
+
+        it == end -> conj(value)
+        else -> SubVector(vec.assocN(it, value), start, end)
       }
+    }
 
     override fun conj(e: @UnsafeVariance E): IPersistentVector<E> =
       SubVector(vec.conj(e), start, end + 1)
@@ -373,17 +378,20 @@ abstract class APersistentVector<out E> :
       operator fun <E> invoke(
         vec: IPersistentVector<E>,
         start: Int,
-        end: Int
+        end: Int,
       ): IPersistentVector<E> = when {
         start > end -> throw IndexOutOfBoundsException(
-          "Make sure that the start < end: $start < $end!"
+          "Make sure that the start < end: $start < $end!",
         )
+
         start < 0 -> throw IndexOutOfBoundsException(
-          "Make sure that the start >= 0: $start >= 0!"
+          "Make sure that the start >= 0: $start >= 0!",
         )
+
         end > vec.count -> throw IndexOutOfBoundsException(
-          "Make sure that the end <= count: $end <= ${vec.count}!"
+          "Make sure that the end <= count: $end <= ${vec.count}!",
         )
+
         start == end -> EmptyVector
         else -> SubVector(vec, start, end)
       }
@@ -392,7 +400,7 @@ abstract class APersistentVector<out E> :
 
   internal class RSeq<E>(
     internal val vec: IPersistentVector<E>,
-    override var index: Int
+    override var index: Int,
   ) : ASeq<E>(), IndexedSeq {
 
     override fun first(): E = vec.nth(index)

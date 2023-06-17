@@ -604,7 +604,7 @@ class PersistentArrayMapTest : FreeSpec({
           val transientMap = l.fold(initial) { map, entry ->
             map.assoc(
               entry.key,
-              entry.value
+              entry.value,
             ) as PersistentArrayMap<Int, String>
           }.asTransient()
 

@@ -39,11 +39,13 @@ sealed class PersistentHashSet<out E>(map: IPersistentMap<E, E>) :
     override fun hashCode(): Int = 0
   }
 
-  internal
-  object EmptyHashSet : AEmptyHashSet<Nothing>(PersistentHashMap.EmptyHashMap)
+  internal object EmptyHashSet : AEmptyHashSet<Nothing>(
+    PersistentHashMap.EmptyHashMap,
+  )
 
-  internal
-  class HashSet<out E>(m: IPersistentMap<E, E>) : PersistentHashSet<E>(m)
+  internal class HashSet<out E>(m: IPersistentMap<E, E>) : PersistentHashSet<E>(
+    m,
+  )
 
   internal class TransientHashSet<out E>(tmap: TransientMap<E, E>) :
     ATransientSet<E>(tmap) {

@@ -13,7 +13,7 @@ sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
   @Suppress("UNCHECKED_CAST")
   internal class Cons<out E>(
     internal val first: E,
-    internal val rest: IPersistentList<E>
+    internal val rest: IPersistentList<E>,
   ) : PersistentList<E>() {
 
     override fun first(): E = first
@@ -39,7 +39,7 @@ sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
     override fun hasheq(): Int = HASH_EQ
 
     override fun first(): E = throw NoSuchElementException(
-      "Calling first() on empty PersistentList."
+      "Calling first() on empty PersistentList.",
     )
 
     override fun rest(): ISeq<E> = this
@@ -59,8 +59,7 @@ sealed class PersistentList<out E> : ASeq<E>(), IPersistentList<E>, InstaCount {
     // List implementation
     override val size: Int = 0
 
-    override
-    fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean =
+    override fun containsAll(elements: Collection<@UnsafeVariance E>): Boolean =
       elements.isEmpty()
 
     override fun get(index: Int): E =

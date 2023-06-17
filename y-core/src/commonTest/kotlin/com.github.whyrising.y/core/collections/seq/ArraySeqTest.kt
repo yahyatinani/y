@@ -247,7 +247,7 @@ class ArraySeqTest : FreeSpec({
       restSeq shouldBeSameInstanceAs Empty
       ShortArraySeq(
         shortArrayOf(1),
-        0
+        0,
       ).rest() shouldBeSameInstanceAs Empty
     }
 
@@ -293,12 +293,12 @@ class ArraySeqTest : FreeSpec({
 
       ShortArraySeq(
         shortArrayOf(15, 2, 5),
-        0
+        0,
       ).indexOf(52) shouldBeExactly -1
 
       ShortArraySeq(
         shortArrayOf(15, 2, 5),
-        0
+        0,
       ).indexOf(2) shouldBeExactly 1
 
       (ShortArraySeq(shortArrayOf(15, 2, 5), 0).rest() as ShortArraySeq)
@@ -310,7 +310,7 @@ class ArraySeqTest : FreeSpec({
 
       ShortArraySeq(
         shortArrayOf(5, 5, 3),
-        0
+        0,
       ).lastIndexOf(3) shouldBeExactly 2
 
       (ShortArraySeq(shortArrayOf(5, 3, 3), 0).rest() as ShortArraySeq)
@@ -318,7 +318,7 @@ class ArraySeqTest : FreeSpec({
 
       ShortArraySeq(
         shortArrayOf(5, 5, 3),
-        0
+        0,
       ).lastIndexOf(5) shouldBeExactly 1
 
       (ShortArraySeq(shortArrayOf(5, 5, 5, 3), 0).rest() as ShortArraySeq)
@@ -417,7 +417,7 @@ class ArraySeqTest : FreeSpec({
 
       IntArraySeq(
         intArrayOf(5, 5, 3),
-        0
+        0,
       ).lastIndexOf(55) shouldBeExactly -1
     }
   }
@@ -461,7 +461,7 @@ class ArraySeqTest : FreeSpec({
       restSeq shouldBeSameInstanceAs Empty
       FloatArraySeq(
         floatArrayOf(1F),
-        0
+        0,
       ).rest() shouldBeSameInstanceAs Empty
     }
 
@@ -491,7 +491,7 @@ class ArraySeqTest : FreeSpec({
 
       FloatArraySeq(
         floatArrayOf(54F, 5F),
-        0
+        0,
       ).rest().count shouldBeExactly 1
     }
 
@@ -517,7 +517,7 @@ class ArraySeqTest : FreeSpec({
       (
         FloatArraySeq(
           floatArrayOf(15F, 2F, 5F),
-          0
+          0,
         ).rest() as FloatArraySeq
         )
         .indexOf(2F) shouldBeExactly 0
@@ -538,7 +538,7 @@ class ArraySeqTest : FreeSpec({
       (
         FloatArraySeq(
           floatArrayOf(5F, 5F, 5F, 3F),
-          0
+          0,
         ).rest() as FloatArraySeq
         )
         .lastIndexOf(5F) shouldBeExactly 1
@@ -612,7 +612,7 @@ class ArraySeqTest : FreeSpec({
 
       DoubleArraySeq(
         doubleArrayOf(1.0, 2.0, 3.0),
-        0
+        0,
       ).count shouldBeExactly 3
 
       DoubleArraySeq(doubleArrayOf(1.0), 0).rest().count shouldBeExactly 0
@@ -642,7 +642,7 @@ class ArraySeqTest : FreeSpec({
 
       val doubleArraySeq = DoubleArraySeq(
         doubleArrayOf(15.0, 2.0, 5.0),
-        0
+        0,
       ).rest() as DoubleArraySeq
       doubleArraySeq.indexOf(2.0) shouldBeExactly 0
     }
@@ -650,7 +650,7 @@ class ArraySeqTest : FreeSpec({
     "lastIndexOf(element)" {
       DoubleArraySeq(
         doubleArrayOf(),
-        0
+        0,
       ).lastIndexOf(12.0) shouldBeExactly -1
 
       DoubleArraySeq(doubleArrayOf(5.0, 5.0, 3.0), 0)
@@ -755,7 +755,7 @@ class ArraySeqTest : FreeSpec({
 
       LongArraySeq(
         longArrayOf(15, 2, 5),
-        0
+        0,
       ).indexOf(52) shouldBeExactly -1
 
       LongArraySeq(longArrayOf(15, 2, 5), 0).indexOf(2) shouldBeExactly 1
@@ -769,7 +769,7 @@ class ArraySeqTest : FreeSpec({
 
       LongArraySeq(
         longArrayOf(5, 5, 3),
-        0
+        0,
       ).lastIndexOf(3) shouldBeExactly 2
 
       (LongArraySeq(longArrayOf(5, 3, 3), 0).rest() as LongArraySeq)
@@ -777,7 +777,7 @@ class ArraySeqTest : FreeSpec({
 
       LongArraySeq(
         longArrayOf(5, 5, 3),
-        0
+        0,
       ).lastIndexOf(5) shouldBeExactly 1
 
       (LongArraySeq(longArrayOf(5, 5, 5, 3), 0).rest() as LongArraySeq)
@@ -785,7 +785,7 @@ class ArraySeqTest : FreeSpec({
 
       LongArraySeq(
         longArrayOf(5, 5, 3),
-        0
+        0,
       ).lastIndexOf(55) shouldBeExactly -1
     }
   }
@@ -872,7 +872,7 @@ class ArraySeqTest : FreeSpec({
 
       ByteArraySeq(
         byteArrayOf(15, 2, 5),
-        0
+        0,
       ).indexOf(52) shouldBeExactly -1
 
       ByteArraySeq(byteArrayOf(15, 2, 5), 0).indexOf(2) shouldBeExactly 1
@@ -886,7 +886,7 @@ class ArraySeqTest : FreeSpec({
 
       ByteArraySeq(
         byteArrayOf(5, 5, 3),
-        0
+        0,
       ).lastIndexOf(3) shouldBeExactly 2
 
       (ByteArraySeq(byteArrayOf(5, 3, 3), 0).rest() as ByteArraySeq)
@@ -894,7 +894,7 @@ class ArraySeqTest : FreeSpec({
 
       ByteArraySeq(
         byteArrayOf(5, 5, 3),
-        0
+        0,
       ).lastIndexOf(5) shouldBeExactly 1
 
       (ByteArraySeq(byteArrayOf(5, 5, 5, 3), 0).rest() as ByteArraySeq)
@@ -902,7 +902,7 @@ class ArraySeqTest : FreeSpec({
 
       ByteArraySeq(
         byteArrayOf(5, 5, 3),
-        0
+        0,
       ).lastIndexOf(55) shouldBeExactly -1
     }
   }
@@ -946,7 +946,7 @@ class ArraySeqTest : FreeSpec({
       restSeq shouldBeSameInstanceAs Empty
       CharArraySeq(
         charArrayOf('1'),
-        0
+        0,
       ).rest() shouldBeSameInstanceAs Empty
     }
 
@@ -976,7 +976,7 @@ class ArraySeqTest : FreeSpec({
 
       CharArraySeq(
         charArrayOf('4', '5'),
-        0
+        0,
       ).rest().count shouldBeExactly 1
     }
 
@@ -1060,7 +1060,7 @@ class ArraySeqTest : FreeSpec({
     "rest() should return Empty seq when array is empty" {
       BooleanArraySeq(
         booleanArrayOf(),
-        0
+        0,
       ).rest() shouldBeSameInstanceAs Empty
 
       BooleanArraySeq(booleanArrayOf(true), 0)
@@ -1092,7 +1092,7 @@ class ArraySeqTest : FreeSpec({
 
       BooleanArraySeq(
         booleanArrayOf(true),
-        0
+        0,
       ).rest().count shouldBeExactly 0
 
       BooleanArraySeq(booleanArrayOf(true, true), 0).rest()
@@ -1112,7 +1112,7 @@ class ArraySeqTest : FreeSpec({
     "indexOf(element)" {
       BooleanArraySeq(
         booleanArrayOf(),
-        0
+        0,
       ).indexOf(true) shouldBeExactly -1
 
       BooleanArraySeq(booleanArrayOf(true, true), 0)

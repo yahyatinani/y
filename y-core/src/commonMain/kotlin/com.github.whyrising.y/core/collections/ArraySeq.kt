@@ -4,7 +4,7 @@ import com.github.whyrising.y.core.util.equals as equalz
 
 class ArraySeq<out E> internal constructor(
   val array: Array<out E>,
-  val i: Int
+  val i: Int,
 ) : ASeq<E>(), IndexedSeq {
 
   override fun first(): E = when {
@@ -59,7 +59,7 @@ class ArraySeq<out E> internal constructor(
 
   class ShortArraySeq(
     val array: ShortArray,
-    val i: Int
+    val i: Int,
   ) : ASeq<Short>(), IndexedSeq {
     override fun first(): Short = when {
       array.isEmpty() -> {
@@ -105,7 +105,7 @@ class ArraySeq<out E> internal constructor(
 
   class IntArraySeq(
     val array: IntArray,
-    val i: Int
+    val i: Int,
   ) : ASeq<Int>(), IndexedSeq {
     override fun first(): Int = when {
       array.isEmpty() -> {
@@ -146,7 +146,7 @@ class ArraySeq<out E> internal constructor(
 
   class FloatArraySeq(
     val array: FloatArray,
-    val i: Int
+    val i: Int,
   ) : ASeq<Float>(), IndexedSeq {
     override fun first(): Float = when {
       array.isEmpty() -> {
@@ -192,7 +192,7 @@ class ArraySeq<out E> internal constructor(
 
   class DoubleArraySeq(
     val array: DoubleArray,
-    val i: Int
+    val i: Int,
   ) : ASeq<Double>(), IndexedSeq {
     override fun first(): Double = when {
       array.isEmpty() -> {
@@ -238,7 +238,7 @@ class ArraySeq<out E> internal constructor(
 
   class LongArraySeq(
     val array: LongArray,
-    val i: Int
+    val i: Int,
   ) : ASeq<Long>(), IndexedSeq {
     override fun first(): Long = when {
       array.isEmpty() -> {
@@ -284,7 +284,7 @@ class ArraySeq<out E> internal constructor(
 
   class ByteArraySeq(
     val array: ByteArray,
-    val i: Int
+    val i: Int,
   ) : ASeq<Byte>(), IndexedSeq {
     override fun first(): Byte = when {
       array.isEmpty() -> {
@@ -330,7 +330,7 @@ class ArraySeq<out E> internal constructor(
 
   class CharArraySeq(
     val array: CharArray,
-    val i: Int
+    val i: Int,
   ) : ASeq<Char>(), IndexedSeq {
     override fun first(): Char = when {
       array.isEmpty() -> {
@@ -376,7 +376,7 @@ class ArraySeq<out E> internal constructor(
 
   class BooleanArraySeq(
     val array: BooleanArray,
-    val i: Int
+    val i: Int,
   ) : ASeq<Boolean>(), IndexedSeq {
     override fun first(): Boolean = when {
       array.isEmpty() -> {

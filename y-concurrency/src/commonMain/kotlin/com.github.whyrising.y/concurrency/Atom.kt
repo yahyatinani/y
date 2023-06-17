@@ -40,7 +40,7 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
   override fun <A1, A2> swap(
     arg1: A1,
     arg2: A2,
-    f: (currentVal: Any?, arg1: A1, arg2: A2) -> Any?
+    f: (currentVal: Any?, arg1: A1, arg2: A2) -> Any?,
   ): Any? {
     while (true) {
       val currentV = _state.value
@@ -69,7 +69,7 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
 
   override fun <A> swapVals(
     arg: A,
-    f: (currentVal: Any?, arg: A) -> Any?
+    f: (currentVal: Any?, arg: A) -> Any?,
   ): Pair<Any?, Any?> {
     while (true) {
       val oldValue = _state.value
@@ -86,7 +86,7 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
   override fun <A1, A2> swapVals(
     arg1: A1,
     arg2: A2,
-    f: (currentVal: Any?, arg1: A1, arg2: A2) -> Any?
+    f: (currentVal: Any?, arg1: A1, arg2: A2) -> Any?,
   ): Pair<Any?, Any?> {
     while (true) {
       val oldValue = _state.value

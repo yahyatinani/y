@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 fun <K, V> clearCache(
   rq: ReferenceQueue<Keyword>,
-  cache: ConcurrentHashMap<K, Reference<V>>
+  cache: ConcurrentHashMap<K, Reference<V>>,
 ) {
   // cleanup any dead entries
   if (rq.poll() != null) {

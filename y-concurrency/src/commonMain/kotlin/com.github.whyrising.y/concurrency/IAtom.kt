@@ -10,7 +10,7 @@ interface IAtom {
   fun <A1, A2> swap(
     arg1: A1,
     arg2: A2,
-    f: (currentVal: Any?, arg1: A1, arg2: A2) -> Any?
+    f: (currentVal: Any?, arg1: A1, arg2: A2) -> Any?,
   ): Any?
 
   fun compareAndSet(oldValue: Any?, newValue: Any?): Boolean

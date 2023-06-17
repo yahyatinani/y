@@ -13,10 +13,10 @@ abstract class ARef : IRef {
   private val lock = reentrantLock()
   private val _validator: AtomicRef<((Any?) -> Boolean)?> = atomic(null)
 
-  private
-  val _watches = atomic<IPersistentMap<Any, (Any, IRef, Any?, Any?) -> Any>>(
-    PersistentHashMap.EmptyHashMap
-  )
+  private val _watches =
+    atomic<IPersistentMap<Any, (Any, IRef, Any?, Any?) -> Any>>(
+      PersistentHashMap.EmptyHashMap,
+    )
 
   private fun validate(vf: ((Any?) -> Boolean)?, value: Any?) {
     if (vf == null) return
@@ -47,11 +47,11 @@ abstract class ARef : IRef {
     }
 
   override val watches: IPersistentMap<Any, (Any, IRef, Any?, Any?) -> Any?> by
-  _watches
+    _watches
 
   override fun addWatch(
     key: Any,
-    callback: (Any, IRef, Any?, Any?) -> Any
+    callback: (Any, IRef, Any?, Any?) -> Any,
   ): IRef {
     lock.withLock {
       _watches.value = _watches.value.assoc(key, callback)

@@ -322,7 +322,7 @@ class PersistentVectorTest : FreeSpec({
         1,
         2,
         3,
-        4
+        4,
       ).empty() shouldBeSameInstanceAs EmptyVector
     }
 
@@ -1014,7 +1014,7 @@ class PersistentVectorTest : FreeSpec({
 
         val subvec = vec.subList(
           fromIndex,
-          toIndex
+          toIndex,
         ) as APersistentVector.SubVector<Int>
 
         subvec.vec shouldBeSameInstanceAs vec
@@ -1101,7 +1101,7 @@ class PersistentVectorTest : FreeSpec({
         val subvec = APersistentVector.SubVector(
           vec,
           start,
-          end
+          end,
         ) as APersistentVector.SubVector<Int>
 
         subvec.vec shouldBeSameInstanceAs vec
@@ -1118,7 +1118,7 @@ class PersistentVectorTest : FreeSpec({
       val subvec = APersistentVector.SubVector(
         vec,
         start,
-        end
+        end,
       ) as APersistentVector.SubVector<Int>
 
       subvec.count shouldBeExactly end - start
@@ -1197,7 +1197,7 @@ class PersistentVectorTest : FreeSpec({
 
         val r = subvec.assocN(
           index,
-          value
+          value,
         ) as APersistentVector.SubVector<Int>
 
         r.nth(index) shouldBeExactly value
@@ -1285,7 +1285,7 @@ class PersistentVectorTest : FreeSpec({
         val subvec = APersistentVector.SubVector(
           vec,
           start,
-          end
+          end,
         ) as APersistentVector.SubVector<Int>
 
         val popped = subvec.pop() as APersistentVector.SubVector<Int>
@@ -1302,7 +1302,7 @@ class PersistentVectorTest : FreeSpec({
         val subvec = APersistentVector.SubVector(
           vec,
           start,
-          end
+          end,
         ) as APersistentVector.SubVector<Int>
 
         subvec.pop() shouldBeSameInstanceAs EmptyVector
