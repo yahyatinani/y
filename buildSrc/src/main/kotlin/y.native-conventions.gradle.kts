@@ -32,7 +32,10 @@ kotlin {
       val commonTest by getting
 
       val nativeMain by creating { dependsOn(commonMain) }
-      val nativeTest by creating { dependsOn(commonTest) }
+      val nativeTest by creating {
+        dependsOn(commonTest)
+        dependsOn(commonMain)
+      }
 
       targets.whenObjectAdded {
         if (this is KotlinNativeTarget) {

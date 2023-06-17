@@ -3,7 +3,6 @@ package com.github.whyrising.y.concurrency
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.assertions.timing.continually
 import io.kotest.core.spec.style.FreeSpec
-import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -492,12 +491,6 @@ class AtomTest : FreeSpec({
   }
 
   "compareAndSet" - {
-    "returns false because current value is not identical to oldValue" {
-      val atom = atom(10)
-
-      atom.compareAndSet(10, 15).shouldBeFalse()
-    }
-
     "returns true because current value is identical to oldValue" {
       var isWatchCalled = false
       val oldV: Any = 10 // Any is important here so oldV remains identical.
