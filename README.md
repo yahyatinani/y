@@ -1,8 +1,7 @@
 ![Y](docs/art/logo-with-text.png)
 ========
 
-[![Build Status](https://github.com/whyrising/y/workflows/build/badge.svg)](https://github.com/whyrising/y/actions) [![Sonatype Nexus (Snapshots)](https://img.shields.io/maven-central/v/com.github.whyrising.y/y-core?color=blue&label=latest%20release&server=https%3A%2F%2Foss.sonatype.org)](http://search.maven.org/#search|ga|1|com.github.whyrising.y) ![GitHub](https://img.shields.io/github/license/whyrising/y) [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.whyrising.y/y-core?label=latest%20snapshot&server=https%3A%2F%2Foss.sonatype.org)](https://oss.sonatype.org/content/repositories/snapshots/com/github/whyrising/y/)
-[![codecov](https://codecov.io/gh/whyrising/y/branch/main/graph/badge.svg?token=O7NV8M4TTP)](https://codecov.io/gh/whyrising/y)
+[![build](https://github.com/yahyatinani/y/actions/workflows/main.yml/badge.svg)](https://github.com/yahyatinani/y/actions/workflows/main.yml) [![Sonatype Nexus (Snapshots)](https://img.shields.io/maven-central/v/com.github.whyrising.y/y-core?color=blue&label=latest%20release&server=https%3A%2F%2Foss.sonatype.org)](http://search.maven.org/#search|ga|1|com.github.whyrising.y) ![GitHub](https://img.shields.io/github/license/whyrising/y) [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.whyrising.y/y-core?label=latest%20snapshot&server=https%3A%2F%2Foss.sonatype.org)](https://oss.sonatype.org/content/repositories/snapshots/com/github/whyrising/y/) [![codecov](https://codecov.io/gh/yahyatinani/y/branch/main/graph/badge.svg?token=O7NV8M4TTP)](https://codecov.io/gh/yahyatinani/y)
 
 `y` is a Kotlin multiplatform library that aims to port and provide effective
 concepts inspired by other languages or libraries.

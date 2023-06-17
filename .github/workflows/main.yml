@@ -1,4 +1,4 @@
-name: main build
+name: build
 
 on:
   push:
@@ -116,7 +116,7 @@ jobs:
       - name: Run tests
         run: ./gradlew mingwX64Test --scan
 
-      - name: publish mingw64 & mingw86 snapshot
+      - name: publish mingw64 snapshot
         run: ./gradlew publishMingwX64PublicationToDeployRepository
 
       - name: Bundle the build report (when failure)
