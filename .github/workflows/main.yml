@@ -37,12 +37,12 @@ jobs:
         run: ./gradlew ${{ matrix.target }} --scan
 
       - name: Generate Kover reports
-        run: ./gradlew koverMergedReport
+        run: ./gradlew koverXmlReport
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         with:
-          files: build/reports/kover/merged-report/result.xml
+          files: build/reports/kover/report.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: true

@@ -7,6 +7,11 @@ plugins {
 
 apply plugin: 'kotlinx-atomicfu'
 
+dependencies {
+  kover(project(":y-core"))
+  kover(project(":y-concurrency"))
+}
+
 spotless {
   groovyGradle {
     target "**/*.gradle"
@@ -35,16 +40,13 @@ spotless {
   }
 }
 
-koverMerged {
-  enable()
-
-  xmlReport {
-    onCheck.set(true)
-    reportFile.set(layout.buildDirectory.file("reports/kover/merged-report/result.xml"))
-  }
-
-  htmlReport {
-    onCheck.set(true)
-    reportDir.set(layout.buildDirectory.dir("reports/kover/merged-report/html-result"))
+koverReport {
+  defaults {
+    xml {
+      onCheck = true
+    }
+    html {
+      onCheck = true
+    }
   }
 }
