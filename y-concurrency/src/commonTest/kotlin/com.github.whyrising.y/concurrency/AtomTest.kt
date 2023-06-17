@@ -35,6 +35,16 @@ class AtomTest : FreeSpec({
     value shouldBe atom.state
   }
 
+  "invoke() should return the value of internal state of the atom" {
+    val n = 10
+    val atom = Atom(n)
+
+    val value = atom()
+
+    value shouldBe n
+    value shouldBe atom.state
+  }
+
   "swap() updates the value of atom to f(current-value-of-atom)" {
     val n = 10
     val atom = Atom(n)
