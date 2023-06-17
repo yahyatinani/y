@@ -1,21 +1,24 @@
 [versions]
-kotlin = "1.7.10"
+kotlin = "1.8.21"
 ktlint = "0.46.1"
-kover = "0.6.0"
-kotest = "5.4.2"
+kover = "0.7.1"
+kotest = "5.6.2"
 datetime = "0.4.0"
-atomicfu = "0.18.3"
-coroutines = "1.6.4"
-serialization = "1.4.0"
-spotless = "6.11.0"
+atomicfu = "0.20.2"
+coroutines = "1.7.0"
+serialization = "1.5.1"
+spotless = "6.19.0"
 
 [libraries]
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+
 kotest-engine = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
 kotest-jvm-runner = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 kotlinx-atomicfu-plugin = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicfu" }

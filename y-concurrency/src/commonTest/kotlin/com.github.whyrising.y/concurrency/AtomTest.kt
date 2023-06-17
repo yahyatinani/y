@@ -144,7 +144,7 @@ class AtomTest : FreeSpec({
       key shouldBeSameInstanceAs k1
       ref shouldBeSameInstanceAs atom
       oldVal shouldBe oldV
-      newVal shouldBe newV
+      newVal!! shouldBe newV
     }
     val watch2: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
       isWatch2Called = true
@@ -152,7 +152,7 @@ class AtomTest : FreeSpec({
       key shouldBeSameInstanceAs k2
       ref shouldBeSameInstanceAs atom
       oldVal shouldBe oldV
-      newVal shouldBe newV
+      newVal!! shouldBe newV
     }
     atom.addWatch(k1, watch1)
     atom.addWatch(k2, watch2)
@@ -173,7 +173,7 @@ class AtomTest : FreeSpec({
       key shouldBeSameInstanceAs k
       ref shouldBeSameInstanceAs atom
       oldVal shouldBe 10
-      newVal shouldBe 11
+      newVal!! shouldBe 11
     }
     atom.addWatch(k, watch)
 
