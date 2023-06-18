@@ -1,7 +1,7 @@
 package com.github.whyrising.y
 
 object Ci {
-  private const val snapshotBase = "0.2.0"
+  private const val snapshotBase = "0.3.0"
 
   private fun githubBuildNumber() = System.getenv("GITHUB_RUN_NUMBER")
 
