@@ -683,3 +683,63 @@ fun <T1, T2, T3, R> map(
 }
 
 fun s(name: String): Symbol = Symbol(name)
+
+// -- update(m, k, f) ----------------------------------------------------------
+
+fun <KValue> update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: (kValue: KValue?) -> Any?,
+): Associative<Any?, Any?> = assoc(m, k to f(get(m, k)))
+
+fun <KValue, X> update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  x: X,
+  f: (kValue: KValue?, x: X) -> Any?,
+): Associative<Any?, Any?> = assoc(m, k to f(get(m, k), x))
+
+fun <KValue, X, Y> update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  x: X,
+  y: Y,
+  f: (kValue: KValue?, x: X, y: Y) -> Any?,
+): Associative<Any?, Any?> = assoc(m, k to f(get(m, k), x, y))
+
+fun <KValue, X, Y, Z> update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  x: X,
+  y: Y,
+  z: Z,
+  f: (kValue: KValue?, x: X, y: Y, z: Z) -> Any?,
+): Associative<Any?, Any?> = assoc(m, k to f(get(m, k), x, y, z))
+
+fun <KValue, X, Y, Z> update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  x: X,
+  y: Y,
+  z: Z,
+  vararg more: Any?,
+  f: (kValue: KValue?, x: X, y: Y, z: Z, more: Array<out Any?>) -> Any?,
+): Associative<Any?, Any?> = assoc(m, k to f(get(m, k), x, y, z, more))
+
+// -- updateIn() ---------------------------------------------------------------
+
+fun updateIn() {
+  TODO()
+}
+
+fun mapcat() {
+  TODO()
+}
+
+fun updateVals() {
+  TODO()
+}
+
+fun updateKeys() {
+  TODO()
+}
