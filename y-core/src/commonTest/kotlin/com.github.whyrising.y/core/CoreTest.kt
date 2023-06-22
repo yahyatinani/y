@@ -22,6 +22,13 @@ import io.kotest.matchers.longs.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import kotlin.reflect.KFunction0
+import kotlin.reflect.KFunction2
+import kotlin.reflect.KFunction3
+import kotlin.reflect.KFunction4
+import kotlin.reflect.KFunction5
+import kotlin.reflect.KFunction6
+import kotlin.reflect.KFunction7
 
 class CoreTest : FreeSpec({
   "inc" {
@@ -644,6 +651,383 @@ class CoreTest : FreeSpec({
       get(hashSet(54, 69, 36), 66, -1) shouldBe -1
       get(transientHashSet, ":x", -1) shouldBe -1
       get(m(":a" to 15, ":b" to 74), ":x", -1) shouldBe -1
+    }
+  }
+
+  "list" {
+    shouldThrowExactly<IllegalArgumentException> { prepend(1) }
+    prepend(null) shouldBe null
+    prepend(v(4, 5, 6)) shouldBe l(4, 5, 6)
+
+    prepend(null, v(4, 5, 6)) shouldBe l(null, 4, 5, 6)
+    prepend(1, null) shouldBe l(1)
+    prepend(l<Any>(), v(4, 5, 6)) shouldBe l(l<Any>(), 4, 5, 6)
+    prepend(1, l<Any>()) shouldBe l(1)
+    prepend(1, v(4, 5, 6)) shouldBe l(1, 4, 5, 6)
+
+    prepend(1, 2, v(4, 5, 6)) shouldBe l(1, 2, 4, 5, 6)
+
+    prepend(1, 2, 3, v(4, 5, 6)) shouldBe l(1, 2, 3, 4, 5, 6)
+
+    prepend(0, 1, 2, 3, v(4, 5, 6)) shouldBe l(0, 1, 2, 3, 4, 5, 6)
+    prepend(-1, 0, 1, 2, 3, v(4, 5, 6)) shouldBe l(-1, 0, 1, 2, 3, 4, 5, 6)
+  }
+
+  "apply()" - {
+    fun testFn(): String = ""
+
+    fun g(x: Any?, y: Any?, z: Any?, z1: Any?): String = "$x$y$z$z1"
+    fun g(x: Any?, y: Any?, z: Any?, z1: Any?, z2: Any?): String =
+      "$x$y$z$z1$z2"
+
+    fun g(x: Any?, y: Any?, z: Any?, z1: Any?, z2: Any?, z3: Any?): String =
+      "$x$y$z$z1$z2$z3"
+
+    fun g(
+      x: Any?,
+      y: Any?,
+      z: Any?,
+      z1: Any?,
+      z2: Any?,
+      z3: Any?,
+      z4: Any?,
+    ): String =
+      "$x$y$z$z1$z2$z3$z4"
+
+    "apply(f, args)" - {
+      "when f is a lambda" - {
+        "0 arg" {
+          apply({ "a" }, null) shouldBe "a"
+
+          shouldThrowExactly<ArityException> {
+            apply({ x: Any? -> "$x" }, v<Any>())
+          }.message shouldBe
+            "Wrong number of args 0 passed to (kotlin.Any?) -> kotlin.String"
+
+          shouldThrowExactly<ArityException> {
+            apply({ x: Any? -> "$x" }, null)
+          }.message shouldBe
+            "Wrong number of args 0 passed to (kotlin.Any?) -> kotlin.String"
+        }
+
+        "1 arg" {
+          shouldThrowExactly<ArityException> {
+            apply({ "a" }, v(1))
+          }.message shouldBe
+            "Wrong number of args 1 passed to () -> kotlin.String"
+
+          apply({ x: Any? -> "$x" }, v(1)) shouldBe "1"
+        }
+
+        "2 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ x: Any? -> "$x" }, v(1, 2))
+          }.message shouldBe
+            "Wrong number of args 2 passed to (kotlin.Any?) -> kotlin.String"
+
+          apply({ x: Any?, y: Any? -> "$x$y" }, v(1, 2)) shouldBe "12"
+        }
+
+        "3 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ x: Any? -> "$x" }, v(1, 2, 3))
+          }.message shouldBe
+            "Wrong number of args 3 passed to (kotlin.Any?) -> kotlin.String"
+
+          apply(
+            { x: Any?, y: Any?, z: Any? -> "$x$y$z" },
+            v(1, 2, 3),
+          ) shouldBe "123"
+        }
+
+        "4 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ x: Any? -> "$x" }, v(1, 2, 3, 4))
+          }.message shouldBe
+            "Wrong number of args 4 passed to (kotlin.Any?) -> kotlin.String"
+
+          apply(
+            { a: Any?, b: Any?, c: Any?, d: Any? -> "$a$b$c$d" },
+            v(1, 2, 3, 4),
+          ) shouldBe "1234"
+        }
+
+        "5 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ x: Any? -> "$x" }, v(1, 2, 3, 4, 5))
+          }.message shouldBe
+            "Wrong number of args 5 passed to (kotlin.Any?) -> kotlin.String"
+
+          apply(
+            { a: Any?, b: Any?, c: Any?, d: Any?, e: Any? -> "$a$b$c$d$e" },
+            v(1, 2, 3, 4, 5),
+          ) shouldBe "12345"
+        }
+
+        "6 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ x: Any? -> "$x" }, v(1, 2, 3, 4, 5, 6))
+          }.message shouldBe
+            "Wrong number of args 6 passed to (kotlin.Any?) -> kotlin.String"
+
+          apply(
+            { a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any? ->
+              "$a$b$c$d$e$f"
+            },
+            v(1, 2, 3, 4, 5, 6),
+          ) shouldBe "123456"
+        }
+
+        "7 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ x: Any? -> "$x" }, v(1, 2, 3, 4, 5, 6, 7))
+          }.message shouldBe
+            "Wrong number of args 7 passed to (kotlin.Any?) -> kotlin.String"
+
+          apply(
+            { a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any?, g: Any? ->
+              "$a$b$c$d$e$f$g"
+            },
+            v(1, 2, 3, 4, 5, 6, 7),
+          ) shouldBe "1234567"
+        }
+      }
+
+      "when f is a KFunction<R>" - {
+        "0 or null args" {
+          val str0: KFunction0<String> = ::str
+          apply(str0, null) shouldBe ""
+          apply(str0, v<Any?>()) shouldBe ""
+
+          shouldThrowExactly<ArityException> {
+            apply(::s, v<Any?>())
+          }.message shouldBe "Wrong number of args 0 passed to s"
+        }
+
+        "1 arg" {
+          apply(::s, v("Symbol-1")) shouldBe Symbol("Symbol-1")
+
+          shouldThrowExactly<ArityException> {
+            val f: Function0<String> = ::testFn
+            apply(f, v(1))
+          }.message shouldBe "Wrong number of args 1 passed to testFn"
+        }
+
+        "2 args" {
+          val str2: KFunction2<Any?, Any?, String> = ::str
+          apply(f = str2, args = v("str1", "str2")) shouldBe "str1str2"
+          apply(f = str2, args = v("str1", null)) shouldBe "str1"
+          apply(f = str2, args = v(null, "str2")) shouldBe "str2"
+
+          shouldThrowExactly<ArityException> {
+            val f: Function0<String> = ::testFn
+            apply(f, v(1, 2))
+          }.message shouldBe "Wrong number of args 2 passed to testFn"
+        }
+
+        "3 args" {
+          val str3: KFunction3<Any?, Any?, Any?, String> = ::str
+          apply(str3, v("str1", "str2", "str3")) shouldBe "str1str2str3"
+          apply(str3, v("str1", "str2", null)) shouldBe "str1str2"
+          apply(str3, v("str1", null, "str3")) shouldBe "str1str3"
+          apply(str3, v(null, "str2", "str3")) shouldBe "str2str3"
+
+          shouldThrowExactly<ArityException> {
+            val f: Function0<String> = ::testFn
+            apply(f, v(1, 2, 3))
+          }.message shouldBe "Wrong number of args 3 passed to testFn"
+        }
+
+        "4 args" {
+          val g: KFunction4<Any?, Any?, Any?, Any?, String> = ::g
+          apply(g, v(1, 2, 3, 4)) shouldBe "1234"
+
+          shouldThrowExactly<ArityException> {
+            val f: Function0<String> = ::testFn
+            apply(f, v(1, 2, 3, 4))
+          }.message shouldBe "Wrong number of args 4 passed to testFn"
+        }
+
+        "5 args" {
+          val g: KFunction5<Any?, Any?, Any?, Any?, Any?, String> = ::g
+          apply(g, v(1, 2, 3, 4, 5)) shouldBe "12345"
+
+          shouldThrowExactly<ArityException> {
+            val f: Function0<String> = ::testFn
+            apply(f, v(1, 2, 3, 4, 5))
+          }.message shouldBe "Wrong number of args 5 passed to testFn"
+        }
+
+        "6 args" {
+          val g: KFunction6<Any?, Any?, Any?, Any?, Any?, Any?, String> = ::g
+          apply(g, v(1, 2, 3, 4, 5, 6)) shouldBe "123456"
+
+          shouldThrowExactly<ArityException> {
+            val f: Function0<String> = ::testFn
+            apply(f, v(1, 2, 3, 4, 5, 6))
+          }.message shouldBe "Wrong number of args 6 passed to testFn"
+        }
+
+        "7 args" {
+          val g: KFunction7<Any?, Any?, Any?, Any?, Any?, Any?, Any?, String> =
+            ::g
+          apply(g, v(1, 2, 3, 4, 5, 6, 7)) shouldBe "1234567"
+
+          shouldThrowExactly<ArityException> {
+            val f: Function0<String> = ::testFn
+            apply(f, v(1, 2, 3, 4, 5, 6, 7))
+          }.message shouldBe "Wrong number of args 7 passed to testFn"
+        }
+
+        "more" {
+          val g: KFunction7<Any?, Any?, Any?, Any?, Any?, Any?, Any?, String> =
+            ::g
+          shouldThrowExactly<NotImplementedError> {
+            apply(g, 0, 1, 2, 3, 4, 5, 6, v(9))
+          }.message shouldBe "An operation is not implemented: apply() " +
+            "supports a maximum arity of 7 for now"
+        }
+      }
+    }
+
+    "apply(f, x, ..., args)" - {
+      "when f is a lambda" - {
+        "1 arg" {
+          shouldThrowExactly<ArityException> {
+            apply({ "a" }, 0, v<Any>())
+          }.message shouldBe
+            "Wrong number of args 1 passed to () -> kotlin.String"
+
+          apply({ x: Any? -> "$x" }, 0, null) shouldBe "0"
+        }
+
+        "2 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ "a" }, 0, v(1))
+          }.message shouldBe
+            "Wrong number of args 2 passed to () -> kotlin.String"
+
+          apply({ x: Any?, y: Any? -> "$x$y" }, 0, v(1)) shouldBe "01"
+          apply(
+            { x: Any?, y: Any?, z: Any? -> "$x$y$z" },
+            0,
+            v(1, 2),
+          ) shouldBe "012"
+        }
+
+        "3 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ "a" }, 0, 1, v(1))
+          }.message shouldBe
+            "Wrong number of args 3 passed to () -> kotlin.String"
+
+          apply(
+            { x: Any?, y: Any?, z: Any? -> "$x$y$z" },
+            0,
+            1,
+            v(2),
+          ) shouldBe "012"
+        }
+
+        "4 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ "a" }, 0, 1, 2, v(1))
+          }.message shouldBe
+            "Wrong number of args 4 passed to () -> kotlin.String"
+
+          apply(
+            { a: Any?, b: Any?, c: Any?, d: Any? -> "$a$b$c$d" },
+            0,
+            1,
+            2,
+            v(2),
+          ) shouldBe "0122"
+        }
+
+        "5 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ "a" }, 0, 1, 2, 3, v(1))
+          }.message shouldBe
+            "Wrong number of args 5 passed to () -> kotlin.String"
+
+          apply(
+            { a: Any?, b: Any?, c: Any?, d: Any?, e: Any? ->
+              "$a$b$c$d$e"
+            },
+            0,
+            1,
+            2,
+            3,
+            v(2),
+          ) shouldBe "01232"
+        }
+
+        "6 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ "a" }, 0, 1, 2, 3, 4, v(1))
+          }.message shouldBe
+            "Wrong number of args 6 passed to () -> kotlin.String"
+
+          apply(
+            { a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any? ->
+              "$a$b$c$d$e$f"
+            },
+            0,
+            1,
+            2,
+            3,
+            4,
+            v(2),
+          ) shouldBe "012342"
+        }
+
+        "7 args" {
+          shouldThrowExactly<ArityException> {
+            apply({ "a" }, 0, 1, 2, 3, 4, 5, v(1))
+          }.message shouldBe
+            "Wrong number of args 7 passed to () -> kotlin.String"
+
+          apply(
+            { a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any?, g: Any? ->
+              "$a$b$c$d$e$f$g"
+            },
+            0,
+            1,
+            2,
+            3,
+            4,
+            v(2, 9),
+          ) shouldBe "0123429"
+
+          apply(
+            { a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any?, g: Any? ->
+              "$a$b$c$d$e$f$g"
+            },
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            v(9),
+          ) shouldBe "0123459"
+        }
+
+        "more" {
+          shouldThrowExactly<NotImplementedError> {
+            apply(
+              {
+                  a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any?, g: Any?,
+                  h: Any?,
+                ->
+                "$a$b$c$d$e$f$g$h"
+              },
+              0, 1, 2, 3, 4, 5, 6, v(9),
+            )
+          }.message shouldBe "An operation is not implemented: apply() " +
+            "supports a maximum arity of 7 for now"
+        }
+      }
     }
   }
 })

@@ -28,6 +28,7 @@ import com.github.whyrising.y.core.collections.StringSeq
 import com.github.whyrising.y.core.collections.TransientSet
 import com.github.whyrising.y.core.util.lazyChunkedSeq
 import kotlin.jvm.JvmName
+import kotlin.reflect.KFunction
 
 fun <T> identity(x: T): T = x
 
@@ -334,7 +335,7 @@ fun <K, V> hashMap(vararg kvs: Pair<K, V>): PersistentHashMap<K, V> = when {
 fun <E> cons(x: E, coll: Any?): ISeq<E> = when (coll) {
   null -> l(x)
   is ISeq<*> -> Cons(x, coll) as ISeq<E>
-  else -> Cons(x, seq<E>(coll) as ISeq<E>)
+  else -> Cons(x, seq(coll) ?: Empty)
 }
 
 fun <E> consChunk(chunk: Chunk<E>, rest: ISeq<E>) = when (chunk.count) {
@@ -503,15 +504,6 @@ fun <E> nextChunks(chunk: IChunkedSeq<E>): ISeq<E>? {
   return when (val rs = chunk.restChunks()) {
     is Empty -> null
     else -> rs
-  }
-}
-
-internal fun spread(arglist: Any?): ISeq<Any?>? {
-  val s = seq<Any?>(arglist)
-  return when {
-    s == null -> null
-    s.next() == null -> seq(s.first())
-    else -> cons(s.first(), spread(s.next()))
   }
 }
 
@@ -726,8 +718,230 @@ fun <KValue, X, Y, Z> update(
   f: (kValue: KValue?, x: X, y: Y, z: Z, more: Array<out Any?>) -> Any?,
 ): Associative<Any?, Any?> = assoc(m, k to f(get(m, k), x, y, z, more))
 
-// -- updateIn() ---------------------------------------------------------------
+// -- spread -------------------------------------------------------------------
+fun spread(arglist: Any?): ISeq<Any?>? {
+  val s = seq<Any?>(arglist)
+  return when {
+    s == null -> null
+    s.next() == null -> seq(s.first())
+    else -> cons(s.first(), spread(s.next()))
+  }
+}
 
+// -- prepend ------------------------------------------------------------------
+
+/**
+ * @param args should be a sequence or sequence compatible.
+ * @return a new [ISeq] containing the items prepended to the rest.
+ */
+fun prepend(args: Any?): ISeq<Any?>? = seq(args)
+
+fun prepend(a: Any?, args: Any?): ISeq<Any?> = cons(a, args)
+
+fun prepend(a: Any?, b: Any?, args: Any?): ISeq<Any?> = cons(a, cons(b, args))
+
+fun prepend(a: Any?, b: Any?, c: Any?, args: Any?): ISeq<Any?> =
+  cons(a, cons(b, cons(c, args)))
+
+fun prepend(
+  a: Any?,
+  b: Any?,
+  c: Any?,
+  d: Any?,
+  vararg more: Any?,
+): ISeq<Any?> = cons(a, cons(b, cons(c, cons(d, spread(more)))))
+
+// -- apply --------------------------------------------------------------------
+
+data class ArityException(val n: Int?, val f: Any?) : IllegalArgumentException(
+  "Wrong number of args $n passed to $f",
+)
+
+fun <R> apply(f: Function<R>, args: Any?): R {
+  var argsSeq = seq<Any?>(args)
+  val arity: Int = argsSeq?.count ?: 0
+  return if (f is KFunction<R>) {
+    when (arity) {
+      0 -> (f as? Function0<R> ?: throw ArityException(arity, f.name)).invoke()
+
+      1 -> {
+        (f as? Function1<Any?, R> ?: throw ArityException(arity, f.name))
+          .invoke(argsSeq?.first())
+      }
+
+      2 -> {
+        (f as? Function2<Any?, Any?, R> ?: throw ArityException(arity, f.name))
+          .invoke(
+            argsSeq?.first(),
+            (argsSeq?.next().also { argsSeq = it })?.first(),
+          )
+      }
+
+      3 -> (
+        f as? Function3<Any?, Any?, Any?, R> ?: throw ArityException(
+          arity,
+          f.name,
+        )
+        )
+        .invoke(
+          argsSeq?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+        )
+
+      4 -> {
+        (
+          f as? Function4<Any?, Any?, Any?, Any?, R> ?: throw ArityException(
+            arity,
+            f.name,
+          )
+          )
+          .invoke(
+            argsSeq?.first(),
+            (argsSeq?.next().also { argsSeq = it })?.first(),
+            (argsSeq?.next().also { argsSeq = it })?.first(),
+            (argsSeq?.next().also { argsSeq = it })?.first(),
+          )
+      }
+
+      5 -> (
+        f as? Function5<Any?, Any?, Any?, Any?, Any?, R>
+          ?: throw ArityException(arity, f.name)
+        )
+        .invoke(
+          argsSeq?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+        )
+
+      6 -> (
+        f as? Function6<Any?, Any?, Any?, Any?, Any?, Any?, R>
+          ?: throw ArityException(arity, f.name)
+        )
+        .invoke(
+          argsSeq?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+        )
+
+      7 -> (
+        f as? Function7<Any?, Any?, Any?, Any?, Any?, Any?, Any?, R>
+          ?: throw ArityException(arity, f.name)
+        )
+        .invoke(
+          argsSeq?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+        )
+
+      else -> TODO("apply() supports a maximum arity of 7 for now")
+    }
+  } else {
+    when (arity) {
+      0 -> (f as? () -> R)?.invoke() ?: throw ArityException(arity, f)
+
+      1 -> (f as? (Any?) -> R ?: throw ArityException(arity, f))
+        .invoke(argsSeq!!.first())
+
+      2 -> (f as? (Any?, Any?) -> R ?: throw ArityException(arity, f)).invoke(
+        argsSeq!!.first(),
+        argsSeq!!.next().also { argsSeq = it }?.first(),
+      )
+
+      3 -> (f as? (Any?, Any?, Any?) -> R ?: throw ArityException(arity, f))
+        .invoke(
+          argsSeq!!.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+        )
+
+      4 -> (
+        f as? (Any?, Any?, Any?, Any?) -> R ?: throw ArityException(
+          arity,
+          f,
+        )
+        )
+        .invoke(
+          argsSeq!!.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+        )
+
+      5 -> (
+        f as? (Any?, Any?, Any?, Any?, Any?) -> R ?: throw ArityException(
+          arity,
+          f,
+        )
+        )
+        .invoke(
+          argsSeq!!.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+        )
+
+      6 -> (
+        f as? (Any?, Any?, Any?, Any?, Any?, Any?) -> R
+          ?: throw ArityException(arity, f)
+        )
+        .invoke(
+          argsSeq!!.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+        )
+
+      7 -> (
+        f as? (Any?, Any?, Any?, Any?, Any?, Any?, Any?) -> R
+          ?: throw ArityException(arity, f)
+        )
+        .invoke(
+          argsSeq!!.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+        )
+
+      else -> TODO("apply() supports a maximum arity of 7 for now")
+    }
+  }
+}
+
+fun <R> apply(f: Function<R>, x: Any?, args: Any?): R =
+  apply(f, prepend(x, args))
+
+fun <R> apply(f: Function<R>, x: Any?, y: Any?, args: Any?): R =
+  apply(f, prepend(x, y, args))
+
+fun <R> apply(f: Function<R>, x: Any?, y: Any?, z: Any?, args: Any?): R =
+  apply(f, prepend(x, y, z, args))
+
+fun <R> apply(
+  f: Function<R>,
+  a: Any?,
+  b: Any?,
+  c: Any?,
+  d: Any?,
+  vararg args: Any?,
+): R = apply(f, cons(a, cons(b, cons(c, cons(d, spread(args))))))
+
+// -- updateIn() ---------------------------------------------------------------
 fun updateIn() {
   TODO()
 }

@@ -1,6 +1,5 @@
-package com.github.whyrising.y.collections.utils
+package com.github.whyrising.y
 
-import com.github.whyrising.y.collections.Keyword
 import java.lang.ref.Reference
 import java.lang.ref.ReferenceQueue
 import java.util.concurrent.ConcurrentHashMap

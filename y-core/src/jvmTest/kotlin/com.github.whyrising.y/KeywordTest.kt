@@ -1,7 +1,5 @@
 package com.github.whyrising.y
 
-import com.github.whyrising.y.collections.Keyword
-import com.github.whyrising.y.collections.k
 import com.github.whyrising.y.core.Symbol
 import com.github.whyrising.y.core.hashSet
 import com.github.whyrising.y.core.m
@@ -15,7 +13,6 @@ import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

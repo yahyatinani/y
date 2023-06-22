@@ -2,11 +2,10 @@ package com.github.whyrising.y.core.collections
 
 import com.github.whyrising.y.core.collections.PersistentList.Empty
 
-class Cons<out E>(
+class Cons<out E> constructor(
   private val _first: E,
   private val _rest: ISeq<E>,
 ) : ASeq<E>() {
-
   override fun first(): E = _first
 
   override fun rest(): ISeq<E> = _rest

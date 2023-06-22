@@ -1,6 +1,5 @@
-package com.github.whyrising.y.collections
+package com.github.whyrising.y
 
-import com.github.whyrising.y.collections.utils.clearCache
 import com.github.whyrising.y.core.Symbol
 import com.github.whyrising.y.core.collections.IHashEq
 import com.github.whyrising.y.core.collections.Named
