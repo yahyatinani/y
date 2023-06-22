@@ -676,48 +676,6 @@ fun <T1, T2, T3, R> map(
 
 fun s(name: String): Symbol = Symbol(name)
 
-// -- update(m, k, f) ----------------------------------------------------------
-
-fun <KValue> update(
-  m: Associative<Any?, Any?>?,
-  k: Any?,
-  f: (kValue: KValue?) -> Any?,
-): Associative<Any?, Any?> = assoc(m, k to f(get(m, k)))
-
-fun <KValue, X> update(
-  m: Associative<Any?, Any?>?,
-  k: Any?,
-  x: X,
-  f: (kValue: KValue?, x: X) -> Any?,
-): Associative<Any?, Any?> = assoc(m, k to f(get(m, k), x))
-
-fun <KValue, X, Y> update(
-  m: Associative<Any?, Any?>?,
-  k: Any?,
-  x: X,
-  y: Y,
-  f: (kValue: KValue?, x: X, y: Y) -> Any?,
-): Associative<Any?, Any?> = assoc(m, k to f(get(m, k), x, y))
-
-fun <KValue, X, Y, Z> update(
-  m: Associative<Any?, Any?>?,
-  k: Any?,
-  x: X,
-  y: Y,
-  z: Z,
-  f: (kValue: KValue?, x: X, y: Y, z: Z) -> Any?,
-): Associative<Any?, Any?> = assoc(m, k to f(get(m, k), x, y, z))
-
-fun <KValue, X, Y, Z> update(
-  m: Associative<Any?, Any?>?,
-  k: Any?,
-  x: X,
-  y: Y,
-  z: Z,
-  vararg more: Any?,
-  f: (kValue: KValue?, x: X, y: Y, z: Z, more: Array<out Any?>) -> Any?,
-): Associative<Any?, Any?> = assoc(m, k to f(get(m, k), x, y, z, more))
-
 // -- spread -------------------------------------------------------------------
 fun spread(arglist: Any?): ISeq<Any?>? {
   val s = seq<Any?>(arglist)
@@ -940,6 +898,76 @@ fun <R> apply(
   d: Any?,
   vararg args: Any?,
 ): R = apply(f, cons(a, cons(b, cons(c, cons(d, spread(args))))))
+
+// -- update(m, k, f) ----------------------------------------------------------
+
+fun update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: Function<Any?>,
+): Associative<Any?, Any?> = when (f) {
+  is KFunction<Any?> -> {
+    assoc(m, k to (f as Function1<Any?, Any?>).invoke(get(m, k)))
+  }
+
+  else -> assoc(m, k to (f as (oldVal: Any?) -> Any?)(get(m, k)))
+}
+
+fun update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: Function<Any?>,
+  x: Any?,
+): Associative<Any?, Any?> = when (f) {
+  is KFunction<Any?> -> {
+    assoc(m, k to (f as Function2<Any?, Any?, Any?>)(get(m, k), x))
+  }
+
+  else -> assoc(m, k to (f as (Any?, Any?) -> Any?)(get(m, k), x))
+}
+
+fun update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: Function<Any?>,
+  x: Any?,
+  y: Any?,
+): Associative<Any?, Any?> = when (f) {
+  is KFunction<Any?> -> {
+    assoc(m, k to (f as Function3<Any?, Any?, Any?, Any?>)(get(m, k), x, y))
+  }
+
+  else -> assoc(m, k to (f as (Any?, Any?, Any?) -> Any?)(get(m, k), x, y))
+}
+
+fun update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: Function<Any?>,
+  x: Any?,
+  y: Any?,
+  z: Any?,
+): Associative<Any?, Any?> = when (f) {
+  is KFunction<Any?> -> assoc(
+    m,
+    k to (f as Function4<Any?, Any?, Any?, Any?, Any?>)(get(m, k), x, y, z),
+  )
+
+  else -> assoc(
+    m,
+    k to (f as (Any?, Any?, Any?, Any?) -> Any?)(get(m, k), x, y, z),
+  )
+}
+
+fun update(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: Function<Any?>,
+  x: Any?,
+  y: Any?,
+  z: Any?,
+  vararg more: Any?,
+): Associative<Any?, Any?> = assoc(m, k to apply(f, get(m, k), x, y, z, more))
 
 // -- updateIn() ---------------------------------------------------------------
 fun updateIn() {

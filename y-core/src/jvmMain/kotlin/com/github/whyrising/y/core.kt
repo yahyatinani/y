@@ -1,8 +1,11 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.core.ArityException
+import com.github.whyrising.y.core.assoc
+import com.github.whyrising.y.core.collections.Associative
 import com.github.whyrising.y.core.collections.ISeq
 import com.github.whyrising.y.core.cons
+import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.prepend
 import com.github.whyrising.y.core.seq
 import com.github.whyrising.y.core.spread
@@ -21,7 +24,7 @@ fun seqToArray(seq: ISeq<Any?>?): Array<Any?> {
   val ret = arrayOfNulls<Any>(seq?.count ?: 0)
   var i = 0
   var s = seq
-  while (s != null) {
+  while (s != null && s.count > 0) {
     ret[i] = s.first()
     ++i
     s = s.next()
@@ -82,7 +85,7 @@ fun <R> applyVar(f: KFunction<R>, args: Any?): R {
         seqToArray(argsSeq?.next().also { argsSeq = it }),
       )
 
-    else -> TODO("Arity ${argsSeq?.count} not supported")
+    else -> TODO("Arity $requiredArity not supported")
   }
 }
 
@@ -103,3 +106,154 @@ fun <R> applyVar(
   d: Any?,
   vararg args: Any?,
 ): R = applyVar(f, cons(a, cons(b, cons(c, cons(d, spread(args))))))
+
+// -- updateVar ----------------------------------------------------------------
+
+/** @param f should be 1 or 2 args maximum function with last one as vararg . */
+fun updateVar(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: KFunction<Any?>,
+): Associative<Any?, Any?> = when (f.valueParameters.size) {
+  1 -> assoc(
+    m,
+    k to (f as Function1<Any?, Any?>).invoke(arrayOf<Any?>(get(m, k))),
+  )
+
+  2 -> assoc(
+    m,
+    k to (f as Function2<Any?, Any?, Any?>)(get(m, k), emptyArray<Any?>()),
+  )
+
+  else -> throw ArityException(1, f.name)
+}
+
+/** @param f a function of 2/3 args maximum and last arg as vararg . */
+fun updateVar(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: KFunction<Any?>,
+  x: Any?,
+): Associative<Any?, Any?> = when (f.valueParameters.size) {
+  1 -> assoc(m, k to (f as Function1<Any?, Any?>).invoke(arrayOf(get(m, k), x)))
+
+  2 -> assoc(
+    m,
+    k to (f as Function2<Any?, Any?, Any?>)(get(m, k), arrayOf(x)),
+  )
+
+  3 -> assoc(
+    m,
+    k to (f as Function3<Any?, Any?, Any?, Any?>)(
+      get(m, k),
+      x,
+      emptyArray<Any?>(),
+    ),
+  )
+
+  else -> throw ArityException(2, f.name)
+}
+
+/** @param f a function of 3/4 args maximum and last arg as vararg . */
+fun updateVar(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: KFunction<Any?>,
+  x: Any?,
+  y: Any?,
+): Associative<Any?, Any?> = when (f.valueParameters.size) {
+  1 -> assoc(
+    m,
+    k to (f as Function1<Any?, Any?>).invoke(arrayOf(get(m, k), x, y)),
+  )
+
+  2 -> assoc(
+    m,
+    k to (f as Function2<Any?, Any?, Any?>)(get(m, k), arrayOf(x, y)),
+  )
+
+  3 -> assoc(
+    m,
+    k to (f as Function3<Any?, Any?, Any?, Any?>)(
+      get(m, k),
+      x,
+      arrayOf(y),
+    ),
+  )
+
+  4 -> assoc(
+    m,
+    k to (f as Function4<Any?, Any?, Any?, Any?, Any?>)(
+      get(m, k),
+      x,
+      y,
+      emptyArray<Any?>(),
+    ),
+  )
+
+  else -> throw ArityException(3, f.name)
+}
+
+/** @param f a function of 4/5 args maximum and last arg as vararg . */
+fun updateVar(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: KFunction<Any?>,
+  x: Any?,
+  y: Any?,
+  z: Any?,
+): Associative<Any?, Any?> = when (f.valueParameters.size) {
+  1 -> assoc(
+    m,
+    k to (f as Function1<Any?, Any?>).invoke(arrayOf(get(m, k), x, y, z)),
+  )
+
+  2 -> assoc(
+    m,
+    k to (f as Function2<Any?, Any?, Any?>)(get(m, k), arrayOf(x, y, z)),
+  )
+
+  3 -> assoc(
+    m,
+    k to (f as Function3<Any?, Any?, Any?, Any?>)(
+      get(m, k),
+      x,
+      arrayOf(y, z),
+    ),
+  )
+
+  4 -> assoc(
+    m,
+    k to (f as Function4<Any?, Any?, Any?, Any?, Any?>)(
+      get(m, k),
+      x,
+      y,
+      arrayOf(z),
+    ),
+  )
+
+  5 -> assoc(
+    m,
+    k to (f as Function5<Any?, Any?, Any?, Any?, Any?, Any?>)(
+      get(m, k),
+      x,
+      y,
+      z,
+      emptyArray<Any?>(),
+    ),
+  )
+
+  else -> throw ArityException(4, f.name)
+}
+
+/** @param f a function of 6/7 args maximum and last arg as vararg. */
+fun updateVar(
+  m: Associative<Any?, Any?>?,
+  k: Any?,
+  f: KFunction<Any?>,
+  x: Any?,
+  y: Any?,
+  z: Any?,
+  vararg more: Any?,
+): Associative<Any?, Any?> =
+  assoc(m, k to applyVar(f, get(m, k), x, y, z, more))
