@@ -1030,4 +1030,21 @@ class CoreTest : FreeSpec({
       }
     }
   }
+
+  "updateIn()" - {
+    val users = v<Any?>(
+      m("name" to "user1", "age" to 26),
+      m("name" to "user2", "age" to 29),
+    )
+    updateIn(users, l(1, "age"), Int::inc) shouldBe v<Any?>(
+      m("name" to "user1", "age" to 26),
+      m("name" to "user2", "age" to 30),
+    )
+
+    updateIn(m("name" to "user1", "age" to 26), l("age"), Int::inc) shouldBe
+      m("name" to "user1", "age" to 27)
+
+    fun add(x: Int, y: Int, z: Int): Int = x + y + z
+    updateIn(m(":a" to 3), l(":a"), ::add, 7, 1) shouldBe m(":a" to 11)
+  }
 })

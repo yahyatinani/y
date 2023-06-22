@@ -970,10 +970,32 @@ fun update(
 ): Associative<Any?, Any?> = assoc(m, k to apply(f, get(m, k), x, y, z, more))
 
 // -- updateIn() ---------------------------------------------------------------
-fun updateIn() {
-  TODO()
+fun updateIn(
+  m: Any?,
+  ks: ISeq<Any>,
+  f: Function<Any?>,
+  vararg args: Any?,
+): Associative<Any?, Any?> {
+  fun upIn(
+    map: Associative<Any?, Any?>?,
+    ks: ISeq<Any>,
+    f: Function<Any?>,
+  ): Associative<Any?, Any?> {
+    val (k, nks) = ks
+    return when (nks.count) {
+      0 -> assoc(
+        map,
+        k to apply(f, get(map, k), if (args.isEmpty()) null else args),
+      )
+
+      else -> assoc(map, k to upIn(get(map, k), nks, f))
+    }
+  }
+
+  return upIn((m as Associative<Any?, Any?>?), ks, f)
 }
 
+// -----------------------------------------------------------------------------
 fun mapcat() {
   TODO()
 }

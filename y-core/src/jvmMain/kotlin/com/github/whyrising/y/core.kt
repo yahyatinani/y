@@ -4,6 +4,8 @@ import com.github.whyrising.y.core.ArityException
 import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.Associative
 import com.github.whyrising.y.core.collections.ISeq
+import com.github.whyrising.y.core.component1
+import com.github.whyrising.y.core.component2
 import com.github.whyrising.y.core.cons
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.prepend
@@ -32,6 +34,7 @@ fun seqToArray(seq: ISeq<Any?>?): Array<Any?> {
   return ret
 }
 
+// FIXME: remember that not all of varargs are Array<*>, it can be IntArray...
 fun <R> applyVar(f: KFunction<R>, args: Any?): R {
   var argsSeq = seq<Any?>(args)
   val argsCount = argsSeq?.count ?: 0
@@ -257,3 +260,26 @@ fun updateVar(
   vararg more: Any?,
 ): Associative<Any?, Any?> =
   assoc(m, k to applyVar(f, get(m, k), x, y, z, more))
+
+// -- updateInVar() ------------------------------------------------------------
+
+fun updateInVar(
+  m: Any?,
+  ks: ISeq<Any>,
+  f: KFunction<Any?>,
+  vararg args: Any?,
+): Associative<Any?, Any?> {
+  fun upIn(
+    map: Associative<Any?, Any?>?,
+    ks: ISeq<Any>,
+    f: KFunction<Any?>,
+  ): Associative<Any?, Any?> {
+    val (k, nks) = ks
+    return when (nks.count) {
+      0 -> assoc(map, k to applyVar(f, get(map, k), args))
+      else -> assoc(map, k to upIn(get(map, k), nks, f))
+    }
+  }
+
+  return upIn((m as Associative<Any?, Any?>?), ks, f)
+}
