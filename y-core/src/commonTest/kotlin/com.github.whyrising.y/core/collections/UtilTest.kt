@@ -129,13 +129,13 @@ class UtilTest : FreeSpec({
 
   "seq(x)" - {
     "when x is null, it should return null" {
-      seq<Int>(null).shouldBeNull()
+      seq(null).shouldBeNull()
     }
 
     "ASeq" {
       val x: Any = Cons(1, PersistentList.Empty)
 
-      val seq = seq<Int>(x) as ISeq<Int>
+      val seq = seq(x) as ISeq<Int>
 
       seq.first() shouldBeExactly 1
     }
@@ -143,7 +143,7 @@ class UtilTest : FreeSpec({
     "Seqable" {
       val x: Any = v(1, 2)
 
-      val seq = seq<Int>(x) as ISeq<Int>
+      val seq = seq(x) as ISeq<Int>
 
       seq.first() shouldBeExactly 1
     }
@@ -151,7 +151,7 @@ class UtilTest : FreeSpec({
     "Iterable<*>" {
       val x = listOf(1, 2, 3, 5)
 
-      val seq = seq<Int>(x) as ISeq<Int>
+      val seq = seq(x) as ISeq<Int>
 
       seq.first() shouldBeExactly x[0]
       seq.count shouldBeExactly x.size
@@ -161,7 +161,7 @@ class UtilTest : FreeSpec({
       val x: Any = true
 
       val e = shouldThrowExactly<IllegalArgumentException> {
-        seq<Int>(x)
+        seq(x)
       }
 
       e.message shouldBe
@@ -171,18 +171,18 @@ class UtilTest : FreeSpec({
     "Kotlin Sequence<E>" {
       val x = sequenceOf(1, 2)
 
-      val seq = seq<Int>(x) as ISeq<Int>
+      val seq = seq(x) as ISeq<Int>
 
       seq.first() shouldBeExactly 1
       seq.rest().first() shouldBeExactly 2
     }
 
     "when passing Empty seq, ti should return null" {
-      seq<Int>(PersistentList.Empty).shouldBeNull()
+      seq(PersistentList.Empty).shouldBeNull()
     }
 
     "when passing a lazySeq, it should realize the sequence" {
-      seq<Int>(lazySeq<Int> { l(1) }) shouldBe l(1)
+      seq(lazySeq<Int> { l(1) }) shouldBe l(1)
     }
   }
 

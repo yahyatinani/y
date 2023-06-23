@@ -475,11 +475,11 @@ class CoreTest : FreeSpec({
   }
 
   "q should return a PersistentQueue" {
-    q<Int>() shouldBeSameInstanceAs PersistentQueue<Int>()
-    q<Int>(null) shouldBeSameInstanceAs PersistentQueue<Int>()
-    q<Int>(l(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
-    q<Int>(v(1, 2, 3, 4)) shouldBe q<Int>().conj(1).conj(2).conj(3).conj(4)
-    q<Int>(listOf(1, 2)) shouldBe q<Int>().conj(1).conj(2)
+    q() shouldBeSameInstanceAs PersistentQueue<Int>()
+    q(null) shouldBeSameInstanceAs PersistentQueue<Int>()
+    q(l(1, 2, 3, 4)) shouldBe q().conj(1).conj(2).conj(3).conj(4)
+    q(v(1, 2, 3, 4)) shouldBe q().conj(1).conj(2).conj(3).conj(4)
+    q(listOf(1, 2)) shouldBe q().conj(1).conj(2)
   }
 
   "map()" - {
@@ -614,7 +614,7 @@ class CoreTest : FreeSpec({
 
   "Associative.get(k) op" {
     m("a" to 2).assoc("b", 56)["b"] shouldBe 56
-    (m("a" to 2) as IPersistentMap<*, *>)["a"] shouldBe 2
+    m("a" to 2)["a"] shouldBe 2
   }
 
   "get(map,key)" - {

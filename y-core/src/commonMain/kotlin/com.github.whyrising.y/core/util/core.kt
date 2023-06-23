@@ -127,7 +127,7 @@ fun hasheq(x: Any?): Int = when (x) {
 }
 
 fun <E> nth(seq: Sequential, index: Int): E {
-  val s = seq<E>(seq)
+  val s = seq(seq)
 
   if (index >= s!!.count || index < 0) {
     throw IndexOutOfBoundsException("index = $index")
@@ -139,7 +139,7 @@ fun <E> nth(seq: Sequential, index: Int): E {
     return get(_index.inc(), rest.first(), rest.rest())
   }
 
-  return get(0, s.first(), s.rest())
+  return get(0, s.first() as E, s.rest() as ISeq<E>)
 }
 
 fun hashCombine(seed: Int, hash: Int): Int =

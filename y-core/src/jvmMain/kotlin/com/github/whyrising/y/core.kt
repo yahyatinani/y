@@ -36,7 +36,7 @@ fun seqToArray(seq: ISeq<Any?>?): Array<Any?> {
 
 // FIXME: remember that not all of varargs are Array<*>, it can be IntArray...
 fun <R> applyVar(f: KFunction<R>, args: Any?): R {
-  var argsSeq = seq<Any?>(args)
+  var argsSeq = seq(args)
   val argsCount = argsSeq?.count ?: 0
   val requiredArity = f.valueParameters.size
   if (argsCount < requiredArity - 1) throw ArityException(argsCount, f.name)

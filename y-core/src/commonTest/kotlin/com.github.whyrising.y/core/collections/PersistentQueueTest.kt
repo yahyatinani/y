@@ -177,8 +177,8 @@ class PersistentQueueTest : FreeSpec({
   }
 
   "toString()" {
-    q<Int>().toString() shouldBe "()"
-    q<Int>(l(1, 2, 3)).toString() shouldBe "(1 2 3)"
+    q().toString() shouldBe "()"
+    q(l(1, 2, 3)).toString() shouldBe "(1 2 3)"
   }
 
   "Collection tests" - {

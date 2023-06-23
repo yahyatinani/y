@@ -209,58 +209,59 @@ inline fun <T1, T2, T3, R2, R> compose(
  * @throws IllegalArgumentException if [coll] is not sequable.
  */
 @Suppress("UNCHECKED_CAST")
-fun <E> seq(coll: Any?): ISeq<E>? = when (coll) {
+fun seq(coll: Any?): ISeq<Any?>? = when (coll) {
   null, Empty -> null
-  is ASeq<*> -> coll as ASeq<E>
+  is ASeq<*> -> coll
   is LazySeq<*> -> when (val seq = coll.seq()) {
     is Empty -> null
-    else -> seq as ISeq<E>
+    else -> seq
   }
 
-  is Seqable<*> -> coll.seq() as ISeq<E>
-  is Iterable<*> -> lazyChunkedSeq(coll.iterator() as Iterator<E>)
-  is Sequence<*> -> lazyChunkedSeq(coll.iterator() as Iterator<E>)
-  is ShortArray -> ArraySeq(coll) as ISeq<E>
-  is IntArray -> ArraySeq(coll) as ISeq<E>
-  is FloatArray -> ArraySeq(coll) as ISeq<E>
-  is DoubleArray -> ArraySeq(coll) as ISeq<E>
-  is LongArray -> ArraySeq(coll) as ISeq<E>
-  is ByteArray -> ArraySeq(coll) as ISeq<E>
-  is CharArray -> ArraySeq(coll) as ISeq<E>
-  is BooleanArray -> ArraySeq(coll) as ISeq<E>
-  is Array<*> -> ArraySeq(coll) as ISeq<E>
-  is CharSequence -> StringSeq(coll) as ISeq<E>
+  is Seqable<*> -> coll.seq()
+  is Iterable<*> -> lazyChunkedSeq(coll.iterator())
+  is Sequence<*> -> lazyChunkedSeq(coll.iterator())
+  is ShortArray -> ArraySeq(coll)
+  is IntArray -> ArraySeq(coll)
+  is FloatArray -> ArraySeq(coll)
+  is DoubleArray -> ArraySeq(coll)
+  is LongArray -> ArraySeq(coll)
+  is ByteArray -> ArraySeq(coll)
+  is CharArray -> ArraySeq(coll)
+  is BooleanArray -> ArraySeq(coll)
+  is Array<*> -> ArraySeq(coll)
+  is CharSequence -> StringSeq(coll)
   is Map<*, *> -> seq(coll.entries)
   else -> throw IllegalArgumentException(
     "Don't know how to create ISeq from: ${coll::class.simpleName}",
   )
 }
 
-fun <E> Iterable<E>.seq(): ISeq<E> = seq(this)!!
+fun <E> Iterable<E>.seq(): ISeq<E> = seq(this) as ISeq<E>
 
-fun <E> Array<E>.seq(): ISeq<E> = seq(this)!!
+fun <E> Array<E>.seq(): ISeq<E> = seq(this) as ISeq<E>
 
-fun <E> Sequence<E>.seq(): ISeq<E> = seq(this)!!
+fun <E> Sequence<E>.seq(): ISeq<E> = seq(this) as ISeq<E>
 
-fun CharSequence.seq(): ISeq<Char> = seq(this)!!
+fun CharSequence.seq(): ISeq<Char> = seq(this) as ISeq<Char>
 
-fun ShortArray.seq(): ISeq<Short> = seq(this)!!
+fun ShortArray.seq(): ISeq<Short> = seq(this) as ISeq<Short>
 
-fun IntArray.seq(): ISeq<Int> = seq(this)!!
+fun IntArray.seq(): ISeq<Int> = seq(this) as ISeq<Int>
 
-fun FloatArray.seq(): ISeq<Float> = seq(this)!!
+fun FloatArray.seq(): ISeq<Float> = seq(this) as ISeq<Float>
 
-fun DoubleArray.seq(): ISeq<Double> = seq(this)!!
+fun DoubleArray.seq(): ISeq<Double> = seq(this) as ISeq<Double>
 
-fun LongArray.seq(): ISeq<Long> = seq(this)!!
+fun LongArray.seq(): ISeq<Long> = seq(this) as ISeq<Long>
 
-fun ByteArray.seq(): ISeq<Byte> = seq(this)!!
+fun ByteArray.seq(): ISeq<Byte> = seq(this) as ISeq<Byte>
 
-fun CharArray.seq(): ISeq<Char> = seq(this)!!
+fun CharArray.seq(): ISeq<Char> = seq(this) as ISeq<Char>
 
-fun BooleanArray.seq(): ISeq<Boolean> = seq(this)!!
+fun BooleanArray.seq(): ISeq<Boolean> = seq(this) as ISeq<Boolean>
 
-fun <K, V> Map<K, V>.seq(): ISeq<MapEntry<K, V>> = seq(this)!!
+fun <K, V> Map<K, V>.seq(): ISeq<MapEntry<K, V>> =
+  seq(this) as ISeq<MapEntry<K, V>>
 
 fun <E> l(): PersistentList<E> = Empty
 
@@ -332,9 +333,9 @@ fun <K, V> hashMap(vararg kvs: Pair<K, V>): PersistentHashMap<K, V> = when {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <E> cons(x: E, coll: Any?): ISeq<E> = when (coll) {
+fun cons(x: Any?, coll: Any?): ISeq<Any?> = when (coll) {
   null -> l(x)
-  is ISeq<*> -> Cons(x, coll) as ISeq<E>
+  is ISeq<*> -> Cons(x, coll)
   else -> Cons(x, seq(coll) ?: Empty)
 }
 
@@ -478,15 +479,13 @@ operator fun <E> IPersistentVector<E>.component6(): E = this.nth(5)
 
 operator fun <K, V> Associative<K, V>.get(key: K): V? = this.valAt(key)
 
-fun <E> first(x: Any?): E? = when (val seq = seq<E>(x)) {
+fun <E> first(x: Any?): E? = when (val seq = seq(x)) {
   null -> null
-  else -> {
-    try {
-      seq.first()
-    } catch (e: NoSuchElementException) {
-      null
-    }
-  }
+  else -> try {
+    seq.first()
+  } catch (e: NoSuchElementException) {
+    null
+  } as E?
 }
 
 fun <E> lazySeq(): LazySeq<E> = LazySeq { null }
@@ -509,7 +508,7 @@ fun <E> nextChunks(chunk: IChunkedSeq<E>): ISeq<E>? {
 
 @Suppress("UNCHECKED_CAST")
 fun <T> isEvery(pred: (T) -> Boolean, coll: Any?): Boolean {
-  val s = seq<Any?>(coll) ?: return true
+  val s = seq(coll) ?: return true
 
   val first = s.first()
 
@@ -525,15 +524,15 @@ fun <T> conj(coll: IPersistentCollection<T>?, x: T): IPersistentCollection<T> {
   }
 }
 
-fun <T> conj(
-  coll: IPersistentCollection<T>?,
-  x: T,
-  vararg xs: T,
-): IPersistentCollection<T> {
+fun conj(
+  coll: IPersistentCollection<Any?>?,
+  x: Any?,
+  vararg xs: Any?,
+): IPersistentCollection<Any?> {
   tailrec fun conj(
-    coll: IPersistentCollection<T>,
-    s: ISeq<T>?,
-  ): IPersistentCollection<T> = when (s) {
+    coll: IPersistentCollection<Any?>,
+    s: ISeq<Any?>?,
+  ): IPersistentCollection<Any?> = when (s) {
     null -> coll
     else -> conj(coll.conj(s.first()), s.next())
   }
@@ -546,7 +545,7 @@ fun <E> concat(): LazySeq<E> = lazySeq()
 fun <E> concat(x: Any?): LazySeq<E> = lazySeq { x }
 
 fun <E> concat(x: Any?, y: Any?): LazySeq<E> = lazySeq {
-  when (val s = seq<E>(x)) {
+  when (val s = seq(x)) {
     null -> y
     else -> when (s) {
       is IChunkedSeq<*> -> {
@@ -560,9 +559,9 @@ fun <E> concat(x: Any?, y: Any?): LazySeq<E> = lazySeq {
 
 fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
   fun cat(xy: Any?, zzs: Any?): LazySeq<E> = lazySeq {
-    val xys = seq<E>(xy)
+    val xys = seq(xy)
     when {
-      xys === null -> when (val argsSeq = seq<E>(zzs)) {
+      xys === null -> when (val argsSeq = seq(zzs)) {
         null -> null
         else -> cat(argsSeq.first(), argsSeq.rest())
       }
@@ -580,11 +579,11 @@ fun <E> concat(x: Any?, y: Any?, vararg zs: Any?): LazySeq<E> {
   return cat(concat<E>(x, y), zs)
 }
 
-fun <E> q(): PersistentQueue<E> = PersistentQueue()
+fun q(): PersistentQueue<Any?> = PersistentQueue()
 
-fun <E> q(coll: Any?): PersistentQueue<E> {
-  var s = seq<E>(coll)
-  var q = q<E>()
+fun q(coll: Any?): PersistentQueue<Any?> {
+  var s = seq(coll)
+  var q = q()
 
   if (s == null) return q
 
@@ -611,7 +610,7 @@ internal fun <T> chunkBuffer(capacity: Int, end: Int, f: (index: Int) -> T):
  * in the given [coll]. */
 @Suppress("UNCHECKED_CAST")
 fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
-  when (val seq = seq<T>(coll)) {
+  when (val seq = seq(coll)) {
     null -> null
     is IChunkedSeq<*> -> {
       seq as IChunkedSeq<T>
@@ -623,7 +622,7 @@ fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
       consChunk(ArrayChunk(buffer), map(seq.restChunks(), f))
     }
 
-    else -> cons(f(seq.first()), map(seq.rest(), f))
+    else -> cons(f(seq.first() as T), map(seq.rest(), f))
   }
 }
 
@@ -639,11 +638,14 @@ fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
  */
 fun <T1, T2, R> map(c1: Any?, c2: Any?, f: (T1, T2) -> R): LazySeq<R> =
   lazySeq {
-    val seq1 = seq<T1>(c1)
-    val seq2 = seq<T2>(c2)
+    val seq1 = seq(c1)
+    val seq2 = seq(c2)
     if (seq1 == null || seq2 == null) return@lazySeq null
 
-    cons(f(seq1.first(), seq2.first()), map(seq1.rest(), seq2.rest(), f))
+    cons(
+      f(seq1.first() as T1, seq2.first() as T2),
+      map(seq1.rest(), seq2.rest(), f)
+    )
   }
 
 /**
@@ -664,12 +666,12 @@ fun <T1, T2, T3, R> map(
   c3: Any?,
   f: (T1, T2, T3) -> R,
 ): LazySeq<R> = lazySeq {
-  val seq1 = seq<T1>(c1)
-  val seq2 = seq<T2>(c2)
-  val seq3 = seq<T3>(c3)
+  val seq1 = seq(c1)
+  val seq2 = seq(c2)
+  val seq3 = seq(c3)
   if (seq1 == null || seq2 == null || seq3 == null) return@lazySeq null
   cons(
-    f(seq1.first(), seq2.first(), seq3.first()),
+    f(seq1.first() as T1, seq2.first() as T2, seq3.first() as T3),
     map(seq1.rest(), seq2.rest(), seq3.rest(), f),
   )
 }
@@ -678,7 +680,7 @@ fun s(name: String): Symbol = Symbol(name)
 
 // -- spread -------------------------------------------------------------------
 fun spread(arglist: Any?): ISeq<Any?>? {
-  val s = seq<Any?>(arglist)
+  val s = seq(arglist)
   return when {
     s == null -> null
     s.next() == null -> seq(s.first())
@@ -716,7 +718,7 @@ data class ArityException(val n: Int?, val f: Any?) : IllegalArgumentException(
 )
 
 fun <R> apply(f: Function<R>, args: Any?): R {
-  var argsSeq = seq<Any?>(args)
+  var argsSeq = seq(args)
   val arity: Int = argsSeq?.count ?: 0
   return if (f is KFunction<R>) {
     when (arity) {

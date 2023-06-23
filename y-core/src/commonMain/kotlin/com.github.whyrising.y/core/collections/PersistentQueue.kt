@@ -40,8 +40,8 @@ class PersistentQueue<out E> private constructor(
       return false
     }
 
-    var ms = seq<Any?>(other)
-    var s: ISeq<E>? = seq(seq())
+    var ms = seq(other)
+    var s: ISeq<E>? = seq(seq()) as ISeq<E>?
     while (s != null) {
       if (ms == null || !equiv(s.first(), ms.first())) {
         return false
@@ -59,8 +59,8 @@ class PersistentQueue<out E> private constructor(
       return false
     }
 
-    var ms = seq<Any?>(other)
-    var s: ISeq<E>? = seq(seq())
+    var ms = seq(other)
+    var s: ISeq<E>? = seq(seq()) as ISeq<E>?
     while (s != null) {
       if (ms == null || s.first() != ms.first()) {
         return false

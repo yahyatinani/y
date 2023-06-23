@@ -62,7 +62,7 @@ abstract class ATransientMap<out K, out V> :
       else -> {
         var rtm: TransientMap<K, V> = this
 
-        var seq = seq<Any?>(e) as ISeq<Any?>
+        var seq = seq(e) as ISeq<Any?>
         for (i in 0 until seq.count)
           when (val entry = seq.first()) {
             is Map.Entry<*, *> -> {

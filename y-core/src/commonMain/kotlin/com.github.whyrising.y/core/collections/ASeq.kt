@@ -33,7 +33,7 @@ abstract class ASeq<out E> : ISeq<E>, List<E>, Sequential, IHashEq {
       other !is List<*> && other !is Sequential -> return false
       else -> {
         var thisSeq: ISeq<E>? = seq()
-        var otherSeq: ISeq<E>? = seq(other)
+        var otherSeq: ISeq<E>? = seq(other) as ISeq<E>?
         while (thisSeq !is Empty && thisSeq != null) {
           if (
             otherSeq == null ||

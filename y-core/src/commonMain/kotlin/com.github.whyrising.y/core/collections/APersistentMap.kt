@@ -90,7 +90,7 @@ abstract class APersistentMap<out K, out V> :
 
     else -> {
       var result: IPersistentMap<K, V> = this
-      var seq = seq<Any?>(e) as ISeq<Any?>
+      var seq = seq(e)!!
 
       for (i in 0 until seq.count) {
         val entry = seq.first()

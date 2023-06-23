@@ -57,7 +57,7 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
           lazySeq = lazySeq.seqVal()
 
         // TODO: make seq nullable maybe?
-        seq = seq(lazySeq) ?: Empty
+        seq = (seq(lazySeq) ?: Empty) as ISeq<@UnsafeVariance E>
       }
 
       return seq
@@ -104,7 +104,7 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
   override fun equiv(other: Any?): Boolean = when (val s = seq()) {
     !is Empty -> s.equiv(other)
     else -> {
-      val seq1 = seq<E>(other)
+      val seq1 = seq(other)
       (other is Sequential || other is List<*>) &&
         (seq1 is Empty || seq1 == null)
     }
@@ -117,7 +117,7 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
   override fun equals(other: Any?): Boolean = when (val s = seq()) {
     !is Empty -> s == other
     else -> {
-      val seq1 = seq<E>(other)
+      val seq1 = seq(other)
       (other is Sequential || other is List<*>) &&
         (seq1 is Empty || seq1 == null)
     }

@@ -18,7 +18,7 @@ class SeqIterator<out E>(next: ISeq<@UnsafeVariance E>?) : Iterator<E> {
       isFresh -> {
         isFresh = false
 
-        next = seq(next)
+        next = seq(next) as ISeq<@UnsafeVariance E>?
       }
       currentSeq === next -> {
         next = currentSeq?.next()
