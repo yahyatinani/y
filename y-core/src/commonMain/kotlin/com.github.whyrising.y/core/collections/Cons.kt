@@ -22,7 +22,7 @@ class Cons<out E> constructor(
       else -> {
         var size = 0
         var rest = _rest
-        while (rest !is Empty) {
+        while (rest != Empty) {
           if (rest is InstaCount) return size + rest.count
 
           rest = rest.rest()
