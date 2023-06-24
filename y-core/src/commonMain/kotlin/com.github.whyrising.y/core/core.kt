@@ -322,7 +322,7 @@ fun <E> vec(coll: Any?): IPersistentVector<E> = when (coll) {
 fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V> =
   PersistentArrayMap.create(this)
 
-fun <K, V> m(vararg kvs: Pair<K, V>): PersistentArrayMap<K, V> = when {
+fun m(vararg kvs: Pair<Any?, Any?>): PersistentArrayMap<Any?, Any?> = when {
   kvs.isEmpty() -> PersistentArrayMap.EmptyArrayMap
   else -> PersistentArrayMap.createWithCheck(*kvs)
 }

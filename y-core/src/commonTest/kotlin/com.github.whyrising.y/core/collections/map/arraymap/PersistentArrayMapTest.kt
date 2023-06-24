@@ -600,7 +600,7 @@ class PersistentArrayMapTest : FreeSpec({
 
       "dissoc(key)" {
         continually(10.seconds) {
-          val initial = m<Int, String>()
+          val initial = m()
           val transientMap = l.fold(initial) { map, entry ->
             map.assoc(
               entry.key,
@@ -643,7 +643,7 @@ class PersistentArrayMapTest : FreeSpec({
   "ArrayMap" - {
     "assoc(key, val)" - {
       "when map is empty, it should add the new entry" {
-        val map = m<String, Int>()
+        val map = m()
 
         val newMap =
           map.assoc("a", 1) as PersistentArrayMap<String, Int>
@@ -858,7 +858,7 @@ class PersistentArrayMapTest : FreeSpec({
 
     "seq()" - {
       "when map is empty, it should return an empty seq" {
-        m<String, Int>().seq() shouldBeSameInstanceAs
+        m().seq() shouldBeSameInstanceAs
           Empty
       }
 
@@ -882,7 +882,7 @@ class PersistentArrayMapTest : FreeSpec({
     "count" {
       val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
 
-      m<String, Int>().count shouldBeExactly 0
+      m().count shouldBeExactly 0
       m(*array).count shouldBeExactly array.size
     }
 
@@ -944,11 +944,11 @@ class PersistentArrayMapTest : FreeSpec({
 
   "EmptyArrayMap" - {
     "toString() should return `{}`" {
-      m<String, Int>().toString() shouldBe "{}"
+      m().toString() shouldBe "{}"
     }
 
     "hashCode()" {
-      m<String, Int>().hashCode() shouldBeExactly 0
+      m().hashCode() shouldBeExactly 0
     }
   }
 })

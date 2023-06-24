@@ -246,10 +246,10 @@ class CoreTest : FreeSpec({
   }
 
   "m(vararg pairs)" {
-    val arrayMap: IPersistentMap<String, Int> = m("a" to 1)
+    val arrayMap = m("a" to 1)
     val pairs = (1..20).map { Pair(it, "$it") }.toTypedArray()
 
-    m<Int, Int>() shouldBeSameInstanceAs EmptyArrayMap
+    m() shouldBeSameInstanceAs EmptyArrayMap
 
     (arrayMap is PersistentArrayMap<*, *>).shouldBeTrue()
     arrayMap.count shouldBeExactly 1
@@ -337,7 +337,7 @@ class CoreTest : FreeSpec({
     val m = m(0 to 45, 1 to 55, 2 to 12)
     var i = 0
     for ((_, v) in m) {
-      v shouldBeExactly m[i]!!
+      v as Int shouldBeExactly m[i]!! as Int
       i++
     }
   }
@@ -620,12 +620,12 @@ class CoreTest : FreeSpec({
 
   "get(map,key)" - {
     "assertions" {
-      val m = m(":a" to 5, ":b" to 6, ":c" to 3)
+      val am = m(":a" to 5, ":b" to 6, ":c" to 3)
 
       get<Int>(m(":a" to 1, ":b" to 2, ":c" to 3), ":a") shouldBe 1
       get<Int>(v(5, 6, 9, 3), 0) shouldBe 5
       get<Int>(hashSet(54, 69, 36), 54) shouldBe 54
-      get<Int>(TransientHashSet(m.asTransient()), ":a") shouldBe 5
+      get<Int>(TransientHashSet(am.asTransient()), ":a") shouldBe 5
       get<String>(m(1 to "d"), 1) shouldBe "d"
       get<Int>(m(":a" to 15, ":b" to 74), ":a") shouldBe 15
       get<Int>(null, ":a").shouldBeNull()
@@ -644,8 +644,8 @@ class CoreTest : FreeSpec({
     }
 
     "get(map, key) should return default" {
-      val m = m(":a" to 5, ":b" to 6, ":c" to 3)
-      val transientHashSet = TransientHashSet(m.asTransient())
+      val am = m(":a" to 5, ":b" to 6, ":c" to 3)
+      val transientHashSet = TransientHashSet(am.asTransient())
 
       get(m(":a" to 1, ":b" to 2, ":c" to 3), ":x", -1) shouldBe -1
       get(v(5, 6, 9, 3), 10, -1) shouldBe -1

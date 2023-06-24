@@ -1,6 +1,5 @@
 package com.github.whyrising.y.core.collections.map
 
-import com.github.whyrising.y.core.collections.APersistentMap
 import com.github.whyrising.y.core.collections.APersistentMap.KeySeq
 import com.github.whyrising.y.core.collections.APersistentMap.ValSeq
 import com.github.whyrising.y.core.collections.ASeq
@@ -27,7 +26,7 @@ import io.kotest.matchers.types.shouldNotBeInstanceOf
 @Suppress("UNCHECKED_CAST")
 class APersistentMapTest : FreeSpec({
   "toString()" {
-    m<String, Int>().toString() shouldBe "{}"
+    m().toString() shouldBe "{}"
     m("a" to 1).toString() shouldBe "{a 1}"
     PersistentArrayMap.createWithCheck("a" to 1, "b" to 2)
       .toString() shouldBe "{a 1, b 2}"
@@ -47,7 +46,7 @@ class APersistentMapTest : FreeSpec({
   "hasheq()" {
     val map = m("a" to 1, "b" to 2, "c" to 3)
     val expectedHash = Murmur3.hashUnordered(map)
-    val emptyMap = m<String, Int>()
+    val emptyMap = m()
 
     val hash = map.hasheq()
 
@@ -63,11 +62,11 @@ class APersistentMapTest : FreeSpec({
 
     (m == m).shouldBeTrue()
 
-    (m<String, Int>() == mapOf<String, Int>()).shouldBeTrue()
+    (m() == mapOf<String, Int>()).shouldBeTrue()
 
     (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 2)).shouldBeTrue()
 
-    (m("a" to 1, "b" to 2).equals("string")).shouldBeFalse()
+    (m("a" to 1, "b" to 2)!! == "string").shouldBeFalse()
 
     (m("a" to 1, "b" to 2) == m("a" to 1)).shouldBeFalse()
 
@@ -75,7 +74,7 @@ class APersistentMapTest : FreeSpec({
 
     (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 10)).shouldBeFalse()
 
-    (m("a" to 1, "b" to 2).equals(m("a" to 1, "b" to 2L))).shouldBeFalse()
+    (m("a" to 1, "b" to 2)!! == m("a" to 1, "b" to 2L)).shouldBeFalse()
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -140,7 +139,7 @@ class APersistentMapTest : FreeSpec({
     val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
     val map = m(*array)
 
-    m<String, Int>().equiv(mapOf<String, Int>()).shouldBeTrue()
+    m().equiv(mapOf<String, Int>()).shouldBeTrue()
 
     "when this and other are the same instance, it should return true" {
       map.equiv(map).shouldBeTrue()
@@ -189,7 +188,7 @@ class APersistentMapTest : FreeSpec({
     val map = m("a" to 1, "b" to 2, "c" to 3)
 
     "KeySeq should be a seq" {
-      val keySeq: ISeq<String> = APersistentMap.KeySeq(map)
+      val keySeq: ISeq<String> = KeySeq(map) as ISeq<String>
       val rest = keySeq.rest() as KeySeq<String, Int>
       val seq: ISeq<String> = rest._seq
 
@@ -206,7 +205,7 @@ class APersistentMapTest : FreeSpec({
 
     "iterator()" - {
       "when map is a MapIterable, it should return an instance of Iter" {
-        val keySeq: ASeq<String> = APersistentMap.KeySeq(map)
+        val keySeq: ASeq<String> = KeySeq(map) as ASeq<String>
         val iter =
           keySeq.iterator() as PersistentArrayMap.Iter<String, Int, String>
 
@@ -218,7 +217,7 @@ class APersistentMapTest : FreeSpec({
       }
 
       "when map is null, it should return an instance of SeqIterator" {
-        val keySeq: ASeq<String> = APersistentMap.KeySeq(map)
+        val keySeq: ASeq<String> = KeySeq(map) as ASeq<String>
         val kSeq = keySeq.rest() as KeySeq<String, Int>
 
         val iter = kSeq.iterator() as SeqIterator<String>
@@ -231,7 +230,7 @@ class APersistentMapTest : FreeSpec({
 
       "when map != null and != MapIterable, return a new Iterator" {
         val nonMiter = MockPersistentMap("a" to 1, "b" to 2, "c" to 3)
-        val keySeq: ASeq<String> = APersistentMap.KeySeq(nonMiter)
+        val keySeq: ASeq<String> = KeySeq(nonMiter)
 
         val iter = keySeq.iterator()
 
@@ -250,7 +249,7 @@ class APersistentMapTest : FreeSpec({
     val map = m("a" to 1, "b" to 2, "c" to 3)
 
     "ValSeq should be a seq" {
-      val valSeq: ISeq<Int> = ValSeq(map)
+      val valSeq: ISeq<Int> = ValSeq(map) as ISeq<Int>
       val rest = valSeq.rest() as ValSeq<String, Int>
       val seq: ISeq<Int> = rest._seq
 
@@ -267,7 +266,7 @@ class APersistentMapTest : FreeSpec({
 
     "iterator()" - {
       "when map is a MapIterable, it should return an instance of Iter" {
-        val valSeq: ASeq<Int> = ValSeq(map)
+        val valSeq: ASeq<Int> = ValSeq(map) as ASeq<Int>
         val iter =
           valSeq.iterator() as PersistentArrayMap.Iter<String, Int, String>
 
@@ -279,7 +278,7 @@ class APersistentMapTest : FreeSpec({
       }
 
       "when map is null, it should return an instance of SeqIterator" {
-        val valSeq: ASeq<Int> = ValSeq(map)
+        val valSeq: ASeq<Int> = ValSeq(map) as ASeq<Int>
         val vSeq = valSeq.rest() as ValSeq<String, Int>
 
         val iter = vSeq.iterator() as SeqIterator<String>
@@ -310,7 +309,7 @@ class APersistentMapTest : FreeSpec({
   "Map implementation" - {
     val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
     val map = m(*array)
-    val emptyMap = m<String, Int>()
+    val emptyMap = m()
 
     "size()" {
       map.size shouldBeExactly array.size
@@ -394,7 +393,7 @@ class APersistentMapTest : FreeSpec({
   "IPersistentMap.keyz()" {
     val map = m("a" to 1, "b" to 2, "c" to 3)
 
-    val keys: ISeq<String> = map.keyz()
+    val keys: ISeq<String> = map.keyz() as ISeq<String>
 
     keys shouldBe l("a", "b", "c")
   }
@@ -402,7 +401,7 @@ class APersistentMapTest : FreeSpec({
   "IPersistentMap.vals()" {
     val map = m("a" to 1, "b" to 2, "c" to 3)
 
-    val vals: ISeq<Int> = map.vals()
+    val vals: ISeq<Int> = map.vals() as ISeq<Int>
 
     vals shouldBe l(1, 2, 3)
   }
