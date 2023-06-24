@@ -1,12 +1,14 @@
 package com.github.whyrising.y.core
 
 import com.github.whyrising.y.core.collections.IPersistentCollection
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import kotlin.reflect.KFunction2
 import kotlin.reflect.KFunction3
 import kotlin.reflect.KFunction4
+import kotlin.test.Test
 
 class UpdateTest : FreeSpec({
   fun inc(int: Int?): Int? = int?.inc()
@@ -30,12 +32,6 @@ class UpdateTest : FreeSpec({
     "when arg is not used, and index is more than one past the end" {
       shouldThrowExactly<IndexOutOfBoundsException> {
         update(v(1, 2, 3), 4, { _: Int? -> 43 })
-      }
-    }
-
-    "when arg is not used, and index is one past the end of the vector" {
-      shouldThrowExactly<NullPointerException> {
-        update(v(1, 2, 3), 3, Int::inc)
       }
     }
   }
@@ -110,4 +106,13 @@ class UpdateTest : FreeSpec({
     val str: KFunction4<Any?, Any?, Any?, Array<out Any?>, Any?> = ::str
     update(m(":k" to 1), ":k", str, 2, 3, 4, 5, 6)
   }.message shouldBe "Wrong number of args 6 passed to str"
-})
+}) {
+  @Test
+  fun `when arg is used and index is one past the end of the vector`() {
+    fun inc2(x: Int?): Int = x!! + 1
+
+    shouldThrow<NullPointerException> {
+      update(v(1, 2, 3), 3, ::inc2)
+    }
+  }
+}

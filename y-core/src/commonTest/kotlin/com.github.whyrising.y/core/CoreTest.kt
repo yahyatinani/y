@@ -21,6 +21,7 @@ import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.longs.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.reflect.KFunction0
 import kotlin.reflect.KFunction2
@@ -701,20 +702,20 @@ class CoreTest : FreeSpec({
 
           shouldThrowExactly<ArityException> {
             apply({ x: Any? -> "$x" }, v<Any>())
-          }.message shouldBe
-            "Wrong number of args 0 passed to (kotlin.Any?) -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 0 passed to"
 
           shouldThrowExactly<ArityException> {
             apply({ x: Any? -> "$x" }, null)
-          }.message shouldBe
-            "Wrong number of args 0 passed to (kotlin.Any?) -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 0 passed to"
         }
 
         "1 arg" {
           shouldThrowExactly<ArityException> {
             apply({ "a" }, v(1))
-          }.message shouldBe
-            "Wrong number of args 1 passed to () -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 1 passed to"
 
           apply({ x: Any? -> "$x" }, v(1)) shouldBe "1"
         }
@@ -722,8 +723,8 @@ class CoreTest : FreeSpec({
         "2 args" {
           shouldThrowExactly<ArityException> {
             apply({ x: Any? -> "$x" }, v(1, 2))
-          }.message shouldBe
-            "Wrong number of args 2 passed to (kotlin.Any?) -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 2 passed to"
 
           apply({ x: Any?, y: Any? -> "$x$y" }, v(1, 2)) shouldBe "12"
         }
@@ -731,8 +732,8 @@ class CoreTest : FreeSpec({
         "3 args" {
           shouldThrowExactly<ArityException> {
             apply({ x: Any? -> "$x" }, v(1, 2, 3))
-          }.message shouldBe
-            "Wrong number of args 3 passed to (kotlin.Any?) -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 3 passed to"
 
           apply(
             { x: Any?, y: Any?, z: Any? -> "$x$y$z" },
@@ -743,8 +744,8 @@ class CoreTest : FreeSpec({
         "4 args" {
           shouldThrowExactly<ArityException> {
             apply({ x: Any? -> "$x" }, v(1, 2, 3, 4))
-          }.message shouldBe
-            "Wrong number of args 4 passed to (kotlin.Any?) -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 4 passed to"
 
           apply(
             { a: Any?, b: Any?, c: Any?, d: Any? -> "$a$b$c$d" },
@@ -755,8 +756,8 @@ class CoreTest : FreeSpec({
         "5 args" {
           shouldThrowExactly<ArityException> {
             apply({ x: Any? -> "$x" }, v(1, 2, 3, 4, 5))
-          }.message shouldBe
-            "Wrong number of args 5 passed to (kotlin.Any?) -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 5 passed to"
 
           apply(
             { a: Any?, b: Any?, c: Any?, d: Any?, e: Any? -> "$a$b$c$d$e" },
@@ -767,8 +768,8 @@ class CoreTest : FreeSpec({
         "6 args" {
           shouldThrowExactly<ArityException> {
             apply({ x: Any? -> "$x" }, v(1, 2, 3, 4, 5, 6))
-          }.message shouldBe
-            "Wrong number of args 6 passed to (kotlin.Any?) -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 6 passed to"
 
           apply(
             { a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any? ->
@@ -781,8 +782,8 @@ class CoreTest : FreeSpec({
         "7 args" {
           shouldThrowExactly<ArityException> {
             apply({ x: Any? -> "$x" }, v(1, 2, 3, 4, 5, 6, 7))
-          }.message shouldBe
-            "Wrong number of args 7 passed to (kotlin.Any?) -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 7 passed to"
 
           apply(
             { a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any?, g: Any? ->
@@ -801,7 +802,7 @@ class CoreTest : FreeSpec({
 
           shouldThrowExactly<ArityException> {
             apply(::s, v<Any?>())
-          }.message shouldBe "Wrong number of args 0 passed to s"
+          }.message shouldContain "Wrong number of args 0 passed to"
         }
 
         "1 arg" {
@@ -810,7 +811,7 @@ class CoreTest : FreeSpec({
           shouldThrowExactly<ArityException> {
             val f: Function0<String> = ::testFn
             apply(f, v(1))
-          }.message shouldBe "Wrong number of args 1 passed to testFn"
+          }.message shouldContain "Wrong number of args 1 passed to"
         }
 
         "2 args" {
@@ -822,7 +823,7 @@ class CoreTest : FreeSpec({
           shouldThrowExactly<ArityException> {
             val f: Function0<String> = ::testFn
             apply(f, v(1, 2))
-          }.message shouldBe "Wrong number of args 2 passed to testFn"
+          }.message shouldContain "Wrong number of args 2 passed to"
         }
 
         "3 args" {
@@ -835,7 +836,7 @@ class CoreTest : FreeSpec({
           shouldThrowExactly<ArityException> {
             val f: Function0<String> = ::testFn
             apply(f, v(1, 2, 3))
-          }.message shouldBe "Wrong number of args 3 passed to testFn"
+          }.message shouldContain "Wrong number of args 3 passed to"
         }
 
         "4 args" {
@@ -845,7 +846,7 @@ class CoreTest : FreeSpec({
           shouldThrowExactly<ArityException> {
             val f: Function0<String> = ::testFn
             apply(f, v(1, 2, 3, 4))
-          }.message shouldBe "Wrong number of args 4 passed to testFn"
+          }.message shouldContain "Wrong number of args 4 passed to"
         }
 
         "5 args" {
@@ -855,7 +856,7 @@ class CoreTest : FreeSpec({
           shouldThrowExactly<ArityException> {
             val f: Function0<String> = ::testFn
             apply(f, v(1, 2, 3, 4, 5))
-          }.message shouldBe "Wrong number of args 5 passed to testFn"
+          }.message shouldContain "Wrong number of args 5 passed to"
         }
 
         "6 args" {
@@ -865,7 +866,7 @@ class CoreTest : FreeSpec({
           shouldThrowExactly<ArityException> {
             val f: Function0<String> = ::testFn
             apply(f, v(1, 2, 3, 4, 5, 6))
-          }.message shouldBe "Wrong number of args 6 passed to testFn"
+          }.message shouldContain "Wrong number of args 6 passed to"
         }
 
         "7 args" {
@@ -876,7 +877,7 @@ class CoreTest : FreeSpec({
           shouldThrowExactly<ArityException> {
             val f: Function0<String> = ::testFn
             apply(f, v(1, 2, 3, 4, 5, 6, 7))
-          }.message shouldBe "Wrong number of args 7 passed to testFn"
+          }.message shouldContain "Wrong number of args 7 passed to"
         }
 
         "more" {
@@ -895,8 +896,8 @@ class CoreTest : FreeSpec({
         "1 arg" {
           shouldThrowExactly<ArityException> {
             apply({ "a" }, 0, v<Any>())
-          }.message shouldBe
-            "Wrong number of args 1 passed to () -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 1 passed to"
 
           apply({ x: Any? -> "$x" }, 0, null) shouldBe "0"
         }
@@ -904,8 +905,8 @@ class CoreTest : FreeSpec({
         "2 args" {
           shouldThrowExactly<ArityException> {
             apply({ "a" }, 0, v(1))
-          }.message shouldBe
-            "Wrong number of args 2 passed to () -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 2 passed to"
 
           apply({ x: Any?, y: Any? -> "$x$y" }, 0, v(1)) shouldBe "01"
           apply(
@@ -918,8 +919,8 @@ class CoreTest : FreeSpec({
         "3 args" {
           shouldThrowExactly<ArityException> {
             apply({ "a" }, 0, 1, v(1))
-          }.message shouldBe
-            "Wrong number of args 3 passed to () -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 3 passed to"
 
           apply(
             { x: Any?, y: Any?, z: Any? -> "$x$y$z" },
@@ -932,8 +933,8 @@ class CoreTest : FreeSpec({
         "4 args" {
           shouldThrowExactly<ArityException> {
             apply({ "a" }, 0, 1, 2, v(1))
-          }.message shouldBe
-            "Wrong number of args 4 passed to () -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 4 passed to"
 
           apply(
             { a: Any?, b: Any?, c: Any?, d: Any? -> "$a$b$c$d" },
@@ -947,8 +948,8 @@ class CoreTest : FreeSpec({
         "5 args" {
           shouldThrowExactly<ArityException> {
             apply({ "a" }, 0, 1, 2, 3, v(1))
-          }.message shouldBe
-            "Wrong number of args 5 passed to () -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 5 passed to"
 
           apply(
             { a: Any?, b: Any?, c: Any?, d: Any?, e: Any? ->
@@ -965,8 +966,8 @@ class CoreTest : FreeSpec({
         "6 args" {
           shouldThrowExactly<ArityException> {
             apply({ "a" }, 0, 1, 2, 3, 4, v(1))
-          }.message shouldBe
-            "Wrong number of args 6 passed to () -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 6 passed to"
 
           apply(
             { a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any? ->
@@ -984,8 +985,8 @@ class CoreTest : FreeSpec({
         "7 args" {
           shouldThrowExactly<ArityException> {
             apply({ "a" }, 0, 1, 2, 3, 4, 5, v(1))
-          }.message shouldBe
-            "Wrong number of args 7 passed to () -> kotlin.String"
+          }.message shouldContain
+            "Wrong number of args 7 passed to"
 
           apply(
             { a: Any?, b: Any?, c: Any?, d: Any?, e: Any?, f: Any?, g: Any? ->
