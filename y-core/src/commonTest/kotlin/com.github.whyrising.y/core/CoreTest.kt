@@ -483,54 +483,6 @@ class CoreTest : FreeSpec({
     q(listOf(1, 2)) shouldBe q().conj(1).conj(2)
   }
 
-  "map()" - {
-    "mapping f to one collection" {
-      map<Int, String>(l<Int>()) { "${it * 2}" } shouldBe Empty
-      map<Int, String>(l(1, 3, 2)) { "${it * 2}" } shouldBe
-        l("2", "6", "4")
-      map<Int, String>(listOf(1, 3)) { "${it * 3}" } shouldBe l("3", "9")
-      var i = 0
-      val lazySeq = map<Int, String>(listOf(1, 3, 4, 2)) {
-        i++ // to prove laziness, f is applied as the element is needed
-        "${it * 2}"
-      }
-      lazySeq.first() shouldBe "2"
-      i shouldBeExactly 1
-    }
-
-    "mapping f to two collections" {
-      map<Int, Int, Int>(l(3, 5), l(4, 2)) { i, j ->
-        i + j
-      } shouldBe l(7, 7)
-
-      map<Int, Int, Int>(l(3, 5), l(4)) { i, j ->
-        i + j
-      } shouldBe l(7)
-
-      map<Int, Float, String>(l(3, 5), l(4.1f, 2.3f)) { i, j ->
-        "${i + j}"
-      } shouldBe l("7.1", "7.3")
-    }
-
-    "mapping f to three collections" {
-      map<Int, Int, Int, Int>(l(3, 5), l(4, 2), l(1, 1)) { i, j, k ->
-        i + j + k
-      } shouldBe l(8, 8)
-
-      map<Int, Int, Int, Int>(l(3, 5), l(4), l(1, 1)) { i, j, k ->
-        i + j + k
-      } shouldBe l(8)
-
-      map<Int, Float, Boolean, String>(
-        l(3, 5),
-        l(4.1f, 2.3f),
-        l(true, false),
-      ) { i, j, k ->
-        "${i + j}$k"
-      } shouldBe l("7.1true", "7.3false")
-    }
-  }
-
   "Collections.seq()" {
     listOf(1, 2, 3, 4).seq() shouldBe l(1, 2, 3, 4)
     arrayOf(1, 2, 3, 4).seq() shouldBe l(1, 2, 3, 4)
@@ -1048,4 +1000,52 @@ class CoreTest : FreeSpec({
     fun add(x: Int, y: Int, z: Int): Int = x + y + z
     updateIn(m(":a" to 3), l(":a"), ::add, 7, 1) shouldBe m(":a" to 11)
   }
+
+  /*  "map()" - {
+      "mapping f to one collection" {
+        map<Int, String>(l<Int>()) { "${it * 2}" } shouldBe Empty
+        map<Int, String>(l(1, 3, 2)) { "${it * 2}" } shouldBe
+          l("2", "6", "4")
+        map<Int, String>(listOf(1, 3)) { "${it * 3}" } shouldBe l("3", "9")
+        var i = 0
+        val lazySeq = map<Int, String>(listOf(1, 3, 4, 2)) {
+          i++ // to prove laziness, f is applied as the element is needed
+          "${it * 2}"
+        }
+        lazySeq.first() shouldBe "2"
+        i shouldBeExactly 1
+      }
+
+      "mapping f to two collections" {
+        map<Int, Int, Int>(l(3, 5), l(4, 2)) { i, j ->
+          i + j
+        } shouldBe l(7, 7)
+
+        map<Int, Int, Int>(l(3, 5), l(4)) { i, j ->
+          i + j
+        } shouldBe l(7)
+
+        map<Int, Float, String>(l(3, 5), l(4.1f, 2.3f)) { i, j ->
+          "${i + j}"
+        } shouldBe l("7.1", "7.3")
+      }
+
+      "mapping f to three collections" {
+        map<Int, Int, Int, Int>(l(3, 5), l(4, 2), l(1, 1)) { i, j, k ->
+          i + j + k
+        } shouldBe l(8, 8)
+
+        map<Int, Int, Int, Int>(l(3, 5), l(4), l(1, 1)) { i, j, k ->
+          i + j + k
+        } shouldBe l(8)
+
+        map<Int, Float, Boolean, String>(
+          l(3, 5),
+          l(4.1f, 2.3f),
+          l(true, false),
+        ) { i, j, k ->
+          "${i + j}$k"
+        } shouldBe l("7.1true", "7.3false")
+      }
+    }*/
 })

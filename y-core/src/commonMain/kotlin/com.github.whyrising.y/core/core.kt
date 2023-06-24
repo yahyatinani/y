@@ -595,87 +595,6 @@ fun q(coll: Any?): PersistentQueue<Any?> {
   return q
 }
 
-internal fun <T> chunkBuffer(capacity: Int, end: Int, f: (index: Int) -> T):
-  Array<Any?> {
-  val buffer = arrayOfNulls<Any?>(capacity)
-  for (i in 0 until end)
-    buffer[i] = f(i)
-  return buffer
-}
-
-/**
- * @param coll should be an [Iterable] or a [Seqable] of elements of type [T].
- * @param f that takes the elements of [coll] as arguments.
- * @return a [LazySeq] consisting of the result of applying [f] to each element
- * in the given [coll]. */
-@Suppress("UNCHECKED_CAST")
-fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
-  when (val seq = seq(coll)) {
-    null -> null
-    is IChunkedSeq<*> -> {
-      seq as IChunkedSeq<T>
-      val firstChunk = seq.firstChunk()
-      val count = firstChunk.count
-      val buffer = chunkBuffer(capacity = count, end = count) { index ->
-        f(firstChunk.nth(index))
-      }
-      consChunk(ArrayChunk(buffer), map(seq.restChunks(), f))
-    }
-
-    else -> cons(f(seq.first() as T), map(seq.rest(), f))
-  }
-}
-
-/**
- * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
- * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
- * @param f takes 1st argument form [c1] and the 2nd from [c2].
- * @return a [LazySeq] consisting of the result of applying [f] to the set of
- * first items of [c1] and [c2], followed by applying [f] to the set of second
- * items in [c1] and [c2], until one or both of the collections are exhausted.
- * If the collections didn't have the same size, the remaining items in either
- * of them are ignored.
- */
-fun <T1, T2, R> map(c1: Any?, c2: Any?, f: (T1, T2) -> R): LazySeq<R> =
-  lazySeq {
-    val seq1 = seq(c1)
-    val seq2 = seq(c2)
-    if (seq1 == null || seq2 == null) return@lazySeq null
-
-    cons(
-      f(seq1.first() as T1, seq2.first() as T2),
-      map(seq1.rest(), seq2.rest(), f),
-    )
-  }
-
-/**
- * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
- * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
- * @param c3 should be an [Iterable] or a [Seqable] of elements of type [T3].
- * @param f takes 1st argument form [c1] and the 2nd from [c2] and 3rd from [c3]
- * @return a [LazySeq] consisting of the result of applying [f] to the set of
- * first items of [c1], [c2], and [c3], followed by applying [f] to the set of
- * second items in [c1], [c2], and [c3], until one or all of the collections
- * are exhausted.
- * If the collections didn't have the same size, the remaining items in either
- * of them are ignored.
- */
-fun <T1, T2, T3, R> map(
-  c1: Any?,
-  c2: Any?,
-  c3: Any?,
-  f: (T1, T2, T3) -> R,
-): LazySeq<R> = lazySeq {
-  val seq1 = seq(c1)
-  val seq2 = seq(c2)
-  val seq3 = seq(c3)
-  if (seq1 == null || seq2 == null || seq3 == null) return@lazySeq null
-  cons(
-    f(seq1.first() as T1, seq2.first() as T2, seq3.first() as T3),
-    map(seq1.rest(), seq2.rest(), seq3.rest(), f),
-  )
-}
-
 fun s(name: String): Symbol = Symbol(name)
 
 // -- spread -------------------------------------------------------------------
@@ -995,6 +914,136 @@ fun updateIn(
   }
 
   return upIn((m as Associative<Any?, Any?>?), ks, f)
+}
+
+// -- map ----------------------------------------------------------------------
+/*
+*/
+/**
+ * @param coll should be an [Iterable] or a [Seqable] of elements of type [T].
+ * @param f that takes the elements of [coll] as arguments.
+ * @return a [LazySeq] consisting of the result of applying [f] to each element
+ * in the given [coll]. *//*
+@Suppress("UNCHECKED_CAST")
+fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
+  when (val seq = seq(coll)) {
+    null -> null
+    is IChunkedSeq<*> -> {
+      seq as IChunkedSeq<T>
+      val firstChunk = seq.firstChunk()
+      val count = firstChunk.count
+      val buffer = chunkBuffer(capacity = count, end = count) { index ->
+        f(firstChunk.nth(index))
+      }
+      consChunk(ArrayChunk(buffer), map(seq.restChunks(), f))
+    }
+
+    else -> cons(f(seq.first() as T), map(seq.rest(), f))
+  }
+}
+
+*/
+/**
+ * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
+ * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
+ * @param f takes 1st argument form [c1] and the 2nd from [c2].
+ * @return a [LazySeq] consisting of the result of applying [f] to the set of
+ * first items of [c1] and [c2], followed by applying [f] to the set of second
+ * items in [c1] and [c2], until one or both of the collections are exhausted.
+ * If the collections didn't have the same size, the remaining items in either
+ * of them are ignored.
+ *//*
+fun <T1, T2, R> map(c1: Any?, c2: Any?, f: (T1, T2) -> R): LazySeq<R> =
+  lazySeq {
+    val seq1 = seq(c1)
+    val seq2 = seq(c2)
+    if (seq1 == null || seq2 == null) return@lazySeq null
+
+    cons(
+      f(seq1.first() as T1, seq2.first() as T2),
+      map(seq1.rest(), seq2.rest(), f),
+    )
+  }
+
+*//**
+ * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
+ * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
+ * @param c3 should be an [Iterable] or a [Seqable] of elements of type [T3].
+ * @param f takes 1st argument form [c1] and the 2nd from [c2] and 3rd from [c3]
+ * @return a [LazySeq] consisting of the result of applying [f] to the set of
+ * first items of [c1], [c2], and [c3], followed by applying [f] to the set of
+ * second items in [c1], [c2], and [c3], until one or all of the collections
+ * are exhausted.
+ * If the collections didn't have the same size, the remaining items in either
+ * of them are ignored.
+ *//*
+fun <T1, T2, T3, R> map(
+  c1: Any?,
+  c2: Any?,
+  c3: Any?,
+  f: (T1, T2, T3) -> R,
+): LazySeq<R> = lazySeq {
+  val seq1 = seq(c1)
+  val seq2 = seq(c2)
+  val seq3 = seq(c3)
+  if (seq1 == null || seq2 == null || seq3 == null) return@lazySeq null
+  cons(
+    f(seq1.first() as T1, seq2.first() as T2, seq3.first() as T3),
+    map(seq1.rest(), seq2.rest(), seq3.rest(), f),
+  )
+}*/
+
+inline fun <T> chunkBuffer(capacity: Int, end: Int, f: (index: Int) -> T):
+  Array<Any?> {
+  val buffer = arrayOfNulls<Any?>(capacity)
+  for (i in 0 until end) buffer[i] = f(i)
+  return buffer
+}
+
+fun map(f: Function<Any?>, coll: Any?): LazySeq<Any?> = lazySeq {
+  val function = f as (Any?) -> Any?
+  when (val seq = seq(coll)) {
+    null -> null
+
+    is IChunkedSeq<*> -> {
+      val firstChunk = seq.firstChunk()
+      val count = firstChunk.count
+      val buffer = chunkBuffer(capacity = count, end = count) { index ->
+        function(firstChunk.nth(index))
+      }
+      consChunk(ArrayChunk(buffer), map(f, seq.restChunks()))
+    }
+
+    else -> cons(function(seq.first()), map(f, seq.rest()))
+  }
+}
+
+fun map(f: Function<Any?>, coll1: Any?, coll2: Any?): LazySeq<Any?> = lazySeq {
+  val s1 = seq(coll1)
+  val s2 = seq(coll2)
+  if (s1 == null || s2 == null) return@lazySeq null
+
+  cons(
+    x = (f as (Any?, Any?) -> Any?)(s1.first(), s2.first()),
+    coll = map(f, s1.rest(), s2.rest())
+  )
+}
+
+fun map(
+  f: Function<Any?>,
+  coll1: Any?,
+  coll2: Any?,
+  coll3: Any?
+): LazySeq<Any?> = lazySeq {
+  val s1 = seq(coll1)
+  val s2 = seq(coll2)
+  val s3 = seq(coll3)
+  if (s1 == null || s2 == null || s3 == null) return@lazySeq null
+
+  cons(
+    x = (f as (Any?, Any?, Any?) -> Any?)(s1.first(), s2.first(), s3.first()),
+    coll = map(f, s1.rest(), s2.rest(), s3.rest())
+  )
 }
 
 // -----------------------------------------------------------------------------
