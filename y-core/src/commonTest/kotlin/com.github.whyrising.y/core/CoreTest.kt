@@ -7,7 +7,6 @@ import com.github.whyrising.y.core.collections.PersistentArrayMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap.Companion.EmptyArrayMap
 import com.github.whyrising.y.core.collections.PersistentHashMap
 import com.github.whyrising.y.core.collections.PersistentHashSet.TransientHashSet
-import com.github.whyrising.y.core.collections.PersistentList.Empty
 import com.github.whyrising.y.core.collections.PersistentQueue
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.collections.Seqable
@@ -1001,51 +1000,75 @@ class CoreTest : FreeSpec({
     updateIn(m(":a" to 3), l(":a"), ::add, 7, 1) shouldBe m(":a" to 11)
   }
 
-  /*  "map()" - {
-      "mapping f to one collection" {
-        map<Int, String>(l<Int>()) { "${it * 2}" } shouldBe Empty
-        map<Int, String>(l(1, 3, 2)) { "${it * 2}" } shouldBe
-          l("2", "6", "4")
-        map<Int, String>(listOf(1, 3)) { "${it * 3}" } shouldBe l("3", "9")
-        var i = 0
-        val lazySeq = map<Int, String>(listOf(1, 3, 4, 2)) {
-          i++ // to prove laziness, f is applied as the element is needed
-          "${it * 2}"
-        }
-        lazySeq.first() shouldBe "2"
-        i shouldBeExactly 1
-      }
+  "map()" - {
+    "map(f, coll)" {
+      map(::inc, l(4, 6, 8)) shouldBe l(5, 7, 9)
+      map(::inc, listOf(1, 3)) shouldBe l(2, 4)
+      map({ i: Int -> i + 1 }, l(4, 6, 8)) shouldBe l(5, 7, 9)
+      map({ i: Int -> i + 1 }, listOf(1, 3)) shouldBe l(2, 4)
+      val str: Function1<Any?, String> = ::str
+      map(str, l(4, 6, 8)) shouldBe l("4", "6", "8")
 
-      "mapping f to two collections" {
-        map<Int, Int, Int>(l(3, 5), l(4, 2)) { i, j ->
-          i + j
-        } shouldBe l(7, 7)
+      map(
+        { f: Function1<Any?, Any?> -> f(0) },
+        l(Int::inc, Int::dec, ::str)
+      ) shouldBe l(1, -1, "0")
+    }
 
-        map<Int, Int, Int>(l(3, 5), l(4)) { i, j ->
-          i + j
-        } shouldBe l(7)
+    "map(f, coll1, coll2)" {
+      map({ i: Int, j: Int -> i + j }, l(6, 5), l(4, 2)) shouldBe l(10, 7)
+      val str: Function2<Any?, Any?, String> = ::str
+      map(str, l(6, 5), l(4, 2)) shouldBe l("64", "52")
+      map(str, l(6, 5), null) shouldBe l()
+      map(str, null, null) shouldBe l()
+      map(str, null, l(4, 2)) shouldBe l()
+      map({ i: Int, j: Int -> i + j }, l(3, 5), l(4)) shouldBe l(7)
+      map(
+        { i: Float, j: Float -> "${i + j}" },
+        l(3f, 5f),
+        l(4.1f, 2.3f)
+      ) shouldBe l("7.1", "7.3")
+    }
 
-        map<Int, Float, String>(l(3, 5), l(4.1f, 2.3f)) { i, j ->
-          "${i + j}"
-        } shouldBe l("7.1", "7.3")
-      }
+    "map(f, coll1, coll2, coll3)" {
+      map(
+        { i: Int, j: Int, k: Int -> i + j + k },
+        l(3, 5),
+        l(4, 2),
+        l(1, 2)
+      ) shouldBe l(8, 9)
 
-      "mapping f to three collections" {
-        map<Int, Int, Int, Int>(l(3, 5), l(4, 2), l(1, 1)) { i, j, k ->
-          i + j + k
-        } shouldBe l(8, 8)
+      map(
+        { i: Int, j: Int, k: Int -> i + j + k },
+        l(3, 5),
+        l(4),
+        l(1, 1)
+      ) shouldBe l(8)
 
-        map<Int, Int, Int, Int>(l(3, 5), l(4), l(1, 1)) { i, j, k ->
-          i + j + k
-        } shouldBe l(8)
+      val str: Function3<Any?, Any?, Any?, String> = ::str
+      map(str, l(3, 5), l(4.1f, 2.3f), l(true, false)) shouldBe
+        l("34.1true", "52.3false")
+    }
 
-        map<Int, Float, Boolean, String>(
-          l(3, 5),
-          l(4.1f, 2.3f),
-          l(true, false),
-        ) { i, j, k ->
-          "${i + j}$k"
-        } shouldBe l("7.1true", "7.3false")
-      }
-    }*/
+    "map(f, c1, c2, c3, vararg colls" {
+      map(
+        { i: Int, j: Int, k: Int, l: Int, m: Int -> i + j + k + l + m },
+        l(3, 5),
+        l(4, 2),
+        l(1, 2),
+        l(1, 1),
+        l(1, 1),
+      ) shouldBe l(10, 11)
+
+      val v: Function5<Any?, Any?, Any?, Any?, Any?, Any?> = ::v
+      map(
+        v,
+        l(3, 5),
+        l(4, 2),
+        l(1, 2),
+        l(1, 1),
+        l(1, 1),
+      ) shouldBe l(v(3, 4, 1, 1, 1), v(5, 2, 2, 1, 1))
+    }
+  }
 })

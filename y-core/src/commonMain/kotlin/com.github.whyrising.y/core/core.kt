@@ -1046,6 +1046,28 @@ fun map(
   )
 }
 
+fun map(
+  f: Function<Any?>,
+  coll1: Any?,
+  coll2: Any?,
+  coll3: Any?,
+  vararg colls: Any?,
+): LazySeq<Any?> = lazySeq {
+  fun step(cs: Any?): LazySeq<Any?> = lazySeq {
+    val ss = map(::seq, cs)
+
+    var sss: ISeq<Any?>? = ss
+    while (sss != null) {
+      sss.first() ?: return@lazySeq null
+      sss = sss.next()
+    }
+
+    cons(map(::first, ss), step(map(ISeq<Any?>::next, ss)))
+  }
+
+  map({ e: Any? -> apply(f, e) }, step(conj(seq(colls), coll3, coll2, coll1)))
+}
+
 // -----------------------------------------------------------------------------
 fun mapcat() {
   TODO()

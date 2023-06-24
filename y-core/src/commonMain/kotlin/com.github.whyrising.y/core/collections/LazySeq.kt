@@ -91,7 +91,7 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
     get() {
       var c = 0
       var s: ISeq<E>? = seq()
-      while (s != null && s !is Empty) {
+      while (s != null && s != Empty) {
         ++c
         s = s.next()
       }
