@@ -644,7 +644,7 @@ fun <T1, T2, R> map(c1: Any?, c2: Any?, f: (T1, T2) -> R): LazySeq<R> =
 
     cons(
       f(seq1.first() as T1, seq2.first() as T2),
-      map(seq1.rest(), seq2.rest(), f)
+      map(seq1.rest(), seq2.rest(), f),
     )
   }
 
