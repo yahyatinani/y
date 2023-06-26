@@ -636,169 +636,93 @@ data class ArityException(val n: Int?, val f: Any?) : IllegalArgumentException(
   "Wrong number of args $n passed to $f",
 )
 
+private fun f(f: Function<*>): Any = if (f is KFunction<*>) f.name else f
+
 fun <R> apply(f: Function<R>, args: Any?): R {
   var argsSeq = seq(args)
-  val arity: Int = argsSeq?.count ?: 0
-  return if (f is KFunction<R>) {
-    when (arity) {
-      0 -> (f as? Function0<R> ?: throw ArityException(arity, f.name)).invoke()
+  return when (val arity: Int = argsSeq?.count ?: 0) {
+    0 -> (f as? Function0<R> ?: throw ArityException(arity, f(f))).invoke()
 
-      1 -> {
-        (f as? Function1<Any?, R> ?: throw ArityException(arity, f.name))
-          .invoke(argsSeq?.first())
-      }
-
-      2 -> {
-        (f as? Function2<Any?, Any?, R> ?: throw ArityException(arity, f.name))
-          .invoke(
-            argsSeq?.first(),
-            (argsSeq?.next().also { argsSeq = it })?.first(),
-          )
-      }
-
-      3 -> (
-        f as? Function3<Any?, Any?, Any?, R> ?: throw ArityException(
-          arity,
-          f.name,
-        )
-        )
-        .invoke(
-          argsSeq?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-        )
-
-      4 -> {
-        (
-          f as? Function4<Any?, Any?, Any?, Any?, R> ?: throw ArityException(
-            arity,
-            f.name,
-          )
-          )
-          .invoke(
-            argsSeq?.first(),
-            (argsSeq?.next().also { argsSeq = it })?.first(),
-            (argsSeq?.next().also { argsSeq = it })?.first(),
-            (argsSeq?.next().also { argsSeq = it })?.first(),
-          )
-      }
-
-      5 -> (
-        f as? Function5<Any?, Any?, Any?, Any?, Any?, R>
-          ?: throw ArityException(arity, f.name)
-        )
-        .invoke(
-          argsSeq?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-        )
-
-      6 -> (
-        f as? Function6<Any?, Any?, Any?, Any?, Any?, Any?, R>
-          ?: throw ArityException(arity, f.name)
-        )
-        .invoke(
-          argsSeq?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-        )
-
-      7 -> (
-        f as? Function7<Any?, Any?, Any?, Any?, Any?, Any?, Any?, R>
-          ?: throw ArityException(arity, f.name)
-        )
-        .invoke(
-          argsSeq?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-        )
-
-      else -> TODO("apply() supports a maximum arity of 7 for now")
+    1 -> {
+      (f as? Function1<Any?, R> ?: throw ArityException(arity, f(f)))
+        .invoke(argsSeq?.first())
     }
-  } else {
-    when (arity) {
-      0 -> (f as? () -> R)?.invoke() ?: throw ArityException(arity, f)
 
-      1 -> (f as? (Any?) -> R ?: throw ArityException(arity, f))
-        .invoke(argsSeq!!.first())
+    2 -> {
+      (f as? Function2<Any?, Any?, R> ?: throw ArityException(arity, f(f)))
+        .invoke(
+          argsSeq?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+        )
+    }
 
-      2 -> (f as? (Any?, Any?) -> R ?: throw ArityException(arity, f)).invoke(
-        argsSeq!!.first(),
-        argsSeq!!.next().also { argsSeq = it }?.first(),
+    3 -> (
+      f as? Function3<Any?, Any?, Any?, R> ?: throw ArityException(
+        arity,
+        f(f),
+      )
+      )
+      .invoke(
+        argsSeq?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
       )
 
-      3 -> (f as? (Any?, Any?, Any?) -> R ?: throw ArityException(arity, f))
-        .invoke(
-          argsSeq!!.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-        )
-
-      4 -> (
-        f as? (Any?, Any?, Any?, Any?) -> R ?: throw ArityException(
+    4 -> {
+      (
+        f as? Function4<Any?, Any?, Any?, Any?, R> ?: throw ArityException(
           arity,
-          f,
+          f(f),
         )
         )
         .invoke(
-          argsSeq!!.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          argsSeq?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
+          (argsSeq?.next().also { argsSeq = it })?.first(),
         )
-
-      5 -> (
-        f as? (Any?, Any?, Any?, Any?, Any?) -> R ?: throw ArityException(
-          arity,
-          f,
-        )
-        )
-        .invoke(
-          argsSeq!!.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-        )
-
-      6 -> (
-        f as? (Any?, Any?, Any?, Any?, Any?, Any?) -> R
-          ?: throw ArityException(arity, f)
-        )
-        .invoke(
-          argsSeq!!.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-        )
-
-      7 -> (
-        f as? (Any?, Any?, Any?, Any?, Any?, Any?, Any?) -> R
-          ?: throw ArityException(arity, f)
-        )
-        .invoke(
-          argsSeq!!.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-          (argsSeq!!.next().also { argsSeq = it })?.first(),
-        )
-
-      else -> TODO("apply() supports a maximum arity of 7 for now")
     }
+
+    5 -> (
+      f as? Function5<Any?, Any?, Any?, Any?, Any?, R>
+        ?: throw ArityException(arity, f(f))
+      )
+      .invoke(
+        argsSeq?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+      )
+
+    6 -> (
+      f as? Function6<Any?, Any?, Any?, Any?, Any?, Any?, R>
+        ?: throw ArityException(arity, f(f))
+      )
+      .invoke(
+        argsSeq?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+      )
+
+    7 -> (
+      f as? Function7<Any?, Any?, Any?, Any?, Any?, Any?, Any?, R>
+        ?: throw ArityException(arity, f(f))
+      )
+      .invoke(
+        argsSeq?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq?.next().also { argsSeq = it })?.first(),
+      )
+
+    else -> TODO("apply() supports a maximum arity of 7 for now")
   }
 }
 
