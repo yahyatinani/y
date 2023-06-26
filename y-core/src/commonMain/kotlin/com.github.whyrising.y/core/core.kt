@@ -9,6 +9,7 @@ import com.github.whyrising.y.core.collections.ChunkedSeq
 import com.github.whyrising.y.core.collections.Cons
 import com.github.whyrising.y.core.collections.IChunkedSeq
 import com.github.whyrising.y.core.collections.ILookup
+import com.github.whyrising.y.core.collections.IMapEntry
 import com.github.whyrising.y.core.collections.IPersistentCollection
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.IPersistentVector
@@ -930,6 +931,36 @@ fun merge(vararg maps: Any?): IPersistentMap<Any, Any?>? {
   } as IPersistentMap<Any, Any?>?
 }
 
+// -- selectKeys ---------------------------------------------------------------
+fun find(map: Any?, key: Any?): IMapEntry<Any?, Any?>? = when (map) {
+  null -> null
+  is Associative<*, *> -> map.entryAt(key)
+  is Map<*, *> -> if (map.contains(key)) MapEntry(key, map[key]) else null
+
+  else -> throw IllegalArgumentException(
+    "find not supported on type: ${map::class.simpleName}",
+  )
+}
+
+fun selectKeys(
+  map: Any?,
+  keySeq: ISeq<Any?>,
+): Associative<Any?, Any?> {
+  tailrec fun selectKeys(
+    ret: IPersistentCollection<Any?>,
+    keySeq: ISeq<Any?>?,
+  ): IPersistentCollection<Any?> {
+    if (keySeq == null) return ret
+
+    val entry = find(map, keySeq.first())
+    return selectKeys(
+      if (entry != null) conj(ret, entry) else ret,
+      keySeq.next(),
+    )
+  }
+
+  return selectKeys(m(), keySeq) as Associative<Any?, Any?>
+}
 // -- ----- --------------------------------------------------------------------
 
 fun updateVals() {

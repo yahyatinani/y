@@ -1083,4 +1083,17 @@ class CoreTest : FreeSpec({
     merge(m(":a" to 1, ":b" to 2, ":c" to 3), m(":b" to 5, ":d" to 9)) shouldBe
       m(":a" to 1, ":b" to 5, ":c" to 3, ":d" to 9)
   }
+
+  "selectKeys()" {
+    selectKeys(null, l(":a")) shouldBe m()
+
+    selectKeys(m(":a" to 1, ":b" to 2), l(":a")) shouldBe m(":a" to 1)
+    selectKeys(mapOf(":a" to 1, ":b" to 2), l(":a")) shouldBe m(":a" to 1)
+
+    selectKeys(v(":a", 1, ":b", 2), l(0)) shouldBe m(0 to ":a")
+
+    shouldThrowExactly<IllegalArgumentException> {
+      selectKeys(1, l(0))
+    }.message shouldBe "find not supported on type: Int"
+  }
 })
