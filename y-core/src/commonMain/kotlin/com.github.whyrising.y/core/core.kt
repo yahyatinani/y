@@ -961,12 +961,34 @@ fun selectKeys(
 
   return selectKeys(m(), keySeq) as Associative<Any?, Any?>
 }
-// -- ----- --------------------------------------------------------------------
 
-fun updateVals() {
-  TODO()
+// -- ISeq<T>::reduce() --------------------------------------------------------
+inline fun <S, T : S> ISeq<T>.reduce(operation: (acc: S, T) -> S): S {
+  if (count == 0) {
+    throw UnsupportedOperationException("Empty sequence can't be reduced.")
+  }
+
+  var s: ISeq<T>? = this
+  var accumulator: S = s!!.first()
+  while (s != null) {
+    accumulator = operation(accumulator, s.first())
+    s = s.next()
+  }
+  return accumulator
 }
 
-fun updateKeys() {
-  TODO()
+// -- ISeq<T>::fold() ----------------------------------------------------------
+inline fun <T, R> ISeq<T>.fold(initial: R, operation: (acc: R, T) -> R): R {
+  var s: ISeq<T>? = this
+  var accumulator = initial
+  while (s != null) {
+    accumulator = operation(accumulator, s.first())
+    s = s.next()
+  }
+  return accumulator
+}
+
+// -- into() -------------------------------------------------------------------
+fun <T> into(to: T, from: Any?): T? = seq(from)?.fold(to) { acc, any ->
+  conj(acc as IPersistentCollection<Any>?, any) as T
 }

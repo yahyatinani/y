@@ -1096,4 +1096,18 @@ class CoreTest : FreeSpec({
       selectKeys(1, l(0))
     }.message shouldBe "find not supported on type: Int"
   }
+
+  "into(to: T, from: Any?)" {
+    into(null, v<Any?>()) shouldBe null
+    into(v<Any?>(), l(1, 2, 3)) shouldBe v(1, 2, 3)
+    into(v(1, 2, 3), v(1, 2, 3)) shouldBe v(1, 2, 3, 1, 2, 3)
+    into(null, v(3)) shouldBe l(3)
+
+    into(
+      m(":x" to 4),
+      v(m(":a" to 1), m(":b" to 2), m(":c" to 3)),
+    ) shouldBe m(":x" to 4, ":a" to 1, ":b" to 2, ":c" to 3)
+
+    into(m(), v(v(":a", 1), v(":b", 2))) shouldBe m(":a" to 1, ":b" to 2)
+  }
 })
