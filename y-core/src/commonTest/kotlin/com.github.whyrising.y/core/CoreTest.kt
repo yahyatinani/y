@@ -1071,4 +1071,16 @@ class CoreTest : FreeSpec({
       ) shouldBe l(v(3, 4, 1, 1, 1), v(5, 2, 2, 1, 1))
     }
   }
+
+  "merge(vararg maps)" {
+    merge(null) shouldBe null
+    merge(null, null) shouldBe null
+    merge(m(), m()) shouldBe m()
+    merge(null, m(), m()) shouldBe m()
+    merge(m(), m(":b" to 9)) shouldBe m(":b" to 9)
+    merge(m(), mapOf(":b" to 9)) shouldBe m(":b" to 9)
+    merge(null, m(), m(":b" to 9)) shouldBe m(":b" to 9)
+    merge(m(":a" to 1, ":b" to 2, ":c" to 3), m(":b" to 5, ":d" to 9)) shouldBe
+      m(":a" to 1, ":b" to 5, ":c" to 3, ":d" to 9)
+  }
 })

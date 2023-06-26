@@ -916,7 +916,21 @@ fun map(
   map({ e: Any? -> apply(f, e) }, step(conj(seq(colls), coll3, coll2, coll1)))
 }
 
-// -----------------------------------------------------------------------------
+// -- merge --------------------------------------------------------------------
+
+/**
+ * @param maps First map should be of type [IPersistentMap], the rest can be of
+ * type [Map] or [IPersistentMap].
+ */
+fun merge(vararg maps: Any?): IPersistentMap<Any, Any?>? {
+  if (maps.firstNotNullOfOrNull { it } == null) return null
+
+  return maps.reduce { acc, map ->
+    conj((acc as IPersistentCollection<Any?>?) ?: m(), map)
+  } as IPersistentMap<Any, Any?>?
+}
+
+// -- ----- --------------------------------------------------------------------
 
 fun updateVals() {
   TODO()
