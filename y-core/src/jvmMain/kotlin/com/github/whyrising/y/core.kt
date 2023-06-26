@@ -427,39 +427,38 @@ fun mapcat(f: Function<Any?>, vararg colls: Any?): LazySeq<Any?> =
   }
 
 fun mapcatVar(f: Function<Any?>, vararg colls: Any?): LazySeq<Any?> {
-  val map = when (colls.size) {
+  val args = when (colls.size) {
+    0 -> throw IllegalArgumentException("mapcatVar() colls is empty")
+
     1 -> {
-      val map2: Function2<Function<Any?>, Any?, LazySeq<Any?>> = ::map
-      apply(map2, f, colls)
+      val mapVar: Function2<KFunction<Any?>, Any?, LazySeq<Any?>> = ::mapVar
+      apply(mapVar, f, colls)
     }
 
     2 -> {
-      val map3: KFunction3<Function<Any?>, Any?, Any?, LazySeq<Any?>> = ::map
-      if (f is KFunction<*>) {
-        val valueParameters = f.valueParameters
-        val size = valueParameters.size
-        val isVararg = valueParameters[size - 1].isVararg
-        if (isVararg) {
-          val mapVar: KFunction3<KFunction<Any?>, Any?, Any?, LazySeq<Any?>> =
-            ::mapVar
-          return applyVar(mapVar, f, colls)
-        }
-        TODO()
-      } else {
-        val map3: KFunction3<Function<Any?>, Any?, Any?, LazySeq<Any?>> = ::map
-        apply(map3, f, colls)
-      }
+      val mapVar: KFunction3<KFunction<Any?>, Any?, Any?, LazySeq<Any?>> =
+        ::mapVar
+      apply(mapVar, f, colls)
     }
 
     3 -> {
-      val map3: Function3<Function<Any?>, Any?, Any?, LazySeq<Any?>> = ::map
-      apply(map3, f, colls)
+      val mapVar: Function4<KFunction<Any?>, Any?, Any?, Any?, LazySeq<Any?>> =
+        ::mapVar
+      apply(mapVar, f, colls)
     }
 
-    4 -> TODO()
-    else -> TODO()
+    else -> {
+      val map5: KFunction5<
+        KFunction<Any?>,
+        Any?,
+        Any?,
+        Any?,
+        Array<out Any?>,
+        LazySeq<Any?>,
+        > = ::mapVar
+      applyVar(map5, f, colls)
+    }
   }
 
-  val f1: KFunction3<Any?, Any?, Array<out Any?>, LazySeq<Any?>> = ::concat
-  return applyVar(f1, map)
+  return applyVar(getConcat(args), args)
 }
