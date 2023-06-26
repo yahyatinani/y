@@ -323,7 +323,7 @@ fun mapVar(f: KFunction<Any?>, coll1: Any?, coll2: Any?): LazySeq<Any?> =
 
     cons(
       x = applyVar(f, l(s1.first(), s2.first())),
-      coll = mapVar(f, s1.rest(), s2.rest())
+      coll = mapVar(f, s1.rest(), s2.rest()),
     )
   }
 
@@ -371,7 +371,62 @@ fun mapVar(
 
 // -- mapcat -------------------------------------------------------------------
 
-fun mapcat(f: Function<Any?>, vararg colls: Any?): LazySeq<Any?> {
+private fun getConcat(args: LazySeq<Any?>) = when (args.count) {
+  1 -> {
+    val c1: KFunction1<Any?, LazySeq<Any?>> = ::concat
+    c1
+  }
+
+  2 -> {
+    val c2: KFunction2<Any?, Any?, LazySeq<Any?>> = ::concat
+    c2
+  }
+
+  3 -> {
+    val c3: KFunction3<Any?, Any?, Array<out Any?>, LazySeq<Any?>> = ::concat
+    c3
+  }
+
+  else -> TODO()
+}
+
+fun mapcat(f: Function<Any?>, vararg colls: Any?): LazySeq<Any?> =
+  when (colls.size) {
+    1 -> {
+      val map2: Function2<Function<Any?>, Any?, LazySeq<Any?>> = ::map
+      val args = apply(map2, f, colls)
+      applyVar(getConcat(args), args)
+    }
+
+    2 -> {
+      val map3: KFunction3<Function<Any?>, Any?, Any?, LazySeq<Any?>> = ::map
+      val args = apply(map3, f, colls)
+      apply(getConcat(args), args)
+    }
+
+    3 -> {
+      val map4: Function4<Function<Any?>, Any?, Any?, Any?, LazySeq<Any?>> =
+        ::map
+      val args = apply(map4, f, colls)
+      apply(getConcat(args), args)
+    }
+
+    else -> {
+      val map5: KFunction5<
+        Function<Any?>,
+        Any?,
+        Any?,
+        Any?,
+        Array<out Any?>,
+        LazySeq<Any?>,
+        > =
+        ::map
+      val args = applyVar(map5, f, colls)
+      apply(getConcat(args), args)
+    }
+  }
+
+fun mapcatVar(f: Function<Any?>, vararg colls: Any?): LazySeq<Any?> {
   val map = when (colls.size) {
     1 -> {
       val map2: Function2<Function<Any?>, Any?, LazySeq<Any?>> = ::map

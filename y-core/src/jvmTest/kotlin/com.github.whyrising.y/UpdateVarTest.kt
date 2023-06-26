@@ -1,6 +1,7 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.core.ArityException
+import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.str
 import com.github.whyrising.y.core.v
@@ -89,24 +90,50 @@ class UpdateVarTest : FreeSpec({
     }.message shouldBe "An operation is not implemented: Arity 8 not supported"
   }
 
-/*  "mapcat(f, vararg colls)" {
-*/
-/*    mapcat(
+  "mapcat(f, vararg colls)" {
+    mapcat(
       List<Any?>::reversed,
-      v(v(3, 2, 1, 0), v(6, 5, 4), v(9, 8, 7))
+      v(v(3, 2, 1, 0), v(6, 5, 4), v(9, 8, 7)),
     ) shouldBe l(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 
     mapcat(List<Any?>::reversed, v(v(0), v(6), v(8))) shouldBe l(0, 6, 8)
 
-    mapcat(List<Any?>::reversed, v(v(1, 0), v(6), v(9, 8))) shouldBe
-      l(0, 1, 6, 8, 9)*/
-/*
+    val v2: Function2<Any?, Any?, Any?> = ::v
+    mapcat(v2, v(v(3, 2), v(6, 5)), v(8, 9)) shouldBe l(v(3, 2), 8, v(6, 5), 9)
 
-    val l: Function1<Array<out Any?>, Any?> = ::l
+    mapcat(v2, v(v(3, 2), v(6, 5)), v(v(8, 9))) shouldBe l(v(3, 2), v(8, 9))
+
+    mapcat(v2, v(v(3, 2), v(6, 5)), v(v(8, v(9)))) shouldBe
+      l(v(3, 2), v(8, v(9)))
+
+    val v3: Function3<Any?, Any?, Any?, Any?> = ::v
+    mapcat(v3, v(v(3, 2), v(6, 5)), v(8, 9), v(12, 15)) shouldBe
+      l(v(3, 2), 8, 12, v(6, 5), 9, 15)
+
+    mapcat(v3, v(v(3, 2), v(6, 5)), v(v(8, 9)), v(12, 15)) shouldBe
+      l(v(3, 2), v(8, 9), 12)
+
+    val v4: Function4<Any?, Any?, Any?, Any?, Any?> = ::v
+    mapcat(v4, v(v(3, 2), v(6, 5)), v(v(8, 9)), v(12, 15), v(12, 15)) shouldBe
+      l(v(3, 2), v(8, 9), 12, 12)
+
+    val v5: Function5<Any?, Any?, Any?, Any?, Any?, Any?> = ::v
     mapcat(
-      l,
-      v(":a", ":b", ":c"),
-      v(1, 2, 3),
-    ) shouldBe l(":a", 1, ":b", 2, ":c", 3)
-  }*/
+      v5,
+      v(v(3, 2), v(6, 5)),
+      v(v(8, 9)),
+      v(12, 15),
+      v(12, 15),
+      v(12, 15),
+    ) shouldBe l(v(3, 2), v(8, 9), 12, 12, 12)
+  }
+
+  /*  "mapcatVar()" {
+      val l: Function1<Array<out Any?>, Any?> = ::l
+      mapcat(
+        l,
+        v(":a", ":b", ":c"),
+        v(1, 2, 3),
+      ) shouldBe l(":a", 1, ":b", 2, ":c", 3)
+    }*/
 })

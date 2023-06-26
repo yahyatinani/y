@@ -53,8 +53,9 @@ class LazySeq<out E> constructor(_f: () -> Any?) :
         var lazySeq: Any = sVal!!
         sVal = null
 
-        while (lazySeq is LazySeq<*>)
+        while (lazySeq is LazySeq<*>) {
           lazySeq = lazySeq.seqVal()
+        }
 
         // TODO: make seq nullable maybe?
         seq = (seq(lazySeq) ?: Empty) as ISeq<@UnsafeVariance E>
