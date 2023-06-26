@@ -1,13 +1,25 @@
 package com.github.whyrising.y
 
 import com.github.whyrising.y.core.ArityException
+import com.github.whyrising.y.core.apply
 import com.github.whyrising.y.core.assoc
+import com.github.whyrising.y.core.chunkBuffer
+import com.github.whyrising.y.core.collections.ArrayChunk
 import com.github.whyrising.y.core.collections.Associative
+import com.github.whyrising.y.core.collections.IChunkedSeq
 import com.github.whyrising.y.core.collections.ISeq
+import com.github.whyrising.y.core.collections.LazySeq
 import com.github.whyrising.y.core.component1
 import com.github.whyrising.y.core.component2
+import com.github.whyrising.y.core.concat
+import com.github.whyrising.y.core.conj
 import com.github.whyrising.y.core.cons
+import com.github.whyrising.y.core.consChunk
+import com.github.whyrising.y.core.first
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.l
+import com.github.whyrising.y.core.lazySeq
+import com.github.whyrising.y.core.map
 import com.github.whyrising.y.core.prepend
 import com.github.whyrising.y.core.seq
 import com.github.whyrising.y.core.spread
@@ -282,4 +294,117 @@ fun updateInVar(
   }
 
   return upIn((m as Associative<Any?, Any?>?), ks, f)
+}
+
+fun mapVar(f: KFunction<Any?>, coll: Any?): LazySeq<Any?> = lazySeq {
+  val function = f as (Array<out Any?>) -> Any?
+
+  when (val seq = seq(coll)) {
+    null -> null
+
+    is IChunkedSeq<*> -> {
+      val firstChunk = seq.firstChunk()
+      val count = firstChunk.count
+      val buffer = chunkBuffer(capacity = count, end = count) { index ->
+        function(arrayOf(firstChunk.nth(index)))
+      }
+      consChunk(ArrayChunk(buffer), mapVar(f, seq.restChunks()))
+    }
+
+    else -> cons(applyVar(f, l(seq.first())), mapVar(f, seq.rest()))
+  }
+}
+
+fun mapVar(f: KFunction<Any?>, coll1: Any?, coll2: Any?): LazySeq<Any?> =
+  lazySeq {
+    val s1 = seq(coll1)
+    val s2 = seq(coll2)
+    if (s1 == null || s2 == null) return@lazySeq null
+
+    cons(
+      x = applyVar(f, l(s1.first(), s2.first())),
+      coll = mapVar(f, s1.rest(), s2.rest())
+    )
+  }
+
+fun mapVar(
+  f: KFunction<Any?>,
+  coll1: Any?,
+  coll2: Any?,
+  coll3: Any?,
+): LazySeq<Any?> = lazySeq {
+  val s1 = seq(coll1)
+  val s2 = seq(coll2)
+  val s3 = seq(coll3)
+  if (s1 == null || s2 == null || s3 == null) return@lazySeq null
+
+  cons(
+    x = applyVar(f, l(s1.first(), s2.first(), s3.first())),
+    coll = mapVar(f, s1.rest(), s2.rest(), s3.rest()),
+  )
+}
+
+fun mapVar(
+  f: KFunction<Any?>,
+  coll1: Any?,
+  coll2: Any?,
+  coll3: Any?,
+  vararg colls: Any?,
+): LazySeq<Any?> = lazySeq {
+  fun step(cs: Any?): LazySeq<Any?> = lazySeq {
+    val ss = map(::seq, cs)
+
+    var sss: ISeq<Any?>? = ss
+    while (sss != null) {
+      sss.first() ?: return@lazySeq null
+      sss = sss.next()
+    }
+
+    cons(map(::first, ss), step(map(ISeq<Any?>::next, ss)))
+  }
+
+  map(
+    { e: Any? -> applyVar(f, e) },
+    step(conj(seq(colls), coll3, coll2, coll1)),
+  )
+}
+
+// -- mapcat -------------------------------------------------------------------
+
+fun mapcat(f: Function<Any?>, vararg colls: Any?): LazySeq<Any?> {
+  val map = when (colls.size) {
+    1 -> {
+      val map2: Function2<Function<Any?>, Any?, LazySeq<Any?>> = ::map
+      apply(map2, f, colls)
+    }
+
+    2 -> {
+      val map3: KFunction3<Function<Any?>, Any?, Any?, LazySeq<Any?>> = ::map
+      if (f is KFunction<*>) {
+        val valueParameters = f.valueParameters
+        val size = valueParameters.size
+        val isVararg = valueParameters[size - 1].isVararg
+        if (isVararg) {
+          val mapVar: KFunction3<KFunction<Any?>, Any?, Any?, LazySeq<Any?>> =
+            ::mapVar
+          return applyVar(mapVar, f, colls)
+        }
+        TODO()
+      } else {
+        val map3: KFunction3<Function<Any?>, Any?, Any?, LazySeq<Any?>> = ::map
+        apply(map3, f, colls)
+      }
+    }
+
+    3 -> {
+      val map3: Function3<Function<Any?>, Any?, Any?, LazySeq<Any?>> = ::map
+      apply(map3, f, colls)
+    }
+
+    4 -> TODO()
+    else -> TODO()
+  }
+
+  val f1: KFunction3<Any?, Any?, Array<out Any?>, LazySeq<Any?>> = ::concat
+  return applyVar(f1, map)
 }

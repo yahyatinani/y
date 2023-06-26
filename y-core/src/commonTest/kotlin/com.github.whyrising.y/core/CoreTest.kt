@@ -1011,7 +1011,7 @@ class CoreTest : FreeSpec({
 
       map(
         { f: Function1<Any?, Any?> -> f(0) },
-        l(Int::inc, Int::dec, ::str)
+        l(Int::inc, Int::dec, ::str),
       ) shouldBe l(1, -1, "0")
     }
 
@@ -1026,7 +1026,7 @@ class CoreTest : FreeSpec({
       map(
         { i: Float, j: Float -> "${i + j}" },
         l(3f, 5f),
-        l(4.1f, 2.3f)
+        l(4.1f, 2.3f),
       ) shouldBe l("7.1", "7.3")
     }
 
@@ -1035,14 +1035,14 @@ class CoreTest : FreeSpec({
         { i: Int, j: Int, k: Int -> i + j + k },
         l(3, 5),
         l(4, 2),
-        l(1, 2)
+        l(1, 2),
       ) shouldBe l(8, 9)
 
       map(
         { i: Int, j: Int, k: Int -> i + j + k },
         l(3, 5),
         l(4),
-        l(1, 1)
+        l(1, 1),
       ) shouldBe l(8)
 
       val str: Function3<Any?, Any?, Any?, String> = ::str

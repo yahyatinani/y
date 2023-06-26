@@ -88,4 +88,25 @@ class UpdateVarTest : FreeSpec({
       updateVar(m(":k" to 1), ":k", ::h, 2, 3, 4, 5, 6, 7)
     }.message shouldBe "An operation is not implemented: Arity 8 not supported"
   }
+
+/*  "mapcat(f, vararg colls)" {
+*/
+/*    mapcat(
+      List<Any?>::reversed,
+      v(v(3, 2, 1, 0), v(6, 5, 4), v(9, 8, 7))
+    ) shouldBe l(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+
+    mapcat(List<Any?>::reversed, v(v(0), v(6), v(8))) shouldBe l(0, 6, 8)
+
+    mapcat(List<Any?>::reversed, v(v(1, 0), v(6), v(9, 8))) shouldBe
+      l(0, 1, 6, 8, 9)*/
+/*
+
+    val l: Function1<Array<out Any?>, Any?> = ::l
+    mapcat(
+      l,
+      v(":a", ":b", ":c"),
+      v(1, 2, 3),
+    ) shouldBe l(":a", 1, ":b", 2, ":c", 3)
+  }*/
 })

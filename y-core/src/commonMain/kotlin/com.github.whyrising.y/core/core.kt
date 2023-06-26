@@ -72,9 +72,9 @@ fun <T1, T2> str(x: T1, y: T2): String = "${str(x)}${str(y)}"
 fun <T1, T2, T3> str(x: T1, y: T2, z: T3): String = "${str(x, y)}${str(z)}"
 
 fun <T1, T2, T3, T> str(x: T1, y: T2, z: T3, vararg args: T): String =
-  args.fold("") { acc, arg ->
+  args.fold(str(x, y, z)) { acc, arg ->
     "$acc${str(arg)}"
-  }.let { "${str(x, y, z)}$it" }
+  }
 
 inline fun <T1, T2, R> curry(
   crossinline f: (T1, T2) -> R,
@@ -917,82 +917,6 @@ fun updateIn(
 }
 
 // -- map ----------------------------------------------------------------------
-/*
-*/
-/**
- * @param coll should be an [Iterable] or a [Seqable] of elements of type [T].
- * @param f that takes the elements of [coll] as arguments.
- * @return a [LazySeq] consisting of the result of applying [f] to each element
- * in the given [coll]. *//*
-@Suppress("UNCHECKED_CAST")
-fun <T, R> map(coll: Any?, f: (T) -> R): LazySeq<R> = lazySeq {
-  when (val seq = seq(coll)) {
-    null -> null
-    is IChunkedSeq<*> -> {
-      seq as IChunkedSeq<T>
-      val firstChunk = seq.firstChunk()
-      val count = firstChunk.count
-      val buffer = chunkBuffer(capacity = count, end = count) { index ->
-        f(firstChunk.nth(index))
-      }
-      consChunk(ArrayChunk(buffer), map(seq.restChunks(), f))
-    }
-
-    else -> cons(f(seq.first() as T), map(seq.rest(), f))
-  }
-}
-
-*/
-/**
- * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
- * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
- * @param f takes 1st argument form [c1] and the 2nd from [c2].
- * @return a [LazySeq] consisting of the result of applying [f] to the set of
- * first items of [c1] and [c2], followed by applying [f] to the set of second
- * items in [c1] and [c2], until one or both of the collections are exhausted.
- * If the collections didn't have the same size, the remaining items in either
- * of them are ignored.
- *//*
-fun <T1, T2, R> map(c1: Any?, c2: Any?, f: (T1, T2) -> R): LazySeq<R> =
-  lazySeq {
-    val seq1 = seq(c1)
-    val seq2 = seq(c2)
-    if (seq1 == null || seq2 == null) return@lazySeq null
-
-    cons(
-      f(seq1.first() as T1, seq2.first() as T2),
-      map(seq1.rest(), seq2.rest(), f),
-    )
-  }
-
-*//**
- * @param c1 should be an [Iterable] or a [Seqable] of elements of type [T1].
- * @param c2 should be an [Iterable] or a [Seqable] of elements of type [T2].
- * @param c3 should be an [Iterable] or a [Seqable] of elements of type [T3].
- * @param f takes 1st argument form [c1] and the 2nd from [c2] and 3rd from [c3]
- * @return a [LazySeq] consisting of the result of applying [f] to the set of
- * first items of [c1], [c2], and [c3], followed by applying [f] to the set of
- * second items in [c1], [c2], and [c3], until one or all of the collections
- * are exhausted.
- * If the collections didn't have the same size, the remaining items in either
- * of them are ignored.
- *//*
-fun <T1, T2, T3, R> map(
-  c1: Any?,
-  c2: Any?,
-  c3: Any?,
-  f: (T1, T2, T3) -> R,
-): LazySeq<R> = lazySeq {
-  val seq1 = seq(c1)
-  val seq2 = seq(c2)
-  val seq3 = seq(c3)
-  if (seq1 == null || seq2 == null || seq3 == null) return@lazySeq null
-  cons(
-    f(seq1.first() as T1, seq2.first() as T2, seq3.first() as T3),
-    map(seq1.rest(), seq2.rest(), seq3.rest(), f),
-  )
-}*/
-
 inline fun <T> chunkBuffer(capacity: Int, end: Int, f: (index: Int) -> T):
   Array<Any?> {
   val buffer = arrayOfNulls<Any?>(capacity)
@@ -1025,7 +949,7 @@ fun map(f: Function<Any?>, coll1: Any?, coll2: Any?): LazySeq<Any?> = lazySeq {
 
   cons(
     x = (f as (Any?, Any?) -> Any?)(s1.first(), s2.first()),
-    coll = map(f, s1.rest(), s2.rest())
+    coll = map(f, s1.rest(), s2.rest()),
   )
 }
 
@@ -1033,7 +957,7 @@ fun map(
   f: Function<Any?>,
   coll1: Any?,
   coll2: Any?,
-  coll3: Any?
+  coll3: Any?,
 ): LazySeq<Any?> = lazySeq {
   val s1 = seq(coll1)
   val s2 = seq(coll2)
@@ -1042,7 +966,7 @@ fun map(
 
   cons(
     x = (f as (Any?, Any?, Any?) -> Any?)(s1.first(), s2.first(), s3.first()),
-    coll = map(f, s1.rest(), s2.rest(), s3.rest())
+    coll = map(f, s1.rest(), s2.rest(), s3.rest()),
   )
 }
 
@@ -1069,9 +993,6 @@ fun map(
 }
 
 // -----------------------------------------------------------------------------
-fun mapcat() {
-  TODO()
-}
 
 fun updateVals() {
   TODO()
