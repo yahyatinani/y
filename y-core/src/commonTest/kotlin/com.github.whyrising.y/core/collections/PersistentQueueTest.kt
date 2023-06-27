@@ -1,5 +1,6 @@
 package com.github.whyrising.y.core.collections
 
+import com.github.whyrising.y.core.collections.PersistentList.Empty
 import com.github.whyrising.y.core.collections.PersistentQueue.Seq
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.q
@@ -18,7 +19,7 @@ class PersistentQueueTest : FreeSpec({
     val queue = PersistentQueue<Int>()
 
     queue.count shouldBeExactly 0
-    queue.front shouldBeSameInstanceAs PersistentList.Empty
+    queue.front shouldBeSameInstanceAs Empty
     queue.back shouldBeSameInstanceAs PersistentVector.EmptyVector
     queue shouldBeSameInstanceAs PersistentQueue<Int>()
   }
@@ -130,7 +131,7 @@ class PersistentQueueTest : FreeSpec({
 
   "seq()" - {
     "seq() should return Empty seq when queue is empty" {
-      PersistentQueue<Int>().seq() shouldBe PersistentList.Empty
+      PersistentQueue<Int>().seq() shouldBe Empty
     }
 
     "seq()" {
@@ -150,6 +151,16 @@ class PersistentQueueTest : FreeSpec({
   }
 
   "hasheq" {
+    val q = q(l(1))
+    q._hasheq shouldBeExactly 0
+    q._hash shouldBeExactly 0
+
+    q.hasheq() shouldBeExactly -1381383523
+    q.hashCode() shouldBeExactly 32
+
+    q.hasheq() shouldBeExactly -1381383523
+    q.hashCode() shouldBeExactly 32
+
     PersistentQueue<Int?>().conj(1).conj(2).conj(3).conj(null)
       .hasheq() shouldBeExactly 762779652
     PersistentQueue<Int>().hasheq() shouldBeExactly -2017569654
@@ -174,6 +185,7 @@ class PersistentQueueTest : FreeSpec({
       .shouldBeFalse()
     (PersistentQueue<Any>().conj(1L) == l(1L)).shouldBeTrue()
     (PersistentQueue<Any?>().conj(null) == v(null)).shouldBeTrue()
+    (PersistentQueue<Any>().conj(1L).equals(Empty)).shouldBeFalse()
   }
 
   "toString()" {

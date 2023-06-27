@@ -17,10 +17,10 @@ class PersistentQueue<out E> private constructor(
   val back: PersistentVector<E>,
 ) : IPersistentList<E>, Collection<E>, InstaCount, IHashEq {
   @Transient
-  private var _hash by atomic(0)
+  internal var _hash by atomic(0)
 
   @Transient
-  private var _hasheq by atomic(0)
+  internal var _hasheq by atomic(0)
 
   override fun toString(): String {
     var str = ""
