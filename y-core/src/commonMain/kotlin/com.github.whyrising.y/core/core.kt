@@ -183,7 +183,8 @@ inline fun <T1, T2, T3, R2, R> compose(
  */
 @Suppress("UNCHECKED_CAST")
 fun seq(coll: Any?): ISeq<Any?>? = when (coll) {
-  null, Empty -> null
+  null -> null
+  is Empty -> null
   is ASeq<*> -> coll
   is LazySeq<*> -> when (val seq = coll.seq()) {
     is Empty -> null

@@ -8,7 +8,7 @@ import com.github.whyrising.y.core.util.nth
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 
-class LazySeq<out E> constructor(_f: () -> Any?) :
+class LazySeq<out E>(_f: () -> Any?) :
   SynchronizedObject(),
   ISeq<E>,
   List<E>,
