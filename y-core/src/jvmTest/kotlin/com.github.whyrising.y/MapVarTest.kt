@@ -22,6 +22,8 @@ class MapVarTest : FreeSpec({
       val mapVar = mapVar(l, v(1, 2, 3, 4))
       (mapVar.first() as PersistentList<Any?>).first() shouldBe 1
       mapVar shouldBe l(l(1), l(2), l(3), l(4))
+
+      mapVar(l, listOf(1, 2, 3, 4)) shouldBe l(l(1), l(2), l(3), l(4))
     }
 
     "mapVar(f, coll1,coll2)" {
@@ -29,6 +31,7 @@ class MapVarTest : FreeSpec({
 
       val l: KFunction1<Array<out Any?>, Any?> = ::l
       mapVar(l, v(1, 2), v(3, 4)) shouldBe l(l(1, 3), l(2, 4))
+      mapVar(l, listOf(1, 2), listOf(3, 4)) shouldBe l(l(1, 3), l(2, 4))
     }
 
     "mapVar(f, coll1, coll2, coll3)" {

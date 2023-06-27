@@ -482,11 +482,10 @@ operator fun <K, V> Associative<K, V>.get(key: K): V? = this.valAt(key)
 
 fun <E> first(x: Any?): E? = when (val seq = seq(x)) {
   null -> null
-  else -> try {
-    seq.first()
-  } catch (e: NoSuchElementException) {
-    null
-  } as E?
+  else -> when (seq.count) {
+    0 -> null
+    else -> seq.first() as E?
+  }
 }
 
 fun <E> lazySeq(): LazySeq<E> = LazySeq { null }
@@ -968,8 +967,8 @@ inline fun <S, T : S> ISeq<T>.reduce(operation: (acc: S, T) -> S): S {
     throw UnsupportedOperationException("Empty sequence can't be reduced.")
   }
 
-  var s: ISeq<T>? = this
-  var accumulator: S = s!!.first()
+  var accumulator: S = this.first()
+  var s: ISeq<T>? = this.next()
   while (s != null) {
     accumulator = operation(accumulator, s.first())
     s = s.next()

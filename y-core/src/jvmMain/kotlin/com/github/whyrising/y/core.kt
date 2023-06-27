@@ -382,12 +382,10 @@ private fun getConcat(args: LazySeq<Any?>) = when (args.count) {
     c2
   }
 
-  3 -> {
+  else -> {
     val c3: KFunction3<Any?, Any?, Array<out Any?>, LazySeq<Any?>> = ::concat
     c3
   }
-
-  else -> TODO()
 }
 
 fun mapcat(f: Function<Any?>, vararg colls: Any?): LazySeq<Any?> =

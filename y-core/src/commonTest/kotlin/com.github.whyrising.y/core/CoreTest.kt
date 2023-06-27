@@ -366,6 +366,7 @@ class CoreTest : FreeSpec({
     first<Int>(v(1, 2, 3)) shouldBe 1
     first<Int>(v<Int>()).shouldBeNull()
     first<Int>(null).shouldBeNull()
+    first<Int>(arrayOf<Any?>()).shouldBeNull()
   }
 
   "consChunk(chunk, rest) should return rest" {
@@ -1119,5 +1120,15 @@ class CoreTest : FreeSpec({
     ) shouldBe m(":x" to 4, ":a" to 1, ":b" to 2, ":c" to 3)
 
     into(m(), v(v(":a", 1), v(":b", 2))) shouldBe m(":a" to 1, ":b" to 2)
+  }
+
+  "ISeq<T>.reduce" {
+    lazySeq<Int> { v(1, 2, 3) }.reduce { acc: Int, i: Int ->
+      acc + i
+    } shouldBe 6
+
+    shouldThrowExactly<UnsupportedOperationException> {
+      v<Int>().seq().reduce { acc: Int, i: Int -> acc + i }
+    }.message shouldBe "Empty sequence can't be reduced."
   }
 })
