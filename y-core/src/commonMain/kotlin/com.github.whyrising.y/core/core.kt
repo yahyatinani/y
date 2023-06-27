@@ -532,10 +532,9 @@ fun q(): PersistentQueue<Any?> = PersistentQueue()
 fun q(coll: Any?): PersistentQueue<Any?> {
   var s = seq(coll)
   var q = q()
-
   if (s == null) return q
 
-  while (s != null && s !is Empty) {
+  while (s != null) {
     q = q.conj(s.first())
     s = s.next()
   }
@@ -593,14 +592,14 @@ fun <R> apply(f: Function<R>, args: Any?): R {
 
     1 -> {
       (f as? Function1<Any?, R> ?: throw ArityException(arity, f(f)))
-        .invoke(argsSeq?.first())
+        .invoke(argsSeq!!.first())
     }
 
     2 -> {
       (f as? Function2<Any?, Any?, R> ?: throw ArityException(arity, f(f)))
         .invoke(
-          argsSeq?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
+          argsSeq!!.first(),
+          (argsSeq.next().also { argsSeq = it })!!.first(),
         )
     }
 
@@ -611,9 +610,9 @@ fun <R> apply(f: Function<R>, args: Any?): R {
       )
       )
       .invoke(
-        argsSeq?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
+        argsSeq!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
       )
 
     4 -> {
@@ -624,10 +623,10 @@ fun <R> apply(f: Function<R>, args: Any?): R {
         )
         )
         .invoke(
-          argsSeq?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
-          (argsSeq?.next().also { argsSeq = it })?.first(),
+          argsSeq!!.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
+          (argsSeq!!.next().also { argsSeq = it })?.first(),
         )
     }
 
@@ -636,11 +635,11 @@ fun <R> apply(f: Function<R>, args: Any?): R {
         ?: throw ArityException(arity, f(f))
       )
       .invoke(
-        argsSeq?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
+        argsSeq!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
       )
 
     6 -> (
@@ -648,12 +647,12 @@ fun <R> apply(f: Function<R>, args: Any?): R {
         ?: throw ArityException(arity, f(f))
       )
       .invoke(
-        argsSeq?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
+        argsSeq!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
       )
 
     7 -> (
@@ -662,12 +661,12 @@ fun <R> apply(f: Function<R>, args: Any?): R {
       )
       .invoke(
         argsSeq?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
-        (argsSeq?.next().also { argsSeq = it })?.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
+        (argsSeq!!.next().also { argsSeq = it })!!.first(),
       )
 
     else -> TODO("apply() supports a maximum arity of 7 for now")

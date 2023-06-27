@@ -1024,6 +1024,55 @@ class CoreTest : FreeSpec({
     "map(f, coll1, coll2, coll3)" {
       map(
         { i: Int, j: Int, k: Int -> i + j + k },
+        null,
+        l(4, 2),
+        l(1, 2),
+      ) shouldBe l()
+
+      map(
+        { i: Int, j: Int, k: Int -> i + j + k },
+        null,
+        null,
+        l(1, 2),
+      ) shouldBe l()
+
+      map(
+        { i: Int, j: Int, k: Int -> i + j + k },
+        l(3, 5),
+        null,
+        l(1, 2),
+      ) shouldBe l()
+
+      map(
+        { i: Int, j: Int, k: Int -> i + j + k },
+        l(3, 5),
+        null,
+        null,
+      ) shouldBe l()
+
+      map(
+        { i: Int, j: Int, k: Int -> i + j + k },
+        l(3, 5),
+        l(1, 2),
+        null,
+      ) shouldBe l()
+
+      map(
+        { i: Int, j: Int, k: Int -> i + j + k },
+        null,
+        l(1, 2),
+        null,
+      ) shouldBe l()
+
+      map(
+        { i: Int, j: Int, k: Int -> i + j + k },
+        null,
+        null,
+        null,
+      ) shouldBe l()
+
+      map(
+        { i: Int, j: Int, k: Int -> i + j + k },
         l(3, 5),
         l(4, 2),
         l(1, 2),
@@ -1079,7 +1128,9 @@ class CoreTest : FreeSpec({
     selectKeys(null, l(":a")) shouldBe m()
 
     selectKeys(m(":a" to 1, ":b" to 2), l(":a")) shouldBe m(":a" to 1)
+
     selectKeys(mapOf(":a" to 1, ":b" to 2), l(":a")) shouldBe m(":a" to 1)
+    selectKeys(mapOf(":a" to 1), l(":z")) shouldBe m()
 
     selectKeys(v(":a", 1, ":b", 2), l(0)) shouldBe m(0 to ":a")
 

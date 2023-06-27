@@ -75,6 +75,14 @@ class APersistentMapTest : FreeSpec({
     (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 10)).shouldBeFalse()
 
     (m("a" to 1, "b" to 2)!! == m("a" to 1, "b" to 2L)).shouldBeFalse()
+
+    (hashMap("a" to 1, "b" to 2) == hashMap("a" to 1, "b" to 2, "x" to 2))
+      .shouldBeFalse()
+
+    (hashMap("a" to 1, "b" to 2) == hashMap("a" to 1, "b" to 2L))
+      .shouldBeFalse()
+
+    (hashMap("a" to 1, "b" to 2) == hashMap("a" to 1, "x" to 2)).shouldBeFalse()
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -375,6 +383,7 @@ class APersistentMapTest : FreeSpec({
 
       entries.contains("x").shouldBeFalse()
       entries.contains(MapEntry("x", 1)).shouldBeFalse()
+      entries.contains(MapEntry("a", 90)).shouldBeFalse()
       entries.contains(MapEntry("a", 1)).shouldBeTrue()
 
       iterator.hasNext().shouldBeTrue()
