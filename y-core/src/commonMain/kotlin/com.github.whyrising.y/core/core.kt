@@ -182,32 +182,33 @@ inline fun <T1, T2, T3, R2, R> compose(
  * @throws IllegalArgumentException if [coll] is not sequable.
  */
 @Suppress("UNCHECKED_CAST")
-fun seq(coll: Any?): ISeq<Any?>? = when (coll) {
-  null -> null
-  is Empty -> null
-  is ASeq<*> -> coll
-  is LazySeq<*> -> when (val seq = coll.seq()) {
-    is Empty -> null
-    else -> seq
+fun seq(coll: Any?): ISeq<Any?>? {
+  val s = when (coll) {
+    null -> null
+    is ASeq<*> -> coll
+    is LazySeq<*> -> coll.seq()
+
+    is Seqable<*> -> coll.seq()
+
+    is Iterable<*> -> lazyChunkedSeq(coll.iterator())
+    is Sequence<*> -> lazyChunkedSeq(coll.iterator())
+    is ShortArray -> ArraySeq(coll)
+    is IntArray -> ArraySeq(coll)
+    is FloatArray -> ArraySeq(coll)
+    is DoubleArray -> ArraySeq(coll)
+    is LongArray -> ArraySeq(coll)
+    is ByteArray -> ArraySeq(coll)
+    is CharArray -> ArraySeq(coll)
+    is BooleanArray -> ArraySeq(coll)
+    is Array<*> -> ArraySeq(coll)
+    is CharSequence -> StringSeq(coll)
+    is Map<*, *> -> seq(coll.entries)
+    else -> throw IllegalArgumentException(
+      "Don't know how to create ISeq from: ${coll::class.simpleName}",
+    )
   }
 
-  is Seqable<*> -> coll.seq()
-  is Iterable<*> -> lazyChunkedSeq(coll.iterator())
-  is Sequence<*> -> lazyChunkedSeq(coll.iterator())
-  is ShortArray -> ArraySeq(coll)
-  is IntArray -> ArraySeq(coll)
-  is FloatArray -> ArraySeq(coll)
-  is DoubleArray -> ArraySeq(coll)
-  is LongArray -> ArraySeq(coll)
-  is ByteArray -> ArraySeq(coll)
-  is CharArray -> ArraySeq(coll)
-  is BooleanArray -> ArraySeq(coll)
-  is Array<*> -> ArraySeq(coll)
-  is CharSequence -> StringSeq(coll)
-  is Map<*, *> -> seq(coll.entries)
-  else -> throw IllegalArgumentException(
-    "Don't know how to create ISeq from: ${coll::class.simpleName}",
-  )
+  return if (s == Empty) null else s
 }
 
 fun <E> Iterable<E>.seq(): ISeq<E> = seq(this) as ISeq<E>

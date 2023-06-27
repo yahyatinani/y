@@ -1,6 +1,7 @@
 package com.github.whyrising.y.core.collections
 
 import com.github.whyrising.y.core.collections.PersistentList.Empty
+import com.github.whyrising.y.core.fold
 import com.github.whyrising.y.core.seq
 import com.github.whyrising.y.core.util.Murmur3
 import com.github.whyrising.y.core.util.equiv
@@ -88,13 +89,9 @@ abstract class APersistentMap<out K, out V> :
       else -> assoc(e.nth(0) as K, e.nth(1) as V)
     }
 
-    else -> {
-      var result: IPersistentMap<K, V> = this
-      var seq = seq(e)!!
-
-      for (i in 0 until seq.count) {
-        val entry = seq.first()
-
+    else -> when (val seq: ISeq<Any?>? = seq(e)) {
+      null -> this
+      else -> seq.fold(this) { acc, entry ->
         if (entry !is Entry<*, *>) {
           throw IllegalArgumentException(
             "All elements of the seq must be of type Map.Entry " +
@@ -102,11 +99,8 @@ abstract class APersistentMap<out K, out V> :
           )
         }
 
-        result = result.assoc(entry.key as K, entry.value as V)
-        seq = seq.rest()
+        acc.assoc(entry.key as K, entry.value as V) as APersistentMap<K, V>
       }
-
-      result
     }
   }
 
