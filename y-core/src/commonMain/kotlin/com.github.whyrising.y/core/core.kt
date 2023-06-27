@@ -252,45 +252,21 @@ fun <E> vec(coll: Iterable<E>): IPersistentVector<E> =
 @Suppress("UNCHECKED_CAST")
 fun <E> vec(coll: Any?): IPersistentVector<E> = when (coll) {
   null -> PersistentVector.EmptyVector
-  is ISeq<*> -> PersistentVector(coll) as IPersistentVector<E>
-  is Iterable<*> -> PersistentVector.create(coll) as IPersistentVector<E>
-  is Array<*> -> PersistentVector(*coll) as IPersistentVector<E>
-  is ShortArray -> {
-    PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
-  }
-
-  is IntArray -> {
-    PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
-  }
-
-  is FloatArray -> {
-    PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
-  }
-
-  is DoubleArray -> {
-    PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
-  }
-
-  is LongArray -> {
-    PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
-  }
-
-  is ByteArray -> {
-    PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
-  }
-
-  is CharArray -> {
-    PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
-  }
-
-  is BooleanArray -> {
-    PersistentVector(*coll.toTypedArray()) as IPersistentVector<E>
-  }
-
+  is ISeq<*> -> PersistentVector(coll)
+  is Iterable<*> -> PersistentVector.create(coll)
+  is Array<*> -> PersistentVector(*coll)
+  is ShortArray -> PersistentVector(*coll.toTypedArray())
+  is IntArray -> PersistentVector(*coll.toTypedArray())
+  is FloatArray -> PersistentVector(*coll.toTypedArray())
+  is DoubleArray -> PersistentVector(*coll.toTypedArray())
+  is LongArray -> PersistentVector(*coll.toTypedArray())
+  is ByteArray -> PersistentVector(*coll.toTypedArray())
+  is CharArray -> PersistentVector(*coll.toTypedArray())
+  is BooleanArray -> PersistentVector(*coll.toTypedArray())
   else -> throw IllegalArgumentException(
-    "${coll::class} can't be turned into a vec.",
+    "${coll::class.simpleName} can't be turned into a vec.",
   )
-}
+} as IPersistentVector<E>
 
 fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V> =
   PersistentArrayMap.create(this)

@@ -1349,6 +1349,11 @@ class PersistentVectorTest : FreeSpec({
 
     vec(listOf(1, 2, "3", 4)) shouldBe v(1, 2, "3", 4)
 
+    vec<Any>(l(1, 2, "3", 4).seq()) shouldBe v(1, 2, "3", 4)
+
+    vec<Any>(listOf<Any>(1, 2, "3", 4).asIterable() as Any) shouldBe
+      v(1, 2, "3", 4)
+
     vec(arrayListOf(1, 2, "3", 4)) shouldBe v(1, 2, "3", 4)
 
     vec(l(1, 2, "3", 4)) shouldBe v(1, 2, "3", 4)
@@ -1370,5 +1375,8 @@ class PersistentVectorTest : FreeSpec({
     vec<Double>(doubleArrayOf(1.0, 2.0)) shouldBe v(1.0, 2.0)
 
     vec<Long>(longArrayOf(1L, 2L)) shouldBe v(1L, 2L)
+
+    shouldThrow<IllegalArgumentException> { vec<Long>(1) }
+      .message shouldBe "Int can't be turned into a vec."
   }
 })
