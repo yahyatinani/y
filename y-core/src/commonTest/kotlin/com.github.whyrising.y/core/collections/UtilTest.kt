@@ -183,6 +183,7 @@ class UtilTest : FreeSpec({
 
     "when passing a lazySeq, it should realize the sequence" {
       seq(lazySeq<Int> { l(1) }) shouldBe l(1)
+      seq(lazySeq<Int> { null }) shouldBe null
     }
   }
 
