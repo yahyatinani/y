@@ -33,34 +33,6 @@ import kotlin.reflect.KFunction
 
 fun <T> identity(x: T): T = x
 
-class NotANumberError(x: Any) : RuntimeException(
-  "Either `$x` is not a number or this type is not supported.",
-)
-
-@Suppress("UNCHECKED_CAST")
-fun <T : Number> inc(x: T): T = when (x) {
-  is Byte -> x.inc() as T
-  is Short -> x.inc() as T
-  is Int -> x.inc() as T
-  is Long -> x.inc() as T
-  is Float -> x.inc() as T
-  is Double -> x.inc() as T
-  // TODO is BigInteger -> x.inc() as T
-  else -> throw NotANumberError(x)
-}
-
-@Suppress("UNCHECKED_CAST")
-fun <T : Number> dec(x: T): T = when (x) {
-  is Byte -> x.dec() as T
-  is Short -> x.dec() as T
-  is Int -> x.dec() as T
-  is Long -> x.dec() as T
-  is Float -> x.dec() as T
-  is Double -> x.dec() as T
-// TODO is BigInteger -> x.dec() as T
-  else -> throw NotANumberError(x)
-}
-
 fun str(): String = ""
 
 fun <T> str(x: T): String = when (x) {

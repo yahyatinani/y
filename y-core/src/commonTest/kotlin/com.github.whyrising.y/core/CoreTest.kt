@@ -15,9 +15,7 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.doubles.shouldBeExactly
-import io.kotest.matchers.floats.shouldBeExactly
 import io.kotest.matchers.ints.shouldBeExactly
-import io.kotest.matchers.longs.shouldBeExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -31,24 +29,6 @@ import kotlin.reflect.KFunction6
 import kotlin.reflect.KFunction7
 
 class CoreTest : FreeSpec({
-  "inc" {
-    inc(1.toByte()) shouldBe 2.toByte()
-    inc(1.toShort()) shouldBe 2.toShort()
-    inc(1) shouldBeExactly 2
-    inc(1L) shouldBeExactly 2L
-    inc(1.2f) shouldBeExactly 2.2f
-    inc(1.2) shouldBeExactly 2.2
-  }
-
-  "dec" {
-    dec(1.toByte()) shouldBe 0.toByte()
-    dec(1.toShort()) shouldBe 0.toShort()
-    dec(1) shouldBeExactly 0
-    dec(1L) shouldBeExactly 0L
-    dec(1.2f) shouldBeExactly 1.2f.dec()
-    dec(1.2) shouldBeExactly 1.2.dec()
-  }
-
   "`identity` should return x" {
     identity(10) shouldBeExactly 10
     identity(10.1) shouldBeExactly 10.1
@@ -1013,8 +993,8 @@ class CoreTest : FreeSpec({
 
   "map()" - {
     "map(f, coll)" {
-      map(::inc, l(4, 6, 8)) shouldBe l(5, 7, 9)
-      map(::inc, listOf(1, 3)) shouldBe l(2, 4)
+      map(Int::inc, l(4, 6, 8)) shouldBe l(5, 7, 9)
+      map(Int::inc, listOf(1, 3)) shouldBe l(2, 4)
       map({ i: Int -> i + 1 }, l(4, 6, 8)) shouldBe l(5, 7, 9)
       map({ i: Int -> i + 1 }, listOf(1, 3)) shouldBe l(2, 4)
       val str: Function1<Any?, String> = ::str
