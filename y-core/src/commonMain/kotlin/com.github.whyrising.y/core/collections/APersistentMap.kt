@@ -109,8 +109,7 @@ abstract class APersistentMap<out K, out V> :
     when {
       this === other -> return true
       other !is Map<*, *> -> return false
-      other is IPersistentMap<*, *> &&
-        other !is MapEquivalence -> return false
+      other is IPersistentMap<*, *> && other !is MapEquivalence -> return false
 
       count != other.size -> return false
       else -> {

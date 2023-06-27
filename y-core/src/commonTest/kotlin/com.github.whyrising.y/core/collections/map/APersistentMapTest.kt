@@ -35,7 +35,7 @@ class APersistentMapTest : FreeSpec({
 
   "hashCode()" {
     val array = arrayOf("a" to 1, "b" to 2)
-    val map = m(*array)
+    val map = hashMap(*array)
     val expHash = ("a".hashCode() xor 1.hashCode()) +
       ("b".hashCode() xor 2.hashCode())
 
@@ -83,6 +83,8 @@ class APersistentMapTest : FreeSpec({
       .shouldBeFalse()
 
     (hashMap("a" to 1, "b" to 2) == hashMap("a" to 1, "x" to 2)).shouldBeFalse()
+
+    hashMap("a" to 1, "b" to 2).equals("string").shouldBeFalse()
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -170,10 +172,10 @@ class APersistentMapTest : FreeSpec({
       map.equiv(mapOf("a" to 1L, "b" to 2, "c" to 3L)).shouldBeTrue()
     }
 
-    "when other is IPersistentMap but not marked, return false" {
+    "when other is IPersistentMap but not MapEquivalence, return false" {
       val other = MockPersistentMap("a" to 1L, "b" to 2, "c" to 3L)
 
-      map.equiv(other).shouldBeFalse()
+      hashMap("a" to 1L, "b" to 2, "c" to 3L).equiv(other).shouldBeFalse()
     }
   }
 
