@@ -278,6 +278,16 @@ class CoreTest : FreeSpec({
 
   "cons()" {
     cons(1, null) shouldBe l(1)
+    cons(1, arrayOf<Any?>()) shouldBe l(1)
+    cons(1, m()) shouldBe l(1)
+    cons(1, shortArrayOf()) shouldBe l(1)
+    cons(1, intArrayOf()) shouldBe l(1)
+    cons(1, floatArrayOf()) shouldBe l(1)
+    cons(1, doubleArrayOf()) shouldBe l(1)
+    cons(1, longArrayOf()) shouldBe l(1)
+    cons(1, byteArrayOf()) shouldBe l(1)
+    cons(1, charArrayOf()) shouldBe l(1)
+    cons(1, booleanArrayOf()) shouldBe l(1)
     cons(1, l(2, 3)) shouldBe l(1, 2, 3)
     cons(1, listOf(2, 3)) shouldBe l(1, 2, 3)
     cons(1, v(2, 3) as Seqable<*>) shouldBe l(1, 2, 3)

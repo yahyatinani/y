@@ -65,6 +65,7 @@ class ArraySeq<out E> internal constructor(
       array.isEmpty() -> {
         throw NoSuchElementException("ShortArraySeq is empty.")
       }
+
       else -> array[i]
     }
 
@@ -111,6 +112,7 @@ class ArraySeq<out E> internal constructor(
       array.isEmpty() -> {
         throw NoSuchElementException("IntArraySeq is empty.")
       }
+
       else -> array[i]
     }
 
@@ -152,6 +154,7 @@ class ArraySeq<out E> internal constructor(
       array.isEmpty() -> {
         throw NoSuchElementException("FloatArraySeq is empty.")
       }
+
       else -> array[i]
     }
 
@@ -198,6 +201,7 @@ class ArraySeq<out E> internal constructor(
       array.isEmpty() -> {
         throw NoSuchElementException("DoubleArraySeq is empty.")
       }
+
       else -> array[i]
     }
 
@@ -244,6 +248,7 @@ class ArraySeq<out E> internal constructor(
       array.isEmpty() -> {
         throw NoSuchElementException("LongArraySeq is empty.")
       }
+
       else -> array[i]
     }
 
@@ -290,6 +295,7 @@ class ArraySeq<out E> internal constructor(
       array.isEmpty() -> {
         throw NoSuchElementException("ByteArraySeq is empty.")
       }
+
       else -> array[i]
     }
 
@@ -336,6 +342,7 @@ class ArraySeq<out E> internal constructor(
       array.isEmpty() -> {
         throw NoSuchElementException("CharArraySeq is empty.")
       }
+
       else -> array[i]
     }
 
@@ -382,6 +389,7 @@ class ArraySeq<out E> internal constructor(
       array.isEmpty() -> {
         throw NoSuchElementException("BooleanArraySeq is empty.")
       }
+
       else -> array[i]
     }
 
@@ -421,40 +429,49 @@ class ArraySeq<out E> internal constructor(
   }
 
   companion object {
-    operator fun invoke(array: IntArray): ISeq<Int> {
-      return IntArraySeq(array, 0)
+    operator fun invoke(array: IntArray): ISeq<Int> = when {
+      array.isEmpty() -> PersistentList.Empty
+      else -> IntArraySeq(array, 0)
     }
 
-    operator fun invoke(array: ShortArray): ISeq<Short> {
-      return ShortArraySeq(array, 0)
+    operator fun invoke(array: ShortArray): ISeq<Short> = when {
+      array.isEmpty() -> PersistentList.Empty
+      else -> ShortArraySeq(array, 0)
     }
 
-    operator fun invoke(array: FloatArray): ISeq<Float> {
-      return FloatArraySeq(array, 0)
+    operator fun invoke(array: FloatArray): ISeq<Float> = when {
+      array.isEmpty() -> PersistentList.Empty
+      else -> FloatArraySeq(array, 0)
     }
 
-    operator fun invoke(array: DoubleArray): ISeq<Double> {
-      return DoubleArraySeq(array, 0)
+    operator fun invoke(array: DoubleArray): ISeq<Double> = when {
+      array.isEmpty() -> PersistentList.Empty
+      else -> DoubleArraySeq(array, 0)
     }
 
-    operator fun invoke(array: LongArray): ISeq<Long> {
-      return LongArraySeq(array, 0)
+    operator fun invoke(array: LongArray): ISeq<Long> = when {
+      array.isEmpty() -> PersistentList.Empty
+      else -> LongArraySeq(array, 0)
     }
 
-    operator fun invoke(array: ByteArray): ISeq<Byte> {
-      return ByteArraySeq(array, 0)
+    operator fun invoke(array: ByteArray): ISeq<Byte> = when {
+      array.isEmpty() -> PersistentList.Empty
+      else -> ByteArraySeq(array, 0)
     }
 
-    operator fun invoke(array: CharArray): ISeq<Char> {
-      return CharArraySeq(array, 0)
+    operator fun invoke(array: CharArray): ISeq<Char> = when {
+      array.isEmpty() -> PersistentList.Empty
+      else -> CharArraySeq(array, 0)
     }
 
-    operator fun invoke(array: BooleanArray): ISeq<Boolean> {
-      return BooleanArraySeq(array, 0)
+    operator fun invoke(array: BooleanArray): ISeq<Boolean> = when {
+      array.isEmpty() -> PersistentList.Empty
+      else -> BooleanArraySeq(array, 0)
     }
 
-    operator fun <E> invoke(array: Array<E>): ISeq<E> {
-      return ArraySeq(array, 0)
+    operator fun <E> invoke(array: Array<E>): ISeq<E> = when {
+      array.isEmpty() -> PersistentList.Empty
+      else -> ArraySeq(array, 0)
     }
   }
 }
