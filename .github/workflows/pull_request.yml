@@ -47,7 +47,6 @@ jobs:
           files: build/reports/kover/report.xml
           flags: unittests
           name: codecov-umbrella
-          threshold: 5%
 #          fail_ci_if_error: false
           verbose: true
 
