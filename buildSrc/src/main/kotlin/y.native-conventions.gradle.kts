@@ -1,4 +1,4 @@
-import com.github.whyrising.y.Ci
+import io.github.yahyatinani.y.Ci
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
