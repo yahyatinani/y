@@ -202,28 +202,11 @@ class CoreTest : FreeSpec({
   }
 
   "assocIn(map, ks, v)" {
-    assocIn(
-      null,
-      l(":a"),
-      22,
-    ) shouldBe m(":a" to 22)
-    assocIn(
-      m(":a" to 11),
-      l(":a"),
-      22,
-    ) shouldBe m(
-      ":a" to 22,
-    )
+    assocIn(null, l(":a"), 22) shouldBe m(":a" to 22)
+    assocIn(m(":a" to 11), l(":a"), 22) shouldBe m(":a" to 22)
     assocIn(v(41, 5, 6, 3), l(2), 22) shouldBe v(41, 5, 22, 3)
-    assocIn(
-      m(":a" to m(":b" to 45)),
-      l(":a", ":b"),
-      22,
-    ) shouldBe m(
-      ":a" to m(
-        ":b" to 22,
-      ),
-    )
+    assocIn(m(":a" to m(":b" to 45)), l(":a", ":b"), 22) shouldBe
+      m(":a" to m(":b" to 22))
     assocIn(
       v(17, 21, v(3, 5, 6)),
       l(2, 1),
@@ -233,13 +216,7 @@ class CoreTest : FreeSpec({
       m(":a" to m(":b" to 45)),
       l(":a", ":b"),
       m(":c" to 74),
-    ) shouldBe m(
-      ":a" to m(
-        ":b" to m(
-          ":c" to 74,
-        ),
-      ),
-    )
+    ) shouldBe m(":a" to m(":b" to m(":c" to 74)))
   }
 
   "toPmap() should return an instance of PersistentArrayMap" {
@@ -262,7 +239,7 @@ class CoreTest : FreeSpec({
     val arrayMap = m("a" to 1)
     val pairs = (1..20).map { Pair(it, "$it") }.toTypedArray()
 
-    m() shouldBeSameInstanceAs EmptyArrayMap
+    m<Any?, Any?>() shouldBeSameInstanceAs EmptyArrayMap
 
     (arrayMap is PersistentArrayMap<*, *>).shouldBeTrue()
     arrayMap.count shouldBeExactly 1
@@ -293,7 +270,7 @@ class CoreTest : FreeSpec({
   "cons()" {
     cons(1, null) shouldBe l(1)
     cons(1, arrayOf<Any?>()) shouldBe l(1)
-    cons(1, m()) shouldBe l(1)
+    cons(1, m<Any?, Any?>()) shouldBe l(1)
     cons(1, shortArrayOf()) shouldBe l(1)
     cons(1, intArrayOf()) shouldBe l(1)
     cons(1, floatArrayOf()) shouldBe l(1)
@@ -1230,33 +1207,27 @@ class CoreTest : FreeSpec({
     merge(null) shouldBe null
     merge(null, null) shouldBe null
     merge(
-      m(),
-      m(),
+      m<Any?, Any?>(),
+      m<Any?, Any?>(),
     ) shouldBe m()
     merge(
       null,
-      m(),
-      m(),
+      m<Any?, Any?>(),
+      m<Any?, Any?>(),
     ) shouldBe m()
     merge(
-      m(),
+      m<Any?, Any?>(),
       m(":b" to 9),
-    ) shouldBe m(
-      ":b" to 9,
-    )
+    ) shouldBe m(":b" to 9)
     merge(
-      m(),
+      m<Any?, Any?>(),
       mapOf(":b" to 9),
-    ) shouldBe m(
-      ":b" to 9,
-    )
+    ) shouldBe m(":b" to 9)
     merge(
       null,
-      m(),
+      m<Any?, Any?>(),
       m(":b" to 9),
-    ) shouldBe m(
-      ":b" to 9,
-    )
+    ) shouldBe m(":b" to 9)
     merge(
       m(":a" to 1, ":b" to 2, ":c" to 3),
       m(":b" to 5, ":d" to 9),
@@ -1268,21 +1239,14 @@ class CoreTest : FreeSpec({
     selectKeys(null, l(":a")) shouldBe m()
 
     selectKeys(
-      m(
-        ":a" to 1,
-        ":b" to 2,
-      ),
+      m(":a" to 1, ":b" to 2),
       l(":a"),
-    ) shouldBe m(
-      ":a" to 1,
-    )
+    ) shouldBe m(":a" to 1)
 
     selectKeys(
       mapOf(":a" to 1, ":b" to 2),
       l(":a"),
-    ) shouldBe m(
-      ":a" to 1,
-    )
+    ) shouldBe m(":a" to 1)
     selectKeys(
       mapOf(":a" to 1),
       l(":z"),
@@ -1291,9 +1255,7 @@ class CoreTest : FreeSpec({
     selectKeys(
       v(":a", 1, ":b", 2),
       l(0),
-    ) shouldBe m(
-      0 to ":a",
-    )
+    ) shouldBe m(0 to ":a")
 
     shouldThrowExactly<IllegalArgumentException> {
       selectKeys(1, l(0))
@@ -1308,25 +1270,11 @@ class CoreTest : FreeSpec({
 
     into(
       m(":x" to 4),
-      v(
-        m(":a" to 1),
-        m(":b" to 2),
-        m(":c" to 3),
-      ),
-    ) shouldBe m(
-      ":x" to 4,
-      ":a" to 1,
-      ":b" to 2,
-      ":c" to 3,
-    )
+      v(m(":a" to 1), m(":b" to 2), m(":c" to 3)),
+    ) shouldBe m(":x" to 4, ":a" to 1, ":b" to 2, ":c" to 3)
 
-    into(
-      m(),
-      v(v(":a", 1), v(":b", 2)),
-    ) shouldBe m(
-      ":a" to 1,
-      ":b" to 2,
-    )
+    into(m<Any?, Any?>(), v(v(":a", 1), v(":b", 2))) shouldBe
+      m(":a" to 1, ":b" to 2)
   }
 
   "ISeq<T>.reduce" {

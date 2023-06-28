@@ -369,7 +369,7 @@ class PersistentHashSetTest : FreeSpec({
 
   "TransientHashSet" - {
     "count should return the count of the inner transient map" {
-      val tmap1 = m().asTransient()
+      val tmap1 = m<Any?, Any?>().asTransient()
       val tmap2 = m("a" to "1").asTransient()
 
       val tSet1 = TransientHashSet(tmap1)
