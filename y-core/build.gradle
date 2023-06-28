@@ -11,6 +11,7 @@ kotlin {
       dependencies {
         api deps.kotlinx.atomicfu
         implementation deps.kotlinx.serialization.json
+        implementation "org.jetbrains.kotlin:kotlin-reflect:1.8.21"
       }
     }
 

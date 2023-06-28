@@ -1,4 +1,4 @@
-import com.github.whyrising.y.Ci
+import io.github.yahyatinani.y.Ci
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
@@ -10,7 +10,7 @@ plugins {
   kotlin("multiplatform")
 }
 
-group = "com.github.whyrising.y"
+group = "io.github.yahyatinani.y"
 version = Ci.publishVersion
 
 tasks.withType<Test> {

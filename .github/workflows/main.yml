@@ -45,7 +45,7 @@ jobs:
           files: build/reports/kover/report.xml
           flags: unittests
           name: codecov-umbrella
-          fail_ci_if_error: false
+#          fail_ci_if_error: false
           verbose: true
 
       - name: Bundle the build report (when failure)

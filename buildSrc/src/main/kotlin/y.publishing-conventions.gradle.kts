@@ -1,4 +1,4 @@
-import com.github.whyrising.y.Ci
+import io.github.yahyatinani.y.Ci
 
 plugins {
   signing
@@ -44,7 +44,7 @@ signing {
 publishing {
   repositories {
     maven {
-      val base = "https://oss.sonatype.org"
+      val base = "https://s01.oss.sonatype.org"
       val releasesUrl = uri("$base/service/local/staging/deploy/maven2/")
       val snapshotsUrl = uri("$base/content/repositories/snapshots/")
 
@@ -65,7 +65,7 @@ publishing {
   publications.withType<MavenPublication>().forEach {
     it.apply {
       pom {
-        val devUrl = "https://github.com/whyrising"
+        val devUrl = "https://github.com/yahyatinani"
         val libUrl = "$devUrl/y"
 
         name.set("y")
@@ -81,7 +81,7 @@ publishing {
 
         developers {
           developer {
-            id.set("whyrising")
+            id.set("yahyatinani")
             name.set("Yahya Tinani")
             email.set("yahyatinani@gmail.com")
           }
