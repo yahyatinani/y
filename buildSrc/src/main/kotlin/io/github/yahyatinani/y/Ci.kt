@@ -1,7 +1,7 @@
 package io.github.yahyatinani.y
 
 object Ci {
-  private const val snapshotBase = "0.4.0"
+  private const val snapshotBase = "0.5.0"
 
   private fun githubBuildNumber() = System.getenv("GITHUB_RUN_NUMBER")
 
