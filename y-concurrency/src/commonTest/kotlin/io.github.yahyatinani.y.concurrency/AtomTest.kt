@@ -29,7 +29,7 @@ class AtomTest : FreeSpec({
     val n = 10
     val atom = Atom(n)
 
-    val value = atom.deref<Int>()
+    val value = atom.deref()
 
     value shouldBe n
     value shouldBe atom.state
@@ -49,7 +49,7 @@ class AtomTest : FreeSpec({
     val n = 10
     val atom = Atom(n)
 
-    val newVal = atom.swap<Int> { currentVal ->
+    val newVal = atom.swap { currentVal ->
       currentVal + 1
     }
 
@@ -57,13 +57,13 @@ class AtomTest : FreeSpec({
   }
 
   "validator property should be null after atom creation" {
-    val ref: IRef = Atom(10)
+    val ref: IRef<*> = Atom(10)
 
     ref.validator.shouldBeNull()
   }
 
   "set validator" {
-    val ref: IRef = Atom(10)
+    val ref: IRef<Int> = Atom(10)
     val vf: (Any?) -> Boolean = { (it as Int) > 5 }
 
     ref.validator = vf
@@ -72,7 +72,7 @@ class AtomTest : FreeSpec({
   }
 
   "when atom value doesn't pas validator fun, set should throw" {
-    val ref: IRef = Atom(10)
+    val ref: IRef<Int> = Atom(10)
     val vf: (Any?) -> Boolean = { (it as Int) > 15 }
 
     val e = shouldThrowExactly<IllegalStateException> {
@@ -84,7 +84,7 @@ class AtomTest : FreeSpec({
   }
 
   "when validator fun throws, encapsulate into IllegalStateException" {
-    val ref: IRef = Atom(10)
+    val ref: IRef<Int> = Atom(10)
     val vf: (Any?) -> Boolean = { throw Exception("mock") }
 
     val e = shouldThrowExactly<IllegalStateException> {
@@ -101,7 +101,7 @@ class AtomTest : FreeSpec({
     atom.validator = vf
 
     val e = shouldThrowExactly<IllegalStateException> {
-      atom.swap<Int> { it - 5 }
+      atom.swap { it - 5 }
     }
 
     e.message shouldBe "Invalid reference state"
@@ -116,8 +116,8 @@ class AtomTest : FreeSpec({
   }
 
   "addWatch(key, callback) should add a watch function to watches" {
-    val atom: IRef = Atom(10)
-    val callback: (Any, IRef, Any?, Any?) -> Any = { _, _, _, _ -> }
+    val atom: IRef<Int> = Atom(10)
+    val callback: (Any, IRef<*>, Any?, Any?) -> Any = { _, _, _, _ -> }
     val key = ":key"
 
     val ref = atom.addWatch(key, callback)
@@ -128,8 +128,8 @@ class AtomTest : FreeSpec({
   }
 
   "removeWatch(key, callback) should remove a watch from watches" {
-    val atom: IRef = Atom(10)
-    val callback: (Any, IRef, Any?, Any?) -> Any = { _, _, _, _ -> }
+    val atom: IRef<Int> = Atom(10)
+    val callback: (Any, IRef<Int>, Any?, Any?) -> Any = { _, _, _, _ -> }
     val key = ":key"
     atom.addWatch(key, callback)
 
@@ -146,23 +146,25 @@ class AtomTest : FreeSpec({
     val newV = 20
     val k1 = ":watch1"
     val k2 = ":watch2"
-    val atom: IRef = Atom(oldV)
-    val watch1: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatch1Called = true
+    val atom: IRef<Int> = Atom(oldV)
+    val watch1: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatch1Called = true
 
-      key shouldBeSameInstanceAs k1
-      ref shouldBeSameInstanceAs atom
-      oldVal shouldBe oldV
-      newVal!! shouldBe newV
-    }
-    val watch2: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatch2Called = true
+        key shouldBeSameInstanceAs k1
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBe oldV
+        newVal!! shouldBe newV
+      }
+    val watch2: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatch2Called = true
 
-      key shouldBeSameInstanceAs k2
-      ref shouldBeSameInstanceAs atom
-      oldVal shouldBe oldV
-      newVal!! shouldBe newV
-    }
+        key shouldBeSameInstanceAs k2
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBe oldV
+        newVal!! shouldBe newV
+      }
     atom.addWatch(k1, watch1)
     atom.addWatch(k2, watch2)
 
@@ -176,17 +178,18 @@ class AtomTest : FreeSpec({
     var isWatchCalled = false
     val atom = Atom(10)
     val k = ":watch"
-    val watch: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatchCalled = true
+    val watch: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-      key shouldBeSameInstanceAs k
-      ref shouldBeSameInstanceAs atom
-      oldVal shouldBe 10
-      newVal!! shouldBe 11
-    }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal shouldBe 10
+        newVal!! shouldBe 11
+      }
     atom.addWatch(k, watch)
 
-    val newVal = atom.swap<Int> { currentVal ->
+    val newVal = atom.swap { currentVal ->
       currentVal + 1
     }
 
@@ -198,20 +201,21 @@ class AtomTest : FreeSpec({
     var isWatchCalled = false
     val atom = Atom(10)
     val k = ":watch"
-    val watch: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatchCalled = true
+    val watch: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-      key shouldBeSameInstanceAs k
-      ref shouldBeSameInstanceAs atom
-      oldVal as Int shouldBeExactly 10
-      newVal as Int shouldBeExactly 15
-    }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal as Int shouldBeExactly 10
+        newVal as Int shouldBeExactly 15
+      }
     atom.addWatch(k, watch)
 
     val newValue = atom.reset(15)
 
-    atom.deref() as Int shouldBeExactly 15
-    newValue as Int shouldBeExactly 15
+    atom.deref() shouldBeExactly 15
+    newValue shouldBeExactly 15
     isWatchCalled.shouldBeTrue()
   }
 
@@ -221,20 +225,21 @@ class AtomTest : FreeSpec({
     val newV = 13
     val atom = Atom(oldV)
     val k = ":watch"
-    val watch: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatchCalled = true
+    val watch: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-      key shouldBeSameInstanceAs k
-      ref shouldBeSameInstanceAs atom
-      oldVal as Int shouldBeExactly oldV
-      newVal as Int shouldBeExactly newV
-    }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal as Int shouldBeExactly oldV
+        newVal as Int shouldBeExactly newV
+      }
     atom.addWatch(k, watch)
 
     val newVal = atom.swap(3) { currentVal, arg -> (currentVal as Int) + arg }
 
-    atom.deref() as Int shouldBeExactly newV
-    newVal as Int shouldBeExactly newV
+    atom.deref() shouldBeExactly newV
+    newVal shouldBeExactly newV
     isWatchCalled.shouldBeTrue()
   }
 
@@ -244,22 +249,23 @@ class AtomTest : FreeSpec({
     val newV = 18
     val atom = Atom(oldV)
     val k = ":watch"
-    val watch: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatchCalled = true
+    val watch: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-      key shouldBeSameInstanceAs k
-      ref shouldBeSameInstanceAs atom
-      oldVal as Int shouldBeExactly oldV
-      newVal as Int shouldBeExactly newV
-    }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal as Int shouldBeExactly oldV
+        newVal as Int shouldBeExactly newV
+      }
     atom.addWatch(k, watch)
 
     val newVal = atom.swap(3, 5) { currentVal, arg1, arg2 ->
-      (currentVal as Int) + arg1 + arg2
+      currentVal + arg1 + arg2
     }
 
-    atom.deref() as Int shouldBeExactly newV
-    newVal as Int shouldBeExactly newV
+    atom.deref() shouldBeExactly newV
+    newVal shouldBeExactly newV
     isWatchCalled.shouldBeTrue()
   }
 
@@ -269,17 +275,18 @@ class AtomTest : FreeSpec({
     val newV = 15
     val atom = Atom(oldV)
     val k = ":watch"
-    val watch: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatchCalled = true
+    val watch: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-      key shouldBeSameInstanceAs k
-      ref shouldBeSameInstanceAs atom
-      oldVal as Int shouldBeExactly oldV
-      newVal as Int shouldBeExactly newV
-    }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal as Int shouldBeExactly oldV
+        newVal as Int shouldBeExactly newV
+      }
     atom.addWatch(k, watch)
 
-    val pair = atom.swapVals<Int> { currentVal -> currentVal + 5 }
+    val pair = atom.swapVals { currentVal -> currentVal + 5 }
 
     atom.deref() as Int shouldBeExactly newV
     pair.first shouldBeExactly oldV
@@ -293,23 +300,24 @@ class AtomTest : FreeSpec({
     val newV = 13
     val atom = Atom(oldV)
     val k = ":watch"
-    val watch: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatchCalled = true
+    val watch: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-      key shouldBeSameInstanceAs k
-      ref shouldBeSameInstanceAs atom
-      oldVal as Int shouldBeExactly oldV
-      newVal as Int shouldBeExactly newV
-    }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal as Int shouldBeExactly oldV
+        newVal as Int shouldBeExactly newV
+      }
     atom.addWatch(k, watch)
 
     val pair = atom.swapVals(3) { currentVal, arg ->
-      (currentVal as Int) + arg
+      currentVal + arg
     }
 
-    atom.deref() as Int shouldBeExactly newV
-    pair.first as Int shouldBeExactly oldV
-    pair.second as Int shouldBeExactly newV
+    atom.deref() shouldBeExactly newV
+    pair.first shouldBeExactly oldV
+    pair.second shouldBeExactly newV
     isWatchCalled.shouldBeTrue()
   }
 
@@ -319,23 +327,24 @@ class AtomTest : FreeSpec({
     val newV = 17
     val atom = Atom(oldV)
     val k = ":watch"
-    val watch: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatchCalled = true
+    val watch: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-      key shouldBeSameInstanceAs k
-      ref shouldBeSameInstanceAs atom
-      oldVal as Int shouldBeExactly oldV
-      newVal as Int shouldBeExactly newV
-    }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal as Int shouldBeExactly oldV
+        newVal as Int shouldBeExactly newV
+      }
     atom.addWatch(k, watch)
 
     val pair = atom.swapVals(3, 4) { currentVal, arg1, arg2 ->
-      (currentVal as Int) + arg1 + arg2
+      currentVal + arg1 + arg2
     }
 
-    atom.deref() as Int shouldBeExactly newV
-    pair.first as Int shouldBeExactly oldV
-    pair.second as Int shouldBeExactly newV
+    atom.deref() shouldBeExactly newV
+    pair.first shouldBeExactly oldV
+    pair.second shouldBeExactly newV
     isWatchCalled.shouldBeTrue()
   }
 
@@ -343,38 +352,39 @@ class AtomTest : FreeSpec({
     var isWatchCalled = false
     val atom = Atom(10)
     val k = ":watch"
-    val watch: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
-      isWatchCalled = true
+    val watch: (Any, IRef<Int>, Any?, Any?) -> Any =
+      { key, ref, oldVal, newVal ->
+        isWatchCalled = true
 
-      key shouldBeSameInstanceAs k
-      ref shouldBeSameInstanceAs atom
-      oldVal as Int shouldBeExactly 10
-      newVal as Int shouldBeExactly 15
-    }
+        key shouldBeSameInstanceAs k
+        ref shouldBeSameInstanceAs atom
+        oldVal as Int shouldBeExactly 10
+        newVal as Int shouldBeExactly 15
+      }
     atom.addWatch(k, watch)
 
     val pair = atom.resetVals(15)
 
-    atom.deref() as Int shouldBeExactly 15
-    pair.first as Int shouldBeExactly 10
-    pair.second as Int shouldBeExactly 15
+    atom.deref() shouldBeExactly 15
+    pair.first shouldBeExactly 10
+    pair.second shouldBeExactly 15
     isWatchCalled.shouldBeTrue()
   }
 
   "atom()" {
-    val atom: Atom = atom(15)
+    val atom: Atom<Int> = atom(15)
 
-    atom.swap<Int> { it * 2 }
+    atom.swap { it * 2 }
 
-    atom.deref<Int>() shouldBeExactly 30
+    atom.deref() shouldBeExactly 30
   }
 
   "invoke() should call deref()" {
-    val atom: Atom = atom(15)
+    val atom: Atom<Int> = atom(15)
 
-    atom.swap<Int> { it * 2 }
+    atom.swap { it * 2 }
 
-    atom.deref<Int>() shouldBeExactly 30
+    atom.deref() shouldBeExactly 30
   }
 
   "Atom concurrency tests" - {
@@ -388,14 +398,14 @@ class AtomTest : FreeSpec({
           val repeatCount = 103
 
           val job = runParallelWork(coroutinesCount, repeatCount) {
-            atom.swap<Int> { currentVal -> currentVal.inc() }
+            atom.swap { currentVal -> currentVal.inc() }
           }
 
           job.join()
 
           advanceUntilIdle()
 
-          atom.deref<Int>() shouldBeExactly coroutinesCount * repeatCount
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount
         }
       }
     }
@@ -414,7 +424,7 @@ class AtomTest : FreeSpec({
           job.join()
           advanceUntilIdle()
 
-          atom.deref<Int>() shouldBeExactly coroutinesCount * repeatCount * 3
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 3
         }
       }
     }
@@ -428,14 +438,14 @@ class AtomTest : FreeSpec({
 
           val job = runParallelWork(coroutinesCount, repeatCount) {
             atom.swap(3, 5) { currentVal, arg1, arg2 ->
-              (currentVal as Int) + arg1 + arg2
+              currentVal + arg1 + arg2
             }
           }
 
           job.join()
           advanceUntilIdle()
 
-          atom.deref<Int>() shouldBeExactly coroutinesCount * repeatCount * 8
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 8
         }
       }
     }
@@ -448,13 +458,13 @@ class AtomTest : FreeSpec({
           val repeatCount = 103
 
           val job = runParallelWork(coroutinesCount, repeatCount) {
-            atom.swapVals<Int> { currentVal -> currentVal + 5 }
+            atom.swapVals { currentVal -> currentVal + 5 }
           }
 
           job.join()
           advanceUntilIdle()
 
-          atom.deref<Int>() shouldBeExactly coroutinesCount * repeatCount * 5
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 5
         }
       }
     }
@@ -473,7 +483,7 @@ class AtomTest : FreeSpec({
           job.join()
           advanceUntilIdle()
 
-          atom.deref<Int>() shouldBeExactly coroutinesCount * repeatCount * 3
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 3
         }
       }
     }
@@ -494,7 +504,7 @@ class AtomTest : FreeSpec({
           job.join()
           advanceUntilIdle()
 
-          atom.deref<Int>() shouldBeExactly coroutinesCount * repeatCount * 7
+          atom.deref() shouldBeExactly coroutinesCount * repeatCount * 7
         }
       }
     }
@@ -505,10 +515,10 @@ class AtomTest : FreeSpec({
       var isWatchCalled = false
       val oldV: Any = 10 // Any is important here so oldV remains identical.
       val newV = 15
-      val atom = atom(0)
+      val atom: Atom<Any> = atom(0)
       atom.reset(oldV)
       val k = ":watch"
-      val w: (Any, IRef, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
+      val w: (Any, IRef<*>, Any?, Any?) -> Any = { key, ref, oldVal, newVal ->
         isWatchCalled = true
 
         key shouldBeSameInstanceAs k
@@ -519,7 +529,7 @@ class AtomTest : FreeSpec({
       atom.addWatch(k, w)
 
       atom.compareAndSet(oldV, newV).shouldBeTrue()
-      atom.deref<Int>() shouldBeExactly newV
+      atom.deref() as Int shouldBeExactly newV
       isWatchCalled.shouldBeTrue()
     }
   }

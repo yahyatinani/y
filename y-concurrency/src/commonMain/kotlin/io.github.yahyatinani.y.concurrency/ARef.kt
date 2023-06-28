@@ -3,22 +3,20 @@ package io.github.yahyatinani.y.concurrency
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.collections.ISeq
 import io.github.yahyatinani.y.core.collections.MapEntry
-import io.github.yahyatinani.y.core.collections.PersistentHashMap
+import io.github.yahyatinani.y.core.collections.PersistentHashMap.EmptyHashMap
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.reentrantLock
 import kotlinx.atomicfu.locks.withLock
 
-abstract class ARef : IRef {
+abstract class ARef<T> : IRef<T> {
   private val lock = reentrantLock()
-  private val _validator: AtomicRef<((Any?) -> Boolean)?> = atomic(null)
+  private val _validator: AtomicRef<((T) -> Boolean)?> = atomic(null)
 
   private val _watches =
-    atomic<IPersistentMap<Any, (Any, IRef, Any?, Any?) -> Any>>(
-      PersistentHashMap.EmptyHashMap,
-    )
+    atomic<IPersistentMap<Any, (Any, IRef<T>, T, T) -> Any>>(EmptyHashMap)
 
-  private fun validate(vf: ((Any?) -> Boolean)?, value: Any?) {
+  private fun validate(vf: ((T) -> Boolean)?, value: T) {
     if (vf == null) return
 
     fun invalidReferenceState(cause: Throwable? = null) =
@@ -35,31 +33,31 @@ abstract class ARef : IRef {
     }
   }
 
-  fun validate(value: Any?) {
+  fun validate(value: T) {
     validate(_validator.value, value)
   }
 
-  override var validator: ((Any?) -> Boolean)?
+  override var validator: ((T) -> Boolean)?
     get() = _validator.value
     set(vf) {
       validate(vf, deref())
       _validator.value = vf
     }
 
-  override val watches: IPersistentMap<Any, (Any, IRef, Any?, Any?) -> Any?> by
+  override val watches: IPersistentMap<Any, (Any, IRef<T>, T, T) -> Any?> by
     _watches
 
   override fun addWatch(
     key: Any,
-    callback: (Any, IRef, Any?, Any?) -> Any,
-  ): IRef {
+    callback: (Any, IRef<T>, T, T) -> Any,
+  ): IRef<T> {
     lock.withLock {
       _watches.value = _watches.value.assoc(key, callback)
       return this
     }
   }
 
-  override fun removeWatch(key: Any): IRef {
+  override fun removeWatch(key: Any): IRef<T> {
     lock.withLock {
       _watches.value = _watches.value.dissoc(key)
       return this
@@ -67,11 +65,11 @@ abstract class ARef : IRef {
   }
 
   @Suppress("UNCHECKED_CAST")
-  fun notifyWatches(oldVal: Any?, newVal: Any?) {
+  fun notifyWatches(oldVal: T, newVal: T) {
     val ws = _watches.value
     if (ws.count <= 0) return
 
-    var s = ws.seq() as ISeq<MapEntry<Any, (Any, IRef, Any?, Any?) -> Any>>?
+    var s = ws.seq() as ISeq<MapEntry<Any, (Any, IRef<T>, T, T) -> Any>>?
     while (s != null) {
       val e = s.first()
       val f = e.value
