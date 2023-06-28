@@ -17,6 +17,7 @@ import io.github.yahyatinani.y.core.collections.ISeq
 import io.github.yahyatinani.y.core.collections.LazySeq
 import io.github.yahyatinani.y.core.collections.MapEntry
 import io.github.yahyatinani.y.core.collections.PersistentArrayMap
+import io.github.yahyatinani.y.core.collections.PersistentArrayMap.Companion.EmptyArrayMap
 import io.github.yahyatinani.y.core.collections.PersistentHashMap
 import io.github.yahyatinani.y.core.collections.PersistentHashSet
 import io.github.yahyatinani.y.core.collections.PersistentList
@@ -273,8 +274,8 @@ fun <E> vec(coll: Any?): IPersistentVector<E> = when (coll) {
 fun <K, V> Map<K, V>.toPmap(): IPersistentMap<K, V> =
   PersistentArrayMap.create(this)
 
-fun m(vararg kvs: Pair<Any?, Any?>): PersistentArrayMap<Any?, Any?> = when {
-  kvs.isEmpty() -> PersistentArrayMap.EmptyArrayMap
+fun <K, V> m(vararg kvs: Pair<K, V>): PersistentArrayMap<K, V> = when {
+  kvs.isEmpty() -> EmptyArrayMap
   else -> PersistentArrayMap.createWithCheck(*kvs)
 }
 
@@ -873,7 +874,7 @@ fun merge(vararg maps: Any?): IPersistentMap<Any, Any?>? {
   if (maps.firstNotNullOfOrNull { it } == null) return null
 
   return maps.reduce { acc, map ->
-    conj((acc as IPersistentCollection<Any?>?) ?: m(), map)
+    conj((acc as IPersistentCollection<Any?>?) ?: EmptyArrayMap, map)
   } as IPersistentMap<Any, Any?>?
 }
 
@@ -905,7 +906,7 @@ fun selectKeys(
     )
   }
 
-  return selectKeys(m(), keySeq) as Associative<Any?, Any?>
+  return selectKeys(EmptyArrayMap, keySeq) as Associative<Any?, Any?>
 }
 
 // -- ISeq<T>::reduce() --------------------------------------------------------

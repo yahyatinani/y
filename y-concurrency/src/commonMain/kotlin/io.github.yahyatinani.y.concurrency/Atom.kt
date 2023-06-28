@@ -3,17 +3,17 @@ package io.github.yahyatinani.y.concurrency
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 
-class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
-  private val _state: AtomicRef<Any?> = atomic(x)
+class Atom<T>(x: T) : ARef<T>(), IAtom2<T> {
+  private val _state: AtomicRef<T> = atomic(x)
 
   internal val state by _state
 
   @Suppress("UNCHECKED_CAST")
-  override fun <T> deref(): T = state as T
+  override fun deref(): T = state
 
-  override fun <T> swap(f: (currentVal: T) -> Any?): Any? {
+  override fun swap(f: (currentVal: T) -> T): T {
     while (true) {
-      val currentV = deref<T>()
+      val currentV = deref()
       val newVal = f(currentV)
       validate(newVal)
 
@@ -24,7 +24,7 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
     }
   }
 
-  override fun <A> swap(arg: A, f: (currentVal: Any?, arg: A) -> Any?): Any? {
+  override fun <A> swap(arg: A, f: (currentVal: T, arg: A) -> T): T {
     while (true) {
       val currentV = _state.value
       val newVal = f(currentV, arg)
@@ -40,8 +40,8 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
   override fun <A1, A2> swap(
     arg1: A1,
     arg2: A2,
-    f: (currentVal: Any?, arg1: A1, arg2: A2) -> Any?,
-  ): Any? {
+    f: (currentVal: T, arg1: A1, arg2: A2) -> T,
+  ): T {
     while (true) {
       val currentV = _state.value
       val newVal = f(currentV, arg1, arg2)
@@ -54,9 +54,9 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
     }
   }
 
-  override fun <V> swapVals(f: (currentVal: V) -> V): Pair<V, V> {
+  override fun swapVals(f: (currentVal: T) -> T): Pair<T, T> {
     while (true) {
-      val oldValue = deref<V>()
+      val oldValue = deref()
       val newVal = f(oldValue)
       validate(newVal)
 
@@ -69,8 +69,8 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
 
   override fun <A> swapVals(
     arg: A,
-    f: (currentVal: Any?, arg: A) -> Any?,
-  ): Pair<Any?, Any?> {
+    f: (currentVal: T, arg: A) -> T,
+  ): Pair<T, T> {
     while (true) {
       val oldValue = _state.value
       val newVal = f(oldValue, arg)
@@ -86,8 +86,8 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
   override fun <A1, A2> swapVals(
     arg1: A1,
     arg2: A2,
-    f: (currentVal: Any?, arg1: A1, arg2: A2) -> Any?,
-  ): Pair<Any?, Any?> {
+    f: (currentVal: T, arg1: A1, arg2: A2) -> T,
+  ): Pair<T, T> {
     while (true) {
       val oldValue = _state.value
       val newVal = f(oldValue, arg1, arg2)
@@ -100,8 +100,8 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
     }
   }
 
-  override fun reset(newValue: Any?): Any? {
-    val oldValue = _state.value
+  override fun reset(newValue: T): T {
+    val oldValue = _state.getAndSet(newValue)
     validate(newValue)
     _state.value = newValue
     notifyWatches(oldValue, newValue)
@@ -114,14 +114,14 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
    *
    * @return true only if set happened, otherwise, false.
    */
-  override fun compareAndSet(oldValue: Any?, newValue: Any?): Boolean {
+  override fun compareAndSet(oldValue: T, newValue: T): Boolean {
     validate(newValue)
     val ret = _state.compareAndSet(oldValue, newValue)
     if (ret) notifyWatches(oldValue, newValue)
     return ret
   }
 
-  override fun resetVals(newValue: Any?): Pair<Any?, Any?> {
+  override fun resetVals(newValue: T): Pair<T, T> {
     validate(newValue)
     val oldValue = _state.getAndSet(newValue)
     notifyWatches(oldValue, newValue)
@@ -136,4 +136,4 @@ class Atom internal constructor(x: Any?) : ARef(), IAtom2 {
  * @param x an initial value to be hold by the atom.
  * @return an `Atom<T>` with an initial value x.
  */
-fun atom(x: Any?): Atom = Atom(x)
+fun <T> atom(x: T): Atom<T> = Atom(x)

@@ -26,7 +26,7 @@ import io.kotest.matchers.types.shouldNotBeInstanceOf
 @Suppress("UNCHECKED_CAST")
 class APersistentMapTest : FreeSpec({
   "toString()" {
-    m().toString() shouldBe "{}"
+    m<Any?, Any?>().toString() shouldBe "{}"
     m("a" to 1).toString() shouldBe "{a 1}"
     PersistentArrayMap.createWithCheck("a" to 1, "b" to 2)
       .toString() shouldBe "{a 1, b 2}"
@@ -46,7 +46,7 @@ class APersistentMapTest : FreeSpec({
   "hasheq()" {
     val map = m("a" to 1, "b" to 2, "c" to 3)
     val expectedHash = Murmur3.hashUnordered(map)
-    val emptyMap = m()
+    val emptyMap = m<Any?, Any?>()
 
     val hash = map.hasheq()
 
@@ -62,11 +62,11 @@ class APersistentMapTest : FreeSpec({
 
     (m == m).shouldBeTrue()
 
-    (m() == mapOf<String, Int>()).shouldBeTrue()
+    (m<Any?, Any?>() == mapOf<String, Int>()).shouldBeTrue()
 
     (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 2)).shouldBeTrue()
 
-    (m("a" to 1, "b" to 2)!! == "string").shouldBeFalse()
+    (m("a" to 1, "b" to 2).equals("string")).shouldBeFalse()
 
     (m("a" to 1, "b" to 2) == m("a" to 1)).shouldBeFalse()
 
@@ -74,7 +74,7 @@ class APersistentMapTest : FreeSpec({
 
     (m("a" to 1, "b" to 2) == m("a" to 1, "b" to 10)).shouldBeFalse()
 
-    (m("a" to 1, "b" to 2)!! == m("a" to 1, "b" to 2L)).shouldBeFalse()
+    (m("a" to 1, "b" to 2).equals(m("a" to 1, "b" to 2L))).shouldBeFalse()
 
     (hashMap("a" to 1, "b" to 2) == hashMap("a" to 1, "b" to 2, "x" to 2))
       .shouldBeFalse()
@@ -149,7 +149,7 @@ class APersistentMapTest : FreeSpec({
     val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
     val map = m(*array)
 
-    m().equiv(mapOf<String, Int>()).shouldBeTrue()
+    m<Any?, Any?>().equiv(mapOf<String, Int>()).shouldBeTrue()
 
     "when this and other are the same instance, it should return true" {
       map.equiv(map).shouldBeTrue()
@@ -319,7 +319,7 @@ class APersistentMapTest : FreeSpec({
   "Map implementation" - {
     val array = arrayOf("a" to 1, "b" to 2, "c" to 3)
     val map = m(*array)
-    val emptyMap = m()
+    val emptyMap = m<Any?, Any?>()
 
     "size()" {
       map.size shouldBeExactly array.size
