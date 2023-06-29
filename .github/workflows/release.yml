@@ -1,23 +1,24 @@
-name: release build
-
+name: Release All Targets
 on:
-  push:
-    paths-ignore:
-      - 'doc/**'
-      - 'docs/**'
-      - '*.md'
-      - '**/*.yml'
-    branches:
-      - release/*
-
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The release version"
+        required: true
+      branch:
+        description: "The branch to release from"
+        required: true
+        default: main
 jobs:
-  linux:
+  publish_base:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Setup JDK
         uses: actions/setup-java@v3
@@ -25,76 +26,168 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Run unit tests
-        run: ./gradlew check --scan
+      - uses: gradle/gradle-build-action@v2
 
-      - name: Bundle the build report
-        if: failure()
-        run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
+      - name: publish multiplatform release
+        run: ./gradlew publishKotlinMultiplatformPublicationToDeployRepository
 
-      - name: Upload the build report
-        if: failure()
-        uses: actions/upload-artifact@master
+      - name: publish jvm release
+        run: ./gradlew publishJvmPublicationToDeployRepository
+
+  publish_linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
         with:
-          name: error-report
-          path: build-reports.zip
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
 
-  macos:
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - uses: gradle/gradle-build-action@v2
+
+      - name: publish linux x64 release
+        run: ./gradlew publishLinuxX64PublicationToDeployRepository
+
+  publish_macos:
     runs-on: macos-latest
+
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
       - uses: gradle/gradle-build-action@v2
 
-      - name: Run macos tests
-        run: ./gradlew macosX64Test --scan
+      - name: publish macosx64 release
+        run: ./gradlew publishMacosX64PublicationToDeployRepository
 
-      - name: Run ios tests
-        run: ./gradlew iosX64Test --scan
+      - name: publish macosArm64 release
+        run: ./gradlew publishMacosArm64PublicationToDeployRepository
 
-      - name: Run tvos tests
-        run: ./gradlew tvosX64Test --scan
+  publish_watchos:
+    runs-on: macos-latest
 
-      - name: Run watchos tests
-        run: ./gradlew watchosX64Test --scan
-
-      - name: Bundle the build report
-        if: failure()
-        run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
-
-      - name: Upload the build report
-        if: failure()
-        uses: actions/upload-artifact@master
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
         with:
-          name: error-report
-          path: build-reports.zip
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
 
-  windows:
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - uses: gradle/gradle-build-action@v2
+
+      - name: publish watchosX64 release
+        run: ./gradlew publishWatchosX64PublicationToDeployRepository
+
+      - name: publish watchosArm32 release
+        run: ./gradlew publishWatchosArm32PublicationToDeployRepository
+
+      - name: publish watchosArm64 release
+        run: ./gradlew publishWatchosArm64PublicationToDeployRepository
+
+      - name: publish watchosSimulatorArm64 release
+        run: ./gradlew publishWatchosSimulatorArm64PublicationToDeployRepository
+
+  publish_ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - uses: gradle/gradle-build-action@v2
+
+      - name: publish iosX64 release
+        run: ./gradlew publishIosX64PublicationToDeployRepository
+
+      - name: publish iosArm64 release
+        run: ./gradlew publishIosArm64PublicationToDeployRepository
+
+      - name: publish iosSimulatorArm64 release
+        run: ./gradlew publishIosSimulatorArm64PublicationToDeployRepository
+
+  publish_tvos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - uses: gradle/gradle-build-action@v2
+
+      - name: publish tvosX64 release
+        run: ./gradlew publishTvosX64PublicationToDeployRepository
+
+      - name: publish tvosArm64 release
+        run: ./gradlew publishTvosArm64PublicationToDeployRepository
+
+      - name: publish tvosSimulatorArm64 release
+        run: ./gradlew publishTvosSimulatorArm64PublicationToDeployRepository
+
+  publish_windows:
     runs-on: windows-latest
+
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
       - uses: gradle/gradle-build-action@v2
 
-      - name: Run tests
-        run: ./gradlew mingwX64Test --scan
-
-      - name: Bundle the build report
-        if: failure()
-        run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
-
-      - name: Upload the build report
-        if: failure()
-        uses: actions/upload-artifact@master
-        with:
-          name: error-report
-          path: build-reports.zip
+      - name: publish mingwX64 release
+        run: ./gradlew publishMingwX64PublicationToDeployRepository
 
 env:
+  RELEASE_VERSION: ${{ github.event.inputs.version }}
+  OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+  OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+  ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+  ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
   GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
