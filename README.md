@@ -1,140 +1,196 @@
-![Y](docs/art/logo-with-text.png)
-========
+# y
 
-[![build](https://github.com/yahyatinani/y/actions/workflows/main.yml/badge.svg)](https://github.com/yahyatinani/y/actions/workflows/main.yml) ![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/io.github.yahyatinani.y/y-core?server=https%3A%2F%2Fs01.oss.sonatype.org%2F&label=latest%20release&color=blue) ![GitHub](https://img.shields.io/github/license/yahyatinani/y)
- ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/io.github.yahyatinani.y/y-core?server=https%3A%2F%2Fs01.oss.sonatype.org%2F&label=latest%20snapshot)
- [![codecov](https://codecov.io/gh/yahyatinani/y/branch/main/graph/badge.svg?token=O7NV8M4TTP)](https://codecov.io/gh/yahyatinani/y)
+A Kotlin Multiplatform library for persistent, structurally shared collections, chunked lazy sequences, and functional utilities.
 
-`y` is a Kotlin multiplatform library that aims to port and provide effective
-concepts inspired by other languages or libraries.
+<!-- [![Build](https://github.com/yahyatinani/y/actions/workflows/main.yml/badge.svg)](https://github.com/yahyatinani/y/actions/workflows/main.yml) -->
+[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.yahyatinani.y/y-core)](https://central.sonatype.com/artifact/io.github.yahyatinani.y/y-core)
+[![License](https://img.shields.io/badge/License-EPL%201.0-blue.svg)](https://opensource.org/licenses/EPL-1.0)
+[![Kotlin](https://img.shields.io/badge/Kotlin-Multiplatform-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 
-## Modules:
+**Status:** pre-1.0. The API may change before 1.0. Actively developed.
 
-### y-core:
+`y` aims to bring the ergonomics and power of persistent data structures and functional programming concepts to Kotlin across multiple targets. It is inspired by approaches from languages and libraries that emphasize immutable, efficient, and composable data structures.
 
-This module provides core data structures and utility functions.
+## Why use y?
 
-- ##### Data structures:
+- Persistent collections with structural sharing
+- Efficient immutable list, vector, map, and set implementations
+- Lazy, chunked sequences for working with large data without eager materialization
+- Functional combinators and collection-oriented APIs
+- Kotlin Multiplatform support for shared logic across targets
+- Designed for clarity, safety, and predictable performance
 
-    - List:
+## Installation
 
-      ```kotlin
-      val list1 = l<Int>(1,2,3) // (1 2 3)
-      val empty = l<Int>() // ()
-          
-      // From Kotlin's List<E> to PersistentList<E>
-      val list2 = listOf<Int>(1, 2, 3).toPlist() // (1 2 3)
-      ```
+```kotlin
+dependencies {
+  implementation("io.github.yahyatinani.y:y-core:<version>")
+  // optional
+  implementation("io.github.yahyatinani.y:y-concurrency:<version>")
+}
+``` 
 
-      To add an item to a list, use `conj(e)`, it puts the item at the front
-      of the list and returns a new list.
+For snapshots, add the Central Portal snapshot repository:
 
-      ```kotlin
-      l<Int>(1,2,3).conj(4) // (4 1 2 3)
-      ```
+```kotlin
+repositories {
+    maven {
+        name = "CentralPortalSnapshots"
+        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+        content { includeGroup("io.github.yahyatinani.y") }
+    }
+}
+```
 
-      To get the size of a list:
+## Targets
 
-      ```kotlin
-      l<Int>(1,2,3).count // 3
-      ```
+JVM and the full Kotlin/Native target range:
 
-    - Vector:
+| Platform | Targets |
+|---|---|
+| **JVM** | `jvm` (with Java interop) |
+| **Linux** | `linuxX64` |
+| **Windows** | `mingwX64` |
+| **macOS** | `macosX64`, `macosArm64` |
+| **iOS** | `iosX64`, `iosArm64`, `iosSimulatorArm64` |
+| **tvOS** | `tvosX64`, `tvosArm64`, `tvosSimulatorArm64` |
+| **watchOS** | `watchosX64`, `watchosArm32`, `watchosArm64`, `watchosSimulatorArm64` |
 
-        ```kotlin
-      val vec1 = v<Int>(1, 2, 3) // [1 2 3]
-        val empty = v<Int>() // []
-            
-        // From Kotlin's List<E> to PersistentVector<E>
-        val vec2 = listOf<Int>(1, 2, 3).toPvector() // [1 2 3]
-      ```
+Android does not yet have a first-class `androidTarget`; Android projects can consume the JVM variant.
 
-      To add an item to a vector, use `conj(e)`, it puts the item at the end
-      of the vector and returns a new vector.
+## Modules
 
-      ```kotlin
-      v<Int>(1, 2, 3).conj(4) // [1 2 3 4]
-      ```
+- **`y-core`** — persistent collection implementations, sequence utilities, and
+  foundational functional APIs.
+- **`y-concurrency`** — lock-free atomic references (CAS retry loops via
+  AtomicFu) and concurrency primitives built on the core collections.
 
-      To get the size of a vector:
+## Project structure
 
-      ```kotlin
-      v<Int>(1, 2, 3).count // 3
-      ```
+```text
+y/
+├── y-core/           # Core persistent collections and functional APIs
+├── y-concurrency/    # Concurrency primitives built on the core
+├── build.gradle      # Root Gradle configuration
+├── settings.gradle   # Included modules
+```
 
-      To get an item by index, you can use `get(index)` operator
-      or `nth(index)`/`nth(index, def)`
+## Quick start
 
-      ```kotlin
-      v<Int>(1, 2, 3)[1] // 2
-      v<Int>(1, 2, 3).nth(2) // 3
-      v<Int>(1, 2, 3).nth(5, -1) // -1
-      ```
+Create persistent collections with the same style as normal Kotlin
+construction:
 
-      To get the items in reverse order as a sequence, use `reverse()`
+```kotlin
+import io.github.yahyatinani.y.core.*
 
-      ```kotlin
-      v<Int>(1, 2, 3).reverse() // (3 2 1)
-      ```
+val list1 = l<Int>(1, 2, 3)             // (1 2 3)
+val emptyList = l<Int>()                // ()
 
-    - PersistentArrayMap:
+val list2 = listOf(1, 2, 3).toPlist()   // (1 2 3)
 
-      This map should be only used when you have very small maps and want to
-      maintain key order, since it is just an array of `[key,val..key,val]`.
-      Subsequent `assoc-ing` will eventually return a `PersistentHashMap`.
+val updated = list1.conj(4)             // (4 1 2 3)
+val size = list1.count                  // 3
 
-        ```kotlin
-        val map1 = m<String, Int>("1" to 1, "2" to 2) // {"1" 1, "2" 2}
-              
-        //From Kotlin's Map<K,V> to PersistentArrayMap<K,V>
-        val map2 = mapOf<String, Int>("1" to 1, "2" to 2).toPArrayMap() // {"1" 1, "2" 2}
-        ```
+val vec1 = v<Int>(1, 2, 3)              // [1 2 3]
+val vec2 = listOf(1, 2, 3).toPvector()  // [1 2 3]
 
-    - PersistentHashMap:
+val vectorUpdated = vec1.conj(4)        // [1 2 3 4]
+val vectorItem = vec1[1]                // 2
 
-      This map requires keys that correctly support hashCode and equals.
+val map1 = m<String, Int>("1" to 1, "2" to 2)  // {"1" 1, "2" 2}
+val set1 = hs<Int>(1, 2, 2, 3, 3)              // #{1 2 3}
+```
 
-        ```kotlin
-        val map1 = hashMap<String, Int>("1" to 1, "2" to 2) // {"1" 1, "2" 2}
-            
-        //From Kotlin's Map<K,V> to PersistentHashMap<K,V>
-        val map2 = mapOf<String, Int>("1" to 1, "2" to 2).toPhashMap() // {"1" 1, "2" 2}
-        ```
+Converting from Kotlin collections:
 
-    - PersistentHashSet:
+```kotlin
+val map = mapOf("1" to 1, "2" to 2).toPArrayMap()
+val hashMap = mapOf("1" to 1, "2" to 2).toPhashMap()
+val hashSet = setOf(1, 2, 2, 3, 3).toPhashSet()
+```
 
-      ```kotlin
-      val set1 = hs<Int>(1, 2, 2, 3, 3) // #{1 2 3}
-          
-      //From Kotlin's Set<E> to PersistentHashSet<E>
-      val set2 = setOf<Int>(1, 2, 2, 3 ,3).toPhashSet() // #{1 2 3}
-      ```
+### Lazy sequences
 
-    - Sequence:
+`y` exposes lazy sequences through `LazySeq<E>`, which implements `ISeq<E>`,
+`List<E>`, and `Sequence<E>`. A `LazySeq` defers evaluation until it is forced
+by calling `first()`, `rest()`, `next()`, `seq()`, or iterating it.
 
-      All collections support a member function `seq()` that return a
-      sequence of type `ISeq<E>` that can walk the entire collection. A
-      sequance provides three key member functions:
+The most direct way to build one is `cons`, which pairs a head element with a
+tail that isn't evaluated until requested:
 
-        - `first()` : return the first element in the sequence.
-        - `rest()` : returns all of the rest elements of the sequence that
-          came after first element, as a sequence.
-        - `cons(element)` : always adds to the front of the sequence and
-          returns a sequence.
+```kotlin
+val numbers = lazySeq<Int> {
+  cons(1, lazySeq {
+    cons(2, lazySeq {
+      cons(3, null)
+    })
+  })
+}
 
-    - ###### Keywords (WIP, only on JVM for now):
+numbers.first()                // 1
+numbers.rest().first()         // 2
+numbers.rest().rest().first()  // 3
+```
 
-      Keywords are identifiers that provide very fast equality tests, and they
-      have a string name. If you call toString() on a keyword it returns the
-      name prefixed by a ':' which is not part of the name.
+Only the node you ask for is realized. `numbers.rest().rest()` doesn't build
+the third `cons` until you call `first()` on it.
 
-      ```kotlin
-      // To create a Keyword, use the utility function `k(name)`:
-      val keyword = k("a") // :a
-      
-      // invoke(map, default = null) operator
-      val map = hashMap("a" to 1)
-      val key = k("a")
-      val default = k("none")
-      key(map, default) // :none
-      ```
+You can also wrap an ordinary Kotlin collection or array:
+
+```kotlin
+import io.github.yahyatinani.y.core.seq
+
+val xs = seq(listOf(1, 2, 3))
+
+xs?.first()                   // 1
+xs?.rest()?.first()           // 2
+xs?.rest()?.rest()?.first()   // 3
+```
+
+The core interface is small:
+
+```kotlin
+interface ISeq<out E> : IPersistentCollection<E> {
+  fun first(): E
+  fun rest(): ISeq<E>
+  fun next(): ISeq<E>?
+  fun cons(e: E): ISeq<E>
+}
+```
+
+- `first()` returns the current element.
+- `rest()` returns the tail, which may be empty but is never null.
+- `next()` returns `null` when no elements remain.
+- `cons(e)` prepends an element, returning a new sequence.
+
+Sequences are immutable, persistent, and lazy. That makes them a natural fit
+for streams, generator-style iteration, and pipelines where you want to stop
+before the whole structure is materialized.
+
+## Complexity
+
+| Operation | `PList` | `PVector` | `PMap` | `PSet` |
+|---|---|---|---|---|
+| Access by index | O(n) | O(log₃₂ n) | — | — |
+| Lookup by key | — | — | O(log₃₂ n) | O(log₃₂ n) |
+| `conj` (append) | O(1) | O(log₃₂ n) | O(log₃₂ n) | O(log₃₂ n) |
+| `assoc` (update) | — | O(log₃₂ n) | O(log₃₂ n) | — |
+| Iteration | O(n) | O(n) | O(n) | O(n) |
+
+## Building
+
+This project uses Gradle.
+
+```bash
+./gradlew test
+```
+
+To run the full verification tasks:
+
+```bash
+./gradlew check
+```
+
+## License
+
+This project is licensed under the Eclipse Public License 1.0. See the [LICENSE.md](LICENSE.md) file for details.
