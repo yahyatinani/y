@@ -6,6 +6,7 @@ A Kotlin Multiplatform library for persistent, structurally shared collections, 
 [![Maven Central Version](https://img.shields.io/maven-central/v/io.github.yahyatinani.y/y-core)](https://central.sonatype.com/artifact/io.github.yahyatinani.y/y-core)
 [![License](https://img.shields.io/badge/License-EPL%201.0-blue.svg)](https://opensource.org/licenses/EPL-1.0)
 [![Kotlin](https://img.shields.io/badge/Kotlin-Multiplatform-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![codecov](https://codecov.io/gh/yahyatinani/y/branch/main/graph/badge.svg?token=O7NV8M4TTP)](https://codecov.io/gh/yahyatinani/y)
 
 **Status:** pre-1.0. The API may change before 1.0. Actively developed.
 
